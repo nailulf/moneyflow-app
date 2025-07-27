@@ -44,8 +44,12 @@ export default function Dashboard() {
 
       if (error) throw error
       setTransactions(data || [])
-    } catch (error: any) {
-      console.error('Error fetching transactions:', error.message)
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error fetching transactions:', error.message)
+      } else {
+        console.error('An unknown error occurred')
+      }
     } finally {
       setLoading(false)
     }

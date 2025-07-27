@@ -1,6 +1,5 @@
 import { createServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import Navigation from '@/components/layout/navigation'
 import FileUpload from '@/components/upload/file-upload'
 import AppLayout from '@/components/layout/app-layout'
 

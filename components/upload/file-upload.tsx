@@ -25,7 +25,7 @@ export default function FileUpload() {
     return new Promise((resolve, reject) => {
       Papa.parse(file, {
         header: true,
-        complete: (results) => {
+        complete: (results: Papa.ParseResult<any>) => {
           const transactions: Transaction[] = results.data.map((row: any) => ({
             description: row.description || row.Description || '',
             amount: parseFloat(row.amount || row.Amount || '0'),
