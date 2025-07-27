@@ -1,9 +1,8 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { cookies } from 'next/headers';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 
-export const createServerClient = async () => {
-  const cookieStore = await cookies()
+export const createServerClient = () => {
   return createServerComponentClient({
-    cookies: () => Promise.resolve(cookieStore)
-  })
-}
+    cookies, //pass the function reference directly
+  });
+};
