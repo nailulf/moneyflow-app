@@ -35,8 +35,12 @@ export default function AuthForm() {
         if (error) throw error
         router.push('/dashboard')
       }
-    } catch (error: any) {
-      alert(error.message)
+    } catch (error: unknown) { // Change 'any' to 'unknown'
+      if (error instanceof Error) {
+        alert(error.message)
+      } else {
+        alert('An unexpected error occurred.')
+      }
     } finally {
       setLoading(false)
     }
