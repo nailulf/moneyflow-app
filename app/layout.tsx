@@ -1,12 +1,9 @@
 import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Toaster } from '@/components/ui/sonner'
 
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
+export const metadata = {
   title: 'MoneyFlow - Personal Finance Tracker',
-  description: 'Track your expenses automatically',
+  description: 'Track your expenses and manage your finances with ease',
 }
 
 export default function RootLayout({
@@ -16,7 +13,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        {children}
+        <Toaster />
+      </body>
     </html>
   )
 }
