@@ -39,7 +39,7 @@ export default function Home() {
     setTransactions(prev => [transaction, ...prev])
   }
 
-  const handleFileProcessed = (newTransactions: any[]) => {
+  const handleFileProcessed = (newTransactions: Transaction[]) => {
     // Convert processed transactions to Transaction objects
     const processedTransactions: Transaction[] = newTransactions.map((t, index) => ({
       id: `imported-${Date.now()}-${index}`,

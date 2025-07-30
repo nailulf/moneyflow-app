@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { transactionSchema, TransactionFormData } from '@/lib/validations'
-import { CATEGORIES } from '@/types/app'
+import { CATEGORIES, Category } from '@/types/app'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -128,7 +128,7 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
             <label className="text-sm font-medium">Category</label>
             <Select
               value={selectedCategory}
-              onValueChange={(value) => setValue('category', value as any)}
+              onValueChange={(value) => setValue('category', value as Category)}
             >
               <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Select category" />
