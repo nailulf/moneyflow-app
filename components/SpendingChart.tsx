@@ -107,7 +107,7 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
                 />
               }
             />
-            <ChartLegend content={<ChartLegendContent />} />
+            <ChartLegend content={({ payload }) => <ChartLegendContent payload={payload} />} />
           </PieChart>
         </ChartContainer>
       </CardContent>
