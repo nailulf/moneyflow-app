@@ -7,8 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Upload, File, X, CheckCircle, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
+interface Transaction {
+  date: string
+  description: string
+  amount: number
+  category: string
+  merchant: string
+}
+
 interface FileUploadProps {
-  onFileProcessed?: (transactions: any[]) => void
+  onFileProcessed?: (transactions: Transaction[]) => void
 }
 
 interface UploadedFile {
@@ -77,7 +85,7 @@ export function FileUpload({ onFileProcessed }: FileUploadProps) {
       )
       
       // Simulate extracted transactions
-      const mockTransactions = [
+      const mockTransactions: Transaction[] = [
         {
           date: new Date().toISOString().split('T')[0],
           description: `Transaction from ${uploadedFile.file.name}`,
