@@ -31,7 +31,7 @@ export function TransactionTable({ transactions, limit = 10 }: TransactionTableP
   if (!isClient) {
     return (
       <Card className="bg-white border border-gray-200 shadow-sm">
-        <CardHeader className="pb-4">
+        <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900">Budgeting</CardTitle>
         </CardHeader>
         <CardContent>
@@ -46,7 +46,7 @@ export function TransactionTable({ transactions, limit = 10 }: TransactionTableP
   if (displayTransactions.length === 0) {
     return (
       <Card className="bg-white border border-gray-200 shadow-sm">
-        <CardHeader className="pb-4">
+        <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900">Holdings</CardTitle>
         </CardHeader>
         <CardContent>
@@ -60,12 +60,12 @@ export function TransactionTable({ transactions, limit = 10 }: TransactionTableP
 
   return (
     <Card className="bg-white border border-gray-200 shadow-sm">
-      <CardHeader className="pb-4">
+      <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold text-gray-900">Budgeting</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

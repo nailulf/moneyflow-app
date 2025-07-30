@@ -1,5 +1,5 @@
 import { Transaction } from '@/types/database'
-import { Category, CATEGORIES } from '@/types/app'
+import { CATEGORIES } from '@/types/app'
 
 // Mock transaction data for development
 export const mockTransactions: Transaction[] = [
@@ -85,8 +85,8 @@ export const mockTransactions: Transaction[] = [
     user_id: 'user1',
     date: '2024-01-08',
     description: 'Doctor Visit',
-    amount: -150.00,
-    category: 'Healthcare',
+    amount: 150.00,
+    category: 'income',
     merchant: 'Medical Center',
     created_at: '2024-01-08T11:00:00Z',
     updated_at: '2024-01-08T11:00:00Z'
@@ -112,11 +112,44 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Client ABC',
     created_at: '2024-01-06T17:00:00Z',
     updated_at: '2024-01-06T17:00:00Z'
+  },
+  {
+    id: '11',
+    user_id: 'user1',
+    date: '2024-02-20',
+    description: 'Rent Payment',
+    amount: -1200.00,
+    category: 'Housing',
+    merchant: 'Landlord',
+    created_at: '2024-02-20T09:00:00Z',
+    updated_at: '2024-02-20T09:00:00Z'
+  },
+  {
+    id: '12',
+    user_id: 'user1',
+    date: '2024-02-10',
+    description: 'Restaurant Dinner',
+    amount: -75.00,
+    category: 'Food & Dining',
+    merchant: 'Fancy Eats',
+    created_at: '2024-02-10T19:30:00Z',
+    updated_at: '2024-02-10T19:30:00Z'
+  },
+  {
+    id: '13',
+    user_id: 'user1',
+    date: '2024-02-05',
+    description: 'Gym Membership',
+    amount: -50.00,
+    category: 'Health & Fitness',
+    merchant: 'Fitness Club',
+    created_at: '2024-02-05T08:00:00Z',
+    updated_at: '2024-02-05T08:00:00Z'
   }
 ]
 
 // Generate additional mock data for different months
-export const generateMockTransactions = (months: number = 6): Transaction[] => {
+export const generateMockTransactions = (months: number = 10): Transaction[] => {
   const transactions: Transaction[] = [...mockTransactions]
   const categories = CATEGORIES.filter(cat => cat !== 'Income')
   

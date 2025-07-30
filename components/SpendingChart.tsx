@@ -1,44 +1,51 @@
 'use client'
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell } from 'recharts'
 import { Transaction } from '@/types/database'
 import { getCategoryBreakdown, formatCurrency } from '@/lib/data-utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from '@/components/ui/chart'
 
 interface SpendingChartProps {
   transactions: Transaction[]
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload
-    return (
-      <div className="bg-white p-3 border rounded-lg shadow-lg">
-        <p className="font-medium">{data.category}</p>
-        <p className="text-sm text-gray-600">
-          {formatCurrency(data.amount)} ({data.percentage.toFixed(1)}%)
-        </p>
-      </div>
-    )
-  }
-  return null
-}
-
-const CustomLegend = ({ payload }: any) => {
-  return (
-    <div className="flex flex-wrap gap-2 justify-center mt-4">
-      {payload.map((entry: any, index: number) => (
-        <div key={index} className="flex items-center gap-1 text-xs">
-          <div 
-            className="w-3 h-3 rounded-full" 
-            style={{ backgroundColor: entry.color }}
-          />
-          <span className="text-gray-600">{entry.value}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
+const chartConfig = {
+  amount: {
+    label: "Amount",
+  },
+  food: {
+    label: "Food",
+    color: "hsl(var(--chart-1))",
+  },
+  transport: {
+    label: "Transport",
+    color: "hsl(var(--chart-2))",
+  },
+  entertainment: {
+    label: "Entertainment",
+    color: "hsl(var(--chart-3))",
+  },
+  shopping: {
+    label: "Shopping",
+    color: "hsl(var(--chart-4))",
+  },
+  utilities: {
+    label: "Utilities",
+    color: "hsl(var(--chart-5))",
+  },
+  other: {
+    label: "Other",
+    color: "hsl(var(--chart-6))",
+  },
+} satisfies ChartConfig
 
 export function SpendingChart({ transactions }: SpendingChartProps) {
   const categoryData = getCategoryBreakdown(transactions)
@@ -46,7 +53,7 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
   if (categoryData.length === 0) {
     return (
       <Card className="bg-white border border-gray-200 shadow-sm">
-        <CardHeader className="pb-4">
+        <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900">Portfolio</CardTitle>
         </CardHeader>
         <CardContent>
@@ -58,33 +65,51 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
     )
   }
 
+  // Map category data to use chart config colors
+  const chartData = categoryData.map((item, index) => ({
+    ...item,
+    fill: `var(--color-${item.category.toLowerCase()})` || `hsl(var(--chart-${(index % 6) + 1}))`,
+  }))
+
   return (
     <Card className="bg-white border border-gray-200 shadow-sm">
-      <CardHeader className="pb-4">
+      <CardHeader>
         <CardTitle className="text-lg font-semibold text-gray-900">Portfolio</CardTitle>
       </CardHeader>
-      <CardContent className="p-4">
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={categoryData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={2}
-                dataKey="amount"
-                stroke="none"
-              >
-                {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      <CardContent className="p-6">
+        <ChartContainer
+          config={chartConfig}
+          className="h-80 w-full"
+        >
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={100}
+              paddingAngle={2}
+              dataKey="amount"
+              nameKey="category"
+              stroke="none"
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.fill} />
+              ))}
+            </Pie>
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(value, name) => [
+                    formatCurrency(Number(value)),
+                    name,
+                  ]}
+                />
+              }
+            />
+            <ChartLegend content={<ChartLegendContent />} />
+          </PieChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   )

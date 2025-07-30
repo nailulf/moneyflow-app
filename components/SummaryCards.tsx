@@ -10,24 +10,33 @@ interface SummaryCardsProps {
   transactions: Transaction[]
 }
 
-export function SummaryCards({ transactions }: SummaryCardsProps) {
+export function SummaryCards({ transactions = [] }: SummaryCardsProps) {
   const [isClient, setIsClient] = useState(false)
   
   useEffect(() => {
     setIsClient(true)
   }, [])
   
-  const totalBalance = getTotalBalance(transactions)
-  const monthlySpending = getMonthlySpending(transactions)
-  const monthlyIncome = getMonthlyIncome(transactions)
-  const netThisMonth = monthlyIncome - monthlySpending
+  const [totalBalance, setTotalBalance] = useState(0)
+  const [monthlySpending, setMonthlySpending] = useState(0)
+  const [monthlyIncome, setMonthlyIncome] = useState(0)
+  const [netThisMonth, setNetThisMonth] = useState(0)
+
+  useEffect(() => {
+    if (transactions.length > 0) {
+      setTotalBalance(getTotalBalance(transactions))
+      setMonthlySpending(getMonthlySpending(transactions))
+      setMonthlyIncome(getMonthlyIncome(transactions))
+      setNetThisMonth(getMonthlyIncome(transactions) - getMonthlySpending(transactions))
+    }
+  }, [transactions])
   
   if (!isClient) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 gap-4">
         {[1, 2, 3].map((i) => (
           <Card key={i} className="bg-white border border-gray-200 shadow-sm">
-            <CardContent className="p-4">
+            <CardContent>
               <div className="animate-pulse">
                 <div className="h-4 bg-gray-200 rounded mb-2"></div>
                 <div className="h-6 bg-gray-200 rounded mb-1"></div>
@@ -68,12 +77,12 @@ export function SummaryCards({ transactions }: SummaryCardsProps) {
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div className="grid grid-cols-1 gap-4">
       {cards.map((card, index) => {
         return (
           <Card key={index} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-3">
+            <CardContent>
+              <div className="flex items-center gap-2 mb-2">
                 <span className="text-base">{card.icon}</span>
                 <span className="text-sm font-medium text-gray-600">
                   {card.title}

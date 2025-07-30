@@ -1,5 +1,5 @@
 import './globals.css'
-import { Toaster } from '@/components/ui/sonner'
+import LayoutWrapper from '@/components/LayoutWrapper'
 
 export const metadata = {
   title: 'MoneyFlow - Personal Finance Tracker',
@@ -13,9 +13,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-background font-sans antialiased">
-        {children}
-        <Toaster />
+      <body>
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   )

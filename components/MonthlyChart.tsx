@@ -1,39 +1,48 @@
 'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { Transaction } from '@/types/database'
 import { getMonthlyData, formatCurrency } from '@/lib/data-utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+  type ChartConfig,
+} from '@/components/ui/chart'
 
 interface MonthlyChartProps {
   transactions: Transaction[]
   type: 'spending' | 'income' | 'both'
   title: string
+  hideXAxis?: boolean
+  displayMonths?: number
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white p-3 border rounded-lg shadow-lg">
-        <p className="font-medium mb-2">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {entry.name}: {formatCurrency(entry.value)}
-          </p>
-        ))}
-      </div>
-    )
-  }
-  return null
-}
+const chartConfig = {
+  income: {
+    label: "Income",
+    color: "hsl(var(--chart-1))",
+  },
+  expenses: {
+    label: "Expenses",
+    color: "hsl(var(--chart-2))",
+  },
+  net: {
+    label: "Net",
+    color: "hsl(var(--chart-3))",
+  },
+} satisfies ChartConfig
 
-export function MonthlyChart({ transactions, type, title }: MonthlyChartProps) {
-  const monthlyData = getMonthlyData(transactions, 6)
+export function MonthlyChart({ transactions, type, title, hideXAxis = false, displayMonths = 6 }: MonthlyChartProps) {
+  const monthlyData = getMonthlyData(transactions, displayMonths)
   
   if (monthlyData.length === 0) {
     return (
       <Card className="bg-white border border-gray-200 shadow-sm">
-        <CardHeader className="pb-4">
+        <CardHeader>
           <CardTitle className="text-lg font-semibold text-gray-900">{title}</CardTitle>
         </CardHeader>
         <CardContent>
@@ -47,57 +56,55 @@ export function MonthlyChart({ transactions, type, title }: MonthlyChartProps) {
 
   return (
     <Card className="bg-white border border-gray-200 shadow-sm">
-      <CardHeader className="pb-4">
+      <CardHeader>
         <CardTitle className="text-lg font-semibold text-gray-900">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="month" 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={false}
-                tickLine={false}
+      <CardContent className="p-6">
+        <ChartContainer config={chartConfig} className="h-80 w-full">
+          <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="month" 
+              tickLine={false}
+              axisLine={false}
+            />
+
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  formatter={(value, name) => [
+                    formatCurrency(Number(value)),
+                    name,
+                  ]}
+                />
+              }
+            />
+            
+            {(type === 'income' || type === 'both') && (
+              <Bar 
+                dataKey="income" 
+                fill="var(--color-income)" 
+                radius={[2, 2, 0, 0]}
               />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#6b7280' }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            )}
+            
+            {(type === 'spending' || type === 'both') && (
+              <Bar 
+                dataKey="expenses" 
+                fill="var(--color-expenses)" 
+                radius={[2, 2, 0, 0]}
               />
-              <Tooltip content={<CustomTooltip />} />
-              
-              {(type === 'income' || type === 'both') && (
-                <Bar 
-                  dataKey="income" 
-                  name="Income" 
-                  fill="#3b82f6" 
-                  radius={[2, 2, 0, 0]}
-                />
-              )}
-              
-              {(type === 'spending' || type === 'both') && (
-                <Bar 
-                  dataKey="expenses" 
-                  name="Expenses" 
-                  fill="#60a5fa" 
-                  radius={[2, 2, 0, 0]}
-                />
-              )}
-              
-              {type === 'both' && (
-                <Bar 
-                  dataKey="net" 
-                  name="Net" 
-                  fill="#1d4ed8" 
-                  radius={[2, 2, 0, 0]}
-                />
-              )}
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+            )}
+            
+            {type === 'both' && (
+              <Bar 
+                dataKey="net" 
+                fill="var(--color-net)" 
+                radius={[2, 2, 0, 0]}
+              />
+            )}
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   )

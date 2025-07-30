@@ -33,7 +33,7 @@ export function getCategoryBreakdown(transactions: Transaction[]): CategoryData[
     .sort((a, b) => b.amount - a.amount)
 }
 
-export function getMonthlyData(transactions: Transaction[], months: number = 6): MonthlyData[] {
+export function getMonthlyData(transactions: Transaction[], months: number = 10): MonthlyData[] {
   const endDate = new Date()
   const startDate = subMonths(endDate, months - 1)
   
