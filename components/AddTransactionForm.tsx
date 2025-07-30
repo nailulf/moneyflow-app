@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -45,10 +45,10 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
   })
 
   useEffect(() => {
-    if (currentDate && setValue) {
+    if (currentDate) {
       setValue('date', currentDate)
     }
-  }, [currentDate])
+  }, [currentDate, setValue])
 
   const selectedCategory = watch('category')
 
@@ -63,7 +63,7 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
       toast.success('Transaction added successfully!')
       reset()
       setOpen(false)
-    } catch (error) {
+    } catch (error) { // eslint-disable-line @typescript-eslint/no-unused-vars
       toast.error('Failed to add transaction')
     } finally {
       setIsSubmitting(false)

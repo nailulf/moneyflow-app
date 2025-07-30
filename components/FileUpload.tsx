@@ -29,22 +29,7 @@ interface UploadedFile {
 export function FileUpload({ onFileProcessed }: FileUploadProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const newFiles = acceptedFiles.map(file => ({
-      file,
-      status: 'uploading' as const,
-      progress: 0
-    }))
-    
-    setUploadedFiles(prev => [...prev, ...newFiles])
-    
-    // Simulate file processing
-    newFiles.forEach((uploadedFile, index) => {
-      simulateFileProcessing(uploadedFile, index)
-    })
-  }, [])
-
-  const simulateFileProcessing = async (uploadedFile: UploadedFile, index: number) => {
+  const simulateFileProcessing = useCallback(async (uploadedFile: UploadedFile, index: number) => {
     const fileIndex = uploadedFiles.length + index
     
     // Simulate upload progress
@@ -100,116 +85,92 @@ export function FileUpload({ onFileProcessed }: FileUploadProps) {
     } else {
       setUploadedFiles(prev => 
         prev.map((f, i) => 
-          i === fileIndex ? { 
-            ...f, 
-            status: 'error', 
-            error: 'Failed to process file. Please check the format.' 
-          } : f
+          i === fileIndex ? { ...f, status: 'error', error: 'Processing failed' } : f
         )
       )
       toast.error(`Failed to process ${uploadedFile.file.name}`)
     }
-  }
+  }, [uploadedFiles, onFileProcessed])
 
-  const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index))
-  }
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const newFiles = acceptedFiles.map(file => ({
+      file,
+      status: 'uploading' as const,
+      progress: 0
+    }))
+    
+    setUploadedFiles(prev => [...prev, ...newFiles])
+    
+    // Simulate file processing
+    newFiles.forEach((uploadedFile, index) => {
+      simulateFileProcessing(uploadedFile, index)
+    })
+  }, [simulateFileProcessing])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    noClick: true,
     accept: {
-      'application/pdf': ['.pdf'],
       'text/csv': ['.csv'],
       'application/vnd.ms-excel': ['.xls'],
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
-    },
-    maxSize: 10 * 1024 * 1024, // 10MB
-    multiple: true
+    }
   })
 
-  const getStatusIcon = (status: UploadedFile['status']) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-500" />
-      default:
-        return <File className="h-4 w-4 text-blue-500" />
-    }
-  }
-
-  const getStatusText = (file: UploadedFile) => {
-    switch (file.status) {
-      case 'uploading':
-        return `Uploading... ${file.progress}%`
-      case 'processing':
-        return `Processing... ${file.progress}%`
-      case 'completed':
-        return 'Completed'
-      case 'error':
-        return file.error || 'Error'
-      default:
-        return 'Unknown'
-    }
+  const removeFile = (fileToRemove: File) => {
+    setUploadedFiles(prev => prev.filter(file => file.file !== fileToRemove))
   }
 
   return (
-    <Card>
+    <Card className="bg-white border border-gray-200 shadow-sm">
       <CardHeader>
-        <CardTitle>Upload Bank Statements</CardTitle>
+        <CardTitle className="text-lg font-semibold text-gray-900">Upload Transactions</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragActive 
-              ? 'border-blue-500 bg-blue-50' 
-              : 'border-gray-300 hover:border-gray-400'
+          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+            isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
           }`}
         >
           <input {...getInputProps()} />
-          <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          {isDragActive ? (
-            <p className="text-blue-600">Drop the files here...</p>
-          ) : (
-            <div>
-              <p className="text-gray-600 mb-2">
-                Drag & drop your bank statements here, or click to select
-              </p>
-              <p className="text-sm text-gray-500">
-                Supports PDF, CSV, XLS, XLSX files up to 10MB
-              </p>
-            </div>
-          )}
+          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+          <p className="mt-2 text-sm text-gray-600">
+            Drag &apos;n&apos; drop some files here, or click to select files
+          </p>
+          <p className="text-xs text-gray-500">(CSV, XLS, XLSX files)</p>
         </div>
 
         {uploadedFiles.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Uploaded Files</h4>
+          <div className="mt-4 space-y-3">
             {uploadedFiles.map((uploadedFile, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
-                {getStatusIcon(uploadedFile.status)}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {uploadedFile.file.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {getStatusText(uploadedFile)}
-                  </p>
+              <div key={index} className="flex items-center justify-between p-3 border rounded-md shadow-sm">
+                <div className="flex items-center space-x-3">
+                  {uploadedFile.status === 'completed' && <CheckCircle className="h-5 w-5 text-green-500" />}
+                  {uploadedFile.status === 'error' && <AlertCircle className="h-5 w-5 text-red-500" />}
                   {(uploadedFile.status === 'uploading' || uploadedFile.status === 'processing') && (
-                    <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                      <div 
-                        className="bg-blue-600 h-1.5 rounded-full transition-all duration-300" 
-                        style={{ width: `${uploadedFile.progress}%` }}
-                      />
-                    </div>
+                    <File className="h-5 w-5 text-gray-500" />
                   )}
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{uploadedFile.file.name}</p>
+                    {uploadedFile.status === 'error' && (
+                      <p className="text-xs text-red-500">Error: {uploadedFile.error}</p>
+                    )}
+                    {(uploadedFile.status === 'uploading' || uploadedFile.status === 'processing') && (
+                      <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                        <div
+                          className="bg-blue-600 h-1.5 rounded-full"
+                          style={{ width: `${uploadedFile.progress}%` }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeFile(index)}
-                  className="h-8 w-8 p-0"
+                  onClick={() => removeFile(uploadedFile.file)}
+                  className="text-gray-500 hover:text-gray-700"
                 >
                   <X className="h-4 w-4" />
                 </Button>

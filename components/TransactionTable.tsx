@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Transaction } from '@/types/database'
-import { formatCurrency, formatDate } from '@/lib/data-utils'
+import { formatCurrency } from '@/lib/data-utils'
 import { CATEGORY_COLORS } from '@/types/app'
 import {
   Table,
@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+
 
 interface TransactionTableProps {
   transactions: Transaction[]
@@ -77,7 +77,7 @@ export function TransactionTable({ transactions, limit = 10 }: TransactionTableP
               </TableRow>
             </TableHeader>
             <TableBody>
-              {displayTransactions.map((transaction, index) => {
+              {displayTransactions.map((transaction) => {
                 const totalAmount = displayTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0)
                 const allocation = totalAmount > 0 ? (Math.abs(transaction.amount) / totalAmount * 100) : 0
                 const gain = Math.abs(transaction.amount) * 0.1 // Deterministic mock gain calculation

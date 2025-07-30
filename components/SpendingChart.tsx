@@ -76,7 +76,7 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-gray-900">Portfolio</CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent>
         <ChartContainer
           config={chartConfig}
           className="h-80 w-full"

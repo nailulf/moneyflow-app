@@ -1,33 +1,64 @@
 'use client'
 
-import { useState } from 'react'
-import { cn } from '@/lib/utils'
-import { SideNavigation } from '@/components/SideNavigation'
-import { UserNav } from '@/components/UserNav'
+import { AppSidebar } from '@/components/app-sidebar'
+import { NavUser } from '@/components/nav-user'
 import { Toaster } from '@/components/ui/sonner'
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
+import { Separator } from '@/components/ui/separator'
+import { usePathname } from 'next/navigation'
 
 interface LayoutWrapperProps {
   children: React.ReactNode
 }
 
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
-  const [collapsed, setCollapsed] = useState(false)
+  const pathname = usePathname()
 
   return (
-    <div className="flex min-h-screen bg-background font-sans antialiased">
-      <SideNavigation collapsed={collapsed} setCollapsed={setCollapsed} />
-      <div className={cn(
-        'flex flex-col flex-1 transition-all duration-300 ease-in-out',
-        collapsed ? 'ml-20' : 'ml-64'
-      )}>
-        <header className="flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 justify-end">
-          <UserNav />
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+          </div>
+          <h1 className="text-xl font-semibold">
+              {
+                pathname === '/spending' ? 'Spending' :
+                pathname.startsWith('/spending') ? 'Spending' :
+                pathname === '/portfolio' ? 'Portfolio' :
+                pathname.startsWith('/portfolio') ? 'Portfolio' :
+                pathname === '/invest' ? 'Invest' :
+                pathname === '/advice' ? 'Advice' :
+                pathname === '/tax' ? 'Tax' :
+                pathname === '/equity' ? 'Equity' :
+                pathname === '/estate-planning' ? 'Estate Planning' :
+                'Dashboard'
+              }
+          </h1>
+          <div className="ml-auto px-4">
+            <NavUser user={{
+              name: "shadcn",
+              email: "shadcn@example.com",
+              avatar: "/avatars/01.png"
+            }} />
+          </div>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6">
-          {children}
-        </main>
-      </div>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
+            {children}
+          </div>
+        </div>
+      </SidebarInset>
       <Toaster />
-    </div>
+    </SidebarProvider>
   )
 }

@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Transaction } from '@/types/database'
 import { getTotalBalance, getMonthlySpending, getMonthlyIncome, formatCurrency } from '@/lib/data-utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, TrendingDown, DollarSign, CreditCard } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+
 
 interface SummaryCardsProps {
   transactions: Transaction[]
@@ -18,14 +18,14 @@ export function SummaryCards({ transactions = [] }: SummaryCardsProps) {
   }, [])
   
   const [totalBalance, setTotalBalance] = useState(0)
-  const [monthlySpending, setMonthlySpending] = useState(0)
+
   const [monthlyIncome, setMonthlyIncome] = useState(0)
   const [netThisMonth, setNetThisMonth] = useState(0)
 
   useEffect(() => {
     if (transactions.length > 0) {
       setTotalBalance(getTotalBalance(transactions))
-      setMonthlySpending(getMonthlySpending(transactions))
+
       setMonthlyIncome(getMonthlyIncome(transactions))
       setNetThisMonth(getMonthlyIncome(transactions) - getMonthlySpending(transactions))
     }

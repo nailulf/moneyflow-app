@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
+import { BarChart, Bar, XAxis, CartesianGrid } from 'recharts'
 import { Transaction } from '@/types/database'
 import { getMonthlyData, formatCurrency } from '@/lib/data-utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,8 +8,6 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
   type ChartConfig,
 } from '@/components/ui/chart'
 
@@ -17,7 +15,6 @@ interface MonthlyChartProps {
   transactions: Transaction[]
   type: 'spending' | 'income' | 'both'
   title: string
-  hideXAxis?: boolean
   displayMonths?: number
 }
 
@@ -36,7 +33,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function MonthlyChart({ transactions, type, title, hideXAxis = false, displayMonths = 6 }: MonthlyChartProps) {
+export function MonthlyChart({ transactions, type, title, displayMonths = 6 }: MonthlyChartProps) {
   const monthlyData = getMonthlyData(transactions, displayMonths)
   
   if (monthlyData.length === 0) {
@@ -59,7 +56,7 @@ export function MonthlyChart({ transactions, type, title, hideXAxis = false, dis
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-gray-900">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent>
         <ChartContainer config={chartConfig} className="h-80 w-full">
           <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" />
