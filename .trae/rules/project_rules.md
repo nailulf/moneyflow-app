@@ -18,6 +18,40 @@
 - **Responsive Margins**: 15% max on large displays, 3% min on small displays
 - **Breakpoints**: Follow Tailwind defaults (sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px)
 
+### PageLayout Components
+- **TopContent**: Full-width card component that spans the entire content area width (MainContent + SideContent combined)
+  - Mobile: 100% width with grid layout
+  - Desktop: 100% width with flexbox column layout
+  - Styling: Card appearance with background, border, shadow, and rounded corners
+  - Overflow: Prevents content overflow with overflow-hidden
+  - Spacing: Card padding (p-4 md:p-6) and bottom margin (mb-4)
+  - Order: Always appears first (order-0) in the layout flow
+- **ContentWrapper**: Container for MainContent and SideContent
+  - Mobile: Grid layout (grid-cols-1) with gap-4
+  - Desktop: Flexbox layout (sm:flex sm:justify-center) for side-by-side content
+  - Order: Appears after TopContent (order-1)
+- **MainContent**: Primary content area (80% width on large screens, 60-80% constraints)
+  - Order: First within ContentWrapper (sm:order-1)
+- **SideContent**: Secondary content area (20-30% width on large screens, 30-40% constraints)
+  - Order: Second within ContentWrapper (sm:order-2)
+
+#### Usage Example:
+```tsx
+<PageLayout>
+  <TopContent>
+    {/* Full-width header content */}
+  </TopContent>
+  <ContentWrapper>
+    <MainContent>
+      {/* Primary page content */}
+    </MainContent>
+    <SideContent>
+      {/* Sidebar content */}
+    </SideContent>
+  </ContentWrapper>
+</PageLayout>
+```
+
 ### Component Design Standards
 - **Card Consistency**: Uniform padding (p-4), border radius (rounded-lg), shadow (shadow-sm)
 - **Spacing Scale**: Use Tailwind spacing scale consistently (4, 6, 8, 12, 16, 24)

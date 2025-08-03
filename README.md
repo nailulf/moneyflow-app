@@ -1,3 +1,74 @@
+# MoneyFlow App - Dynamic Data Management
+
+A modern financial management application built with Next.js, Supabase, and TypeScript that enables fully dynamic category and transaction management based on user preferences.
+
+## Features
+
+### Dynamic Category Management
+- **Custom Categories**: Users can create, edit, and delete their own expense and income categories
+- **Default Categories**: New users get a set of default categories automatically initialized
+- **Color Customization**: Each category can have a custom color for better visual organization
+- **Soft Delete**: Categories are soft-deleted to maintain data integrity with existing transactions
+- **Real-time Updates**: Category changes are reflected immediately across the application
+
+### Dynamic Transaction Management
+- **Flexible Transaction Creation**: Support for both income and expense transactions
+- **Category Association**: Transactions can be linked to user-defined categories
+- **Rich Metadata**: Support for merchant, notes, and tags
+- **Date Range Filtering**: Query transactions by specific date ranges
+- **Real-time Statistics**: Automatic calculation of income, expense, and net amounts
+
+### User Preferences System
+- **Customizable Settings**: Store user-specific preferences like currency, theme, and notifications
+- **JSON Storage**: Flexible preference storage using JSONB for complex settings
+- **Easy Management**: Simple API for getting, setting, and deleting preferences
+
+## Technology Stack
+
+- **Frontend**: Next.js 14 with TypeScript
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **UI Components**: shadcn/ui
+- **Styling**: Tailwind CSS
+- **Form Validation**: Zod
+- **State Management**: React Hooks
+
+## Setup Instructions
+
+### 1. Environment Configuration
+
+Copy the environment template:
+```bash
+cp .env.example .env.local
+```
+
+Fill in your Supabase credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+```
+
+### 2. Database Setup
+
+Run the migration files in order in your Supabase SQL editor:
+
+1. `supabase/migrations/001_create_categories_table.sql`
+2. `supabase/migrations/002_create_user_preferences_table.sql`
+3. `supabase/migrations/003_create_transactions_table.sql`
+
+### 3. Install Dependencies
+
+```bash
+npm install
+```
+
+### 4. Run Development Server
+
+```bash
+npm run dev
+```
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

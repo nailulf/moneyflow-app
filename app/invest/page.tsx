@@ -2,13 +2,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { InvestNavigation } from "@/components/TopNavigation"
-import { PageLayout, MainContent, SideContent } from "@/components/PageLayout"
+import { PageLayout, MainContent, SideContent, ContentWrapper } from "@/components/PageLayout"
 
 export default function InvestPage() {
   return (
     <>
       <InvestNavigation />
       <PageLayout>
+        <ContentWrapper>
         <MainContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card className="rounded-xl">
@@ -134,6 +135,7 @@ export default function InvestPage() {
             {/* Additional investment content can go here */}
           </div>
         </SideContent>
+        </ContentWrapper>
       </PageLayout>
     </>
   )

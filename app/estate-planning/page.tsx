@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Users, Shield, AlertTriangle } from "lucide-react"
 import { EstatePlanningNavigation } from "@/components/TopNavigation"
-import { PageLayout, MainContent, SideContent } from "@/components/PageLayout"
+import { PageLayout, MainContent, SideContent, ContentWrapper } from "@/components/PageLayout"
 
 export default function EstatePlanningPage() {
   return (
     <>
       <EstatePlanningNavigation />
       <PageLayout>
+        <ContentWrapper>
         <MainContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="rounded-xl">
@@ -182,6 +183,7 @@ export default function EstatePlanningPage() {
             {/* Additional estate planning content can go here */}
           </div>
         </SideContent>
+        </ContentWrapper>
       </PageLayout>
     </>
   )

@@ -13,6 +13,31 @@ export const CATEGORIES = [
 
 export type Category = typeof CATEGORIES[number]
 
+// Category Group Types for new CategoryManager
+export type CategoryGroup = 'EXPENSE' | 'INCOME'
+
+export interface CategoryGroupData {
+  id: CategoryGroup
+  name: string
+  categories: CategoryItem[]
+}
+
+export interface CategoryItem {
+  id: string
+  name: Category
+  color: string
+  group: CategoryGroup
+  isCustom?: boolean
+}
+
+// Helper function to get categories by group
+export function getCategoriesByGroup(groupId: CategoryGroup): Category[] {
+  if (groupId === 'INCOME') {
+    return ['Income']
+  }
+  return CATEGORIES.filter(cat => cat !== 'Income')
+}
+
 export interface TransactionSummary {
   totalAmount: number
   transactionCount: number

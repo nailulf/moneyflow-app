@@ -1,13 +1,20 @@
 import { z } from 'zod'
-import { CATEGORIES } from '@/types/app'
 
-export const transactionSchema = z.object({
+export const transactionFormSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   description: z.string().min(1, 'Description is required'),
-  amount: z.number().min(0.01, 'Amount must be greater than 0'),
-  category: z.enum(CATEGORIES),
-  merchant: z.string().optional()
+  amount: z.number().positive('Amount must be positive'),
+  type: z.enum(['INCOME', 'EXPENSE']),
+  category_id: z.string().optional().nullable(),
+  merchant: z.string().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  tags: z.array(z.string()).optional().nullable(),
 })
+
+// Export as transactionSchema for backward compatibility
+export const transactionSchema = transactionFormSchema
+
+
 
 export const fileUploadSchema = z.object({
   file: z.instanceof(File)
@@ -18,5 +25,5 @@ export const fileUploadSchema = z.object({
     )
 })
 
-export type TransactionFormData = z.infer<typeof transactionSchema>
+export type TransactionFormData = z.infer<typeof transactionFormSchema>
 export type FileUploadFormData = z.infer<typeof fileUploadSchema>

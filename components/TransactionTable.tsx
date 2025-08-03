@@ -87,10 +87,10 @@ export function TransactionTable({ transactions, limit = 10 }: TransactionTableP
                       <div className="flex items-center gap-2">
                         <div 
                           className="w-2 h-2 rounded-full" 
-                          style={{ backgroundColor: CATEGORY_COLORS[transaction.category as keyof typeof CATEGORY_COLORS] }}
+                          style={{ backgroundColor: CATEGORY_COLORS[(transaction.category_id || 'Other') as keyof typeof CATEGORY_COLORS] }}
                         />
                         <div>
-                          <div className="text-sm font-medium text-gray-900">{transaction.category}</div>
+                          <div className="text-sm font-medium text-gray-900">{transaction.category_id || 'Other'}</div>
                           <div className="text-xs text-gray-500">{transaction.description}</div>
                         </div>
                       </div>

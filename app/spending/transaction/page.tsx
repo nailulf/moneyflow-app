@@ -1,55 +1,34 @@
 'use client'
 
 import { TransactionTable } from '@/components/TransactionTable'
-import { AddTransactionForm } from '@/components/AddTransactionForm'
-import { generateMockTransactions } from '@/lib/mock-data'
+import { AddTransactionButton } from '@/components/AddTransactionButton'
 import { SpendingNavigation } from '@/components/TopNavigation'
-import { PageLayout, MainContent, SideContent } from '@/components/PageLayout'
+import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useState } from 'react'
-import { Transaction } from '@/types/database'
-import { TransactionFormData } from '@/lib/validations'
+import { useTransactionManager } from '@/hooks/use-transaction-manager'
+import { CategoryManager } from '@/components/CategoryManager'
 
 export default function SpendingTransactionPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>(generateMockTransactions(25))
-
-  const handleTransactionAdded = (newTransaction: TransactionFormData) => {
-    const transaction: Transaction = {
-      id: `new-${Date.now()}`,
-      user_id: 'user1',
-      date: newTransaction.date,
-      description: newTransaction.description,
-      amount: newTransaction.amount,
-      category: newTransaction.category,
-      merchant: newTransaction.merchant || null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-    
-    setTransactions(prev => [transaction, ...prev])
-  }
+  // Test user ID for development - in production this would come from authentication
+  const TEST_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
+  
+  const { transactions, addTransaction } = useTransactionManager({
+    userId: TEST_USER_ID
+  })
 
   // Filter for expenses only
-  const expenses = transactions.filter(t => t.amount < 0)
+  const expenses = transactions.filter(t => t.type === 'EXPENSE')
   const recentExpenses = expenses.slice(0, 5)
-  const totalExpenses = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0)
+  const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0)
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation />
+      <SpendingNavigation actionButton={<CategoryManager userId={TEST_USER_ID} />} />
       
       <PageLayout>
-        
+        <ContentWrapper>
         <MainContent>
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Transactions</h2>
-                <p className="text-muted-foreground">Manage and track your spending transactions</p>
-              </div>
-              <AddTransactionForm onTransactionAdded={handleTransactionAdded} />
-            </div>
-            
             <TransactionTable 
               transactions={transactions}
             />
@@ -58,6 +37,9 @@ export default function SpendingTransactionPage() {
         
         <SideContent>
           <div className="space-y-4">
+            <div>
+              <AddTransactionButton onTransactionAdded={addTransaction} />
+            </div>
             <Card>
               <CardHeader>
                 <CardTitle>Quick Stats</CardTitle>
@@ -92,7 +74,7 @@ export default function SpendingTransactionPage() {
                     <div key={transaction.id} className="flex justify-between items-center">
                       <div>
                         <p className="text-sm font-medium">{transaction.description}</p>
-                        <p className="text-xs text-muted-foreground">{transaction.category}</p>
+                        <p className="text-xs text-muted-foreground">{transaction.category_id || 'Uncategorized'}</p>
                       </div>
                       <span className="text-sm font-medium text-red-600">
                         ${Math.abs(transaction.amount).toFixed(2)}
@@ -104,7 +86,7 @@ export default function SpendingTransactionPage() {
             </Card>
           </div>
         </SideContent>
-        
+        </ContentWrapper>
       </PageLayout>
     </div>
   )

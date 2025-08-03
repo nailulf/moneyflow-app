@@ -3,37 +3,58 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Lightbulb, TrendingUp, Shield, Target } from "lucide-react"
 import { AdviceNavigation } from "@/components/TopNavigation"
-import { PageLayout, MainContent, SideContent } from "@/components/PageLayout"
+import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from "@/components/PageLayout"
 
 export default function AdvicePage() {
   return (
     <>
       <AdviceNavigation />
       <PageLayout>
+        <TopContent>
+          <Card className="rounded-xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Financial Goals
+                </CardTitle>
+                <CardDescription>Track your progress towards financial milestones</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-medium">House Down Payment</span>
+                      <span className="text-sm text-muted-foreground">$45,000 / $60,000</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-blue-600 h-2 rounded-full" style={{width: '75%'}}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-medium">Vacation Fund</span>
+                      <span className="text-sm text-muted-foreground">$3,200 / $5,000</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-green-600 h-2 rounded-full" style={{width: '64%'}}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-medium">Retirement</span>
+                      <span className="text-sm text-muted-foreground">$125,000 / $1,000,000</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-purple-600 h-2 rounded-full" style={{width: '12.5%'}}></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+        </TopContent>
+        <ContentWrapper>
         <MainContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="rounded-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5" />
-              Quick Tips
-            </CardTitle>
-            <CardDescription>Personalized recommendations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-sm font-medium">Increase Emergency Fund</p>
-                <p className="text-xs text-muted-foreground">Aim for 6 months of expenses</p>
-              </div>
-              <div className="p-3 bg-green-50 rounded-lg">
-                <p className="text-sm font-medium">Diversify Portfolio</p>
-                <p className="text-xs text-muted-foreground">Consider international stocks</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
+          <div className="grid gap-4 lg:grid-cols-2">
         <Card className="rounded-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -77,49 +98,33 @@ export default function AdvicePage() {
           </CardContent>
         </Card>
           </div>
+          <div className="py-6">
+          <Card className="rounded-xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5" />
+              Quick Tips
+            </CardTitle>
+            <CardDescription>Personalized recommendations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm font-medium">Increase Emergency Fund</p>
+                <p className="text-xs text-muted-foreground">Aim for 6 months of expenses</p>
+              </div>
+              <div className="p-3 bg-green-50 rounded-lg">
+                <p className="text-sm font-medium">Diversify Portfolio</p>
+                <p className="text-xs text-muted-foreground">Consider international stocks</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        </div>
         </MainContent>
         <SideContent>
           <div className="space-y-4">
-            <Card className="rounded-xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Financial Goals
-                </CardTitle>
-                <CardDescription>Track your progress towards financial milestones</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium">House Down Payment</span>
-                      <span className="text-sm text-muted-foreground">$45,000 / $60,000</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{width: '75%'}}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium">Vacation Fund</span>
-                      <span className="text-sm text-muted-foreground">$3,200 / $5,000</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-600 h-2 rounded-full" style={{width: '64%'}}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-sm font-medium">Retirement</span>
-                      <span className="text-sm text-muted-foreground">$125,000 / $1,000,000</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-purple-600 h-2 rounded-full" style={{width: '12.5%'}}></div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            
             
             <Card className="rounded-xl">
               <CardHeader>
@@ -157,6 +162,7 @@ export default function AdvicePage() {
             </Card>
           </div>
         </SideContent>
+        </ContentWrapper>
       </PageLayout>
     </>
   )

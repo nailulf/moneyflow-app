@@ -6,7 +6,7 @@ import { MonthlyChart } from '@/components/MonthlyChart'
 import NetWorthCard from '@/components/NetWorthCard'
 import { generateMockTransactions } from '@/lib/mock-data'
 import { Transaction } from '@/types/database'
-import { PageLayout, MainContent, SideContent } from '@/components/PageLayout'
+import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
 
 export default function Home() {
   // In a real app, this would come from your database
@@ -19,6 +19,7 @@ export default function Home() {
   return (
     <div className="flex flex-col h-full">
       <PageLayout>
+        <ContentWrapper>
         <MainContent>
           <NetWorthCard 
               onAddAssets={() => {
@@ -44,6 +45,7 @@ export default function Home() {
             </div>
           </div>
         </SideContent>
+        </ContentWrapper>
       </PageLayout>
     </div>
   )

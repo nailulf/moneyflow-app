@@ -1,5 +1,5 @@
 import { PortfolioNavigation } from '@/components/TopNavigation'
-import { PageLayout, MainContent, SideContent } from '@/components/PageLayout'
+import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function PortfolioPage() {
@@ -8,7 +8,7 @@ export default function PortfolioPage() {
       <PortfolioNavigation />
       
       <PageLayout>
-        
+        <ContentWrapper>
         <MainContent>
           <div className="space-y-6">
             <div>
@@ -99,7 +99,7 @@ export default function PortfolioPage() {
             </Card>
           </div>
         </SideContent>
-        
+        </ContentWrapper>
       </PageLayout>
     </div>
   )

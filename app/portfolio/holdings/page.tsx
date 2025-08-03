@@ -1,5 +1,5 @@
 import { PortfolioNavigation } from '@/components/TopNavigation'
-import { PageLayout, MainContent, SideContent } from '@/components/PageLayout'
+import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
@@ -67,7 +67,7 @@ export default function PortfolioHoldingsPage() {
       <PortfolioNavigation />
       
       <PageLayout>
-        
+        <ContentWrapper>
         <MainContent>
           <div className="space-y-6">
             <div>
@@ -161,7 +161,7 @@ export default function PortfolioHoldingsPage() {
             </Card>
           </div>
         </SideContent>
-        
+        </ContentWrapper>
       </PageLayout>
     </div>
   )

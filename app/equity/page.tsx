@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Home, TrendingUp, Calculator, MapPin } from "lucide-react"
 import { EquityNavigation } from "@/components/TopNavigation"
-import { PageLayout, MainContent, SideContent } from "@/components/PageLayout"
+import { PageLayout, MainContent, SideContent, ContentWrapper } from "@/components/PageLayout"
 
 export default function EquityPage() {
   return (
     <>
       <EquityNavigation />
       <PageLayout>
+        <ContentWrapper>
         <MainContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="rounded-xl">
@@ -195,6 +196,7 @@ export default function EquityPage() {
             {/* Additional equity content can go here */}
           </div>
         </SideContent>
+        </ContentWrapper>
       </PageLayout>
     </>
   )

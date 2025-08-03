@@ -9,17 +9,18 @@ interface TopNavigationProps {
     label: string
     href: string
   }>
+  actionButton?: React.ReactNode
 }
 
-export function TopNavigation({ subMenus }: TopNavigationProps) {
+export function TopNavigation({ subMenus, actionButton }: TopNavigationProps) {
   const pathname = usePathname()
 
   return (
     <div className="bg-background">
-      <div className="flex h-14 items-center px-4">
+      <div className="flex h-10 items-center justify-between">
         <div className="flex items-center space-x-6">
           {subMenus && subMenus.length > 0 && (
-            <nav className="flex items-center space-x-2 px-12">
+            <nav className="flex items-center space-x-2 px-4">
               {subMenus.map((item) => (
                 <Link
                   key={item.href}
@@ -37,6 +38,7 @@ export function TopNavigation({ subMenus }: TopNavigationProps) {
             </nav>
           )}
         </div>
+        {actionButton && <div>{actionButton}</div>}
       </div>
     </div>
   )
@@ -47,13 +49,13 @@ export function DashboardNavigation() {
   return <TopNavigation/>
 }
 
-export function SpendingNavigation() {
+export function SpendingNavigation({ actionButton }: { actionButton?: React.ReactNode }) {
   const subMenus = [
     { label: "Overview", href: "/spending" },
     { label: "Breakdown", href: "/spending/breakdown" },
     { label: "Transaction", href: "/spending/transaction" }
   ]
-  return <TopNavigation subMenus={subMenus} />
+  return <TopNavigation subMenus={subMenus} actionButton={actionButton} />
 }
 
 export function PortfolioNavigation() {

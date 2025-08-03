@@ -11,43 +11,26 @@ interface SummaryCardsProps {
 }
 
 export function SummaryCards({ transactions = [] }: SummaryCardsProps) {
-  const [isClient, setIsClient] = useState(false)
+
   
+  const initialTotalBalance = transactions.length > 0 ? getTotalBalance(transactions) : 0
+  const initialMonthlyIncome = transactions.length > 0 ? getMonthlyIncome(transactions) : 0
+  const initialNetThisMonth = transactions.length > 0 ? initialMonthlyIncome - getMonthlySpending(transactions) : 0
+
+  const [totalBalance, setTotalBalance] = useState(initialTotalBalance)
+  const [monthlyIncome, setMonthlyIncome] = useState(initialMonthlyIncome)
+  const [netThisMonth, setNetThisMonth] = useState(initialNetThisMonth)
+
+  // If transactions can change after initial render, keep a useEffect to update state
+  // Otherwise, this useEffect can be removed if transactions are static after initial load
   useEffect(() => {
-    setIsClient(true)
-  }, [])
-  
-  const [totalBalance, setTotalBalance] = useState(0)
-
-  const [monthlyIncome, setMonthlyIncome] = useState(0)
-  const [netThisMonth, setNetThisMonth] = useState(0)
-
-  useEffect(() => {
-    if (transactions.length > 0) {
-      setTotalBalance(getTotalBalance(transactions))
-
-      setMonthlyIncome(getMonthlyIncome(transactions))
-      setNetThisMonth(getMonthlyIncome(transactions) - getMonthlySpending(transactions))
-    }
+    setTotalBalance(getTotalBalance(transactions))
+    const fixedDate = new Date('2024-01-15T12:00:00Z'); // Use a fixed date for consistent SSR/CSR
+      setMonthlyIncome(getMonthlyIncome(transactions, fixedDate))
+      setNetThisMonth(getMonthlyIncome(transactions, fixedDate) - getMonthlySpending(transactions, fixedDate))
   }, [transactions])
   
-  if (!isClient) {
-    return (
-      <div className="grid grid-cols-1 gap-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="bg-white border border-gray-200 shadow-sm">
-            <CardContent>
-              <div className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-6 bg-gray-200 rounded mb-1"></div>
-                <div className="h-3 bg-gray-200 rounded"></div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
-  }
+
 
   const cards = [
     {

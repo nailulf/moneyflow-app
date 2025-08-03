@@ -39,7 +39,7 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
       date: currentDate,
       description: '',
       amount: 0,
-      category: 'Other',
+      category_id: null,
       merchant: ''
     }
   })
@@ -50,7 +50,7 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
     }
   }, [currentDate, setValue])
 
-  const selectedCategory = watch('category')
+  const selectedCategoryId = watch('category_id')
 
   const onSubmit = async (data: TransactionFormData) => {
     setIsSubmitting(true)
@@ -127,10 +127,10 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
           <div className="space-y-2">
             <label className="text-sm font-medium">Category</label>
             <Select
-              value={selectedCategory}
-              onValueChange={(value) => setValue('category', value as Category)}
-            >
-              <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+                value={selectedCategoryId || undefined}
+                onValueChange={(value) => setValue('category_id', value as Category)}
+              >
+              <SelectTrigger className={errors.category_id ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
@@ -141,8 +141,8 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
                 ))}
               </SelectContent>
             </Select>
-            {errors.category && (
-              <p className="text-sm text-red-500">{errors.category.message}</p>
+            {errors.category_id && (
+              <p className="text-sm text-red-500">{errors.category_id.message}</p>
             )}
           </div>
 

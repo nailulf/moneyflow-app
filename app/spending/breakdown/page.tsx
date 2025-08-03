@@ -1,18 +1,86 @@
-import { SpendingChart } from '@/components/SpendingChart'
-import { MonthlyChart } from '@/components/MonthlyChart'
-import { generateMockTransactions } from '@/lib/mock-data'
+'use client'
+
+import { useEffect } from 'react'
+import { CashFlowBreakdown } from '@/components/CashFlowBreakdown'
 import { SpendingNavigation } from '@/components/TopNavigation'
-import { PageLayout, MainContent, SideContent } from '@/components/PageLayout'
+import { PageLayout, MainContent, SideContent, TopContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTransactionManager } from '@/hooks/use-transaction-manager'
+import { CategoryManager } from '@/components/CategoryManager'
+import { useBudgetManager } from '@/hooks/use-budget-manager'
+// Simple progress component inline
+const Progress = ({ value = 0, className = '' }: { value?: number; className?: string }) => {
+  const percentage = Math.min(Math.max(value, 0), 100)
+  return (
+    <div className={`relative h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800 ${className}`}>
+      <div
+        className="h-full bg-blue-600 transition-all duration-300 ease-in-out"
+        style={{ width: `${percentage}%` }}
+      />
+    </div>
+  )
+}
+import { TrendingUp, TrendingDown } from 'lucide-react'
+import { CATEGORY_COLORS } from '@/types/app'
 
-export default function SpendingBreakdownPage() {
-  const transactions = generateMockTransactions(50)
+// Mock budget data
+interface BudgetCategory {
+  id: string
+  category: string
+  budgetAmount: number
+  spentAmount: number
+  color: string
+}
 
-  // Calculate category breakdown
-  const categoryBreakdown = transactions.reduce((acc, transaction) => {
-    if (transaction.amount < 0) { // Only expenses
-      const category = transaction.category
-      acc[category] = (acc[category] || 0) + Math.abs(transaction.amount)
+interface Budget {
+  id: string
+  name: string
+  totalAmount: number
+  period: 'monthly' | 'yearly'
+  categories: BudgetCategory[]
+}
+
+const mockBudgets: Budget[] = [
+  {
+    id: '1',
+    name: 'Monthly Budget',
+    totalAmount: 3000,
+    period: 'monthly',
+    categories: [
+      { id: '1', category: 'Food & Dining', budgetAmount: 600, spentAmount: 450, color: CATEGORY_COLORS['Food & Dining'] },
+      { id: '2', category: 'Transportation', budgetAmount: 300, spentAmount: 280, color: CATEGORY_COLORS['Transportation'] },
+      { id: '3', category: 'Entertainment', budgetAmount: 200, spentAmount: 150, color: CATEGORY_COLORS['Entertainment'] },
+      { id: '4', category: 'Shopping', budgetAmount: 400, spentAmount: 520, color: CATEGORY_COLORS['Shopping'] },
+      { id: '5', category: 'Bills & Utilities', budgetAmount: 800, spentAmount: 750, color: CATEGORY_COLORS['Bills & Utilities'] },
+    ]
+  }
+]
+
+export default function BudgetingBreakdownPage() {
+  // Test user ID for development - in production this would come from authentication
+  const TEST_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
+  
+  const { 
+    selectedBudget
+  } = useBudgetManager({ initialBudgets: mockBudgets })
+  
+  const { transactions, loadTransactions } = useTransactionManager({
+    userId: TEST_USER_ID
+  })
+  
+  // Initialize with mock data on client side only
+  useEffect(() => {
+    loadTransactions()
+  }, [loadTransactions])
+  
+  const displayTransactions = transactions
+
+  // Calculate category breakdown from transactions
+  const categoryBreakdown = displayTransactions.reduce((acc, transaction) => {
+    if (transaction.type === 'EXPENSE') { // Only expenses
+      // For now, use a fallback category name since we don't have category lookup yet
+      const category = transaction.category_id || 'Uncategorized'
+      acc[category] = (acc[category] || 0) + transaction.amount
     }
     return acc
   }, {} as Record<string, number>)
@@ -21,27 +89,91 @@ export default function SpendingBreakdownPage() {
     .sort(([,a], [,b]) => b - a)
     .slice(0, 10)
 
+  // Calculate budget overview
+  const totalBudget = selectedBudget?.totalAmount || 0
+  const totalSpent = selectedBudget?.categories.reduce((sum, cat) => sum + cat.spentAmount, 0) || 0
+  const totalIncome = displayTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
+  const netCashFlow = totalIncome - totalSpent
+
+
+
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation />
+      <SpendingNavigation actionButton={<CategoryManager userId={TEST_USER_ID} />} />
       
       <PageLayout>
-        
+        <TopContent>
+           {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className='mb-4'>
+                <h2 className="text-xl font-semibold tracking-tight mb-2">Budgeting & Breakdown</h2>
+                <p className="text-muted-foreground">Manage your budgets and analyze spending patterns</p>
+              </div>
+            </div>
+            {/* Budget Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Income</p>
+                      <p className="text-2xl font-bold text-green-600">${totalIncome.toLocaleString()}</p>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Expenses</p>
+                      <p className="text-2xl font-bold text-red-600">${totalSpent.toLocaleString()}</p>
+                    </div>
+                    <TrendingDown className="h-8 w-8 text-red-600" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Net Cash Flow</p>
+                      <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        ${netCashFlow.toLocaleString()}
+                      </p>
+                    </div>
+                    {netCashFlow >= 0 ? 
+                      <TrendingUp className="h-8 w-8 text-green-600" /> : 
+                      <TrendingDown className="h-8 w-8 text-red-600" />
+                    }
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Budget Remaining</p>
+                      <p className="text-2xl font-bold">${(totalBudget - totalSpent).toLocaleString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">of ${totalBudget.toLocaleString()}</p>
+                      <Progress value={(totalSpent / totalBudget) * 100} className="w-16 h-2 mt-1" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+        </TopContent>
+        <ContentWrapper>
         <MainContent>
           <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight mb-2">Spending Breakdown</h2>
-              <p className="text-muted-foreground">Detailed analysis of your spending patterns</p>
-            </div>
-            
-            <SpendingChart transactions={transactions} />
-            
-            <MonthlyChart 
-              transactions={transactions}
-              title="Monthly Spending Trend"
-              type="spending"
-              displayMonths={12}
-            />
+            {/* Cash Flow Breakdown with Tabs */}
+            <CashFlowBreakdown transactions={transactions} />
           </div>
         </MainContent>
         
@@ -57,7 +189,10 @@ export default function SpendingBreakdownPage() {
                   {sortedCategories.map(([category, amount]) => (
                     <div key={category} className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
+                        <div 
+                          className="w-2 h-2 rounded-full" 
+                          style={{ backgroundColor: CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || '#AED6F1' }}
+                        />
                         <span className="text-sm font-medium">{category}</span>
                       </div>
                       <span className="text-sm text-muted-foreground">
@@ -68,8 +203,20 @@ export default function SpendingBreakdownPage() {
                 </div>
               </CardContent>
             </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Use the budget manager above to create and manage your budgets.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </SideContent>
+        </ContentWrapper>
         
       </PageLayout>
     </div>

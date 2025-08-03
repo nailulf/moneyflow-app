@@ -6,6 +6,8 @@ export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(Math.abs(amount))
 }
 
@@ -18,7 +20,7 @@ export function getCategoryBreakdown(transactions: Transaction[]): CategoryData[
   const totalExpenses = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0)
   
   const categoryTotals = expenses.reduce((acc, transaction) => {
-    const category = transaction.category as Category
+    const category = (transaction.category_id || 'Other') as Category
     acc[category] = (acc[category] || 0) + Math.abs(transaction.amount)
     return acc
   }, {} as Record<Category, number>)
@@ -69,8 +71,8 @@ export function getTotalBalance(transactions: Transaction[]): number {
   return transactions.reduce((sum, t) => sum + t.amount, 0)
 }
 
-export function getMonthlySpending(transactions: Transaction[]): number {
-  const currentMonth = new Date()
+export function getMonthlySpending(transactions: Transaction[], currentDate: Date = new Date()): number {
+  const currentMonth = currentDate
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
   
@@ -82,8 +84,8 @@ export function getMonthlySpending(transactions: Transaction[]): number {
     .reduce((sum, t) => sum + t.amount, 0))
 }
 
-export function getMonthlyIncome(transactions: Transaction[]): number {
-  const currentMonth = new Date()
+export function getMonthlyIncome(transactions: Transaction[], currentDate: Date = new Date()): number {
+  const currentMonth = currentDate
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
   

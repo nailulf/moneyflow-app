@@ -1,55 +1,38 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { SummaryCards } from '@/components/SummaryCards'
 import { SpendingChart } from '@/components/SpendingChart'
 import { MonthlyChart } from '@/components/MonthlyChart'
 import { TransactionTable } from '@/components/TransactionTable'
-import { generateMockTransactions } from '@/lib/mock-data'
 import { SpendingNavigation } from '@/components/TopNavigation'
-import { PageLayout, MainContent, SideContent } from '@/components/PageLayout'
-import { AddTransactionForm } from '@/components/AddTransactionForm'
-import { Transaction } from '@/types/database'
-import { TransactionFormData } from '@/lib/validations'
+import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
+import { useTransactionManager } from '@/hooks/use-transaction-manager'
+import { CategoryManager } from '@/components/CategoryManager'
+
 
 export default function SpendingPage() {
+  // Test user ID for development - in production this would come from authentication
+  const TEST_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
+  
   // In a real app, this would come from your database
-  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const { transactions, loadTransactions } = useTransactionManager({
+    userId: TEST_USER_ID
+  })
 
   useEffect(() => {
-    setTransactions(generateMockTransactions(10))
-  }, [])
+    // Load transactions from database or use mock data for development
+    loadTransactions()
+  }, [loadTransactions])
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation />
+      <SpendingNavigation actionButton={<CategoryManager userId={TEST_USER_ID} />} />
       
       <PageLayout>
-        
+        <ContentWrapper>
         <MainContent>
           <div className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight">Overview</h2>
-              <p className="text-sm text-muted-foreground">Your financial dashboard</p>
-            </div>
-            <AddTransactionForm onTransactionAdded={(newTransaction: TransactionFormData) => {
-              // Create a new transaction object
-              const transaction: Transaction = {
-                id: `new-${Date.now()}`,
-                user_id: 'user1',
-                date: newTransaction.date,
-                description: newTransaction.description,
-                amount: newTransaction.amount,
-                category: newTransaction.category,
-                merchant: newTransaction.merchant || null,
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-              }
-              
-              setTransactions(prev => [transaction, ...prev])
-            }} />
-          </div>
             <SpendingChart transactions={transactions} />
             
             <TransactionTable 
@@ -69,16 +52,9 @@ export default function SpendingPage() {
         <SideContent>
           <div className="space-y-4">
             <SummaryCards transactions={transactions} />
-            
-            <MonthlyChart 
-              transactions={transactions} 
-              title="Income Trend"
-              type="income"
-              displayMonths={6}
-            />
           </div>
         </SideContent>
-        
+        </ContentWrapper>
       </PageLayout>
     </div>
   )

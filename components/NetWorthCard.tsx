@@ -17,7 +17,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { mockNetWorthData, mockAssets, type TimePeriod, type AssetType, type NetWorthData } from "@/lib/mock-data"
+import { mockNetWorthData, mockAssets, type TimePeriod } from "@/lib/mock-data"
 
 const timePeriods: { value: TimePeriod; label: string }[] = [
   { value: "1W", label: "1W" },
@@ -179,7 +179,7 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
           {/* Assets Progress Bar */}
           <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
             <div className="h-full flex">
-              {displayAssets.map((asset, index) => (
+              {displayAssets.map((asset) => (
                 <div
                   key={asset.id}
                   className="h-full"
