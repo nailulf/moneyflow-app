@@ -2,13 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { SummaryCards } from '@/components/SummaryCards'
-import { SpendingChart } from '@/components/SpendingChart'
 import { MonthlyChart } from '@/components/MonthlyChart'
-import { AddTransactionForm } from '@/components/AddTransactionForm'
+import NetWorthCard from '@/components/NetWorthCard'
 import { generateMockTransactions } from '@/lib/mock-data'
 import { Transaction } from '@/types/database'
-import { TransactionFormData } from '@/lib/validations'
-import { DashboardNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent } from '@/components/PageLayout'
 
 export default function Home() {
@@ -19,41 +16,16 @@ export default function Home() {
     setTransactions(generateMockTransactions(12))
   }, [])
 
-  const handleTransactionAdded = (newTransaction: TransactionFormData) => {
-    // Create a new transaction object
-    const transaction: Transaction = {
-      id: `new-${Date.now()}`,
-      user_id: 'user1',
-      date: newTransaction.date,
-      description: newTransaction.description,
-      amount: newTransaction.amount,
-      category: newTransaction.category,
-      merchant: newTransaction.merchant || null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-    
-    setTransactions(prev => [transaction, ...prev])
-  }
-
-
-
   return (
     <div className="flex flex-col h-full">
-      <DashboardNavigation />
-      
       <PageLayout>
-        
         <MainContent>
-          <div className="flex items-center justify-between mb-6">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight">Overview</h2>
-              <p className="text-sm text-muted-foreground">Your financial dashboard</p>
-            </div>
-            <AddTransactionForm onTransactionAdded={handleTransactionAdded} />
-          </div>
-          
-          <SummaryCards transactions={transactions} />
+          <NetWorthCard 
+              onAddAssets={() => {
+                // TODO: Implement add assets functionality
+                console.log('Add assets clicked')
+              }}
+            />
           
           <div className="mt-6">
             <MonthlyChart
@@ -66,14 +38,12 @@ export default function Home() {
         </MainContent>
         
         <SideContent>
-          <div className="space-y-4">
+          <div className="space-y-6">            
             <div>
-              <h3 className="text-lg font-medium mb-4">Spending Breakdown</h3>
-              <SpendingChart transactions={transactions} />
+              <SummaryCards transactions={transactions} />
             </div>
           </div>
         </SideContent>
-        
       </PageLayout>
     </div>
   )

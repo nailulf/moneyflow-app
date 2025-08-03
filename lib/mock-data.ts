@@ -149,6 +149,121 @@ export const mockTransactions: Transaction[] = [
 ]
 
 // Generate additional mock data for different months
+// Net Worth Data Types
+export interface NetWorthData {
+  date: string
+  value: number
+}
+
+export type TimePeriod = "1W" | "1M" | "3M" | "YTD" | "1Y" | "3Y" | "5Y"
+
+// Mock Net Worth Data
+export const mockNetWorthData: Record<TimePeriod, NetWorthData[]> = {
+  "1W": [
+    { date: "Mon", value: 98500 },
+    { date: "Tue", value: 99200 },
+    { date: "Wed", value: 98800 },
+    { date: "Thu", value: 100100 },
+    { date: "Fri", value: 101500 },
+    { date: "Sat", value: 102000 },
+    { date: "Sun", value: 102300 },
+  ],
+  "1M": [
+    { date: "Week 1", value: 95000 },
+    { date: "Week 2", value: 97500 },
+    { date: "Week 3", value: 99800 },
+    { date: "Week 4", value: 102300 },
+  ],
+  "3M": [
+    { date: "Jan", value: 85000 },
+    { date: "Feb", value: 92000 },
+    { date: "Mar", value: 102300 },
+  ],
+  "YTD": [
+    { date: "Jan", value: 85000 },
+    { date: "Feb", value: 92000 },
+    { date: "Mar", value: 102300 },
+  ],
+  "1Y": [
+    { date: "Q1", value: 75000 },
+    { date: "Q2", value: 82000 },
+    { date: "Q3", value: 95000 },
+    { date: "Q4", value: 102300 },
+  ],
+  "3Y": [
+    { date: "2022", value: 45000 },
+    { date: "2023", value: 68000 },
+    { date: "2024", value: 102300 },
+  ],
+  "5Y": [
+    { date: "2020", value: 25000 },
+    { date: "2021", value: 35000 },
+    { date: "2022", value: 45000 },
+    { date: "2023", value: 68000 },
+    { date: "2024", value: 102300 },
+  ],
+}
+
+// Asset Types
+export interface AssetType {
+  id: string
+  name: string
+  value: number
+  percentage: number
+  color: string
+  change: number
+  changePercentage: number
+}
+
+// Mock Assets Data
+export const mockAssets: AssetType[] = [
+  {
+    id: "1",
+    name: "Stocks & ETFs",
+    value: 45000,
+    percentage: 44,
+    color: "#10b981",
+    change: 2500,
+    changePercentage: 5.9,
+  },
+  {
+    id: "2",
+    name: "Real Estate",
+    value: 35000,
+    percentage: 34,
+    color: "#3b82f6",
+    change: 1200,
+    changePercentage: 3.6,
+  },
+  {
+    id: "3",
+    name: "Cash & Savings",
+    value: 12000,
+    percentage: 12,
+    color: "#8b5cf6",
+    change: -300,
+    changePercentage: -2.4,
+  },
+  {
+    id: "4",
+    name: "Cryptocurrency",
+    value: 8000,
+    percentage: 8,
+    color: "#f59e0b",
+    change: 800,
+    changePercentage: 11.1,
+  },
+  {
+    id: "5",
+    name: "Bonds",
+    value: 2300,
+    percentage: 2,
+    color: "#ef4444",
+    change: 100,
+    changePercentage: 4.5,
+  },
+]
+
 export const generateMockTransactions = (months: number = 10): Transaction[] => {
   const transactions: Transaction[] = [...mockTransactions]
   const categories = CATEGORIES.filter(cat => cat !== 'Income')

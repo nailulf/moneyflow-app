@@ -10,7 +10,11 @@ interface PageLayoutProps {
 export function PageLayout({ children, className }: PageLayoutProps) {
   return (
     <div className={cn(
-      "flex-1 p-0 flex justify-center", // Center content horizontally
+      "p-0",
+      // Grid layout for small screens (mobile-first)
+      "grid grid-cols-1 gap-4 justify-items-center",
+      // Flexbox layout for larger screens
+      "sm:flex sm:justify-center",
       className
     )}>
         {children}
@@ -23,9 +27,12 @@ export function PageLayout({ children, className }: PageLayoutProps) {
 export function MainContent({ children, className }: { children: React.ReactNode, className?: string }) {
   return (
     <div className={cn(
-      "w-full sm:w-[60%] md:w-[55%] lg:w-[50%]", // 40-60% of display width, responsive
-      "min-w-[60%] max-w-[70%]", // Enforce min/max constraints
-      "p-2 md:p-4 lg:p-8", // Add padding for content spacing
+      // Grid layout for small screens - takes 1 grid row, appears after SideContent
+      "w-full order-2",
+      // Flexbox layout for larger screens
+      "sm:w-[80%] md:w-[80%] lg:w-[80%] sm:order-none",
+      "sm:min-w-[60%] sm:max-w-[80%]", // Enforce min/max constraints on larger screens
+      "p-0 md:p-2 lg:p-4", // Add padding for content spacing
       className
     )}>
       {children}
@@ -36,9 +43,12 @@ export function MainContent({ children, className }: { children: React.ReactNode
 export function SideContent({ children, className }: { children: React.ReactNode, className?: string }) {
   return (
     <div className={cn(
-      "w-full sm:w-[30%] md:w-[25%] lg:w-[20%]", // 20-30% of display width, responsive
-      "min-w-[30%] max-w-[40%]", // Enforce min/max constraints
-      "p-2 md:p-4 lg:p-8", // Add padding for content spacing
+      // Grid layout for small screens - takes max 2 grid rows, appears at top
+      "w-full order-1 grid-rows-[max-content]",
+      // Flexbox layout for larger screens
+      "sm:w-[30%] md:w-[25%] lg:w-[20%] sm:order-none",
+      "sm:min-w-[30%] sm:max-w-[40%]", // Enforce min/max constraints on larger screens
+      "p-0 md:p-2 lg:p-4", // Add padding for content spacing
       className
     )}>
       {children}
