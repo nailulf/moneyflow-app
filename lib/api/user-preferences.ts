@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 import { UserPreference } from '@/types/database'
 
 // Get a specific user preference
@@ -6,7 +6,7 @@ export async function getUserPreference<T = unknown>(
   userId: string, 
   key: string
 ): Promise<T | null> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('user_preferences')
     .select('preference_value')
     .eq('user_id', userId)
@@ -27,7 +27,7 @@ export async function getUserPreference<T = unknown>(
 
 // Get all user preferences
 export async function getAllUserPreferences(userId: string): Promise<Record<string, unknown>> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('user_preferences')
     .select('preference_key, preference_value')
     .eq('user_id', userId)
@@ -38,7 +38,7 @@ export async function getAllUserPreferences(userId: string): Promise<Record<stri
   }
 
   const preferences: Record<string, unknown> = {}
-  data?.forEach(pref => {
+  data?.forEach((pref: { preference_key: string; preference_value: unknown }) => {
     preferences[pref.preference_key] = pref.preference_value
   })
 
@@ -51,15 +51,13 @@ export async function setUserPreference<T = unknown>(
   key: string,
   value: T
 ): Promise<UserPreference> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from('user_preferences')
     .upsert({
       user_id: userId,
       preference_key: key,
       preference_value: value,
       updated_at: new Date().toISOString()
-    }, {
-      onConflict: 'user_id,preference_key'
     })
     .select()
     .single()
@@ -74,7 +72,7 @@ export async function setUserPreference<T = unknown>(
 
 // Delete a user preference
 export async function deleteUserPreference(userId: string, key: string): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabaseClient()
     .from('user_preferences')
     .delete()
     .eq('user_id', userId)

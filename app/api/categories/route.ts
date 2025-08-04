@@ -10,6 +10,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
+    // Check if we're in build time
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    }
+
     const supabase = createServerComponentClient()
     const { data, error } = await supabase
       .from('categories')
@@ -37,6 +42,11 @@ export async function POST(request: NextRequest) {
 
     if (!user_id || !name || !group_type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Check if we're in build time
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
     }
 
     const supabase = createServerComponentClient()
@@ -76,6 +86,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Category ID is required' }, { status: 400 })
     }
 
+    // Check if we're in build time
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    }
+
     const supabase = createServerComponentClient()
     const { data, error } = await supabase
       .from('categories')
@@ -106,6 +121,11 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: 'Category ID is required' }, { status: 400 })
+    }
+
+    // Check if we're in build time
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
     }
 
     const supabase = createServerComponentClient()
