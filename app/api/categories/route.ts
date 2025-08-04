@@ -1,18 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { Database } from '@/types/database'
-
-// Create a service role client that bypasses RLS
-const supabaseAdmin = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
+import { createServerComponentClient } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,7 +10,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const { data, error } = await supabaseAdmin
+    const supabase = createServerComponentClient()
+    const { data, error } = await supabase
       .from('categories')
       .select('*')
       .eq('user_id', userId)
@@ -51,7 +39,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const { data, error } = await supabaseAdmin
+    const supabase = createServerComponentClient()
+    const { data, error } = await supabase
       .from('categories')
       .insert({
         user_id,
@@ -87,7 +76,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Category ID is required' }, { status: 400 })
     }
 
-    const { data, error } = await supabaseAdmin
+    const supabase = createServerComponentClient()
+    const { data, error } = await supabase
       .from('categories')
       .update({
         ...updates,
@@ -118,7 +108,8 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Category ID is required' }, { status: 400 })
     }
 
-    const { error } = await supabaseAdmin
+    const supabase = createServerComponentClient()
+    const { error } = await supabase
       .from('categories')
       .update({
         is_active: false,

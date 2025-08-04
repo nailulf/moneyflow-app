@@ -54,12 +54,6 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
   const chartData = mockNetWorthData[selectedPeriod] || fallbackData
   const displayAssets = mockAssets.slice(0, 5)
   
-  // Debug logging
-  console.log('Selected period:', selectedPeriod)
-  console.log('Chart data:', chartData)
-  console.log('Chart data length:', chartData.length)
-  console.log('Mock data available:', !!mockNetWorthData[selectedPeriod])
-  
   // Calculate dynamic values based on selected period
   const currentNetWorth = chartData[chartData.length - 1]?.value || 0
   const previousNetWorth = chartData[0]?.value || 0
