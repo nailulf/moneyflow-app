@@ -8,8 +8,8 @@ export interface Database {
           date: string
           description: string
           amount: number
-          type: 'INCOME' | 'EXPENSE'
-          category_id: string | null
+          type: 'INCOME' | 'EXPENSE' | 'TRANSFER'
+          category_id: string
           merchant: string | null
           notes: string | null
           tags: string[] | null
@@ -22,8 +22,8 @@ export interface Database {
           date: string
           description: string
           amount: number
-          type: 'INCOME' | 'EXPENSE'
-          category_id?: string | null
+          type: 'INCOME' | 'EXPENSE' | 'TRANSFER'
+          category_id?: string
           merchant?: string | null
           notes?: string | null
           tags?: string[] | null
@@ -36,8 +36,8 @@ export interface Database {
           date?: string
           description?: string
           amount?: number
-          type?: 'INCOME' | 'EXPENSE'
-          category_id?: string | null
+          type?: 'INCOME' | 'EXPENSE' | 'TRANSFER'
+          category_id?: string
           merchant?: string | null
           notes?: string | null
           tags?: string[] | null
@@ -79,13 +79,54 @@ export interface Database {
           created_at?: string
         }
       }
+      category_groups: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          type: 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM'
+          color: string
+          icon: string | null
+          is_default: boolean
+          is_active: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          type: 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM'
+          color?: string
+          icon?: string | null
+          is_default?: boolean
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          type?: 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM'
+          color?: string
+          icon?: string | null
+          is_default?: boolean
+          is_active?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+      }
       categories: {
         Row: {
           id: string
           user_id: string
           name: string
           color: string
-          group_type: 'EXPENSE' | 'INCOME'
+          group_type: 'EXPENSE' | 'INCOME' | 'TRANSFER'
+          category_group_id: string
           is_custom: boolean
           is_active: boolean
           created_at: string
@@ -96,7 +137,8 @@ export interface Database {
           user_id: string
           name: string
           color: string
-          group_type: 'EXPENSE' | 'INCOME'
+          group_type?: 'EXPENSE' | 'INCOME' | 'TRANSFER'
+          category_group_id?: string
           is_custom?: boolean
           is_active?: boolean
           created_at?: string
@@ -107,7 +149,8 @@ export interface Database {
           user_id?: string
           name?: string
           color?: string
-          group_type?: 'EXPENSE' | 'INCOME'
+          group_type?: 'EXPENSE' | 'INCOME' | 'TRANSFER'
+          category_group_id?: string | null
           is_custom?: boolean
           is_active?: boolean
           updated_at?: string
@@ -149,6 +192,10 @@ export type TransactionUpdate = Database['public']['Tables']['transactions']['Up
 export type UploadedFile = Database['public']['Tables']['uploaded_files']['Row']
 export type UploadedFileInsert = Database['public']['Tables']['uploaded_files']['Insert']
 export type UploadedFileUpdate = Database['public']['Tables']['uploaded_files']['Update']
+
+export type CategoryGroupDB = Database['public']['Tables']['category_groups']['Row']
+export type CategoryGroupInsert = Database['public']['Tables']['category_groups']['Insert']
+export type CategoryGroupUpdate = Database['public']['Tables']['category_groups']['Update']
 
 export type CategoryDB = Database['public']['Tables']['categories']['Row']
 export type CategoryInsert = Database['public']['Tables']['categories']['Insert']

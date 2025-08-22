@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS categories (
   user_id UUID NOT NULL,
   name TEXT NOT NULL,
   color TEXT NOT NULL DEFAULT '#6B7280',
-  group_type TEXT NOT NULL CHECK (group_type IN ('EXPENSE', 'INCOME')),
+  group_type TEXT NOT NULL CHECK (group_type IN ('EXPENSE', 'INCOME', 'TRANSFER')),
   is_custom BOOLEAN NOT NULL DEFAULT true,
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

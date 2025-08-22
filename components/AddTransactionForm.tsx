@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { transactionSchema, TransactionFormData } from '@/lib/validations'
-import { CATEGORIES, Category } from '@/types/app'
+// Removed fallback CATEGORIES to ensure only valid user categories (with IDs) are selectable
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -12,8 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useCategories } from '@/contexts/CategoryContext'
 
 interface AddTransactionFormProps {
+  userId: string
   onTransactionAdded?: (transaction: TransactionFormData) => void
 }
 
@@ -21,6 +23,26 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentDate, setCurrentDate] = useState('')
+  const [isAnySelectOpen, setIsAnySelectOpen] = useState(false)
+  const [suppressCloseUntil, setSuppressCloseUntil] = useState(0)
+
+  // Load user categories from shared context
+  const { categories, loading: categoriesLoading } = useCategories()
+  
+  // Group categories by type for display
+  const categoryGroups = categories.reduce((groups, category) => {
+    const groupType = category.group_type || 'EXPENSE'
+    const existingGroup = groups.find(g => g.type === groupType)
+    if (existingGroup) {
+      existingGroup.categories.push(category)
+    } else {
+      groups.push({
+        type: groupType,
+        categories: [category]
+      })
+    }
+    return groups
+  }, [] as Array<{ type: string; categories: typeof categories }>)
 
   useEffect(() => {
     setCurrentDate(new Date().toISOString().split('T')[0])
@@ -39,7 +61,8 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
       date: currentDate,
       description: '',
       amount: 0,
-      category_id: null,
+      type: 'EXPENSE',
+      category_id: '',
       merchant: ''
     }
   })
@@ -50,16 +73,24 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
     }
   }, [currentDate, setValue])
 
+  const selectedType = watch('type')
   const selectedCategoryId = watch('category_id')
+
+  // Reset category when type changes
+  useEffect(() => {
+    setValue('category_id', '')
+  }, [selectedType, setValue])
 
   const onSubmit = async (data: TransactionFormData) => {
     setIsSubmitting(true)
     try {
-      // Here you would normally save to database
-      // For now, we'll just simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      onTransactionAdded?.(data)
+      // If an external handler is provided, await it (it may call an API)
+      if (onTransactionAdded) {
+        await onTransactionAdded(data)
+      } else {
+        // Otherwise, simulate a short delay
+        await new Promise(resolve => setTimeout(resolve, 300))
+      }
       toast.success('Transaction added successfully!')
       reset()
       setOpen(false)
@@ -70,15 +101,90 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
     }
   }
 
+  // Derive categories based on selected type
+  const groupForType = categoryGroups.find(g => g.type === (selectedType || 'EXPENSE'))
+  const dynamicCategoryItems = groupForType?.categories ?? []
+  const hasDynamicCategories = dynamicCategoryItems.length > 0
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next: boolean) => {
+        const suppressed = suppressCloseUntil > Date.now()
+        if (!next && (isAnySelectOpen || suppressed)) return
+        setOpen(next)
+      }}
+    >
       <DialogTrigger asChild>
-        <Button className="gap-2">
+        <Button className="gap-2" data-testid="add-transaction-trigger">
           <Plus className="h-4 w-4" />
           Add Transaction
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-white">
+      <DialogContent
+        className="sm:max-w-md bg-white"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onInteractOutside={(event: any) => {
+          const suppressed = suppressCloseUntil > Date.now()
+          if (isAnySelectOpen || suppressed) {
+            event.preventDefault()
+            return
+          }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const orig = (event as any).detail?.originalEvent as Event | undefined
+          const target = (orig?.target ?? event.target) as HTMLElement | null
+          if (
+            target && (
+              target.closest('[data-slot^="select-"]') ||
+              target.closest('[role="listbox"]') ||
+              target.closest('[role="option"]')
+            )
+          ) {
+            event.preventDefault()
+          }
+        }}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onPointerDownOutside={(event: any) => {
+          const suppressed = suppressCloseUntil > Date.now()
+          if (isAnySelectOpen || suppressed) {
+            event.preventDefault()
+            return
+          }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const orig = (event as any).detail?.originalEvent as Event | undefined
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const target = (orig?.target ?? (event as any).target) as HTMLElement | null
+          if (
+            target && (
+              target.closest('[data-slot^="select-"]') ||
+              target.closest('[role="listbox"]') ||
+              target.closest('[role="option"]')
+            )
+          ) {
+            event.preventDefault()
+          }
+        }}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onFocusOutside={(event: any) => {
+          const suppressed = suppressCloseUntil > Date.now()
+          if (isAnySelectOpen || suppressed) {
+            event.preventDefault()
+            return
+          }
+           // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const orig = (event as any).detail?.originalEvent as Event | undefined
+          const target = (orig?.target ?? event.target) as HTMLElement | null
+          if (
+            target && (
+              target.closest('[data-slot^=\"select-\"]') ||
+              target.closest('[role=\"listbox\"]') ||
+              target.closest('[role=\"option\"]')
+            )
+          ) {
+            event.preventDefault()
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Add New Transaction</DialogTitle>
         </DialogHeader>
@@ -125,20 +231,55 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Category</label>
+            <label className="text-sm font-medium">Type</label>
             <Select
-                value={selectedCategoryId || undefined}
-                onValueChange={(value) => setValue('category_id', value as Category)}
-              >
-              <SelectTrigger className={errors.category_id ? 'border-red-500' : ''}>
-                <SelectValue placeholder="Select category" />
+              value={selectedType}
+              onValueChange={(value: string) => {
+                setSuppressCloseUntil(Date.now() + 500)
+                setValue('type', value as 'INCOME' | 'EXPENSE' | 'TRANSFER')
+              }}
+              onOpenChange={setIsAnySelectOpen}
+            >
+              <SelectTrigger className={errors.type ? 'border-red-500' : ''} data-testid="type-select-trigger">
+                <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
+                <SelectItem value="EXPENSE" data-testid="type-option-EXPENSE">Expense</SelectItem>
+                <SelectItem value="INCOME" data-testid="type-option-INCOME">Income</SelectItem>
+                <SelectItem value="TRANSFER" data-testid="type-option-TRANSFER">Transfer</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.type && (
+              <p className="text-sm text-red-500">{errors.type.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Category</label>
+            <Select
+              value={(selectedCategoryId as string) || undefined}
+              onValueChange={(value) => {
+                setSuppressCloseUntil(Date.now() + 500)
+                setValue('category_id', value)
+              }}
+              disabled={categoriesLoading}
+              onOpenChange={setIsAnySelectOpen}
+            >
+              <SelectTrigger className={errors.category_id ? 'border-red-500' : ''} data-testid="category-select-trigger">
+                <SelectValue placeholder={categoriesLoading ? 'Loading...' : 'Select category'} />
+              </SelectTrigger>
+              <SelectContent>
+                {hasDynamicCategories ? (
+                  dynamicCategoryItems.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id} data-testid={`category-option-${cat.id}`}>
+                      {cat.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1.5 text-sm text-gray-500">
+                    No categories available for this type
+                  </div>
+                )}
               </SelectContent>
             </Select>
             {errors.category_id && (

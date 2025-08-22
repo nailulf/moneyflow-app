@@ -14,27 +14,43 @@ export const CATEGORIES = [
 export type Category = typeof CATEGORIES[number]
 
 // Category Group Types for new CategoryManager
-export type CategoryGroup = 'EXPENSE' | 'INCOME'
+export type CategoryGroupType = 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM'
+export type CategoryGroup = 'EXPENSE' | 'INCOME' | 'TRANSFER' // Keep for backward compatibility
 
 export interface CategoryGroupData {
-  id: CategoryGroup
+  id: string
   name: string
+  type: CategoryGroupType
+  color: string
+  icon?: string | null
+  isDefault: boolean
+  isActive: boolean
+  sortOrder: number
   categories: CategoryItem[]
 }
 
 export interface CategoryItem {
   id: string
-  name: Category
+  name: string // Changed from Category to string to support custom names
   color: string
-  group: CategoryGroup
+  groupType: CategoryGroupType
+  categoryGroupId?: string | null
   isCustom?: boolean
 }
 
-// Helper function to get categories by group
-export function getCategoriesByGroup(groupId: CategoryGroup): Category[] {
+// Helper function to get categories by group (updated for new structure)
+export function getCategoriesByGroup(groups: CategoryGroupData[], groupType: CategoryGroupType): CategoryItem[] {
+  return groups
+    .filter(group => group.type === groupType && group.isActive)
+    .flatMap(group => group.categories)
+}
+
+// Helper function to get default categories by legacy group type
+export function getDefaultCategoriesByGroup(groupId: CategoryGroup): Category[] {
   if (groupId === 'INCOME') {
     return ['Income']
   }
+  // Default app constants currently don't include transfer-specific names; UI will source user categories
   return CATEGORIES.filter(cat => cat !== 'Income')
 }
 

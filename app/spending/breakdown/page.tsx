@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import React from 'react'
 import { CashFlowBreakdown } from '@/components/CashFlowBreakdown'
 import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, TopContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useTransactionManager } from '@/hooks/use-transaction-manager'
-import { CategoryManager } from '@/components/CategoryManager'
+import { useTransactions } from '@/contexts/TransactionContext'
+
 import { useBudgetManager } from '@/hooks/use-budget-manager'
 // Simple progress component inline
 const Progress = ({ value = 0, className = '' }: { value?: number; className?: string }) => {
@@ -22,6 +22,7 @@ const Progress = ({ value = 0, className = '' }: { value?: number; className?: s
 }
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { CATEGORY_COLORS } from '@/types/app'
+import { CategoryManager } from '@/components/CategoryManager'
 
 // Mock budget data
 interface BudgetCategory {
@@ -58,20 +59,13 @@ const mockBudgets: Budget[] = [
 
 export default function BudgetingBreakdownPage() {
   // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
+  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID || 'test-user-123'
   
   const { 
     selectedBudget
   } = useBudgetManager({ initialBudgets: mockBudgets })
   
-  const { transactions, loadTransactions } = useTransactionManager({
-    userId: TEST_USER_ID
-  })
-  
-  // Initialize with mock data on client side only
-  useEffect(() => {
-    loadTransactions()
-  }, [loadTransactions])
+  const { transactions } = useTransactions()
   
   const displayTransactions = transactions
 

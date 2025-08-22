@@ -3,9 +3,11 @@ import { z } from 'zod'
 export const transactionFormSchema = z.object({
   date: z.string().min(1, 'Date is required'),
   description: z.string().min(1, 'Description is required'),
-  amount: z.number().positive('Amount must be positive'),
-  type: z.enum(['INCOME', 'EXPENSE']),
-  category_id: z.string().optional().nullable(),
+  amount: z
+    .number()
+    .refine((v) => v !== 0, 'Amount must not be zero'),
+  type: z.enum(['INCOME', 'EXPENSE', 'TRANSFER']),
+  category_id: z.string().min(1, 'Category is required'),
   merchant: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   tags: z.array(z.string()).optional().nullable(),

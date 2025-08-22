@@ -1,18 +1,54 @@
 import { Transaction, TransactionInsert, TransactionUpdate } from '@/types/database'
 
+// Request deduplication cache
+const requestCache = new Map<string, Promise<Transaction[]>>()
+const dataCache = new Map<string, { data: Transaction[], timestamp: number }>()
+const CACHE_DURATION = 30000 // 30 seconds
+
 /**
- * Fetch all transactions for a user
+ * Fetch all transactions for a user with deduplication and caching
  */
 export async function getUserTransactions(userId: string): Promise<Transaction[]> {
-  const response = await fetch(`/api/transactions?userId=${userId}`)
+  const cacheKey = `transactions-${userId}`
   
-  if (!response.ok) {
-    const error = await response.json()
-    console.error('Error fetching transactions:', error)
-    throw new Error('Failed to fetch transactions')
+  // Check data cache first
+  const cached = dataCache.get(cacheKey)
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data
   }
+  
+  // Check if request is already in progress
+  if (requestCache.has(cacheKey)) {
+    return requestCache.get(cacheKey)!
+  }
+  
+  // Create new request
+  const requestPromise = (async () => {
+    try {
+      const response = await fetch(`/api/transactions?userId=${userId}`)
+      
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('Error fetching transactions:', error)
+        throw new Error('Failed to fetch transactions')
+      }
 
-  return await response.json()
+      const data = await response.json()
+      
+      // Cache the result
+      dataCache.set(cacheKey, { data, timestamp: Date.now() })
+      
+      return data
+    } finally {
+      // Remove from request cache when done
+      requestCache.delete(cacheKey)
+    }
+  })()
+  
+  // Store the promise to prevent duplicate requests
+  requestCache.set(cacheKey, requestPromise)
+  
+  return requestPromise
 }
 
 /**
@@ -146,21 +182,23 @@ export async function getTransactionStats(userId: string, startDate?: string, en
 
   const data: Transaction[] = await response.json()
 
-  const stats = data.reduce(
-    (acc: { totalIncome: number; totalExpense: number }, transaction: Transaction) => {
-      if (transaction.type === 'INCOME') {
-        acc.totalIncome += transaction.amount
-      } else {
-        acc.totalExpense += transaction.amount
-      }
-      return acc
-    },
-    { totalIncome: 0, totalExpense: 0 }
+  // Exclude TRANSFER transactions from stats
+  const relevant = data.filter(t => t.type !== 'TRANSFER')
+
+  const totalIncome = relevant
+    .filter(t => t.type === 'INCOME' && t.amount > 0)
+    .reduce((sum, t) => sum + t.amount, 0)
+
+  const totalExpense = Math.abs(
+    relevant
+      .filter(t => t.type === 'EXPENSE' && t.amount < 0)
+      .reduce((sum, t) => sum + t.amount, 0)
   )
 
   return {
-    ...stats,
-    netAmount: stats.totalIncome - stats.totalExpense,
-    transactionCount: data.length
+    totalIncome,
+    totalExpense,
+    netAmount: totalIncome - totalExpense,
+    transactionCount: relevant.length
   }
 }

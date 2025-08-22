@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   date DATE NOT NULL,
   description TEXT NOT NULL,
   amount DECIMAL(12,2) NOT NULL,
-  type TEXT NOT NULL CHECK (type IN ('INCOME', 'EXPENSE')),
+  type TEXT NOT NULL CHECK (type IN ('INCOME', 'EXPENSE', 'TRANSFER')),
   category_id UUID,
   merchant TEXT,
   notes TEXT,
@@ -65,7 +65,7 @@ BEGIN
   SELECT 
     COALESCE(SUM(CASE WHEN t.type = 'INCOME' THEN t.amount ELSE 0 END), 0) as total_income,
     COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0) as total_expense,
-    COALESCE(SUM(CASE WHEN t.type = 'INCOME' THEN t.amount ELSE -t.amount END), 0) as net_amount,
+    COALESCE(SUM(CASE WHEN t.type = 'INCOME' THEN t.amount WHEN t.type = 'EXPENSE' THEN -t.amount ELSE 0 END), 0) as net_amount,
     COUNT(*) as transaction_count
   FROM transactions t
   WHERE t.user_id = user_uuid

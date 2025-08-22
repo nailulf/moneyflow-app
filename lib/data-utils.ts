@@ -3,9 +3,9 @@ import { CategoryData, MonthlyData, CATEGORY_COLORS, Category } from '@/types/ap
 import { format, parseISO, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths } from 'date-fns'
 
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('id-ID', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'IDR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(Math.abs(amount))
@@ -16,7 +16,7 @@ export function formatDate(dateString: string): string {
 }
 
 export function getCategoryBreakdown(transactions: Transaction[]): CategoryData[] {
-  const expenses = transactions.filter(t => t.amount < 0)
+  const expenses = transactions.filter(t => t.type === 'EXPENSE' && t.amount < 0)
   const totalExpenses = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0)
   
   const categoryTotals = expenses.reduce((acc, transaction) => {
@@ -51,11 +51,11 @@ export function getMonthlyData(transactions: Transaction[], months: number = 10)
     })
     
     const income = monthTransactions
-      .filter(t => t.amount > 0)
+      .filter(t => t.type === 'INCOME' && t.amount > 0)
       .reduce((sum, t) => sum + t.amount, 0)
     
     const expenses = Math.abs(monthTransactions
-      .filter(t => t.amount < 0)
+      .filter(t => t.type === 'EXPENSE' && t.amount < 0)
       .reduce((sum, t) => sum + t.amount, 0))
     
     return {
@@ -79,7 +79,7 @@ export function getMonthlySpending(transactions: Transaction[], currentDate: Dat
   return Math.abs(transactions
     .filter(t => {
       const transactionDate = parseISO(t.date)
-      return transactionDate >= monthStart && transactionDate <= monthEnd && t.amount < 0
+      return transactionDate >= monthStart && transactionDate <= monthEnd && t.type === 'EXPENSE' && t.amount < 0
     })
     .reduce((sum, t) => sum + t.amount, 0))
 }
@@ -92,7 +92,7 @@ export function getMonthlyIncome(transactions: Transaction[], currentDate: Date 
   return transactions
     .filter(t => {
       const transactionDate = parseISO(t.date)
-      return transactionDate >= monthStart && transactionDate <= monthEnd && t.amount > 0
+      return transactionDate >= monthStart && transactionDate <= monthEnd && t.type === 'INCOME' && t.amount > 0
     })
     .reduce((sum, t) => sum + t.amount, 0)
 }

@@ -1,33 +1,30 @@
 'use client'
 
-import { useEffect } from 'react'
+import React from 'react'
 import { SummaryCards } from '@/components/SummaryCards'
 import { SpendingChart } from '@/components/SpendingChart'
 import { MonthlyChart } from '@/components/MonthlyChart'
 import { TransactionTable } from '@/components/TransactionTable'
 import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
-import { useTransactionManager } from '@/hooks/use-transaction-manager'
+import { useTransactions } from '@/contexts/TransactionContext'
+
+
 import { CategoryManager } from '@/components/CategoryManager'
 
 
 export default function SpendingPage() {
   // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = '550e8400-e29b-41d4-a716-446655440000'
+  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID || 'test-user-123'
   
-  // In a real app, this would come from your database
-  const { transactions, loadTransactions } = useTransactionManager({
-    userId: TEST_USER_ID
-  })
-
-  useEffect(() => {
-    // Load transactions from database or use mock data for development
-    loadTransactions()
-  }, [loadTransactions])
+  // Use shared transaction context
+  const { transactions } = useTransactions()
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation actionButton={<CategoryManager userId={TEST_USER_ID} />} />
+      <SpendingNavigation actionButton={
+        <CategoryManager userId={TEST_USER_ID} />
+      } />
       
       <PageLayout>
         <ContentWrapper>
@@ -37,7 +34,9 @@ export default function SpendingPage() {
             
             <TransactionTable 
               transactions={transactions} 
-              limit={8} 
+              limit={8}
+              userId={TEST_USER_ID}
+              enableSelfManagement={true}
             />
             
             <MonthlyChart 
@@ -56,6 +55,8 @@ export default function SpendingPage() {
         </SideContent>
         </ContentWrapper>
       </PageLayout>
+      
+
     </div>
   )
 }
