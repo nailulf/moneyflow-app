@@ -24,10 +24,10 @@ This document provides a comprehensive analysis of the authentication and user c
 
 #### Current Implementation Problems:
 
-**Hardcoded User ID Usage**:
+**Environment-based User ID Usage**:
 ```typescript
 // Found in multiple pages:
-const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID || 'test-user-123'
+const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
 ```
 
 **Missing Authentication Context**:

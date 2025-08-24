@@ -138,7 +138,7 @@ async function setupDatabase() {
     // Initialize default category groups for test user
     if (tableStatus.category_groups) {
       console.log('\n🔧 Checking default category groups for test user...');
-      const testUserId = envVars.NEXT_PUBLIC_TEST_USER_ID || 'test-user-123';
+      const testUserId = envVars.NEXT_PUBLIC_TEST_USER_ID;
       
       const { data: existingGroups, error: groupsError } = await supabase
         .from('category_groups')

@@ -14,7 +14,7 @@ envContent.split('\n').forEach(line => {
 });
 
 const BASE_URL = 'http://localhost:3000';
-const USER_ID = envVars.NEXT_PUBLIC_TEST_USER_ID || 'test-user-123';
+const USER_ID = envVars.NEXT_PUBLIC_TEST_USER_ID;
 
 async function testAPI() {
   console.log('🧪 Testing API endpoints...');

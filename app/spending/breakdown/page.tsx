@@ -59,7 +59,7 @@ const mockBudgets: Budget[] = [
 
 export default function BudgetingBreakdownPage() {
   // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID || 'test-user-123'
+  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
   
   const { 
     selectedBudget

@@ -12,7 +12,7 @@ import { CategoryManager } from '@/components/CategoryManager'
 
 export default function SpendingTransactionPage() {
   // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID || 'test-user-123'
+  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
   
   // Use shared transaction context
   const { transactions, addTransaction } = useTransactions()
