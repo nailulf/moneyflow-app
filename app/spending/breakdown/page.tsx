@@ -6,7 +6,7 @@ import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, TopContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTransactions } from '@/contexts/TransactionContext'
-import { getMonthlySpending, getMonthlyIncome, getCategoryBreakdown } from '@/lib/data-utils'
+import { getMonthlySpending, getMonthlyIncome, getCategoryBreakdown, formatCurrency } from '@/lib/data-utils'
 import { useBudgetManager } from '@/hooks/use-budget-manager'
 // Simple progress component inline
 const Progress = ({ value = 0, className = '' }: { value?: number; className?: string }) => {
@@ -107,7 +107,7 @@ export default function BudgetingBreakdownPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Monthly Income</p>
-                      <p className="text-2xl font-bold text-green-600">${monthlyIncome.toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-green-600">{formatCurrency(monthlyIncome)}</p>
                     </div>
                     <TrendingUp className="h-8 w-8 text-green-600" />
                   </div>
@@ -119,7 +119,7 @@ export default function BudgetingBreakdownPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Monthly Expenses</p>
-                      <p className="text-2xl font-bold text-red-600">${monthlySpending.toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-red-600">{formatCurrency(monthlySpending)}</p>
                     </div>
                     <TrendingDown className="h-8 w-8 text-red-600" />
                   </div>
@@ -132,7 +132,7 @@ export default function BudgetingBreakdownPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">Monthly Net Cash Flow</p>
                       <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        ${netCashFlow.toLocaleString()}
+                        {formatCurrency(netCashFlow)}
                       </p>
                     </div>
                     {netCashFlow >= 0 ? 
@@ -148,10 +148,10 @@ export default function BudgetingBreakdownPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Budget Remaining</p>
-                      <p className="text-2xl font-bold">${(totalBudget - totalSpent).toLocaleString()}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(totalBudget - totalSpent)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-muted-foreground">of ${totalBudget.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">of {formatCurrency(totalBudget)}</p>
                       <Progress value={(totalSpent / totalBudget) * 100} className="w-16 h-2 mt-1" />
                     </div>
                   </div>
