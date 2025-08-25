@@ -6,7 +6,7 @@ import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, TopContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTransactions } from '@/contexts/TransactionContext'
-
+import { getMonthlySpending, getMonthlyIncome, getCategoryBreakdown } from '@/lib/data-utils'
 import { useBudgetManager } from '@/hooks/use-budget-manager'
 // Simple progress component inline
 const Progress = ({ value = 0, className = '' }: { value?: number; className?: string }) => {
@@ -65,29 +65,25 @@ export default function BudgetingBreakdownPage() {
     selectedBudget
   } = useBudgetManager({ initialBudgets: mockBudgets })
   
-  const { transactions } = useTransactions()
+  const { transactions, loading, error } = useTransactions()
   
   const displayTransactions = transactions
 
-  // Calculate category breakdown from transactions
-  const categoryBreakdown = displayTransactions.reduce((acc, transaction) => {
-    if (transaction.type === 'EXPENSE') { // Only expenses
-      // For now, use a fallback category name since we don't have category lookup yet
-      const category = transaction.category_id || 'Uncategorized'
-      acc[category] = (acc[category] || 0) + transaction.amount
-    }
-    return acc
-  }, {} as Record<string, number>)
+  // Calculate monthly financial metrics
+  const currentDate = new Date()
+  const monthlyIncome = getMonthlyIncome(displayTransactions, currentDate)
+  const monthlySpending = getMonthlySpending(displayTransactions, currentDate)
+  const netCashFlow = monthlyIncome - monthlySpending
 
-  const sortedCategories = Object.entries(categoryBreakdown)
-    .sort(([,a], [,b]) => b - a)
+  // Calculate category breakdown for the current month
+  const categoryBreakdownData = getCategoryBreakdown(displayTransactions)
+  const sortedCategories = categoryBreakdownData
     .slice(0, 10)
+    .map(item => [item.category, item.amount] as [string, number])
 
   // Calculate budget overview
   const totalBudget = selectedBudget?.totalAmount || 0
   const totalSpent = selectedBudget?.categories.reduce((sum, cat) => sum + cat.spentAmount, 0) || 0
-  const totalIncome = displayTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0)
-  const netCashFlow = totalIncome - totalSpent
 
 
 
@@ -110,8 +106,8 @@ export default function BudgetingBreakdownPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Total Income</p>
-                      <p className="text-2xl font-bold text-green-600">${totalIncome.toLocaleString()}</p>
+                      <p className="text-sm text-muted-foreground">Monthly Income</p>
+                      <p className="text-2xl font-bold text-green-600">${monthlyIncome.toLocaleString()}</p>
                     </div>
                     <TrendingUp className="h-8 w-8 text-green-600" />
                   </div>
@@ -122,8 +118,8 @@ export default function BudgetingBreakdownPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Total Expenses</p>
-                      <p className="text-2xl font-bold text-red-600">${totalSpent.toLocaleString()}</p>
+                      <p className="text-sm text-muted-foreground">Monthly Expenses</p>
+                      <p className="text-2xl font-bold text-red-600">${monthlySpending.toLocaleString()}</p>
                     </div>
                     <TrendingDown className="h-8 w-8 text-red-600" />
                   </div>
@@ -134,7 +130,7 @@ export default function BudgetingBreakdownPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Net Cash Flow</p>
+                      <p className="text-sm text-muted-foreground">Monthly Net Cash Flow</p>
                       <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         ${netCashFlow.toLocaleString()}
                       </p>

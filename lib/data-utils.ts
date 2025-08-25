@@ -76,12 +76,12 @@ export function getMonthlySpending(transactions: Transaction[], currentDate: Dat
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
   
-  return Math.abs(transactions
+  return transactions
     .filter(t => {
       const transactionDate = parseISO(t.date)
-      return transactionDate >= monthStart && transactionDate <= monthEnd && t.type === 'EXPENSE' && t.amount < 0
+      return transactionDate >= monthStart && transactionDate <= monthEnd && t.type === 'EXPENSE'
     })
-    .reduce((sum, t) => sum + t.amount, 0))
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 }
 
 export function getMonthlyIncome(transactions: Transaction[], currentDate: Date = new Date()): number {
@@ -92,7 +92,7 @@ export function getMonthlyIncome(transactions: Transaction[], currentDate: Date 
   return transactions
     .filter(t => {
       const transactionDate = parseISO(t.date)
-      return transactionDate >= monthStart && transactionDate <= monthEnd && t.type === 'INCOME' && t.amount > 0
+      return transactionDate >= monthStart && transactionDate <= monthEnd && t.type === 'INCOME'
     })
-    .reduce((sum, t) => sum + t.amount, 0)
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 }

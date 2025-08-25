@@ -54,11 +54,11 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
     return (
       <Card className="bg-white border border-gray-200 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Portfolio</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-900">Spending Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-gray-500">
-            No portfolio data available
+            No spending data available
           </div>
         </CardContent>
       </Card>
@@ -74,7 +74,7 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
   return (
     <Card className="bg-white border border-gray-200 shadow-sm">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-900">Portfolio</CardTitle>
+        <CardTitle className="text-lg font-semibold text-gray-900">Spending</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer

@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { PieChart, Pie, Cell } from 'recharts'
 import { Transaction } from '@/types/database'
-import { getCategoryBreakdown, formatCurrency } from '@/lib/data-utils'
+import { formatCurrency } from '@/lib/data-utils'
+import { useCategories } from '@/contexts/CategoryContext'
+import { startOfMonth, endOfMonth, parseISO } from 'date-fns'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -75,31 +77,84 @@ const mockBudgets: Budget[] = [
 ]
 
 export function CashFlowBreakdown({ transactions, budgets = mockBudgets }: CashFlowBreakdownProps) {
+  const { getCategoryName, getCategoryColor } = useCategories()
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(budgets[0] || null)
   const [viewBy, setViewBy] = useState<'category' | 'amount'>('category')
 
-  // Calculate expense breakdown
-  const expenseData = getCategoryBreakdown(transactions)
-  const totalExpenses = expenseData.reduce((sum, item) => sum + item.amount, 0)
+  // Filter transactions for current month
+  const currentDate = new Date()
+  const monthStart = startOfMonth(currentDate)
+  const monthEnd = endOfMonth(currentDate)
+  
+  console.log('🔍 CashFlowBreakdown Debug Info:')
+  console.log('📅 Current Date:', currentDate)
+  console.log('📅 Month Start:', monthStart)
+  console.log('📅 Month End:', monthEnd)
+  console.log('📊 Total Transactions:', transactions.length)
+  
+  const monthlyTransactions = transactions.filter(t => {
+    const transactionDate = parseISO(t.date)
+    return transactionDate >= monthStart && transactionDate <= monthEnd
+  })
+  
+  console.log('📊 Monthly Transactions:', monthlyTransactions.length)
+  console.log('📊 Monthly Transactions Data:', monthlyTransactions)
 
-  // Calculate income breakdown
-  const incomeTransactions = transactions.filter(t => t.amount > 0)
+  // Calculate income breakdown for current month
+  const incomeTransactions = monthlyTransactions.filter(t => t.type === 'INCOME' && t.amount > 0)
+  console.log('💰 Income Transactions:', incomeTransactions.length)
+  console.log('💰 Income Transactions Data:', incomeTransactions)
+  
   const incomeByCategory = incomeTransactions.reduce((acc, transaction) => {
-    const category = transaction.category_id || 'Other'
+    const category = getCategoryName(transaction.category_id) || 'Other'
+    const color = getCategoryColor(transaction.category_id) || '#4CAF50'
+    const amount = Math.abs(transaction.amount)
     acc[category] = (acc[category] || 0) + transaction.amount
     return acc
   }, {} as Record<string, number>)
+  
+  console.log('💰 Income By Category:', incomeByCategory)
 
   const incomeData = Object.entries(incomeByCategory)
     .map(([category, amount]) => ({
       category,
       amount,
       percentage: incomeTransactions.length > 0 ? (amount / incomeTransactions.reduce((sum, t) => sum + t.amount, 0)) * 100 : 0,
-      color: CATEGORY_COLORS[category as Category] || '#4CAF50'
+      color: getCategoryColor(incomeTransactions.find(t => getCategoryName(t.category_id) === category)?.category_id || '') || '#4CAF50'
     }))
     .sort((a, b) => b.amount - a.amount)
 
   const totalIncome = incomeData.reduce((sum, item) => sum + item.amount, 0)
+  console.log('💰 Total Income:', totalIncome)
+  console.log('💰 Income Data:', incomeData)
+
+  // Calculate expense breakdown for current month
+  const expenseTransactions = monthlyTransactions.filter(t => t.type === 'EXPENSE')
+  
+  const expenseByCategory = expenseTransactions.reduce((acc, transaction) => {
+    const category = getCategoryName(transaction.category_id) || 'Other'
+    const color = getCategoryColor(transaction.category_id) || '#4CAF50'
+    const amount = Math.abs(transaction.amount)
+    acc[category] = (acc[category] || 0) + amount
+    return acc
+  }, {} as Record<string, number>)
+  
+  console.log('💸 Expense By Category:', expenseByCategory)
+
+  const expenseData = Object.entries(expenseByCategory)
+    .map(([category, amount]) => ({
+      category,
+      amount: Math.abs(amount),
+      percentage: expenseTransactions.length > 0 ? (Math.abs(amount) / expenseTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0)) * 100 : 0,
+      color: getCategoryColor(expenseTransactions.find(t => getCategoryName(t.category_id) === category)?.category_id || '') || '#F44336'
+    }))
+    .sort((a, b) => b.amount - a.amount)
+
+  const totalExpenses = expenseData.reduce((sum, item) => sum + item.amount, 0)
+  
+  console.log('💸 Expense Data:', expenseData)
+  console.log('💸 Total Expenses:', totalExpenses)
+  console.log('💸 Expense Data Length:', expenseData.length)
 
   // Calculate budget breakdown
   const budgetData = selectedBudget?.categories.map(cat => ({
@@ -113,6 +168,12 @@ export function CashFlowBreakdown({ transactions, budgets = mockBudgets }: CashF
 
   const totalBudget = selectedBudget?.totalAmount || 0
   const totalSpent = budgetData.reduce((sum, item) => sum + item.spentAmount, 0)
+  
+  console.log('💰 Budget Data:', budgetData)
+  console.log('💰 Total Budget:', totalBudget)
+  console.log('💰 Total Spent:', totalSpent)
+  console.log('💰 Selected Budget:', selectedBudget)
+  console.log('\n=== End CashFlowBreakdown Debug ===\n')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderPieChart = (data: any[], dataKey: string, nameKey: string) => {
@@ -261,15 +322,15 @@ export function CashFlowBreakdown({ transactions, budgets = mockBudgets }: CashF
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Expense Distribution</h3>
-                  <p className="text-sm text-gray-600">Total spent this month: {formatCurrency(totalExpenses)}</p>
+                  <h3 className="text-lg font-semibold mb-2">Expenses</h3>
+                  <p className="text-sm text-gray-600">Total spending this month: {formatCurrency(totalExpenses)}</p>
                 </div>
                 {renderPieChart(expenseData, 'amount', 'category')}
               </div>
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Category Breakdown</h3>
-                  <p className="text-sm text-gray-600">{expenseData.length} categories</p>
+                  <h3 className="text-lg font-semibold mb-2">Expenses Breakdown</h3>
+                  <p className="text-sm text-gray-600">{expenseData.length} expense categories</p>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {renderCategoryList(expenseData, 'expense')}
