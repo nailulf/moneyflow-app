@@ -1,26 +1,36 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
 interface BudgetCategory {
   id: string
-  category: string
-  budgetAmount: number
-  spentAmount: number
-  color: string
+  allocated_amount: number
+  spent_amount: number
+  category: {
+    id: string
+    name: string
+    color: string
+  }
 }
 
 interface Budget {
   id: string
   name: string
-  totalAmount: number
+  total_amount: number
   period: 'monthly' | 'yearly'
-  categories: BudgetCategory[]
+  year: number
+  month?: number
+  currency: string
+  is_active: boolean
+  budget_categories: BudgetCategory[]
 }
 
 interface UseBudgetManagerProps {
-  initialBudgets?: Budget[]
+  userId?: string
+  autoFetch?: boolean
+  year?: number
+  month?: number
   onBudgetCreated?: (budget: Budget) => void
   onBudgetUpdated?: (budget: Budget) => void
   onBudgetDeleted?: (budgetId: string) => void
@@ -29,7 +39,8 @@ interface UseBudgetManagerProps {
 interface UseBudgetManagerReturn {
   budgets: Budget[]
   selectedBudget: Budget | null
-  createBudget: (budgetData: Omit<Budget, 'id'>) => Promise<void>
+  fetchBudgets: () => Promise<void>
+  createBudget: (budgetData: any) => Promise<void>
   updateBudget: (id: string, budgetData: Partial<Budget>) => Promise<void>
   deleteBudget: (id: string) => Promise<void>
   selectBudget: (budget: Budget | null) => void
@@ -39,37 +50,81 @@ interface UseBudgetManagerReturn {
 }
 
 export function useBudgetManager({
-  initialBudgets = [],
+  userId,
+  autoFetch = true,
+  year,
+  month,
   onBudgetCreated,
   onBudgetUpdated,
   onBudgetDeleted
 }: UseBudgetManagerProps = {}): UseBudgetManagerReturn {
-  const [budgets, setBudgets] = useState<Budget[]>(initialBudgets)
-  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(
-    initialBudgets[0] || null
-  )
+  const [budgets, setBudgets] = useState<Budget[]>([])
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const createBudget = useCallback(async (budgetData: Omit<Budget, 'id'>) => {
+  const fetchBudgets = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     
     try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const currentDate = new Date()
+      const targetYear = year || currentDate.getFullYear()
+      const targetMonth = month || (currentDate.getMonth() + 1)
       
-      const newBudget: Budget = {
-        ...budgetData,
-        id: `budget-${crypto.randomUUID()}`
+      const response = await fetch(`/api/budgets?year=${targetYear}&month=${targetMonth}&active=true`)
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch budgets')
       }
       
-      setBudgets(prev => [...prev, newBudget])
+      const data = await response.json()
+      setBudgets(data.budgets || [])
       
-      // Set as selected if it's the first budget
-      if (budgets.length === 0) {
-        setSelectedBudget(newBudget)
+      // Auto-select the first active budget
+      if (data.budgets && data.budgets.length > 0) {
+        setSelectedBudget(data.budgets[0])
+      } else {
+        setSelectedBudget(null)
       }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch budgets'
+      setError(errorMessage)
+      toast.error(errorMessage)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [year, month])
+
+  useEffect(() => {
+    if (autoFetch) {
+      fetchBudgets()
+    }
+  }, [autoFetch, fetchBudgets])
+
+  const createBudget = useCallback(async (budgetData: any) => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const response = await fetch('/api/budgets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(budgetData),
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create budget')
+      }
+      
+      const data = await response.json()
+      const newBudget = data.budget
+      
+      setBudgets(prev => [newBudget, ...prev])
+      setSelectedBudget(newBudget)
       
       onBudgetCreated?.(newBudget)
       toast.success('Budget created successfully')
@@ -80,30 +135,39 @@ export function useBudgetManager({
     } finally {
       setIsLoading(false)
     }
-  }, [budgets.length, onBudgetCreated])
+  }, [onBudgetCreated])
 
   const updateBudget = useCallback(async (id: string, budgetData: Partial<Budget>) => {
     setIsLoading(true)
     setError(null)
     
     try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 300))
+      const response = await fetch(`/api/budgets/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(budgetData),
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update budget')
+      }
+      
+      const data = await response.json()
+      const updatedBudget = data.budget
       
       setBudgets(prev => prev.map(budget => 
-        budget.id === id ? { ...budget, ...budgetData } : budget
+        budget.id === id ? updatedBudget : budget
       ))
       
       // Update selected budget if it's the one being updated
       if (selectedBudget?.id === id) {
-        setSelectedBudget(prev => prev ? { ...prev, ...budgetData } : null)
+        setSelectedBudget(updatedBudget)
       }
       
-      const updatedBudget = budgets.find(b => b.id === id)
-      if (updatedBudget) {
-        onBudgetUpdated?.({ ...updatedBudget, ...budgetData })
-      }
-      
+      onBudgetUpdated?.(updatedBudget)
       toast.success('Budget updated successfully')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update budget'
@@ -112,23 +176,32 @@ export function useBudgetManager({
     } finally {
       setIsLoading(false)
     }
-  }, [budgets, selectedBudget, onBudgetUpdated])
+  }, [selectedBudget, onBudgetUpdated])
 
   const deleteBudget = useCallback(async (id: string) => {
     setIsLoading(true)
     setError(null)
     
     try {
-      // In a real app, this would be an API call
-      await new Promise(resolve => setTimeout(resolve, 300))
+      const response = await fetch(`/api/budgets/${id}`, {
+        method: 'DELETE',
+      })
       
-      setBudgets(prev => prev.filter(budget => budget.id !== id))
-      
-      // Clear selected budget if it's the one being deleted
-      if (selectedBudget?.id === id) {
-        const remainingBudgets = budgets.filter(b => b.id !== id)
-        setSelectedBudget(remainingBudgets[0] || null)
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete budget')
       }
+      
+      setBudgets(prev => {
+        const filtered = prev.filter(budget => budget.id !== id)
+        
+        // Clear selected budget if it's the one being deleted
+        if (selectedBudget?.id === id) {
+          setSelectedBudget(filtered[0] || null)
+        }
+        
+        return filtered
+      })
       
       onBudgetDeleted?.(id)
       toast.success('Budget deleted successfully')
@@ -139,7 +212,7 @@ export function useBudgetManager({
     } finally {
       setIsLoading(false)
     }
-  }, [budgets, selectedBudget, onBudgetDeleted])
+  }, [selectedBudget, onBudgetDeleted])
 
   const selectBudget = useCallback((budget: Budget | null) => {
     setSelectedBudget(budget)
@@ -148,6 +221,7 @@ export function useBudgetManager({
   return {
     budgets,
     selectedBudget,
+    fetchBudgets,
     createBudget,
     updateBudget,
     deleteBudget,

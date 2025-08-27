@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { TransactionTable } from '@/components/TransactionTable'
-import { AddTransactionButton } from '@/components/AddTransactionButton'
+import { AddTransactionForm } from '@/components/AddTransactionForm'
 import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,7 +33,7 @@ export default function SpendingTransactionPage() {
         <MainContent>
           <div className="space-y-6">
             <div className="flex justify-end">
-              <AddTransactionButton userId={TEST_USER_ID} onTransactionAdded={addTransaction} />
+              <AddTransactionForm userId={TEST_USER_ID} onTransactionAdded={addTransaction} />
             </div>
             <TransactionTable 
               transactions={transactions} 

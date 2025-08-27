@@ -1,13 +1,17 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { CashFlowBreakdown } from '@/components/CashFlowBreakdown'
 import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, TopContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useTransactions } from '@/contexts/TransactionContext'
-import { getMonthlySpending, getMonthlyIncome, getCategoryBreakdown, formatCurrency } from '@/lib/data-utils'
-import { useBudgetManager } from '@/hooks/use-budget-manager'
+import { formatCurrency } from '@/lib/data-utils'
+import { useFilteredTransactions } from '@/hooks/useFilteredTransactions'
+import { calculateBudgetProgress, calculateTotalSpent } from '@/lib/budget-utils'
+import { BudgetCreationModal } from '@/components/BudgetCreationModal'
+import { useCategories } from '@/contexts/CategoryContext'
 // Simple progress component inline
 const Progress = ({ value = 0, className = '' }: { value?: number; className?: string }) => {
   const percentage = Math.min(Math.max(value, 0), 100)
@@ -20,72 +24,116 @@ const Progress = ({ value = 0, className = '' }: { value?: number; className?: s
     </div>
   )
 }
-import { TrendingUp, TrendingDown } from 'lucide-react'
-import { CATEGORY_COLORS } from '@/types/app'
+import { TrendingUp, TrendingDown, Plus, Target, Calendar } from 'lucide-react'
 import { CategoryManager } from '@/components/CategoryManager'
+import { toast } from 'sonner'
+import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-// Mock budget data
-interface BudgetCategory {
-  id: string
-  category: string
-  budgetAmount: number
-  spentAmount: number
-  color: string
-}
-
+// Real budget data interfaces
 interface Budget {
   id: string
   name: string
-  totalAmount: number
+  total_amount: number
   period: 'monthly' | 'yearly'
-  categories: BudgetCategory[]
+  year: number
+  month?: number
+  currency: string
+  is_active: boolean
+  budget_categories: {
+    id: string
+    allocated_amount: number
+    spent_amount: number
+    category: {
+      id: string
+      name: string
+      color: string
+    }
+  }[]
 }
-
-const mockBudgets: Budget[] = [
-  {
-    id: '1',
-    name: 'Monthly Budget',
-    totalAmount: 3000,
-    period: 'monthly',
-    categories: [
-      { id: '1', category: 'Food & Dining', budgetAmount: 600, spentAmount: 450, color: CATEGORY_COLORS['Food & Dining'] },
-      { id: '2', category: 'Transportation', budgetAmount: 300, spentAmount: 280, color: CATEGORY_COLORS['Transportation'] },
-      { id: '3', category: 'Entertainment', budgetAmount: 200, spentAmount: 150, color: CATEGORY_COLORS['Entertainment'] },
-      { id: '4', category: 'Shopping', budgetAmount: 400, spentAmount: 520, color: CATEGORY_COLORS['Shopping'] },
-      { id: '5', category: 'Bills & Utilities', budgetAmount: 800, spentAmount: 750, color: CATEGORY_COLORS['Bills & Utilities'] },
-    ]
-  }
-]
 
 export default function BudgetingBreakdownPage() {
   // Test user ID for development - in production this would come from authentication
   const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
   
-  const { 
-    selectedBudget
-  } = useBudgetManager({ initialBudgets: mockBudgets })
+  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false)
+  const [selectedYear, setSelectedYear] = useState(2025) // Set to 2025 where we have budget data
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [timeRange, setTimeRange] = useState<'monthly' | 'yearly'>('monthly')
+  const [budgets, setBudgets] = useState<Budget[]>([])
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null)
+  const [budgetLoading, setBudgetLoading] = useState(true)
   
   const { transactions, loading, error } = useTransactions()
-  
-  const displayTransactions = transactions
+  const { categories } = useCategories()
 
-  // Calculate monthly financial metrics
-  const currentDate = new Date()
-  const monthlyIncome = getMonthlyIncome(displayTransactions, currentDate)
-  const monthlySpending = getMonthlySpending(displayTransactions, currentDate)
-  const netCashFlow = monthlyIncome - monthlySpending
+  // Handle budgets loaded from ClientBudgetFetcher
+  const handleBudgetsLoaded = (loadedBudgets: Budget[]) => {
+    setBudgets(loadedBudgets)
+    setBudgetLoading(false)
+    
+    // Auto-select the first budget if none selected
+    if (loadedBudgets.length > 0 && !selectedBudget) {
+      setSelectedBudget(loadedBudgets[0])
+    }
+  }
 
-  // Calculate category breakdown for the current month
-  const categoryBreakdownData = getCategoryBreakdown(displayTransactions)
-  const sortedCategories = categoryBreakdownData
-    .slice(0, 10)
-    .map(item => [item.category, item.amount] as [string, number])
+  const refetchBudgets = () => {
+     setBudgetLoading(true)
+     // The ClientBudgetFetcher will handle refetching
+   }
+
+   // Transform budgets for CashFlowBreakdown component
+   const transformedBudgets = budgets.map(budget => ({
+     id: budget.id,
+     name: budget.name,
+     totalAmount: budget.total_amount,
+     period: budget.period,
+     categories: budget.budget_categories?.map(bc => ({
+       id: bc.id,
+       category: bc.category?.name || 'Unknown',
+       budgetAmount: bc.allocated_amount,
+       spentAmount: bc.spent_amount,
+       color: bc.category.color,
+       status: (bc.spent_amount / bc.allocated_amount > 1 ? 'over' : 
+                bc.spent_amount / bc.allocated_amount > 0.8 ? 'warning' : 'good') as 'good' | 'warning' | 'over'
+     }))
+   }))
+
+  // Filter transactions based on time range
+  const filteredTransactions = transactions.filter(transaction => {
+    const transactionDate = new Date(transaction.date)
+    const transactionYear = transactionDate.getFullYear()
+    const transactionMonth = transactionDate.getMonth() + 1
+
+    if (timeRange === 'yearly') {
+      return transactionYear === selectedYear
+    } else {
+      return transactionYear === selectedYear && transactionMonth === selectedMonth
+    }
+  })
+
+  const {
+    monthlyIncome,
+    monthlySpending,
+    netCashFlow,
+    categoryBreakdownData
+  } = useFilteredTransactions(transactions, timeRange, selectedYear, selectedMonth)
+
+  const handleBudgetCreated = (budget: Budget) => {
+    refetchBudgets()
+    setSelectedBudget(budget)
+    setIsBudgetModalOpen(false)
+    toast.success('Budget created successfully!')
+  }
 
   // Calculate budget overview
-  const totalBudget = selectedBudget?.totalAmount || 0
-  const totalSpent = selectedBudget?.categories.reduce((sum, cat) => sum + cat.spentAmount, 0) || 0
+  const totalBudget = selectedBudget?.total_amount || 0
+  const totalSpent = selectedBudget?.budget_categories.reduce((sum, cat) => sum + cat.spent_amount, 0) || 0
+  const budgetProgress = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0
 
-
+  // Debug logging
+  console.log('📊 Budgets array before mapping:', budgets)
 
   return (
     <div className="flex flex-col h-full">
@@ -99,6 +147,58 @@ export default function BudgetingBreakdownPage() {
                 <h2 className="text-xl font-semibold tracking-tight mb-2">Budgeting & Breakdown</h2>
                 <p className="text-muted-foreground">Manage your budgets and analyze spending patterns</p>
               </div>
+              <div className="flex items-center gap-2">
+                {/* Time Range Selector */}
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Select value={timeRange} onValueChange={(value: 'monthly' | 'yearly') => setTimeRange(value)}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
+                        <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {timeRange === 'monthly' && (
+                    <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                          <SelectItem key={month} value={month.toString()}>
+                            {new Date(0, month - 1).toLocaleString('default', { month: 'short' })}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+                
+                {selectedBudget && (
+                  <Badge variant="outline" className="flex items-center gap-2">
+                    <Target className="h-3 w-3" />
+                    {selectedBudget.name}
+                  </Badge>
+                )}
+                <Button onClick={() => setIsBudgetModalOpen(true)} className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Create Budget
+                </Button>
+              </div>
             </div>
             {/* Budget Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -106,7 +206,7 @@ export default function BudgetingBreakdownPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Monthly Income</p>
+                      <p className="text-sm text-muted-foreground">{timeRange === 'monthly' ? 'Monthly' : 'Avg Monthly'} Income</p>
                       <p className="text-2xl font-bold text-green-600">{formatCurrency(monthlyIncome)}</p>
                     </div>
                     <TrendingUp className="h-8 w-8 text-green-600" />
@@ -118,7 +218,7 @@ export default function BudgetingBreakdownPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Monthly Expenses</p>
+                      <p className="text-sm text-muted-foreground">{timeRange === 'monthly' ? 'Monthly' : 'Avg Monthly'} Expenses</p>
                       <p className="text-2xl font-bold text-red-600">{formatCurrency(monthlySpending)}</p>
                     </div>
                     <TrendingDown className="h-8 w-8 text-red-600" />
@@ -130,7 +230,7 @@ export default function BudgetingBreakdownPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Monthly Net Cash Flow</p>
+                      <p className="text-sm text-muted-foreground">{timeRange === 'monthly' ? 'Monthly' : 'Avg Monthly'} Net Cash Flow</p>
                       <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatCurrency(netCashFlow)}
                       </p>
@@ -147,12 +247,23 @@ export default function BudgetingBreakdownPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Budget Remaining</p>
-                      <p className="text-2xl font-bold">{formatCurrency(totalBudget - totalSpent)}</p>
+                      <p className="text-sm text-muted-foreground">Budget Status</p>
+                      <p className={`text-2xl font-bold ${
+                        budgetProgress > 100 ? 'text-red-600' : 
+                        budgetProgress > 80 ? 'text-yellow-600' : 'text-green-600'
+                      }`}>
+                        {formatCurrency(totalBudget - totalSpent)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {budgetProgress.toFixed(1)}% used
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-muted-foreground">of {formatCurrency(totalBudget)}</p>
-                      <Progress value={(totalSpent / totalBudget) * 100} className="w-16 h-2 mt-1" />
+                      <Progress value={budgetProgress} className="w-16 h-2 mt-1" />
+                      {budgetProgress > 100 && (
+                        <p className="text-xs text-red-600 mt-1">Over budget!</p>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -163,7 +274,10 @@ export default function BudgetingBreakdownPage() {
         <MainContent>
           <div className="space-y-6">
             {/* Cash Flow Breakdown with Tabs */}
-            <CashFlowBreakdown transactions={transactions} />
+            <CashFlowBreakdown 
+              transactions={filteredTransactions} 
+              budgets={transformedBudgets}
+            />
           </div>
         </MainContent>
         
@@ -171,26 +285,71 @@ export default function BudgetingBreakdownPage() {
           <div className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Top Categories</CardTitle>
-                <CardDescription>Your highest spending categories</CardDescription>
+                <CardTitle>Budget Overview</CardTitle>
+                <CardDescription>
+                  {selectedBudget ? `${selectedBudget.name} - ${timeRange === 'monthly' ? 'Monthly' : 'Yearly'} Budget` : 'No budget selected'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {sortedCategories.map(([category, amount]) => (
-                    <div key={category} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div 
-                          className="w-2 h-2 rounded-full" 
-                          style={{ backgroundColor: CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || '#AED6F1' }}
-                        />
-                        <span className="text-sm font-medium">{category}</span>
+                {selectedBudget ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {formatCurrency(selectedBudget.total_amount)}
+                        </div>
+                        <div className="text-sm text-blue-600">Total Budget</div>
                       </div>
-                      <span className="text-sm text-muted-foreground">
-                        ${amount.toFixed(2)}
-                      </span>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                         <div className="text-2xl font-bold text-green-600">
+                           {formatCurrency(
+                             selectedBudget.budget_categories.reduce((sum: number, bc) => 
+                               sum + (filteredTransactions
+                                 .filter(t => t.amount < 0 && t.category_id === bc.category?.id)
+                                 .reduce((catSum, t) => catSum + Math.abs(t.amount), 0)
+                               ), 0)
+                           )}
+                         </div>
+                         <div className="text-sm text-green-600">Total Spent</div>
+                       </div>
+                     </div>
+                     
+                     <div className="space-y-2">
+                       <div className="flex justify-between text-sm">
+                         <span>Overall Progress</span>
+                         <span>
+                           {calculateBudgetProgress(
+                             selectedBudget.budget_categories.reduce((sum: number, bc) => 
+                               sum + (filteredTransactions
+                                 .filter(t => t.amount < 0 && t.category_id === bc.category?.id)
+                                 .reduce((catSum, t) => catSum + Math.abs(t.amount), 0)
+                               ), 0),
+                             selectedBudget.total_amount
+                           ).toFixed(1)}%
+                         </span>
+                       </div>
+                       <Progress 
+                         value={Math.min(
+                           calculateBudgetProgress(
+                             selectedBudget.budget_categories.reduce((sum: number, bc) => 
+                               sum + (filteredTransactions
+                                 .filter(t => t.amount < 0 && t.category_id === bc.category?.id)
+                                 .reduce((catSum, t) => catSum + Math.abs(t.amount), 0)
+                               ), 0),
+                             selectedBudget.total_amount
+                           ),
+                           100
+                         )}
+                         className="h-2"
+                       />
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-gray-500">
+                    <p>No budget selected</p>
+                    <p className="text-sm mt-1">Select a budget to see overview</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
             
@@ -209,6 +368,14 @@ export default function BudgetingBreakdownPage() {
         </ContentWrapper>
         
       </PageLayout>
+      
+      <BudgetCreationModal
+        isOpen={isBudgetModalOpen}
+        onClose={() => setIsBudgetModalOpen(false)}
+        onBudgetCreated={handleBudgetCreated}
+        categories={categories}
+        userId={TEST_USER_ID}
+      />
     </div>
   )
 }

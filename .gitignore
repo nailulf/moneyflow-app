@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/docs
 
 # next.js
 /.next/
@@ -19,6 +20,7 @@
 
 # production
 /build
+/docs
 
 # misc
 .DS_Store

@@ -220,6 +220,15 @@ user_preferences {
 | PUT | `/api/category-groups` | Update category group | `groupId` + update data |
 | DELETE | `/api/category-groups` | Delete category group | `groupId` |
 
+### Budget Endpoints
+
+| Method | Endpoint | Description | Parameters |
+|--------|----------|-------------|------------|
+| GET | `/api/budget` | Get user budget | `userId` |
+| POST | `/api/budget` | Create new budget | Budget data in body |
+| PUT | `/api/budget` | Update budget | `budgetId` + update data |
+| DELETE | `/api/budget` | Delete budget | `budgetId` |
+
 ## 🎯 Key Components Explained
 
 ### 1. LayoutWrapper Component
@@ -252,7 +261,7 @@ user_preferences {
 
 ## 🔐 Authentication & Security
 
-### Supabase Authentication
+### Supabase Authentication 
 - **JWT Tokens**: Secure session management
 - **Row Level Security (RLS)**: Database-level access control
 - **Client Types**:

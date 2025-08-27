@@ -2,13 +2,29 @@ import { Transaction } from '@/types/database'
 import { CategoryData, MonthlyData, CATEGORY_COLORS, Category } from '@/types/app'
 import { format, parseISO, startOfMonth, endOfMonth, eachMonthOfInterval, subMonths } from 'date-fns'
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Math.abs(amount))
+// Default currency configuration
+export const DEFAULT_CURRENCY = 'IDR'
+
+// Currency formatting helper with support for multiple currencies
+export function formatCurrency(amount: number, currency: string = DEFAULT_CURRENCY): string {
+  const currencySymbols: Record<string, string> = {
+    'IDR': 'Rp',
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£',
+    'JPY': '¥'
+  }
+  
+  const symbol = currencySymbols[currency] || currency
+  
+  // For IDR, show without decimals and with thousand separators
+  if (currency === 'IDR') {
+    return `${symbol} ${Math.round(Math.abs(amount)).toLocaleString('id-ID')}`
+  }
+  
+  // For other currencies, show with 2 decimal places
+  const formattedAmount = Math.abs(amount).toFixed(2)
+  return `${symbol}${formattedAmount}`
 }
 
 export function formatDate(dateString: string): string {

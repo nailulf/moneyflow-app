@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus, TrendingUp, TrendingDown } from "lucide-react"
+import { formatCurrency } from "@/lib/data-utils"
 import {
   AreaChart,
   Area,
@@ -61,14 +62,7 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
   const netWorthChangePercentage = previousNetWorth > 0 ? (netWorthChange / previousNetWorth) * 100 : 0
   const isPositiveChange = netWorthChange >= 0
 
-  const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value)
-  }
+
 
   const formatPercentage = (value: number): string => {
     return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`

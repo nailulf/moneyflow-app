@@ -100,7 +100,7 @@ export type PreferenceKey = typeof PREFERENCE_KEYS[keyof typeof PREFERENCE_KEYS]
 // Type-safe preference getters and setters
 export const preferences = {
   async getCurrency(userId: string): Promise<string> {
-    return await getUserPreference(userId, PREFERENCE_KEYS.DEFAULT_CURRENCY) || 'USD'
+    return await getUserPreference(userId, PREFERENCE_KEYS.DEFAULT_CURRENCY) || 'IDR'
   },
 
   async setCurrency(userId: string, currency: string): Promise<void> {

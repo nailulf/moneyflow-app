@@ -181,6 +181,77 @@ export interface Database {
           updated_at?: string
         }
       }
+      budgets: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          total_amount: number
+          period: 'monthly' | 'yearly'
+          year: number
+          month: number | null
+          currency: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          total_amount: number
+          period: 'monthly' | 'yearly'
+          year: number
+          month?: number | null
+          currency?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          total_amount?: number
+          period?: 'monthly' | 'yearly'
+          year?: number
+          month?: number | null
+          currency?: string
+          is_active?: boolean
+          updated_at?: string
+        }
+      }
+      budget_categories: {
+        Row: {
+          id: string
+          budget_id: string
+          category_id: string
+          allocated_amount: number
+          spent_amount: number
+          currency: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          budget_id: string
+          category_id: string
+          allocated_amount: number
+          spent_amount?: number
+          currency?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          budget_id?: string
+          category_id?: string
+          allocated_amount?: number
+          spent_amount?: number
+          currency?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -204,3 +275,11 @@ export type CategoryUpdate = Database['public']['Tables']['categories']['Update'
 export type UserPreference = Database['public']['Tables']['user_preferences']['Row']
 export type UserPreferenceInsert = Database['public']['Tables']['user_preferences']['Insert']
 export type UserPreferenceUpdate = Database['public']['Tables']['user_preferences']['Update']
+
+export type BudgetDB = Database['public']['Tables']['budgets']['Row']
+export type BudgetInsert = Database['public']['Tables']['budgets']['Insert']
+export type BudgetUpdate = Database['public']['Tables']['budgets']['Update']
+
+export type BudgetCategoryDB = Database['public']['Tables']['budget_categories']['Row']
+export type BudgetCategoryInsert = Database['public']['Tables']['budget_categories']['Insert']
+export type BudgetCategoryUpdate = Database['public']['Tables']['budget_categories']['Update']
