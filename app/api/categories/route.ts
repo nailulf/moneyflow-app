@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       is_active: boolean;
       created_at: string;
       updated_at: string;
-      category_group_id?: string;
+      category_group_id: string;
       group_type: string;
     } = {
       user_id,
@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
       is_active: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      category_group_id: category_group_id,
       group_type: group_type || 'EXPENSE' // Default to EXPENSE if not provided
     }
 
@@ -185,7 +186,7 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
+    const id = searchParams.get('category_id')
 
     if (!id) {
       return NextResponse.json({ error: 'Category ID is required' }, { status: 400 })
