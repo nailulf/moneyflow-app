@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/chart'
 import { CATEGORIES, CashFlowBreakdownProps } from '@/types/app'
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import { TransformedBudget } from '@/contexts/BudgetContext'
 
 const chartConfig = {
   amount: {
@@ -71,6 +72,12 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
 
   // Calculate expense data
   const expenseTransactions = currentMonthTransactions.filter(t => t.amount !== 0 && t.type === 'EXPENSE')
+  interface CategoryData {
+    category: string
+    amount: number
+    color: string
+  }
+
   const expensesByCategory = expenseTransactions.reduce((acc, transaction) => {
     const categoryName = getCategoryName(transaction.category_id) || 'Other'
     const amount = Math.abs(transaction.amount)
@@ -84,19 +91,27 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
     }
     acc[categoryName].amount += amount
     return acc
-  }, {} as Record<string, { category: string; amount: number; color: string }>)
+  }, {} as Record<string, CategoryData>)
+
+  interface CategoryDataWithPercentage extends CategoryData {
+    percentage: number
+  }
+
+  type BudgetCategoryData = TransformedBudget['categories'][0] & {
+    percentage: number
+  }
 
   const expenseDataArray = Object.values(expensesByCategory)
     .sort((a, b) => viewBy === 'amount' ? b.amount - a.amount : a.category.localeCompare(b.category))
   
-  const totalExpenseAmount = expenseDataArray.reduce((sum: number, item: any) => sum + item.amount, 0)
+  const totalExpenseAmount = expenseDataArray.reduce((sum: number, item: CategoryData) => sum + item.amount, 0)
   
-  const expenseData = expenseDataArray.map((item: any) => ({
+  const expenseData: CategoryDataWithPercentage[] = expenseDataArray.map((item: CategoryData) => ({
     ...item,
     percentage: totalExpenseAmount > 0 ? (item.amount / totalExpenseAmount) * 100 : 0
   }))
 
-  const totalExpenses = expenseData.reduce((sum: number, item: any) => sum + item.amount, 0)
+  const totalExpenses = expenseData.reduce((sum: number, item: CategoryDataWithPercentage) => sum + item.amount, 0)
 
   // Calculate income data
   const incomeTransactions = currentMonthTransactions.filter(t => t.amount > 0 && t.type === 'INCOME')
@@ -113,19 +128,19 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
     }
     acc[categoryName].amount += amount
     return acc
-  }, {} as Record<string, { category: string; amount: number; color: string }>)
+  }, {} as Record<string, CategoryData>)
 
   const incomeDataArray = Object.values(incomeByCategory)
     .sort((a, b) => viewBy === 'amount' ? b.amount - a.amount : a.category.localeCompare(b.category))
   
-  const totalIncomeAmount = incomeDataArray.reduce((sum: number, item: any) => sum + item.amount, 0)
+  const totalIncomeAmount = incomeDataArray.reduce((sum: number, item: CategoryData) => sum + item.amount, 0)
   
-  const incomeData = incomeDataArray.map((item: any) => ({
+  const incomeData: CategoryDataWithPercentage[] = incomeDataArray.map((item: CategoryData) => ({
     ...item,
     percentage: totalIncomeAmount > 0 ? (item.amount / totalIncomeAmount) * 100 : 0
   }))
 
-  const totalIncome = incomeData.reduce((sum: number, item: any) => sum + item.amount, 0)
+  const totalIncome = incomeData.reduce((sum: number, item: CategoryDataWithPercentage) => sum + item.amount, 0)
   
   // Enhanced budget data with real transaction amounts -> calculating spentAmount
   const enhancedBudgetData = budgetData.map(item => {
@@ -169,7 +184,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
     }
   }, [selectedBudget?.id, handleBudgetItemsFetch])
 
-  const renderPieChart = (data: any[], dataKey: string, nameKey: string) => {
+  const renderPieChart = (data: CategoryDataWithPercentage[], dataKey: string, nameKey: string) => {
     if (data.length === 0) {
       return (
         <div className="flex items-center justify-center h-64 text-gray-500">
@@ -205,7 +220,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
     )
   }
 
-  const renderCategoryList = (data: any[], type: 'expense' | 'income' | 'budget') => {
+  const renderCategoryList = (data: CategoryDataWithPercentage[] | BudgetCategoryData[], type: 'expense' | 'income' | 'budget') => {
     if (data.length === 0) {
       return (
         <div className="flex items-center justify-center h-32 text-gray-500">
@@ -217,9 +232,9 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
     return (
       <div className="space-y-3">
         {data.map((item, index) => {
-          const percentage = type === 'budget' ? item.percentage : item.percentage
-          const amount = type === 'budget' ? item.spentAmount : item.amount
-          const budgetAmount = type === 'budget' ? item.budgetAmount : undefined
+          const percentage = item.percentage
+          const amount = type === 'budget' ? (item as BudgetCategoryData).spentAmount : (item as CategoryDataWithPercentage).amount
+          const budgetAmount = type === 'budget' ? (item as BudgetCategoryData).budgetAmount : undefined
           
           return (
             <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
@@ -232,7 +247,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                   <span className="font-medium text-sm">{item.category}</span>
                   {type === 'budget' && (
                     <div className="text-xs text-gray-500">
-                      {formatCurrency(amount)} of {formatCurrency(budgetAmount)}
+                      {formatCurrency(amount)} of {formatCurrency(budgetAmount || 0)}
                     </div>
                   )}
                 </div>
@@ -247,10 +262,10 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                   </span>
                   {type === 'budget' && (
                     <Badge 
-                      variant={item.status === 'over' ? 'destructive' : item.status === 'warning' ? 'secondary' : 'default'}
+                      variant={(item as BudgetCategoryData).status === 'over' ? 'destructive' : (item as BudgetCategoryData).status === 'warning' ? 'secondary' : 'default'}
                       className="text-xs"
                     >
-                      {item.status === 'over' ? 'Over' : item.status === 'warning' ? 'Warning' : 'Good'}
+                      {(item as BudgetCategoryData).status === 'over' ? 'Over' : (item as BudgetCategoryData).status === 'warning' ? 'Warning' : 'Good'}
                     </Badge>
                   )}
                 </div>

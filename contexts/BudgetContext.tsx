@@ -23,7 +23,7 @@ interface Budget extends Omit<BudgetDB, 'budget_categories'> {
 }
 
 // Transformed budget interface for CashFlowBreakdown component
-interface TransformedBudget {
+export interface TransformedBudget {
   id: string
   name: string
   totalAmount: number
