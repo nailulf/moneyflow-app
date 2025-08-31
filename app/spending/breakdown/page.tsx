@@ -12,6 +12,7 @@ import { useFilteredTransactions } from '@/hooks/useFilteredTransactions'
 import { calculateBudgetProgress, calculateTotalSpent } from '@/lib/budget-utils'
 import { BudgetCreationModal } from '@/components/BudgetCreationModal'
 import { useCategories } from '@/contexts/CategoryContext'
+import { BudgetProvider } from '@/contexts/BudgetContext'
 // Simple progress component inline
 const Progress = ({ value = 0, className = '' }: { value?: number; className?: string }) => {
   const percentage = Math.min(Math.max(value, 0), 100)
@@ -116,9 +117,7 @@ export default function BudgetingBreakdownPage() {
   const {
     monthlyIncome,
     monthlySpending,
-    netCashFlow,
-    categoryBreakdownData
-  } = useFilteredTransactions(transactions, timeRange, selectedYear, selectedMonth)
+    netCashFlow  } = useFilteredTransactions(transactions, timeRange, selectedYear, selectedMonth)
 
   const handleBudgetCreated = (budget: Budget) => {
     refetchBudgets()
@@ -131,9 +130,6 @@ export default function BudgetingBreakdownPage() {
   const totalBudget = selectedBudget?.total_amount || 0
   const totalSpent = selectedBudget?.budget_categories.reduce((sum, cat) => sum + cat.spent_amount, 0) || 0
   const budgetProgress = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0
-
-  // Debug logging
-  console.log('📊 Budgets array before mapping:', budgets)
 
   return (
     <div className="flex flex-col h-full">
@@ -274,10 +270,11 @@ export default function BudgetingBreakdownPage() {
         <MainContent>
           <div className="space-y-6">
             {/* Cash Flow Breakdown with Tabs */}
-            <CashFlowBreakdown 
-              transactions={filteredTransactions} 
-              budgets={transformedBudgets}
-            />
+            <BudgetProvider userId={TEST_USER_ID} year={selectedYear} month={selectedMonth}>
+              <CashFlowBreakdown 
+                transactions={filteredTransactions}
+              />
+            </BudgetProvider>
           </div>
         </MainContent>
         

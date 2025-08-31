@@ -1,3 +1,5 @@
+import { Transaction } from './database'
+
 export const CATEGORIES = [
   'Food & Dining',
   'Transportation',
@@ -16,6 +18,32 @@ export type Category = typeof CATEGORIES[number]
 // Category Group Types for new CategoryManager
 export type CategoryGroupType = 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM'
 export type CategoryGroup = 'EXPENSE' | 'INCOME' | 'TRANSFER' // Keep for backward compatibility
+
+export interface Budget {
+  budget_id: string
+  id: string
+  name: string
+  amount: number
+  startDate: string
+  endDate: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+} 
+
+// should be budget's item
+export interface BudgetItem{
+  id: string
+  budget_id: string
+  category_id: string
+  allocated_amount: number
+  spent_amount: number
+  currency: string
+  created_at: string
+  updated_at: string
+  category_name?: string
+  category_color?: string
+}
 
 export interface CategoryGroupData {
   id: string
@@ -37,6 +65,13 @@ export interface CategoryItem {
   categoryGroupId?: string | null
   isCustom?: boolean
 }
+
+// Helper function to get budgets breakdown by budgetID
+export function getBudgetItems(budgetItems: BudgetItem[], budgetID: string): BudgetItem[] {
+  return budgetItems
+    .filter(item => item.budget_id === budgetID)
+}
+
 
 // Helper function to get categories by group (updated for new structure)
 export function getCategoriesByGroup(groups: CategoryGroupData[], groupType: CategoryGroupType): CategoryItem[] {
@@ -95,4 +130,7 @@ export const CATEGORY_COLORS: Record<Category, string> = {
   'Travel': '#F7DC6F',
   'Income': '#82E0AA',
   'Other': '#AED6F1'
+}
+export interface CashFlowBreakdownProps {
+  transactions: Transaction[]
 }

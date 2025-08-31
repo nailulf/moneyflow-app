@@ -24,16 +24,12 @@ interface DisplayGroup {
   categories: CategoryDB[]
 }
 
-export function CategoryManager({ 
+// Internal component that contains all the logic
+function CategoryManagerInternal({ 
   userId,
   onCategoryUpdated,
   className = ''
 }: CategoryManagerProps) {
-  // Early return for SSR
-  if (typeof window === 'undefined') {
-    return null
-  }
-  
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
@@ -572,4 +568,19 @@ export function CategoryManager({
       </SheetContent>
     </Sheet>
   )
+}
+
+// Wrapper component that handles client-side mounting
+export function CategoryManager(props: CategoryManagerProps) {
+  const [isMounted, setIsMounted] = useState(false)
+  
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  if (!isMounted) {
+    return null
+  }
+
+  return <CategoryManagerInternal {...props} />
 }
