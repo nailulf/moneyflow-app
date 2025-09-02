@@ -14,6 +14,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Whole Foods',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-15T10:00:00Z',
     updated_at: '2024-01-15T10:00:00Z'
   },
@@ -28,6 +29,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Shell',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-14T15:30:00Z',
     updated_at: '2024-01-14T15:30:00Z'
   },
@@ -42,6 +44,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Company Inc',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-13T09:00:00Z',
     updated_at: '2024-01-13T09:00:00Z'
   },
@@ -56,6 +59,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Netflix',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-12T12:00:00Z',
     updated_at: '2024-01-12T12:00:00Z'
   },
@@ -70,6 +74,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Electric Company',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-11T14:00:00Z',
     updated_at: '2024-01-11T14:00:00Z'
   },
@@ -84,6 +89,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Starbucks',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-10T08:30:00Z',
     updated_at: '2024-01-10T08:30:00Z'
   },
@@ -98,6 +104,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Amazon',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-09T16:45:00Z',
     updated_at: '2024-01-09T16:45:00Z'
   },
@@ -112,6 +119,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Medical Center',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-08T11:00:00Z',
     updated_at: '2024-01-08T11:00:00Z'
   },
@@ -126,6 +134,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Uber',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-07T19:20:00Z',
     updated_at: '2024-01-07T19:20:00Z'
   },
@@ -140,6 +149,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Client ABC',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-06T17:00:00Z',
     updated_at: '2024-01-06T17:00:00Z'
   },
@@ -154,6 +164,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Landlord',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-02-20T09:00:00Z',
     updated_at: '2024-02-20T09:00:00Z'
   },
@@ -168,6 +179,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Fancy Eats',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-02-10T19:30:00Z',
     updated_at: '2024-02-10T19:30:00Z'
   },
@@ -182,6 +194,7 @@ export const mockTransactions: Transaction[] = [
     merchant: 'Fitness Club',
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-02-05T08:00:00Z',
     updated_at: '2024-02-05T08:00:00Z'
   }
@@ -323,6 +336,7 @@ export const generateMockTransactions = (months: number = 10): Transaction[] => 
       merchant: 'Company Inc',
       notes: null,
       tags: null,
+      is_recurring: false,
       created_at: date.toISOString(),
       updated_at: date.toISOString()
     })
@@ -346,6 +360,7 @@ export const generateMockTransactions = (months: number = 10): Transaction[] => 
         merchant: 'Various',
         notes: null,
         tags: null,
+        is_recurring: false,
         created_at: expenseDate.toISOString(),
         updated_at: expenseDate.toISOString()
       })

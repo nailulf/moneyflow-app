@@ -33,6 +33,7 @@ const testTransactions: Transaction[] = [
     merchant: null,
     notes: 'Regular monthly salary',
     tags: ['salary', 'monthly'],
+    is_recurring: false,
     created_at: '2024-01-15T00:00:00Z',
     updated_at: '2024-01-15T00:00:00Z'
   },
@@ -47,6 +48,7 @@ const testTransactions: Transaction[] = [
     merchant: null,
     notes: 'Client project completion',
     tags: ['freelance', 'web-dev'],
+    is_recurring: false,
     created_at: '2024-01-20T00:00:00Z',
     updated_at: '2024-01-20T00:00:00Z'
   },
@@ -61,6 +63,7 @@ const testTransactions: Transaction[] = [
     merchant: null,
     notes: 'Quarterly dividend payment',
     tags: ['investment', 'dividends'],
+    is_recurring: false,
     created_at: '2024-01-25T00:00:00Z',
     updated_at: '2024-01-25T00:00:00Z'
   },
@@ -77,6 +80,7 @@ const testTransactions: Transaction[] = [
     merchant: 'Property Management Co.',
     notes: 'Monthly apartment rent',
     tags: ['housing', 'rent'],
+    is_recurring: false,
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-01T00:00:00Z'
   },
@@ -91,6 +95,7 @@ const testTransactions: Transaction[] = [
     merchant: 'Supermarket ABC',
     notes: 'Weekly grocery shopping',
     tags: ['food', 'groceries'],
+    is_recurring: false,
     created_at: '2024-01-05T00:00:00Z',
     updated_at: '2024-01-05T00:00:00Z'
   },
@@ -105,6 +110,7 @@ const testTransactions: Transaction[] = [
     merchant: 'PLN & PDAM',
     notes: 'Monthly utility bills',
     tags: ['utilities', 'bills'],
+    is_recurring: false,
     created_at: '2024-01-10T00:00:00Z',
     updated_at: '2024-01-10T00:00:00Z'
   },
@@ -119,6 +125,7 @@ const testTransactions: Transaction[] = [
     merchant: 'TransJakarta',
     notes: 'Monthly public transport pass',
     tags: ['transport', 'public'],
+    is_recurring: false,
     created_at: '2024-01-12T00:00:00Z',
     updated_at: '2024-01-12T00:00:00Z'
   },
@@ -133,6 +140,7 @@ const testTransactions: Transaction[] = [
     merchant: 'Cinema XXI & Restaurant',
     notes: 'Weekend entertainment',
     tags: ['entertainment', 'leisure'],
+    is_recurring: false,
     created_at: '2024-01-18T00:00:00Z',
     updated_at: '2024-01-18T00:00:00Z'
   },
@@ -149,6 +157,7 @@ const testTransactions: Transaction[] = [
     merchant: null,
     notes: 'Regular monthly salary',
     tags: ['salary', 'monthly'],
+    is_recurring: false,
     created_at: '2024-02-15T00:00:00Z',
     updated_at: '2024-02-15T00:00:00Z'
   },
@@ -163,6 +172,7 @@ const testTransactions: Transaction[] = [
     merchant: 'Property Management Co.',
     notes: 'Monthly apartment rent',
     tags: ['housing', 'rent'],
+    is_recurring: false,
     created_at: '2024-02-01T00:00:00Z',
     updated_at: '2024-02-01T00:00:00Z'
   }
@@ -406,6 +416,7 @@ function testEdgeCases() {
     merchant: null,
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-15T00:00:00Z',
     updated_at: '2024-01-15T00:00:00Z'
   }]
@@ -427,6 +438,7 @@ function testEdgeCases() {
     merchant: null,
     notes: null,
     tags: null,
+    is_recurring: false,
     created_at: '2024-01-15T00:00:00Z',
     updated_at: '2024-01-15T00:00:00Z'
   }]
@@ -459,6 +471,7 @@ function testPerformance() {
       merchant: null,
       notes: null,
       tags: null,
+      is_recurring: false,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z'
     })

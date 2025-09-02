@@ -360,6 +360,7 @@ export function exampleUsage() {
       merchant: null,
       notes: null,
       tags: null,
+      is_recurring: false,
       created_at: '2024-01-15T00:00:00Z',
       updated_at: '2024-01-15T00:00:00Z'
     },
@@ -374,6 +375,7 @@ export function exampleUsage() {
       merchant: 'Property Management',
       notes: null,
       tags: null,
+      is_recurring: false,
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z'
     },
@@ -388,6 +390,7 @@ export function exampleUsage() {
       merchant: 'Supermarket',
       notes: null,
       tags: ['food', 'weekly'],
+      is_recurring: false,
       created_at: '2024-01-10T00:00:00Z',
       updated_at: '2024-01-10T00:00:00Z'
     },
@@ -402,6 +405,7 @@ export function exampleUsage() {
       merchant: null,
       notes: 'Web development project',
       tags: ['freelance', 'web'],
+      is_recurring: false,
       created_at: '2024-01-20T00:00:00Z',
       updated_at: '2024-01-20T00:00:00Z'
     }
@@ -496,6 +500,7 @@ export function handleEdgeCases() {
       merchant: null,
       notes: null,
       tags: null,
+      is_recurring: false,
       created_at: '2024-01-15T00:00:00Z',
       updated_at: '2024-01-15T00:00:00Z'
     }
@@ -518,6 +523,7 @@ export function handleEdgeCases() {
       merchant: null,
       notes: null,
       tags: null,
+      is_recurring: false,
       created_at: '2024-01-15T00:00:00Z',
       updated_at: '2024-01-15T00:00:00Z'
     }
