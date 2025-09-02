@@ -11,6 +11,7 @@ export const transactionFormSchema = z.object({
   merchant: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   tags: z.array(z.string()).optional().nullable(),
+  is_recurring: z.boolean().default(false),
 })
 
 // Export as transactionSchema for backward compatibility

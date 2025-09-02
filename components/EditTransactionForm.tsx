@@ -62,7 +62,8 @@ export function EditTransactionForm({
       amount: 0,
       type: 'EXPENSE',
       category_id:'',
-      merchant: ''
+      merchant: '',
+      is_recurring: false
     }
   })
 
@@ -75,6 +76,7 @@ export function EditTransactionForm({
       setValue('type', transaction.type)
       setValue('category_id', transaction.category_id)
       setValue('merchant', transaction.merchant || '')
+      setValue('is_recurring', transaction.is_recurring || false)
     }
   }, [transaction, open, setValue])
 
@@ -294,6 +296,25 @@ export function EditTransactionForm({
               placeholder="Enter merchant name"
               {...register('merchant')}
             />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="is_recurring"
+                {...register('is_recurring')}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="is_recurring" className="text-sm font-medium">
+                Recurring Transaction
+              </label>
+            </div>
+            {watch('is_recurring') && (
+              <p className="text-xs text-blue-600">
+                This transaction will be marked as recurring
+              </p>
+            )}
           </div>
 
           <div className="flex gap-2 pt-4">

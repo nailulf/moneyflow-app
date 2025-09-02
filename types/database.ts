@@ -13,6 +13,7 @@ export interface Database {
           merchant: string | null
           notes: string | null
           tags: string[] | null
+          is_recurring: boolean
           created_at: string
           updated_at: string
         }
@@ -27,6 +28,7 @@ export interface Database {
           merchant?: string | null
           notes?: string | null
           tags?: string[] | null
+          is_recurring?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -41,6 +43,7 @@ export interface Database {
           merchant?: string | null
           notes?: string | null
           tags?: string[] | null
+          is_recurring?: boolean
           updated_at?: string
         }
       }

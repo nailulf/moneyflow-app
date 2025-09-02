@@ -63,7 +63,8 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
       amount: 0,
       type: 'EXPENSE',
       category_id: '',
-      merchant: ''
+      merchant: '',
+      is_recurring: false
     }
   })
 
@@ -75,6 +76,7 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
 
   const selectedType = watch('type')
   const selectedCategoryId = watch('category_id')
+  const isRecurring = watch('is_recurring')
 
   // Reset category when type changes
   useEffect(() => {
@@ -294,6 +296,23 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
               {...register('merchant')}
             />
           </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="is_recurring"
+              {...register('is_recurring')}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="is_recurring" className="text-sm font-medium">
+              Recurring Transaction
+            </label>
+          </div>
+          {isRecurring && (
+            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+              💡 This transaction will be marked as recurring. You can set up automatic scheduling separately.
+            </div>
+          )}
 
           <div className="flex gap-2 pt-4">
             <Button
