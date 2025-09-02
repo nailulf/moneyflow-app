@@ -52,15 +52,9 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
   const { getCategoryName, getCategoryColor } = useCategories()
   const { transformedBudgets, selectedBudget, selectBudget, loading: budgetLoading, error: budgetError, getBudgetItems } = useBudgets()
 
-  // Filter transactions for current month
-  const currentDate = new Date()
-  const monthStart = startOfMonth(currentDate)
-  const monthEnd = endOfMonth(currentDate)
-  
-  const currentMonthTransactions = transactions.filter(transaction => {
-    const transactionDate = parseISO(transaction.date)
-    return transactionDate >= monthStart && transactionDate <= monthEnd
-  })
+  // Use the filtered transactions passed as props
+  // This allows the component to respect the month/year filter from the parent
+  const filteredTransactions = transactions
 
   // Find the selected transformed budget for calculations
   const selectedTransformedBudget = transformedBudgets.find(b => b.id === selectedBudget?.id)
@@ -71,7 +65,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
   const totalSpent = budgetData.reduce((sum: number, item) => sum + (item.spentAmount || 0), 0)
 
   // Calculate expense data
-  const expenseTransactions = currentMonthTransactions.filter(t => t.amount !== 0 && t.type === 'EXPENSE')
+  const expenseTransactions = filteredTransactions.filter(t => t.amount !== 0 && t.type === 'EXPENSE')
   interface CategoryData {
     category: string
     amount: number
@@ -114,7 +108,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
   const totalExpenses = expenseData.reduce((sum: number, item: CategoryDataWithPercentage) => sum + item.amount, 0)
 
   // Calculate income data
-  const incomeTransactions = currentMonthTransactions.filter(t => t.amount > 0 && t.type === 'INCOME')
+  const incomeTransactions = filteredTransactions.filter(t => t.amount > 0 && t.type === 'INCOME')
   const incomeByCategory = incomeTransactions.reduce((acc, transaction) => {
     const categoryName = getCategoryName(transaction.category_id) || 'Other'
     const amount = transaction.amount
