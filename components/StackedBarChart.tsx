@@ -54,12 +54,7 @@ const defaultChartConfig = {
 } satisfies ChartConfig
 
 interface StackedBarChartProps {
-  data?: Array<{
-    month: string
-    revenue: number
-    expenses: number
-    profit: number
-  }>
+  data?: Array<any>
   config?: ChartConfig
   title?: string
   description?: string
@@ -67,6 +62,7 @@ interface StackedBarChartProps {
   showTrend?: boolean
   trendValue?: number
   trendLabel?: string
+  tooltipFormatter?: (value: number, name: string, props: any) => [string, string]
 }
 
 export function StackedBarChart({
@@ -78,6 +74,7 @@ export function StackedBarChart({
   showTrend = true,
   trendValue = 8.7,
   trendLabel = "Trending up by 8.7% this year",
+  tooltipFormatter,
 }: StackedBarChartProps) {
   const totalValue = React.useMemo(() => {
     return data.reduce((acc, curr) => acc + curr.revenue + curr.expenses + curr.profit, 0)
@@ -102,27 +99,35 @@ export function StackedBarChart({
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={
+                <ChartTooltipContent 
+                  hideLabel 
+                  formatter={tooltipFormatter}
+                />
+              }
             />
             <ChartLegend content={<ChartLegendContent />} />
-            <Bar
-              dataKey="revenue"
-              stackId="a"
-              fill="hsl(var(--chart-1))"
-              radius={[0, 0, 4, 4]}
-            />
-            <Bar
-              dataKey="expenses"
-              stackId="a"
-              fill="hsl(var(--chart-2))"
-              radius={[0, 0, 0, 0]}
-            />
-            <Bar
-              dataKey="profit"
-              stackId="a"
-              fill="hsl(var(--chart-3))"
-              radius={[4, 4, 0, 0]}
-            />
+            {/* Dynamically render bars based on config */}
+            {Object.keys(config).map((key, index, array) => {
+              // Determine if this is the first or last bar for radius styling
+              const isFirst = index === 0;
+              const isLast = index === array.length - 1;
+              
+              return (
+                <Bar
+                  key={key}
+                  dataKey={key}
+                  stackId="a"
+                  fill={config[key].color}
+                  radius={[
+                    isLast ? 4 : 0,  // top-left radius
+                    isLast ? 4 : 0,  // top-right radius
+                    isFirst ? 4 : 0, // bottom-right radius
+                    isFirst ? 4 : 0  // bottom-left radius
+                  ]}
+                />
+              );
+            })}
           </BarChart>
         </ChartContainer>
         {showTrend && (

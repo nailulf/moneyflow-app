@@ -114,7 +114,7 @@ const ChartTooltipContent = React.forwardRef<
       payload?: ReadonlyArray<{dataKey?: string; name?: string; value?: number; color?: string; payload?: Record<string, unknown>}>
       label?: string | number
       labelFormatter?: (label: string | number, payload: Array<{dataKey?: string; name?: string; value?: number; color?: string; payload?: Record<string, unknown>}>) => React.ReactNode
-      formatter?: (value: number, name: string, props: Record<string, unknown>) => React.ReactNode
+      formatter?: (value: number, name: string, props: Record<string, unknown>) => [string, string] | React.ReactNode
     }
 >(
   (
