@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { InvestNavigation } from "@/components/TopNavigation"
 import { PageLayout, MainContent, SideContent, ContentWrapper } from "@/components/PageLayout"
+import { StackedBarChart } from "@/components/StackedBarChart"
 
 export default function InvestPage() {
   return (
@@ -11,7 +12,15 @@ export default function InvestPage() {
       <PageLayout>
         <ContentWrapper>
         <MainContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-6">
+            <StackedBarChart
+              title="Investment Portfolio Performance"
+              description="Revenue, expenses, and profit analysis"
+              className="w-full"
+              showTrend={true}
+              trendValue={12.3}
+              trendLabel="Portfolio growth up by 12.3% this year"
+            />
             <Card className="rounded-xl">
               <CardHeader>
                 <CardTitle>Available Cash</CardTitle>
@@ -131,8 +140,39 @@ export default function InvestPage() {
           </div>
         </MainContent>
         <SideContent>
-          <div className="space-y-4">
-            {/* Additional investment content can go here */}
+          <div className="space-y-4">            
+            <Card className="rounded-xl">
+              <CardHeader>
+                <CardTitle>Staking Opportunities</CardTitle>
+                <CardDescription>Available staking options</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Ethereum 2.0</p>
+                      <p className="text-sm text-muted-foreground">4.2% APY</p>
+                    </div>
+                    <Badge variant="secondary">Active</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Cardano</p>
+                      <p className="text-sm text-muted-foreground">5.1% APY</p>
+                    </div>
+                    <Badge variant="outline">Available</Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium">Polkadot</p>
+                      <p className="text-sm text-muted-foreground">12.3% APY</p>
+                    </div>
+                    <Badge variant="outline">Available</Badge>
+                  </div>
+                </div>
+                <Button className="mt-4 w-full" variant="outline">Explore Staking</Button>
+              </CardContent>
+            </Card>
           </div>
         </SideContent>
         </ContentWrapper>
