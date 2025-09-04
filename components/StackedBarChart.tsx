@@ -54,7 +54,7 @@ const defaultChartConfig = {
 } satisfies ChartConfig
 
 interface StackedBarChartProps {
-  data?: Array<any>
+  data?: Array<Record<string, string | number>>
   config?: ChartConfig
   title?: string
   description?: string
@@ -62,7 +62,7 @@ interface StackedBarChartProps {
   showTrend?: boolean
   trendValue?: number
   trendLabel?: string
-  tooltipFormatter?: (value: number, name: string, props: any) => [string, string]
+  tooltipFormatter?: (value: number, name: string, props: Record<string, unknown>) => [string, string] | React.ReactNode
 }
 
 export function StackedBarChart({
@@ -77,8 +77,13 @@ export function StackedBarChart({
   tooltipFormatter,
 }: StackedBarChartProps) {
   const totalValue = React.useMemo(() => {
-    return data.reduce((acc, curr) => acc + curr.revenue + curr.expenses + curr.profit, 0)
-  }, [data])
+    return data.reduce((acc, curr) => {
+      const revenue = typeof curr.revenue === 'number' ? curr.revenue : 0;
+      const expenses = typeof curr.expenses === 'number' ? curr.expenses : 0;
+      const profit = typeof curr.profit === 'number' ? curr.profit : 0;
+      return acc + revenue + expenses + profit;
+    }, 0);
+  }, [data]);
 
   return (
     <Card className={className}>
@@ -102,7 +107,7 @@ export function StackedBarChart({
               content={
                 <ChartTooltipContent 
                   hideLabel 
-                  formatter={tooltipFormatter}
+                  formatter={tooltipFormatter as any}
                 />
               }
             />

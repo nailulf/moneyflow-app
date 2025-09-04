@@ -127,9 +127,10 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
   }
 
   // Custom tooltip formatter to show spending vs budget
-  const tooltipFormatter = (value: number, name: string, props: any) => {
-    const { payload } = props;
-    const { spending, budget } = payload;
+  const tooltipFormatter = (value: number, name: string, props: Record<string, unknown>) => {
+    const payload = props.payload as Record<string, number>;
+    const spending = typeof payload.spending === 'number' ? payload.spending : 0;
+    const budget = typeof payload.budget === 'number' ? payload.budget : 0;
     
     // Calculate percentage of budget spent
     const percentSpent = budget > 0 ? (spending / budget) * 100 : 0;
