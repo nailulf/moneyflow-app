@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import { SummaryCards } from '@/components/SummaryCards'
-import { SpendingChart } from '@/components/SpendingChart'
-import { StackedBarChart } from '@/components/StackedBarChart'
 import SpendingVsBudgetChart from '@/components/SpendingVsBudgetChart'
 import { TransactionTable } from '@/components/TransactionTable'
 import { SpendingNavigation } from '@/components/TopNavigation'
