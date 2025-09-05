@@ -1,11 +1,19 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { StackedBarChart } from '@/components/StackedBarChart'
+import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer } from 'recharts'
 import { Transaction } from '@/types/database'
 import { formatCurrency } from '@/lib/data-utils'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart'
 
 interface TransformedBudget {
   id: string
@@ -74,15 +82,10 @@ function transformDataForChart(transactions: Transaction[], budgets: Transformed
     // Calculate total budget amount
     const budget = monthBudget ? monthBudget.totalAmount : 0;
     
-    // Calculate delta (budget - spending)
-    const delta = budget - spending;
-    
     return {
       month: monthData.month.slice(0, 3), // Abbreviate month name
       spending,
       budget,
-      delta: delta > 0 ? delta : 0, // Only show positive delta (under budget)
-      overspent: delta < 0 ? Math.abs(delta) : 0, // Show amount overspent if negative
     };
   });
 }
@@ -92,25 +95,17 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
     return transformDataForChart(transactions, budgets);
   }, [transactions, budgets]);
   
-  // Custom chart config for spending vs budget
+  // Custom chart config for spending vs budget with soft blue colors
   const chartConfig = {
     spending: {
       label: "Spending",
-      color: "hsl(var(--chart-2))",
+      color: "hsl(210, 100%, 70%)", // Soft light blue
     },
     budget: {
       label: "Budget",
-      color: "hsl(var(--chart-1))",
+      color: "hsl(210, 100%, 50%)", // Medium dark blue
     },
-    delta: {
-      label: "Under Budget",
-      color: "hsl(var(--chart-3))",
-    },
-    overspent: {
-      label: "Over Budget",
-      color: "hsl(var(--destructive))",
-    },
-  };
+  } satisfies ChartConfig;
 
   if (isLoading) {
     return (
@@ -146,30 +141,52 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
         `${formatCurrency(value)}`,
         'Budget'
       ];
-    } else if (name === 'delta') {
-      return [
-        `${formatCurrency(value)}`,
-        'Under Budget'
-      ];
-    } else if (name === 'overspent') {
-      return [
-        `${formatCurrency(value)}`,
-        'Over Budget'
-      ];
     }
     
     return [formatCurrency(value), name];
   };
 
   return (
-    <StackedBarChart
-      data={chartData}
-      config={chartConfig}
-      title="Spending vs Budget"
-      description="Last 12 months"
-      showTrend={false}
-      tooltipFormatter={tooltipFormatter}
-    />
+    <Card>
+      <CardHeader>
+        <CardTitle>Spending vs Budget</CardTitle>
+        <CardDescription>Last 12 months</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig} className="h-[300px]">
+          <BarChart accessibilityLayer data={chartData}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) => value.slice(0, 3)}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={
+                <ChartTooltipContent 
+                  hideLabel 
+                  formatter={tooltipFormatter as any}
+                />
+              }
+            />
+            <ChartLegend content={<ChartLegendContent />} />
+            <Bar
+              dataKey="budget"
+              fill={chartConfig.budget.color}
+              radius={[4, 4, 0, 0]}
+            />
+            <Bar
+              dataKey="spending"
+              fill={chartConfig.spending.color}
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   );
 }
 
