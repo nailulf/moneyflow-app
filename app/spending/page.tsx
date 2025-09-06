@@ -27,6 +27,7 @@ export default function SpendingPage() {
   
   // Use budget data hook
   const { transformedBudgets, loading: budgetLoading } = useBudgetData(
+    TEST_USER_ID,
     currentYear,
     currentMonth,
     'monthly',

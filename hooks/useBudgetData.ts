@@ -29,12 +29,14 @@ interface Budget {
 }
 
 export function useBudgetData(
+  userId: string,
   selectedYear: number,
   selectedMonth: number,
   timeRange: 'monthly' | 'yearly',
   transactions: Transaction[]
 ) {
   console.log('🎯 useBudgetData hook called with:', {
+    userId,
     selectedYear,
     selectedMonth,
     timeRange,
@@ -58,7 +60,7 @@ export function useBudgetData(
       setLoading(true)
       setError(null)
       
-      let url = `/api/budgets?year=${selectedYear}&active=true`
+      let url = `/api/budgets?userId=${userId}&year=${selectedYear}&active=true`
       if (timeRange === 'monthly') {
         url += `&month=${selectedMonth}`
       }
@@ -103,7 +105,7 @@ export function useBudgetData(
     } finally {
       setLoading(false)
     }
-  }, [selectedYear, selectedMonth, timeRange])
+  }, [userId, selectedYear, selectedMonth, timeRange])
 
   // Use a ref to track if we've attempted to fetch
   const hasFetchedRef = useRef(false)
@@ -139,7 +141,7 @@ export function useBudgetData(
   )
 
   // Transform budgets with actual spending data
-  const transformedBudgets = budgets.map(budget => 
+  const transformedBudgets = (budgets || []).map(budget => 
     transformBudgetWithSpending(budget, filteredTransactions)
   )
 
@@ -152,7 +154,7 @@ export function useBudgetData(
     setLoading(true)
     setError(null)
     
-    let url = `/api/budgets?year=${selectedYear}&active=true`
+    let url = `/api/budgets?userId=${userId}&year=${selectedYear}&active=true`
     if (timeRange === 'monthly') {
       url += `&month=${selectedMonth}`
     }
@@ -181,7 +183,7 @@ export function useBudgetData(
     } finally {
       setLoading(false)
     }
-  }, [selectedYear, selectedMonth, timeRange])
+  }, [userId, selectedYear, selectedMonth, timeRange])
 
   return {
     budgets,

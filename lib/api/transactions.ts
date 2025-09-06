@@ -33,7 +33,8 @@ export async function getUserTransactions(userId: string): Promise<Transaction[]
         throw new Error('Failed to fetch transactions')
       }
 
-      const data = await response.json()
+      const result = await response.json()
+      const data = result.transactions || []
       
       // Cache the result
       dataCache.set(cacheKey, { data, timestamp: Date.now() })
@@ -73,7 +74,8 @@ export async function getTransactionsByDateRange(
     throw new Error('Failed to fetch transactions')
   }
 
-  return await response.json()
+  const result = await response.json()
+  return result.transactions || []
 }
 
 /**
@@ -94,7 +96,8 @@ export async function createTransaction(transaction: TransactionInsert): Promise
     throw new Error('Failed to create transaction')
   }
 
-  return await response.json()
+  const result = await response.json()
+  return result.transactions || []
 }
 
 /**

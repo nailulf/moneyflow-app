@@ -8,6 +8,12 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const categoryId = searchParams.get('categoryId')
+    const merchant = searchParams.get('merchant')
+    const search = searchParams.get('search')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const sortBy = searchParams.get('sortBy') || 'date'
+    const sortOrder = searchParams.get('sortOrder') || 'desc'
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
@@ -18,12 +24,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
     }
 
+    // Calculate offset for pagination
+    const offset = (page - 1) * limit
+
     const supabase = createServerComponentClient()
     let query = supabase
       .from('transactions')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('user_id', userId)
 
+    // Apply filters
     if (startDate) {
       query = query.gte('date', startDate)
     }
@@ -33,17 +43,43 @@ export async function GET(request: NextRequest) {
     if (categoryId) {
       query = query.eq('category_id', categoryId)
     }
+    if (merchant) {
+      query = query.ilike('merchant', `%${merchant}%`)
+    }
+    if (search) {
+      query = query.or(`description.ilike.%${search}%,merchant.ilike.%${search}%`)
+    }
 
-    query = query.order('date', { ascending: false })
+    // Apply sorting
+    const ascending = sortOrder === 'asc'
+    query = query.order(sortBy, { ascending })
 
-    const { data, error } = await query
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1)
+
+    const { data: transactions, error, count } = await query
 
     if (error) {
       console.error('Error fetching transactions:', error)
       return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    // Calculate pagination metadata
+    const totalPages = Math.ceil((count || 0) / limit)
+    const hasNextPage = page < totalPages
+    const hasPreviousPage = page > 1
+
+    return NextResponse.json({
+      transactions,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage
+      }
+    })
   } catch (error) {
     console.error('API Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -2,10 +2,8 @@
 
 import React from 'react'
 import { TransactionTable } from '@/components/TransactionTable'
-import { AddTransactionForm } from '@/components/AddTransactionForm'
 import { SpendingNavigation } from '@/components/TopNavigation'
-import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { CategoryManager } from '@/components/CategoryManager'
 
@@ -19,8 +17,6 @@ export default function SpendingTransactionPage() {
 
   // Filter for expenses only
   const expenses = transactions.filter(t => t.type === 'EXPENSE')
-  const recentExpenses = expenses.slice(0, 5)
-  const totalExpenses = expenses.reduce((sum, t) => sum + t.amount, 0)
 
   return (
     <div className="flex flex-col h-full">
@@ -29,43 +25,20 @@ export default function SpendingTransactionPage() {
         </div>} />
       
       <PageLayout>
-        <ContentWrapper>
-        <MainContent>
-          <div className="space-y-6">
-            <div className="flex justify-end">
-              <AddTransactionForm userId={TEST_USER_ID} onTransactionAdded={addTransaction} />
-            </div>
-            <TransactionTable 
+        <TopContent>
+          <TransactionTable 
               transactions={transactions} 
-              limit={8}
               userId={TEST_USER_ID}
               enableSelfManagement={true}
+              enableLazyLoading={true}
+              pageSize={20}
             />
+        </TopContent>
+        <ContentWrapper>
+        <MainContent>
+          <div>
           </div>
         </MainContent>
-        
-        <SideContent>
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Stats</CardTitle>
-                <CardDescription>Transaction summary</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Recent expenses</span>
-                    <span className="text-sm font-medium">{recentExpenses.length}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Total expenses</span>
-                    <span className="text-sm font-medium">{totalExpenses.toFixed(2)}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </SideContent>
         </ContentWrapper>
       </PageLayout>
     </div>

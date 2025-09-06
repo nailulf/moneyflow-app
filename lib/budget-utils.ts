@@ -41,9 +41,12 @@ export function calculateCategorySpending(
   transactions: Transaction[],
   categoryId: string
 ): number {
+  if (!transactions || !Array.isArray(transactions)) {
+    return 0
+  }
   return transactions
-    .filter(t => t.category_id === categoryId && t.type === 'EXPENSE')
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+    .filter(t => t && t.category_id === categoryId && t.type === 'EXPENSE')
+    .reduce((sum, t) => sum + Math.abs(t.amount || 0), 0)
 }
 
 /**
@@ -68,6 +71,11 @@ export function getTransactionsByDateRange(
   year: number,
   month?: number
 ): Transaction[] {
+  // Add null check for transactions
+  if (!transactions || !Array.isArray(transactions)) {
+    return []
+  }
+
   let startDate: Date
   let endDate: Date
 
@@ -80,6 +88,7 @@ export function getTransactionsByDateRange(
   }
 
   return transactions.filter(transaction => {
+    if (!transaction || !transaction.date) return false
     const transactionDate = parseISO(transaction.date)
     return transactionDate >= startDate && transactionDate <= endDate
   })
@@ -112,8 +121,19 @@ export function transformBudgetWithSpending(
   budget: Budget,
   transactions: Transaction[]
 ): TransformedBudget {
+  // Add null checks for budget and budget_categories
+  if (!budget || !budget.budget_categories) {
+    return {
+      id: budget?.id || '',
+      name: budget?.name || 'Unknown Budget',
+      totalAmount: budget?.total_amount || 0,
+      period: budget?.period || 'monthly',
+      categories: []
+    }
+  }
+
   const categoriesWithActualSpending = budget.budget_categories
-    .filter((cat: BudgetCategory) => cat.category) // Filter out categories without category data
+    .filter((cat: BudgetCategory) => cat && cat.category) // Filter out categories without categories data
     .map((cat: BudgetCategory) => {
       const actualSpent = calculateCategorySpending(transactions, cat.category?.id || '')
       

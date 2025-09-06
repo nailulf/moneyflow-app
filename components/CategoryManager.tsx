@@ -57,10 +57,11 @@ function CategoryManagerInternal({
         throw new Error('Failed to fetch category groups')
       }
       const data = await response.json()
-      setCategoryGroups(data)
+      setCategoryGroups(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error('Error fetching category groups:', err)
       setError('Failed to load category groups')
+      setCategoryGroups([]) // Set empty array as fallback
     }
   }, [userId])
 
@@ -72,10 +73,11 @@ function CategoryManagerInternal({
         throw new Error('Failed to fetch categories')
       }
       const data = await response.json()
-      setCategories(data)
+      setCategories(Array.isArray(data) ? data : [])
     } catch (err) {
       console.error('Error fetching categories:', err)
       setError('Failed to load categories')
+      setCategories([]) // Set empty array as fallback
     }
   }, [userId])
 

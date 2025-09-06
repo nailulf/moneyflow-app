@@ -15,7 +15,19 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('budgets')
-      .select('*')
+      .select(`
+        *,
+        budget_categories (
+          id,
+          allocated_amount,
+          spent_amount,
+          categories (
+            id,
+            name,
+            color
+          )
+        )
+      `)
       .eq('user_id', userId)
       .eq('is_active', true)
       .order('created_at', { ascending: true })

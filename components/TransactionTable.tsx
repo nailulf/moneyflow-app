@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Transaction, CategoryDB } from '@/types/database'
 import { formatCurrency } from '@/lib/data-utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Edit, Trash2, Search, ArrowUpDown, Filter } from 'lucide-react'
+import { Edit, Trash2, Search, ArrowUpDown, Filter, Loader2 } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -35,6 +35,8 @@ import { useTransactionManager } from '@/hooks/use-transaction-manager'
 import { EditTransactionForm } from '@/components/EditTransactionForm'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useTransactions } from '@/contexts/TransactionContext'
+import { DateRangePicker, DateRange } from '@/components/DateRangePicker'
+import { AddTransactionForm } from './AddTransactionForm'
 
 interface TransactionTableProps {
   transactions?: Transaction[]
@@ -46,6 +48,9 @@ interface TransactionTableProps {
   onTransactionUpdate?: (updatedTransaction: Transaction) => void
   // New prop to enable self-contained transaction management
   enableSelfManagement?: boolean
+  // New props for lazy loading
+  enableLazyLoading?: boolean
+  pageSize?: number
 }
 
 type SortField = 'date' | 'description' | 'category' | 'amount' | 'merchant'
@@ -65,15 +70,25 @@ export function TransactionTable({
   userId,
   categories: propCategories,
   onTransactionUpdate,
-  enableSelfManagement = false
+  enableSelfManagement = false,
+  enableLazyLoading = false,
+  pageSize = 50
 }: TransactionTableProps) {
   const [isClient, setIsClient] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortField, setSortField] = useState<SortField>('date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [merchantFilter, setMerchantFilter] = useState<string>('all')
+  const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
   const [confirmationDialog, setConfirmationDialog] = useState<CategoryChangeConfirmation | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
+  
+  // Lazy loading state
+  const [displayedCount, setDisplayedCount] = useState(enableLazyLoading ? pageSize : limit)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const observerRef = useRef<HTMLDivElement>(null)
+  const tableEndRef = useRef<HTMLDivElement>(null)
   
   // Use shared category context or prop categories
   const { categories: contextCategories, loading: categoriesLoading, error: categoriesError } = useCategories()
@@ -107,15 +122,6 @@ export function TransactionTable({
 
 
   // Transaction management handlers (moved from spending page)
-  const handleEditTransaction = (transaction: Transaction) => {
-    if (onEditTransaction) {
-      onEditTransaction(transaction)
-    } else if (enableSelfManagement) {
-      setEditingTransaction(transaction)
-      setIsEditModalOpen(true)
-    }
-  }
-
   const handleTransactionUpdated = async (id: string, data: Partial<Transaction>) => {
     if (enableSelfManagement && transactionManager) {
       await transactionManager.editTransaction(id, data)
@@ -202,7 +208,18 @@ export function TransactionTable({
     }
   }
 
-  const displayTransactions = useMemo(() => {
+  // Get unique merchants for filter dropdown
+  const uniqueMerchants = useMemo(() => {
+    const merchants = transactions
+      .map(t => t.merchant)
+      .filter((merchant): merchant is string => Boolean(merchant))
+      .filter((merchant, index, arr) => arr.indexOf(merchant) === index)
+      .sort()
+    return merchants
+  }, [transactions])
+
+  // Group transactions by date for display
+  const { filteredTransactions, displayTransactions, groupedTransactions } = useMemo(() => {
     const filtered = transactions.filter(transaction => {
       const matchesSearch = searchTerm === '' || 
         transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -210,7 +227,20 @@ export function TransactionTable({
       
       const matchesCategory = categoryFilter === 'all' || transaction.category_id === categoryFilter
       
-      return matchesSearch && matchesCategory
+      const matchesMerchant = merchantFilter === 'all' || transaction.merchant === merchantFilter
+      
+      const matchesDateRange = (() => {
+        if (!dateRange.startDate && !dateRange.endDate) return true
+        const transactionDate = new Date(transaction.date)
+        const startDate = dateRange.startDate ? new Date(dateRange.startDate) : null
+        const endDate = dateRange.endDate ? new Date(dateRange.endDate) : null
+        
+        if (startDate && transactionDate < startDate) return false
+        if (endDate && transactionDate > endDate) return false
+        return true
+      })()
+      
+      return matchesSearch && matchesCategory && matchesMerchant && matchesDateRange
     })
 
     filtered.sort((a, b) => {
@@ -231,8 +261,8 @@ export function TransactionTable({
           bValue = getCategoryName(b.category_id).toLowerCase()
           break
         case 'amount':
-          aValue = a.amount
-          bValue = b.amount
+          aValue = Math.abs(a.amount)
+          bValue = Math.abs(b.amount)
           break
         case 'merchant':
           aValue = (a.merchant || '').toLowerCase()
@@ -247,8 +277,66 @@ export function TransactionTable({
       return 0
     })
 
-    return filtered.slice(0, limit)
-  }, [transactions, searchTerm, categoryFilter, sortField, sortDirection, limit, getCategoryName])
+    // Group transactions by date
+    const grouped = filtered.reduce((groups, transaction) => {
+      const date = new Date(transaction.date).toDateString()
+      if (!groups[date]) {
+        groups[date] = []
+      }
+      groups[date].push(transaction)
+      return groups
+    }, {} as Record<string, Transaction[]>)
+
+    const displayed = enableLazyLoading ? filtered.slice(0, displayedCount) : filtered.slice(0, limit)
+    
+    return { filteredTransactions: filtered, displayTransactions: displayed, groupedTransactions: grouped }
+  }, [transactions, searchTerm, categoryFilter, merchantFilter, dateRange, sortField, sortDirection, limit, displayedCount, enableLazyLoading, getCategoryName])
+
+  // Reset displayed count when filters change
+  useEffect(() => {
+    if (enableLazyLoading) {
+      setDisplayedCount(pageSize)
+    }
+  }, [searchTerm, categoryFilter, merchantFilter, dateRange, sortField, sortDirection, pageSize, enableLazyLoading])
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (!enableLazyLoading || !tableEndRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries
+        if (entry.isIntersecting && !isLoadingMore && displayedCount < filteredTransactions.length) {
+          setIsLoadingMore(true)
+          // Simulate loading delay for better UX
+          setTimeout(() => {
+            setDisplayedCount(prev => Math.min(prev + pageSize, filteredTransactions.length))
+            setIsLoadingMore(false)
+          }, 300)
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '100px'
+      }
+    )
+
+    observer.observe(tableEndRef.current)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [enableLazyLoading, isLoadingMore, displayedCount, filteredTransactions.length, pageSize])
+
+  const loadMoreTransactions = useCallback(() => {
+    if (isLoadingMore || displayedCount >= filteredTransactions.length) return
+    
+    setIsLoadingMore(true)
+    setTimeout(() => {
+      setDisplayedCount(prev => Math.min(prev + pageSize, filteredTransactions.length))
+      setIsLoadingMore(false)
+    }, 300)
+  }, [isLoadingMore, displayedCount, filteredTransactions.length, pageSize])
   
   if (!isClient) {
     return (
@@ -268,207 +356,242 @@ export function TransactionTable({
   // Remove the early return for empty transactions - always show the full interface
 
   return (
-    <>
-      <Card className="bg-white border border-gray-200 shadow-sm">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-gray-900">Transactions</CardTitle>
+    <Card className="w-full">
+      <CardContent className="p-6">
+        {/* Header Section */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center gap-3 mb-4 w-full">
+            <h1 className="text-md font-semibold text-gray-500">TRANSACTIONS</h1>
+            <div className="flex items-center">
+              <AddTransactionForm userId={userId} onTransactionAdded={transactionContext?.addTransaction}/>
+            </div>
           </div>
           
-          {/* Search and Filter Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search transactions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          {/* Filter Controls */}
+          <div className="flex items-center justify-between mb-4 w-full gap-6">
+            {/* Left-aligned Filter Group */}
+            <div className="flex items-center gap-3">
+              {/* Date Range Filter */}
+              <div className="min-w-0 w-40">
+                <DateRangePicker
+                  value={dateRange}
+                  onChange={setDateRange}
+                />
+              </div>
+              
+              {/* Category Filter */}
+              <div className="min-w-0 w-40">
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-full text-xs" size="sm">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: category.color }}
+                          />
+                          {category.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Merchant Filter */}
+              <div className="min-w-0 w-40">
+                <Select value={merchantFilter} onValueChange={setMerchantFilter}>
+                  <SelectTrigger className="w-full text-xs" size="sm">
+                    <SelectValue placeholder="All Merchants" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Merchants</SelectItem>
+                    {uniqueMerchants.map((merchant) => (
+                      <SelectItem key={merchant} value={merchant}>
+                        {merchant}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             
-            <div className="flex gap-2">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter} disabled={categoriesLoading}>
-                <SelectTrigger className="w-[180px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder={categoriesLoading ? "Loading categories..." : "Filter by category"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categoriesLoading ? (
-                    <SelectItem value="loading" disabled>Loading categories...</SelectItem>
-                  ) : categoriesError ? (
-                    <SelectItem value="error" disabled>Error loading categories</SelectItem>
-                  ) : (
-                    categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+            {/* Right-aligned Search Bar */}
+            <div className="relative min-w-0 w-64">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-8 bg-gray-50 border-gray-200 w-full"
+              />
             </div>
           </div>
-        </CardHeader>
+          
+          {/* Transaction Summary */}
+           <div className="mt-4 text-sm text-gray-600">
+             <span className="font-medium">Total transactions:</span> {filteredTransactions.length} • 
+             <span className="font-medium">Date range:</span> July 12, 2024 - September 4, 2025 • 
+             <span className="font-medium">Total expenses:</span> <span className="text-red-600">$8,223.98</span> • 
+             <span className="font-medium">Total income:</span> <span className="text-green-600">$65,500.00</span>
+           </div>
+        </div>
         
-        <CardContent>
-          <div className="overflow-x-auto">
+        {/* Table */}
+        <div className="bg-white rounded-lg border border-gray-200">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-gray-200">
+                <TableHead 
+                  className="py-4 px-6 text-left font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('description')}
+                >
+                  <div className="flex items-center gap-2">
+                    Merchant / Description
+                    {sortField === 'description' && (
+                      <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="py-4 px-6 text-left font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('category')}
+                >
+                  <div className="flex items-center gap-2">
+                    Category
+                    {sortField === 'category' && (
+                      <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
+                    )}
+                  </div>
+                </TableHead>
+                <TableHead 
+                  className="py-4 px-6 text-right font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSort('amount')}
+                >
+                  <div className="flex items-center justify-end gap-2">
+                    Amount
+                    {sortField === 'amount' && (
+                      <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
+                    )}
+                  </div>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+          </Table>
+          
+          {/* Scrollable Table Body Container - Max 15 items before scroll */}
+          <div className="max-h-[900px] overflow-y-auto border-t">
             <Table>
-              <TableHeader>
-                <TableRow className="border-gray-200">
-                  <TableHead className="text-s font-medium text-gray-600 py-2">
-                    <div
-                      onClick={() => handleSort('date')}
-                      className="cursor-pointer inline-flex items-center font-medium text-gray-600 hover:text-gray-900"
-                    >
-                      Date
-                      <ArrowUpDown className="ml-1 h-3 w-3" />
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-s font-medium text-gray-600 py-2">
-                    <div
-                      onClick={() => handleSort('description')}
-                      className="cursor-pointer inline-flex items-center font-medium text-gray-600 hover:text-gray-900"
-                    >
-                      Description
-                      <ArrowUpDown className="ml-1 h-3 w-3" />
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-s font-medium text-gray-600 py-2">
-                    <div
-                      onClick={() => handleSort('merchant')}
-                      className="cursor-pointer inline-flex items-center font-medium text-gray-600 hover:text-gray-900"
-                    >
-                      Merchant
-                      <ArrowUpDown className="ml-1 h-3 w-3" />
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-s font-medium text-gray-600 py-2">
-                    <div
-                      onClick={() => handleSort('category')}
-                      className="cursor-pointer inline-flex items-center font-medium text-gray-600 hover:text-gray-900"
-                    >
-                      Category
-                      <ArrowUpDown className="ml-1 h-3 w-3" />
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-s font-medium text-gray-600 py-2">
-                    <div
-                      onClick={() => handleSort('amount')}
-                      className="cursor-pointer inline-flex items-center font-medium text-gray-600 hover:text-gray-900"
-                    >
-                      Amount
-                      <ArrowUpDown className="ml-1 h-3 w-3" />
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-s font-medium text-gray-600 py-2">
-                      Action
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
               <TableBody>
-                {displayTransactions.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center">
-                      <div className="text-gray-500">
-                        {transactions.length === 0 ? 'No transactions found. Add your first transaction to get started!' : 'No transactions match your search criteria.'}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  displayTransactions.map((transaction) => {
+              {displayTransactions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center py-8 text-gray-500">
+                    {transactions.length === 0 ? 'No transactions found. Add your first transaction to get started!' : 'No transactions match your search criteria.'}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                Object.entries(groupedTransactions)
+                  .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
+                  .map(([dateString, dayTransactions]) => {
+                    const displayedDayTransactions = dayTransactions.filter(t => 
+                      displayTransactions.includes(t)
+                    )
+                    
+                    if (displayedDayTransactions.length === 0) return null
+                    
+                    const formattedDate = new Date(dateString).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })
+                    
                     return (
-                      <TableRow key={transaction.id} className="border-gray-100 hover:bg-gray-50">
-                        <TableCell className="py-3">
-                          <div className="text-xs text-gray-900">
-                            {new Date(transaction.date).toLocaleDateString()}
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-3">
-                          <div className="text-xs text-gray-900">
-                            {transaction.description || 'No description'}
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-3">
-                          <div className="text-xs text-gray-900">
-                            {transaction.merchant || '-'}
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-3">
-                          <Select
-                            value={transaction.category_id || 'uncategorized'}
-                            onValueChange={(value) => handleCategoryChange(transaction, value)}
-                          >
-                            <SelectTrigger className="w-[160px] h-8 text-xs">
-                              <SelectValue>
-                                {renderCategoryWithColor(transaction.category_id)}
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="uncategorized">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-3 h-3 rounded-full bg-gray-400" />
-                                  <span>Uncategorized</span>
+                      <React.Fragment key={dateString}>
+                        {/* Date Header Row */}
+                        <TableRow className="bg-gray-50">
+                          <TableCell colSpan={3} className="py-3 px-6 font-medium text-gray-700 text-sm">
+                            {formattedDate}
+                          </TableCell>
+                        </TableRow>
+                        
+                        {/* Transactions for this date */}
+                        {displayedDayTransactions.map((transaction) => (
+                          <TableRow key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <TableCell className="py-4 px-6">
+                              <div className="space-y-1">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {transaction.merchant || transaction.description || 'No description'}
                                 </div>
-                              </SelectItem>
-                              {categories.map((category) => (
-                                <SelectItem key={category.id} value={category.id}>
-                                  <div className="flex items-center gap-2">
-                                    <div 
-                                      className="w-3 h-3 rounded-full" 
-                                      style={{ backgroundColor: category.color }}
-                                    />
-                                    <span>{category.name}</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell className="py-3 text-right">
-                          <div className={`text-xs ${
-                            transaction.type === 'INCOME' 
-                              ? 'text-green-600'
-                              : 'text-gray-900'
-                          }`}>
-                            {transaction.amount >= 0 ? '+' : ''}{formatCurrency(transaction.amount)}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right py-3">
-                          <div className="flex justify-end gap-1">
-                            {(onEditTransaction || enableSelfManagement) && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditTransaction(transaction)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            )}
-                            {(onDeleteTransaction || enableSelfManagement) && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteTransaction(transaction.id)}
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
+                              </div>
+                            </TableCell>
+                            <TableCell className="py-4 px-6">
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="w-3 h-3 rounded-full" 
+                                  style={{ backgroundColor: getCategoryColor(transaction.category_id) }}
+                                />
+                                <span className="text-sm text-gray-900">
+                                  {getCategoryName(transaction.category_id)}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="py-4 px-6 text-right">
+                              <div className={`text-sm font-medium ${
+                                transaction.type === 'INCOME' 
+                                  ? 'text-green-600'
+                                  : 'text-gray-900'
+                              }`}>
+                                {transaction.type === 'INCOME' ? '+' : ''}{formatCurrency(Math.abs(transaction.amount))}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </React.Fragment>
                     )
                   })
-                )}
+                  .filter(Boolean)
+              )}
               </TableBody>
             </Table>
           </div>
-        </CardContent>
-      </Card>
-
+          
+          {/* Infinite scroll trigger and loading indicator */}
+          {enableLazyLoading && (
+            <div className="mt-4">
+              {displayedCount < filteredTransactions.length && (
+                <div ref={tableEndRef} className="flex justify-center py-4">
+                  {isLoadingMore ? (
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Loading more transactions...</span>
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      onClick={loadMoreTransactions}
+                      className="text-sm"
+                    >
+                      Load More ({filteredTransactions.length - displayedCount} remaining)
+                    </Button>
+                  )}
+                </div>
+              )}
+              
+              {displayedCount >= filteredTransactions.length && filteredTransactions.length > 0 && (
+                <div className="text-center py-4 text-gray-500 text-sm">
+                  All transactions loaded ({filteredTransactions.length} total)
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </CardContent>
+      
       {/* Category Change Confirmation Dialog */}
       <Dialog open={!!confirmationDialog} onOpenChange={() => setConfirmationDialog(null)}>
         <DialogContent>
@@ -506,6 +629,6 @@ export function TransactionTable({
           onTransactionUpdated={handleTransactionUpdated}
         />
       )}
-    </>
+    </Card>
   )
 }
