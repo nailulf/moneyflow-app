@@ -2,7 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
 import { getUserBudgets, createBudget, updateBudget, deleteBudget, getBudgetItems } from '@/lib/api/budgets'
-import { BudgetDB, BudgetInsert, BudgetUpdate } from '@/types/database'
+import { createBudgetCategory, getBudgetCategories, updateBudgetCategory, deleteBudgetCategory } from '@/lib/api/budget-categories'
+import { BudgetDB, BudgetInsert, BudgetUpdate, BudgetCategoryDB, BudgetCategoryInsert, BudgetCategoryUpdate } from '@/types/database'
+import { BudgetItem } from '@/types/app'
 import { toast } from 'sonner'
 
 // Budget interfaces for the context
@@ -51,7 +53,14 @@ interface BudgetContextType {
   selectBudget: (budget: Budget | null) => void
   refreshBudgets: () => Promise<void>
   getBudgetById: (budgetId: string) => Budget | null
-  getBudgetItems: (budgetId: string) => Promise<any[]>
+  getBudgetItems: (budgetId: string) => Promise<BudgetItem[]>
+  // Budget category management
+  getBudgetCategoriesHandler: (budgetId: string) => Promise<BudgetCategoryDB[]>
+  createBudgetCategoryHandler: (budgetCategory: BudgetCategoryInsert) => Promise<BudgetCategoryDB>
+  updateBudgetCategoryHandler: (budgetCategory: BudgetCategoryUpdate) => Promise<BudgetCategoryDB>
+  deleteBudgetCategoryHandler: (budgetCategoryId: string) => Promise<void>
+  // Enhanced budget editing
+  updateBudgetWithCategories: (budgetId: string, budgetData: Partial<BudgetUpdate>, categories: BudgetCategoryDB[]) => Promise<void>
 }
 
 const BudgetContext = createContext<BudgetContextType | undefined>(undefined)
@@ -290,6 +299,123 @@ export function BudgetProvider({
     }
   }, [])
 
+  // Budget category management functions
+  const getBudgetCategoriesHandler = useCallback(async (budgetId: string): Promise<BudgetCategoryDB[]> => {
+    try {
+      setLoading(true)
+      const categories = await getBudgetCategories(budgetId)
+      return categories
+    } catch (error) {
+      console.error('Error fetching budget categories:', error)
+      setError('Failed to fetch budget categories')
+      return []
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const createBudgetCategoryHandler = useCallback(async (budgetCategory: BudgetCategoryInsert): Promise<BudgetCategoryDB> => {
+    try {
+      setLoading(true)
+      const newCategory = await createBudgetCategory(budgetCategory)
+      await refreshBudgets() // Refresh to get updated data
+      return newCategory
+    } catch (error) {
+      console.error('Error creating budget category:', error)
+      setError('Failed to create budget category')
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }, [refreshBudgets])
+
+  const updateBudgetCategoryHandler = useCallback(async (budgetCategory: BudgetCategoryUpdate): Promise<BudgetCategoryDB> => {
+    try {
+      setLoading(true)
+      const updatedCategory = await updateBudgetCategory(budgetCategory)
+      await refreshBudgets() // Refresh to get updated data
+      return updatedCategory
+    } catch (error) {
+      console.error('Error updating budget category:', error)
+      setError('Failed to update budget category')
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }, [refreshBudgets])
+
+  const deleteBudgetCategoryHandler = useCallback(async (budgetCategoryId: string): Promise<void> => {
+    try {
+      setLoading(true)
+      await deleteBudgetCategory(budgetCategoryId)
+      await refreshBudgets() // Refresh to get updated data
+    } catch (error) {
+      console.error('Error deleting budget category:', error)
+      setError('Failed to delete budget category')
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }, [refreshBudgets])
+
+  // Enhanced budget editing with categories
+  const updateBudgetWithCategories = useCallback(async (
+    budgetId: string,
+    budgetData: Partial<BudgetUpdate>,
+    categories: BudgetCategoryDB[]
+  ): Promise<void> => {
+    try {
+      setLoading(true)
+      
+      // Update budget data if provided
+      if (Object.keys(budgetData).length > 0) {
+        await updateBudget({ id: budgetId, ...budgetData })
+      }
+
+      // Get current categories to compare
+      const currentCategories = await getBudgetCategories(budgetId)
+      const currentCategoryIds = new Set(currentCategories.map(cat => cat.id))
+      const newCategoryIds = new Set(categories.filter(cat => cat.id).map(cat => cat.id))
+
+      // Delete removed categories
+      for (const currentCategory of currentCategories) {
+        if (!newCategoryIds.has(currentCategory.id)) {
+          await deleteBudgetCategory(currentCategory.id)
+        }
+      }
+
+      // Update or create categories
+      for (const category of categories) {
+        if (category.id && currentCategoryIds.has(category.id)) {
+          // Update existing category
+          await updateBudgetCategory({
+            id: category.id,
+            budget_id: budgetId,
+            category_id: category.category_id,
+            allocated_amount: category.allocated_amount,
+            currency: category.currency
+          })
+        } else if (!category.id) {
+          // Create new category
+          await createBudgetCategory({
+            budget_id: budgetId,
+            category_id: category.category_id,
+            allocated_amount: category.allocated_amount,
+            currency: category.currency || 'IDR'
+          })
+        }
+      }
+
+      await refreshBudgets() // Refresh to get updated data
+    } catch (error) {
+      console.error('Error updating budget with categories:', error)
+      setError('Failed to update budget with categories')
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }, [refreshBudgets])
+
   useEffect(() => {
     if (autoFetch) {
       fetchBudgets()
@@ -309,7 +435,14 @@ export function BudgetProvider({
     selectBudget,
     refreshBudgets,
     getBudgetById,
-    getBudgetItems: getBudgetItemsHandler
+    getBudgetItems: getBudgetItemsHandler,
+    // Budget category management
+    getBudgetCategoriesHandler,
+    createBudgetCategoryHandler,
+    updateBudgetCategoryHandler,
+    deleteBudgetCategoryHandler,
+    // Enhanced budget editing
+    updateBudgetWithCategories
   }
 
   return (

@@ -112,3 +112,15 @@ export function getMonthlyIncome(transactions: Transaction[], currentDate: Date 
     })
     .reduce((sum, t) => sum + Math.abs(t.amount), 0)
 }
+
+export function calculateTotalSpending(transactions: Transaction[]): number {
+  return transactions
+    .filter(t => t.type === 'EXPENSE')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+}
+
+export function calculateTotalIncome(transactions: Transaction[]): number {
+  return transactions
+    .filter(t => t.type === 'INCOME')
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+}

@@ -44,6 +44,81 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PUT(request: NextRequest) {
+  try {
+    const { id, budget_id, category_id, allocated_amount, currency = 'IDR' } = await request.json()
+
+    if (!id || !budget_id || !category_id || !allocated_amount) {
+      return NextResponse.json({ error: 'ID, budget ID, category ID, and allocated amount are required' }, { status: 400 })
+    }
+
+    // Check if we're in build time
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    }
+
+    const supabase = createServerComponentClient()
+
+    const updateData = {
+      budget_id,
+      category_id,
+      allocated_amount,
+      currency,
+      updated_at: new Date().toISOString(),
+    }
+
+    const { data, error } = await supabase
+      .from('budget_categories')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating budget category:', error)
+      return NextResponse.json({ error: 'Failed to update budget category' }, { status: 500 })
+    }
+
+    return NextResponse.json(data)
+  } catch (error: unknown) {
+    console.error('API Error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'Budget category ID is required' }, { status: 400 })
+    }
+
+    // Check if we're in build time
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    }
+
+    const supabase = createServerComponentClient()
+
+    const { error } = await supabase
+      .from('budget_categories')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting budget category:', error)
+      return NextResponse.json({ error: 'Failed to delete budget category' }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error: unknown) {
+    console.error('API Error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { CategoryDB } from '@/types/database'
 import { formatCurrency, DEFAULT_CURRENCY } from '@/lib/data-utils'
 import { preferences } from '@/lib/api/user-preferences'
+import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
 
 interface BudgetCategory {
   category_id: string
@@ -84,6 +85,9 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
   const [budgetCategories, setBudgetCategories] = useState<BudgetCategory[]>([])
   const [selectedCategoryId, setSelectedCategoryId] = useState('')
   const [categoryAmount, setCategoryAmount] = useState('')
+  
+  // Initialize budget allocation hook with minimum value to prevent zero error
+  const budgetAllocation = useBudgetAllocation(1, DEFAULT_CURRENCY)
 
   // Reset form when modal opens/closes
   useEffect(() => {
@@ -98,6 +102,9 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
       setSelectedCategoryId('')
       setCategoryAmount('')
       
+      // Initialize allocation hook
+      budgetAllocation.initializeAllocation(0, DEFAULT_CURRENCY)
+      
       // Load user's preferred currency
       if (userId) {
         preferences.getCurrency(userId).then(userCurrency => {
@@ -109,7 +116,17 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
         setCurrency(DEFAULT_CURRENCY)
       }
     }
+    // Removed budgetAllocation from dependencies to prevent infinite loop
   }, [isOpen, userId])
+
+  // Update allocation hook when total amount changes
+  useEffect(() => {
+    const amount = parseFloat(totalAmount) || 0
+    if (amount > 0) {
+      budgetAllocation.updateTotalAmount(amount)
+    }
+    // Removed budgetAllocation from dependencies to prevent infinite loop
+  }, [totalAmount])
 
   const handleAddCategory = () => {
     if (!selectedCategoryId || !categoryAmount) {
@@ -123,13 +140,26 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
       return
     }
 
-    // Check if category already exists
-    if (budgetCategories.some(bc => bc.category_id === selectedCategoryId)) {
-      toast.error('Category already added to budget')
+    const category = categories.find(c => c.id === selectedCategoryId)
+    if (!category) {
+      toast.error('Selected category not found')
       return
     }
 
-    const category = categories.find(c => c.id === selectedCategoryId)
+    // Use allocation hook to add category
+    const success = budgetAllocation.addCategory(
+      selectedCategoryId,
+      category.name,
+      category.color,
+      amount
+    )
+
+    if (!success) {
+      toast.error('Failed to add category. Check if it already exists or exceeds budget.')
+      return
+    }
+
+    // Update local state for UI
     setBudgetCategories(prev => [...prev, {
       category_id: selectedCategoryId,
       allocated_amount: amount,
@@ -141,16 +171,24 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
   }
 
   const handleRemoveCategory = (categoryId: string) => {
+    // Use allocation hook to remove category
+    const success = budgetAllocation.removeCategory(categoryId)
+    
+    if (!success) {
+      toast.error('Failed to remove category')
+      return
+    }
+    
+    // Update local state for UI
     setBudgetCategories(prev => prev.filter(bc => bc.category_id !== categoryId))
   }
 
   const getTotalAllocated = () => {
-    return budgetCategories.reduce((sum, bc) => sum + bc.allocated_amount, 0)
+    return budgetAllocation.totalAllocated
   }
 
   const getRemainingAmount = () => {
-    const total = parseFloat(totalAmount) || 0
-    return total - getTotalAllocated()
+    return budgetAllocation.remainingAmount
   }
 
   const canProceedToStep2 = () => {
@@ -158,9 +196,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
   }
 
   const canCreateBudget = () => {
-    const total = parseFloat(totalAmount) || 0
-    const allocated = getTotalAllocated()
-    return budgetCategories.length > 0 && allocated <= total
+    return budgetAllocation.isValid && budgetCategories.length > 0
   }
 
   const handleCreateBudget = async () => {
@@ -171,6 +207,9 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
 
     setIsLoading(true)
     try {
+      // Use allocation hook to get properly formatted data
+      const allocationData = budgetAllocation.toDatabaseFormat()
+      
       const budgetData = {
         name: budgetName,
         total_amount: parseFloat(totalAmount),
@@ -178,10 +217,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
         year,
         month: period === 'monthly' ? month : null,
         currency,
-        categories: budgetCategories.map(bc => ({
-          category_id: bc.category_id,
-          allocated_amount: bc.allocated_amount
-        }))
+        categories: allocationData
       }
 
       const response = await fetch('/api/budgets', {
@@ -214,14 +250,15 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
   )
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Create New Budget
-          </DialogTitle>
-        </DialogHeader>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent className="w-[400px] sm:w-[540px]">
+         <SheetHeader>
+           <SheetTitle className="flex items-center gap-2">
+             <Target className="h-5 w-5" />
+             Create New Budget
+           </SheetTitle>
+         </SheetHeader>
+         <div className="mt-6 overflow-y-auto max-h-[calc(100vh-120px)]">
 
         {step === 1 && (
           <div className="space-y-6">
@@ -350,6 +387,24 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
               </CardContent>
             </Card>
 
+            {!budgetAllocation.isValid && budgetAllocation.validation.errors.length > 0 && (
+              <Card className="border-red-200 bg-red-50">
+                <CardContent className="pt-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-red-800">Validation Errors:</p>
+                    <ul className="text-sm text-red-700 space-y-1">
+                      {budgetAllocation.validation.errors.map((error, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="text-red-500">•</span>
+                          {error}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="space-y-4">
               <h3 className="font-semibold">Add Category Allocation</h3>
               <div className="flex gap-2">
@@ -428,7 +483,8 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+         </div>
+       </SheetContent>
+     </Sheet>
   )
 }

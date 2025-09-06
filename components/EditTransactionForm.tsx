@@ -8,7 +8,7 @@ import { Transaction } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { toast } from 'sonner'
 import { useCategories } from '@/contexts/CategoryContext'
 
@@ -130,67 +130,13 @@ export function EditTransactionForm({
   const selectedCategory = getSelectedCategory()
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-md"
-        onInteractOutside={(event) => {
-          const suppressed = suppressCloseUntil > Date.now()
-          if (isAnySelectOpen || suppressed) {
-            event.preventDefault()
-            return
-          }
-          const target = event.target as HTMLElement | null
-          if (
-            target && (
-              target.closest('[data-slot^="select-"]') ||
-              target.closest('[role="listbox"]') ||
-              target.closest('[role="option"]')
-            )
-          ) {
-            event.preventDefault()
-          }
-        }}
-        onPointerDownOutside={(event: Event & { preventDefault: () => void; detail?: { originalEvent?: Event }; target?: EventTarget | null }) => {
-          const suppressed = suppressCloseUntil > Date.now()
-          if (isAnySelectOpen || suppressed) {
-            event.preventDefault()
-            return
-          }
-          const orig = event.detail?.originalEvent as Event | undefined
-          const target = (orig?.target ?? event.target) as HTMLElement | null
-          if (
-            target && (
-              target.closest('[data-slot^="select-"]') ||
-              target.closest('[role="listbox"]') ||
-              target.closest('[role="option"]')
-            )
-          ) {
-            event.preventDefault()
-          }
-        }}
-        onFocusOutside={(event: Event & { preventDefault: () => void; detail?: { originalEvent?: Event }; target?: EventTarget | null }) => {
-          const suppressed = suppressCloseUntil > Date.now()
-          if (isAnySelectOpen || suppressed) {
-            event.preventDefault()
-            return
-          }
-          const orig = event.detail?.originalEvent as Event | undefined
-          const target = (orig?.target ?? event.target) as HTMLElement | null
-          if (
-            target && (
-              target.closest('[data-slot^="select-"]') ||
-              target.closest('[role="listbox"]') ||
-              target.closest('[role="option"]')
-            )
-          ) {
-            event.preventDefault()
-          }
-        }}
-      >
-        <DialogHeader>
-          <DialogTitle>Edit Transaction</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-[400px] sm:w-[540px]">
+        <SheetHeader>
+          <SheetTitle>Edit Transaction</SheetTitle>
+        </SheetHeader>
+        <div className="mt-6 overflow-y-auto">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Date</label>
             <Input
@@ -335,7 +281,8 @@ export function EditTransactionForm({
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

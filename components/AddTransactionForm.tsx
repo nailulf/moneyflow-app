@@ -8,7 +8,7 @@ import { transactionSchema, TransactionFormData } from '@/lib/validations'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -109,7 +109,7 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
   const hasDynamicCategories = dynamicCategoryItems.length > 0
 
   return (
-    <Dialog
+    <Sheet
       open={open}
       onOpenChange={(next: boolean) => {
         const suppressed = suppressCloseUntil > Date.now()
@@ -117,79 +117,17 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
         setOpen(next)
       }}
     >
-      <DialogTrigger asChild>
+      <SheetTrigger asChild>
         <Button className="gap-2" data-testid="add-transaction-trigger">
           <Plus className="h-4 w-4" />
           Add Transaction
         </Button>
-      </DialogTrigger>
-      <DialogContent
-        className="sm:max-w-md bg-white"
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onInteractOutside={(event: any) => {
-          const suppressed = suppressCloseUntil > Date.now()
-          if (isAnySelectOpen || suppressed) {
-            event.preventDefault()
-            return
-          }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const orig = (event as any).detail?.originalEvent as Event | undefined
-          const target = (orig?.target ?? event.target) as HTMLElement | null
-          if (
-            target && (
-              target.closest('[data-slot^="select-"]') ||
-              target.closest('[role="listbox"]') ||
-              target.closest('[role="option"]')
-            )
-          ) {
-            event.preventDefault()
-          }
-        }}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onPointerDownOutside={(event: any) => {
-          const suppressed = suppressCloseUntil > Date.now()
-          if (isAnySelectOpen || suppressed) {
-            event.preventDefault()
-            return
-          }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const orig = (event as any).detail?.originalEvent as Event | undefined
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const target = (orig?.target ?? (event as any).target) as HTMLElement | null
-          if (
-            target && (
-              target.closest('[data-slot^="select-"]') ||
-              target.closest('[role="listbox"]') ||
-              target.closest('[role="option"]')
-            )
-          ) {
-            event.preventDefault()
-          }
-        }}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onFocusOutside={(event: any) => {
-          const suppressed = suppressCloseUntil > Date.now()
-          if (isAnySelectOpen || suppressed) {
-            event.preventDefault()
-            return
-          }
-           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const orig = (event as any).detail?.originalEvent as Event | undefined
-          const target = (orig?.target ?? event.target) as HTMLElement | null
-          if (
-            target && (
-              target.closest('[data-slot^=\"select-\"]') ||
-              target.closest('[role=\"listbox\"]') ||
-              target.closest('[role=\"option\"]')
-            )
-          ) {
-            event.preventDefault()
-          }
-        }}
-      >
-        <DialogHeader>
-          <DialogTitle>Add New Transaction</DialogTitle>
-        </DialogHeader>
+      </SheetTrigger>
+      <SheetContent className="w-[400px] sm:w-[540px]">
+        <SheetHeader>
+          <SheetTitle>Add New Transaction</SheetTitle>
+        </SheetHeader>
+        <div className="mt-6 overflow-y-auto">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Date</label>
@@ -332,7 +270,8 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 
 interface BudgetCategory {
@@ -63,16 +63,20 @@ export function useBudgetManager({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Memoized API URL to prevent unnecessary recalculations
+  const apiUrl = useMemo(() => {
+    const currentDate = new Date()
+    const targetYear = year || currentDate.getFullYear()
+    const targetMonth = month || (currentDate.getMonth() + 1)
+    return `/api/budgets?year=${targetYear}&month=${targetMonth}&active=true`
+  }, [year, month]) // Optimized: memoized API URL construction
+
   const fetchBudgets = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     
     try {
-      const currentDate = new Date()
-      const targetYear = year || currentDate.getFullYear()
-      const targetMonth = month || (currentDate.getMonth() + 1)
-      
-      const response = await fetch(`/api/budgets?year=${targetYear}&month=${targetMonth}&active=true`)
+      const response = await fetch(apiUrl)
       
       if (!response.ok) {
         throw new Error('Failed to fetch budgets')
@@ -94,7 +98,7 @@ export function useBudgetManager({
     } finally {
       setIsLoading(false)
     }
-  }, [year, month])
+  }, [apiUrl])
 
   useEffect(() => {
     if (autoFetch) {
@@ -176,7 +180,7 @@ export function useBudgetManager({
     } finally {
       setIsLoading(false)
     }
-  }, [selectedBudget, onBudgetUpdated])
+  }, [selectedBudget?.id, onBudgetUpdated]) // Optimized: only depend on selectedBudget.id
 
   const deleteBudget = useCallback(async (id: string) => {
     setIsLoading(true)
@@ -212,7 +216,7 @@ export function useBudgetManager({
     } finally {
       setIsLoading(false)
     }
-  }, [selectedBudget, onBudgetDeleted])
+  }, [selectedBudget?.id, onBudgetDeleted]) // Optimized: only depend on selectedBudget.id
 
   const selectBudget = useCallback((budget: Budget | null) => {
     setSelectedBudget(budget)

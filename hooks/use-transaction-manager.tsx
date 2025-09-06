@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Transaction, TransactionInsert, TransactionUpdate } from '@/types/database'
 import { TransactionFormData } from '@/lib/validations'
 import { toast } from 'sonner'
@@ -105,7 +105,7 @@ export function useTransactionManager({
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, []) // Optimized: no dependencies needed for this function
 
   const removeTransaction = useCallback(async (id: string) => {
     try {
@@ -122,7 +122,7 @@ export function useTransactionManager({
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, []) // Optimized: no dependencies needed for this function
 
   const getTransactionsByDateRangeHandler = useCallback(async (startDate: string, endDate: string) => {
     try {

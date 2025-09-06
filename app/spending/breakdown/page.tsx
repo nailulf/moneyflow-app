@@ -10,7 +10,7 @@ import { useTransactions } from '@/contexts/TransactionContext'
 import { formatCurrency } from '@/lib/data-utils'
 import { useFilteredTransactions } from '@/hooks/useFilteredTransactions'
 import { calculateBudgetProgress, calculateTotalSpent } from '@/lib/budget-utils'
-import { BudgetCreationModal } from '@/components/BudgetCreationModal'
+import { BudgetCreationModal } from '@/components/BudgetCreationSheet'
 import { useCategories } from '@/contexts/CategoryContext'
 import { BudgetProvider } from '@/contexts/BudgetContext'
 // Simple progress component inline

@@ -21,6 +21,11 @@ import {
 import { CATEGORIES, CashFlowBreakdownProps } from '@/types/app'
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import { TransformedBudget } from '@/contexts/BudgetContext'
+import { BudgetEditSheet } from '@/components/BudgetEditSheet'
+import { toast } from 'sonner'
+import { createCategory } from '@/lib/api/categories'
+import { getUserCategoryGroups } from '@/lib/api/category-groups'
+import { CategoryInsert } from '@/types/database'
 
 const chartConfig = {
   amount: {
@@ -49,8 +54,9 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
   const [viewBy, setViewBy] = useState<'category' | 'amount'>('category')
   const [budgetItemsLoading, setBudgetItemsLoading] = useState(false)
   const [budgetItemsError, setBudgetItemsError] = useState<string | null>(null)
-  const { getCategoryName, getCategoryColor } = useCategories()
-  const { transformedBudgets, selectedBudget, selectBudget, loading: budgetLoading, error: budgetError, getBudgetItems } = useBudgets()
+  const [isBudgetEditOpen, setIsBudgetEditOpen] = useState(false)
+  const { getCategoryName, getCategoryColor, categories, refreshCategories } = useCategories()
+  const { transformedBudgets, selectedBudget, selectBudget, loading: budgetLoading, error: budgetError, getBudgetItems, updateBudgetWithCategories, refreshBudgets } = useBudgets()
 
   // Use the filtered transactions passed as props
   // This allows the component to respect the month/year filter from the parent
@@ -272,6 +278,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
   }
 
   return (
+    <>
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -431,7 +438,11 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                     </div>
                     
                     {/* Edit Budget Button */}
-                    <button className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors">
+                    <button 
+                      onClick={() => setIsBudgetEditOpen(true)}
+                      className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+                      disabled={!selectedBudget}
+                    >
                       <span className="text-sm font-medium underline">EDIT BUDGET</span>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -555,5 +566,163 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
         </Tabs>
       </CardContent>
     </Card>
+    
+    {/* Budget Edit Sheet */}
+    <BudgetEditSheet
+      isOpen={isBudgetEditOpen}
+      onClose={() => setIsBudgetEditOpen(false)}
+      budgetData={selectedBudget ? {
+        id: selectedBudget.id || '1',
+        name: selectedBudget.name || 'Monthly Budget',
+        totalAmount: selectedTransformedBudget?.totalAmount || 0,
+        period: 'monthly' as const,
+        categories: selectedTransformedBudget?.categories || []
+      } : null}
+      onSave={async (updatedBudget) => {
+        try {
+          if (!selectedBudget?.id) {
+            toast.error('No budget selected for saving')
+            return
+          }
+
+          const userId = process.env.NEXT_PUBLIC_TEST_USER_ID!
+          
+          // Validate budget data before processing
+          if (!updatedBudget.categories || updatedBudget.categories.length === 0) {
+            throw new Error('No budget categories provided')
+          }
+          
+          if (updatedBudget.totalAmount <= 0) {
+            throw new Error('Budget total amount must be greater than zero')
+          }
+          
+          // Check if budget exceeds limit and handle "Others" category creation
+          const totalAllocated = updatedBudget.categories.reduce((sum, cat) => {
+            if (cat.budgetAmount < 0) {
+              throw new Error(`Budget amount cannot be negative for category: ${cat.category}`)
+            }
+            return sum + cat.budgetAmount
+          }, 0)
+          const budgetExceedsLimit = totalAllocated > updatedBudget.totalAmount
+          
+          // Ensure "Others" category exists if budget exceeds limit or if it's referenced
+          const othersCategory = updatedBudget.categories.find(cat => cat.category === 'Others')
+          let othersExists = categories.find(cat => cat.name === 'Others')
+          
+          if ((budgetExceedsLimit || othersCategory) && !othersExists) {
+            // Get expense category group
+            const categoryGroups = await getUserCategoryGroups(userId)
+            const expenseGroup = categoryGroups.find(group => group.type === 'EXPENSE')
+            
+            if (!expenseGroup) {
+              throw new Error('No expense category group found')
+            }
+            
+            // Create "Others" category
+            const newOthersCategory: CategoryInsert = {
+              user_id: userId,
+              name: 'Others',
+              color: '#AED6F1',
+              group_type: 'EXPENSE',
+              category_group_id: expenseGroup.id,
+              is_custom: true,
+              is_active: true
+            }
+            
+            othersExists = await createCategory(newOthersCategory)
+            
+            // Refresh categories to include the new "Others" category
+            await refreshCategories()
+            
+            toast.success('"Others" category created successfully')
+          }
+          
+          // If budget exceeds limit and no "Others" item exists, create it
+          if (budgetExceedsLimit && !othersCategory) {
+            const excessAmount = totalAllocated - updatedBudget.totalAmount
+            updatedBudget.categories.push({
+               id: '',
+               category: 'Others',
+               budgetAmount: excessAmount,
+               spentAmount: 0,
+               color: '#AED6F1',
+               status: 'good' as const
+             })
+            
+            // Update total budget amount to accommodate the excess
+            updatedBudget.totalAmount = totalAllocated
+          }
+
+          // Transform BudgetEditData categories to BudgetCategoryDB format
+          const budgetCategories = updatedBudget.categories.map(category => {
+            // Find category ID by name
+            const categoryData = categories.find(cat => cat.name === category.category) || 
+                               (category.category === 'Others' ? othersExists : null)
+            
+            if (!categoryData) {
+              throw new Error(`Category not found: ${category.category}`)
+            }
+
+            return {
+              id: category.id !== categoryData.id ? '' : category.id, // Empty ID for new categories
+              budget_id: selectedBudget.id,
+              category_id: categoryData.id,
+              allocated_amount: category.budgetAmount,
+              spent_amount: category.spentAmount,
+              currency: 'IDR',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
+          })
+
+          // Update budget with categories
+          await updateBudgetWithCategories(
+            selectedBudget.id,
+            {
+              name: updatedBudget.name,
+              total_amount: updatedBudget.totalAmount,
+              period: updatedBudget.period
+            },
+            budgetCategories
+          )
+
+          // Refresh budgets to get updated data
+          await refreshBudgets()
+          
+          setIsBudgetEditOpen(false)
+        } catch (error) {
+          console.error('Error saving budget:', error)
+          
+          // Provide specific error messages for different scenarios
+          let errorMessage = 'Unknown error occurred'
+          
+          if (error instanceof Error) {
+            if (error.message.includes('Category not found')) {
+              errorMessage = 'Failed to find or create required category. Please try again.'
+            } else if (error.message.includes('No expense category group found')) {
+              errorMessage = 'No expense category group found. Please contact support.'
+            } else if (error.message.includes('budget')) {
+              errorMessage = `Budget save failed: ${error.message}`
+            } else {
+              errorMessage = error.message
+            }
+          }
+          
+          toast.error(`Error saving budget: ${errorMessage}`)
+          
+          // If category creation failed, refresh categories to ensure consistency
+          if (error instanceof Error && error.message.includes('Category')) {
+            try {
+              await refreshCategories()
+            } catch (refreshError) {
+              console.error('Failed to refresh categories:', refreshError)
+            }
+          }
+          
+          throw error // Let BudgetEditSheet handle the error display
+        }
+      }}
+    />
+    </>
   )
 }

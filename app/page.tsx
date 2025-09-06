@@ -27,15 +27,6 @@ export default function Home() {
                 console.log('Add assets clicked')
               }}
             />
-          
-          <div className="mt-6">
-            <MonthlyChart
-              transactions={transactions}
-              type="both"
-              title="Income vs Expenses"
-              displayMonths={12}
-            />
-          </div>
         </MainContent>
         
         <SideContent>

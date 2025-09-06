@@ -52,7 +52,7 @@ export async function getUserBudgets(userId: string): Promise<BudgetDB[]> {
 
 // Update an existing budget
 export async function updateBudget(budget: BudgetUpdate): Promise<BudgetDB> {
-  const response = await fetch(`/api/budgets/${budget.id}`, {
+  const response = await fetch('/api/budgets', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

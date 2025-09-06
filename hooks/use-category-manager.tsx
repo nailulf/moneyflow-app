@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import { CategoryGroupData, CategoryItem, CategoryGroup, CategoryGroupType } from '@/types/app'
 import { CategoryDB } from '@/types/database'
@@ -145,6 +145,9 @@ export function useCategoryManager({
   }, [loadCategories])
 
   // Add a new category group
+  // Memoize category groups length to prevent unnecessary re-renders
+  const categoryGroupsLength = useMemo(() => categoryGroups.length, [categoryGroups.length])
+
   const addCategoryGroup = useCallback(async (name: string, type: CategoryGroupType, color: string) => {
     if (!userId) {
       toast.error('User not authenticated')
@@ -156,7 +159,7 @@ export function useCategoryManager({
     
     try {
       const groupInsert = convertToGroupInsert(
-        { name, type, color, isDefault: false, isActive: true, sortOrder: categoryGroups.length + 1 },
+        { name, type, color, isDefault: false, isActive: true, sortOrder: categoryGroupsLength + 1 },
         userId
       )
       
@@ -171,7 +174,7 @@ export function useCategoryManager({
     } finally {
       setIsLoading(false)
     }
-  }, [userId, loadCategories, categoryGroups.length])
+  }, [userId, loadCategories, categoryGroupsLength]) // Optimized: use memoized length
 
   // Delete a category group
    const deleteCategoryGroup = useCallback(async (groupId: string) => {
@@ -290,9 +293,21 @@ export function useCategoryManager({
 export function useCategories(userId: string) {
   const { categoryGroups, isLoading, error } = useCategoryManager({ userId })
   
-  const allCategories = categoryGroups.flatMap(group => group.categories)
-  const expenseCategories = categoryGroups.find(g => g.id === 'EXPENSE')?.categories || []
-  const incomeCategories = categoryGroups.find(g => g.id === 'INCOME')?.categories || []
+  // Memoize computed categories to prevent unnecessary recalculations
+  const allCategories = useMemo(() => 
+    categoryGroups.flatMap(group => group.categories), 
+    [categoryGroups]
+  )
+  
+  const expenseCategories = useMemo(() => 
+    categoryGroups.find(g => g.id === 'EXPENSE')?.categories || [], 
+    [categoryGroups]
+  )
+  
+  const incomeCategories = useMemo(() => 
+    categoryGroups.find(g => g.id === 'INCOME')?.categories || [], 
+    [categoryGroups]
+  )
   
   return {
     allCategories,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { transformBudgetWithSpending, getTransactionsByDateRange } from '@/lib/budget-utils'
 import { Transaction } from '@/types/database'
 
@@ -52,7 +52,16 @@ export function useBudgetData(
   const [testCounter, setTestCounter] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
   
-  // Fetch function
+  // Memoized URL construction to prevent unnecessary re-computations
+  const apiUrl = useMemo(() => {
+    let url = `/api/budgets?userId=${userId}&year=${selectedYear}&active=true`
+    if (timeRange === 'monthly') {
+      url += `&month=${selectedMonth}`
+    }
+    return url
+  }, [userId, selectedYear, selectedMonth, timeRange]) // Optimized: memoized URL construction
+
+  // Fetch function with optimized dependencies
   const fetchBudgets = useCallback(async () => {
     console.log('🔍 fetchBudgets called')
     
@@ -60,13 +69,8 @@ export function useBudgetData(
       setLoading(true)
       setError(null)
       
-      let url = `/api/budgets?userId=${userId}&year=${selectedYear}&active=true`
-      if (timeRange === 'monthly') {
-        url += `&month=${selectedMonth}`
-      }
-      
-      console.log('🔍 Fetching budgets from:', url)
-      const response = await fetch(url)
+      console.log('🔍 Fetching budgets from:', apiUrl)
+      const response = await fetch(apiUrl)
       
       if (!response.ok) {
         throw new Error(`Failed to fetch budgets: ${response.statusText}`)
@@ -132,35 +136,34 @@ export function useBudgetData(
     }
   }, [isMounted, fetchBudgets])
 
-  // Get filtered transactions for the current time range
-  const filteredTransactions = getTransactionsByDateRange(
-    transactions,
-    timeRange,
-    selectedYear,
-    selectedMonth
-  )
+  // Memoized filtered transactions to prevent unnecessary recalculations
+  const filteredTransactions = useMemo(() => {
+    return getTransactionsByDateRange(
+      transactions,
+      timeRange,
+      selectedYear,
+      selectedMonth
+    )
+  }, [transactions, timeRange, selectedYear, selectedMonth])
 
-  // Transform budgets with actual spending data
-  const transformedBudgets = (budgets || []).map(budget => 
-    transformBudgetWithSpending(budget, filteredTransactions)
-  )
+  // Memoized transformed budgets to prevent expensive recalculations
+  const transformedBudgets = useMemo(() => {
+    return (budgets || []).map(budget => 
+      transformBudgetWithSpending(budget, filteredTransactions)
+    )
+  }, [budgets, filteredTransactions])
 
   console.log('🎯 useBudgetData returning budgets:', budgets, 'testCounter:', testCounter)
   
-  // Create a refetch function
+  // Optimized refetch function using memoized URL
   const refetchBudgets = useCallback(async () => {
     console.log('🔄 Manual refetch triggered')
     // Trigger a re-render by updating a dependency
     setLoading(true)
     setError(null)
     
-    let url = `/api/budgets?userId=${userId}&year=${selectedYear}&active=true`
-    if (timeRange === 'monthly') {
-      url += `&month=${selectedMonth}`
-    }
-    
     try {
-      const response = await fetch(url)
+      const response = await fetch(apiUrl)
       if (!response.ok) {
         throw new Error(`Failed to fetch budgets: ${response.statusText}`)
       }

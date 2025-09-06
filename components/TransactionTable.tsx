@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Transaction, CategoryDB } from '@/types/database'
-import { formatCurrency } from '@/lib/data-utils'
+import { formatCurrency, getTotalBalance, calculateTotalSpending, calculateTotalIncome } from '@/lib/data-utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Edit, Trash2, Search, ArrowUpDown, Filter, Loader2 } from 'lucide-react'
@@ -30,13 +30,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { updateTransaction } from '@/lib/api/transactions'
+import { updateTransaction, deleteTransaction } from '@/lib/api/transactions'
 import { useTransactionManager } from '@/hooks/use-transaction-manager'
 import { EditTransactionForm } from '@/components/EditTransactionForm'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { DateRangePicker, DateRange } from '@/components/DateRangePicker'
 import { AddTransactionForm } from './AddTransactionForm'
+import { useFilteredTransactions } from '@/hooks/useFilteredTransactions'
 
 interface TransactionTableProps {
   transactions?: Transaction[]
@@ -83,6 +84,10 @@ export function TransactionTable({
   const [dateRange, setDateRange] = useState<DateRange>({ startDate: null, endDate: null })
   const [confirmationDialog, setConfirmationDialog] = useState<CategoryChangeConfirmation | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{ transaction: Transaction } | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   
   // Lazy loading state
   const [displayedCount, setDisplayedCount] = useState(enableLazyLoading ? pageSize : limit)
@@ -97,8 +102,6 @@ export function TransactionTable({
   // Self-contained transaction management - always call hooks to follow React rules
   const transactionManager = useTransactionManager({ userId })
   const transactionContext = useTransactions()
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   
   // Use either prop transactions or context transactions when self-managing
   const transactions = useMemo(() => {
@@ -122,14 +125,6 @@ export function TransactionTable({
 
 
   // Transaction management handlers (moved from spending page)
-  const handleTransactionUpdated = async (id: string, data: Partial<Transaction>) => {
-    if (enableSelfManagement && transactionManager) {
-      await transactionManager.editTransaction(id, data)
-      setIsEditModalOpen(false)
-      setEditingTransaction(null)
-    }
-  }
-
   const handleDeleteTransaction = async (id: string) => {
     if (onDeleteTransaction) {
       onDeleteTransaction(id)
@@ -187,6 +182,33 @@ export function TransactionTable({
     })
   }
 
+  const handleDeleteTransactionClick = useCallback(async (transaction: Transaction) => {
+    setDeleteConfirmDialog({
+      transaction,
+    })
+  }, [])
+
+  const confirmDeleteTransaction = useCallback(async () => {
+    if (!deleteConfirmDialog || isDeleting) return
+    
+    setIsDeleting(true)
+    try {
+      await deleteTransaction(deleteConfirmDialog.transaction.id)
+      
+      if (enableSelfManagement && transactionManager) {
+        await transactionManager.removeTransaction(deleteConfirmDialog.transaction.id)
+      } else if (transactionContext) {
+        await transactionContext.removeTransaction(deleteConfirmDialog.transaction.id)
+      }
+      
+      setDeleteConfirmDialog(null)
+    } catch (error) {
+      console.error('Failed to delete transaction:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [deleteConfirmDialog, isDeleting, enableSelfManagement, transactionManager, transactionContext])
+
   const confirmCategoryChange = async () => {
     if (!confirmationDialog) return
     
@@ -207,6 +229,28 @@ export function TransactionTable({
       setIsUpdating(false)
     }
   }
+
+  const handleTransactionUpdated = useCallback(async (id: string, data: Partial<Transaction>) => {
+    try {
+      if (enableSelfManagement && transactionManager) {
+        await transactionManager.editTransaction(id, data)
+      } else if (transactionContext) {
+        await transactionContext.editTransaction(id, data)
+      }
+      
+      if (onTransactionUpdate) {
+        const updatedTransaction = transactions.find(t => t.id === id)
+        if (updatedTransaction) {
+          onTransactionUpdate({ ...updatedTransaction, ...data })
+        }
+      }
+      
+      setEditingTransaction(null)
+      setIsEditModalOpen(false)
+    } catch (error) {
+      console.error('Failed to update transaction:', error)
+    }
+  }, [enableSelfManagement, transactionManager, transactionContext, onTransactionUpdate, transactions])
 
   // Get unique merchants for filter dropdown
   const uniqueMerchants = useMemo(() => {
@@ -435,62 +479,68 @@ export function TransactionTable({
           {/* Transaction Summary */}
            <div className="mt-4 text-sm text-gray-600">
              <span className="font-medium">Total transactions:</span> {filteredTransactions.length} • 
-             <span className="font-medium">Date range:</span> July 12, 2024 - September 4, 2025 • 
-             <span className="font-medium">Total expenses:</span> <span className="text-red-600">$8,223.98</span> • 
-             <span className="font-medium">Total income:</span> <span className="text-green-600">$65,500.00</span>
+             <span className="font-medium">Date range:</span> {(() => {
+               if (filteredTransactions.length === 0) return 'No transactions';
+               const dates = filteredTransactions.map(t => new Date(t.date)).sort((a, b) => a.getTime() - b.getTime());
+               const startDate = dates[0].toLocaleDateString();
+               const endDate = dates[dates.length - 1].toLocaleDateString();
+               return dates.length === 1 ? startDate : `${startDate} - ${endDate}`;
+             })()} • 
+             <span className="font-medium">Total expenses:</span> <span className="text-red-600">{formatCurrency(calculateTotalSpending(filteredTransactions))}</span> • 
+             <span className="font-medium">Total income:</span> <span className="text-green-600">{formatCurrency(calculateTotalIncome(filteredTransactions))}</span> • 
+             <span className="font-medium">Balance:</span> <span className={getTotalBalance(filteredTransactions) >= 0 ? 'text-green-600' : 'text-red-600'}>{formatCurrency(getTotalBalance(filteredTransactions))}</span>
            </div>
         </div>
         
         {/* Table */}
         <div className="bg-white rounded-lg border border-gray-200">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-gray-200">
-                <TableHead 
-                  className="py-4 px-6 text-left font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleSort('description')}
-                >
-                  <div className="flex items-center gap-2">
-                    Merchant / Description
-                    {sortField === 'description' && (
-                      <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
-                    )}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="py-4 px-6 text-left font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleSort('category')}
-                >
-                  <div className="flex items-center gap-2">
-                    Category
-                    {sortField === 'category' && (
-                      <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
-                    )}
-                  </div>
-                </TableHead>
-                <TableHead 
-                  className="py-4 px-6 text-right font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleSort('amount')}
-                >
-                  <div className="flex items-center justify-end gap-2">
-                    Amount
-                    {sortField === 'amount' && (
-                      <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
-                    )}
-                  </div>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-          </Table>
-          
-          {/* Scrollable Table Body Container - Max 15 items before scroll */}
-          <div className="max-h-[900px] overflow-y-auto border-t">
+          <div className="max-h-[900px] overflow-y-auto">
             <Table>
+              <TableHeader className="sticky top-0 bg-white z-10">
+                <TableRow className="border-b border-gray-200">
+                  <TableHead 
+                    className="py-4 px-6 text-left font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50 w-[40%]"
+                    onClick={() => handleSort('description')}
+                  >
+                    <div className="flex items-center gap-2">
+                      Merchant / Description
+                      {sortField === 'description' && (
+                        <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="py-4 px-6 text-left font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50 w-[25%]"
+                    onClick={() => handleSort('category')}
+                  >
+                    <div className="flex items-center gap-2">
+                      Category
+                      {sortField === 'category' && (
+                        <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="py-4 px-6 text-right font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50 w-[20%]"
+                    onClick={() => handleSort('amount')}
+                  >
+                    <div className="flex items-center justify-end gap-2">
+                      Amount
+                      {sortField === 'amount' && (
+                        <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
+                      )}
+                    </div>
+                  </TableHead>
+                  <TableHead className="py-4 px-6 text-center font-medium text-gray-700 text-sm w-[15%]">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
               <TableBody>
               {displayTransactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8 text-gray-500">
-                    {transactions.length === 0 ? 'No transactions found. Add your first transaction to get started!' : 'No transactions match your search criteria.'}
+                  <TableCell colSpan={4} className="py-12 text-center text-gray-500">
+                    No transactions found
                   </TableCell>
                 </TableRow>
               ) : (
@@ -514,7 +564,7 @@ export function TransactionTable({
                       <React.Fragment key={dateString}>
                         {/* Date Header Row */}
                         <TableRow className="bg-gray-50">
-                          <TableCell colSpan={3} className="py-3 px-6 font-medium text-gray-700 text-sm">
+                          <TableCell colSpan={4} className="py-3 px-6 font-medium text-gray-700 text-sm">
                             {formattedDate}
                           </TableCell>
                         </TableRow>
@@ -522,14 +572,14 @@ export function TransactionTable({
                         {/* Transactions for this date */}
                         {displayedDayTransactions.map((transaction) => (
                           <TableRow key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            <TableCell className="py-4 px-6">
+                            <TableCell className="py-4 px-6 w-[40%]">
                               <div className="space-y-1">
                                 <div className="text-sm font-medium text-gray-900">
                                   {transaction.merchant || transaction.description || 'No description'}
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="py-4 px-6">
+                            <TableCell className="py-4 px-6 w-[25%]">
                               <div className="flex items-center gap-2">
                                 <div 
                                   className="w-3 h-3 rounded-full" 
@@ -540,13 +590,40 @@ export function TransactionTable({
                                 </span>
                               </div>
                             </TableCell>
-                            <TableCell className="py-4 px-6 text-right">
+                            <TableCell className="py-4 px-6 text-right w-[20%]">
                               <div className={`text-sm font-medium ${
                                 transaction.type === 'INCOME' 
                                   ? 'text-green-600'
                                   : 'text-gray-900'
                               }`}>
                                 {transaction.type === 'INCOME' ? '+' : ''}{formatCurrency(Math.abs(transaction.amount))}
+                              </div>
+                            </TableCell>
+                            <TableCell className="py-4 px-6 w-[15%]">
+                              <div className="flex items-center justify-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (onEditTransaction) {
+                                      onEditTransaction(transaction)
+                                    } else if (enableSelfManagement) {
+                                      setEditingTransaction(transaction)
+                                      setIsEditModalOpen(true)
+                                    }
+                                  }}
+                                  className="h-8 w-8 p-0 hover:bg-gray-100"
+                                >
+                                  <Edit className="h-4 w-4 text-gray-600" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteTransactionClick(transaction)}
+                                  className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                                >
+                                  <Trash2 className="h-4 w-4 text-gray-600" />
+                                </Button>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -614,6 +691,46 @@ export function TransactionTable({
               disabled={isUpdating}
             >
               {isUpdating ? 'Updating...' : 'Confirm'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteConfirmDialog} onOpenChange={() => setDeleteConfirmDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Transaction</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this transaction? This action cannot be undone.
+              <br /><br />
+              <strong>Transaction Details:</strong>
+              <br />Merchant: {deleteConfirmDialog?.transaction.merchant}
+              <br />Amount: {deleteConfirmDialog?.transaction.amount ? formatCurrency(deleteConfirmDialog.transaction.amount) : 'N/A'}
+              <br />Date: {deleteConfirmDialog?.transaction.date ? new Date(deleteConfirmDialog.transaction.date).toLocaleDateString() : 'N/A'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteConfirmDialog(null)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDeleteTransaction}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Transaction'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Transaction } from '@/types/database'
 import { getTransactionsByDateRange } from '@/lib/budget-utils'
-import { getMonthlySpending, getMonthlyIncome, getCategoryBreakdown } from '@/lib/data-utils'
+import { getMonthlySpending, getMonthlyIncome, getCategoryBreakdown, calculateTotalSpending, calculateTotalIncome } from '@/lib/data-utils'
 
 export function useFilteredTransactions(
   transactions: Transaction[],
@@ -24,20 +24,16 @@ export function useFilteredTransactions(
     if (timeRange === 'monthly') {
       return getMonthlyIncome(filteredTransactions, new Date(selectedYear, selectedMonth - 1))
     }
-    // For yearly, sum all income transactions
-    return filteredTransactions
-      .filter(t => t.type === 'INCOME')
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+    // Use the utility function instead of inline logic
+    return calculateTotalIncome(filteredTransactions)
   }, [filteredTransactions, timeRange, selectedYear, selectedMonth])
 
   const monthlySpending = useMemo(() => {
     if (timeRange === 'monthly') {
       return getMonthlySpending(filteredTransactions, new Date(selectedYear, selectedMonth - 1))
     }
-    // For yearly, sum all expense transactions
-    return filteredTransactions
-      .filter(t => t.type === 'EXPENSE')
-      .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+    // Use the utility function instead of inline logic
+    return calculateTotalSpending(filteredTransactions)
   }, [filteredTransactions, timeRange, selectedYear, selectedMonth])
 
   const netCashFlow = useMemo(() => {
