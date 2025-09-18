@@ -8,6 +8,7 @@ export const transactionFormSchema = z.object({
     .refine((v) => v !== 0, 'Amount must not be zero'),
   type: z.enum(['INCOME', 'EXPENSE', 'TRANSFER']),
   category_id: z.string().min(1, 'Category is required'),
+  account_id: z.string().min(1, 'Account is required'),
   merchant: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   tags: z.array(z.string()).optional().nullable(),

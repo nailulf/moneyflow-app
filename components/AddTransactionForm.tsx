@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCategories } from '@/contexts/CategoryContext'
+import { useAccounts } from '@/contexts/AccountContext'
 
 interface AddTransactionFormProps {
   userId: string
@@ -28,6 +29,9 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
 
   // Load user categories from shared context
   const { categories, loading: categoriesLoading } = useCategories()
+  
+  // Load user accounts from shared context
+  const { accounts, loading: accountsLoading } = useAccounts()
   
   // Group categories by type for display
   const categoryGroups = categories.reduce((groups, category) => {
@@ -63,6 +67,7 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
       amount: 0,
       type: 'EXPENSE',
       category_id: '',
+      account_id: '',
       merchant: '',
       is_recurring: false
     }
@@ -224,6 +229,39 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
             </Select>
             {errors.category_id && (
               <p className="text-sm text-red-500">{errors.category_id.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Account</label>
+            <Select
+              value={watch('account_id') || undefined}
+              onValueChange={(value) => {
+                setSuppressCloseUntil(Date.now() + 500)
+                setValue('account_id', value)
+              }}
+              disabled={accountsLoading}
+              onOpenChange={setIsAnySelectOpen}
+            >
+              <SelectTrigger className={errors.account_id ? 'border-red-500' : ''} data-testid="account-select-trigger">
+                <SelectValue placeholder={accountsLoading ? 'Loading...' : 'Select account'} />
+              </SelectTrigger>
+              <SelectContent>
+                {accounts.length > 0 ? (
+                  accounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id} data-testid={`account-option-${account.id}`}>
+                      {account.name} ({account.type.toLowerCase().replace('_', ' ')})
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1.5 text-sm text-gray-500">
+                    No accounts available
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+            {errors.account_id && (
+              <p className="text-sm text-red-500">{errors.account_id.message}</p>
             )}
           </div>
 

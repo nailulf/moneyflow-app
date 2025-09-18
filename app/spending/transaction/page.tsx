@@ -6,6 +6,8 @@ import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { CategoryManager } from '@/components/CategoryManager'
+import { AccountManager } from '@/components/AccountManager'
+import { AccountProvider } from '@/contexts/AccountContext'
 
 
 export default function SpendingTransactionPage() {
@@ -20,9 +22,14 @@ export default function SpendingTransactionPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation actionButton={<div>
-        <CategoryManager userId={TEST_USER_ID} />
-        </div>} />
+      <SpendingNavigation actionButton={
+        <div className="flex items-center gap-2">
+          <CategoryManager userId={TEST_USER_ID} />
+          <AccountProvider userId={TEST_USER_ID}>
+            <AccountManager userId={TEST_USER_ID} />
+          </AccountProvider>
+        </div>
+      } />
       
       <PageLayout>
         <TopContent>

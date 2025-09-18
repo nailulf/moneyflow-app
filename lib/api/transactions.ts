@@ -25,7 +25,9 @@ export async function getUserTransactions(userId: string): Promise<Transaction[]
   // Create new request
   const requestPromise = (async () => {
     try {
-      const response = await fetch(`/api/transactions?userId=${userId}`)
+      // Use absolute URL to avoid "Invalid URL" errors in server context
+      const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000'
+      const response = await fetch(`${baseUrl}/api/transactions?userId=${userId}`)
       
       if (!response.ok) {
         const error = await response.json()

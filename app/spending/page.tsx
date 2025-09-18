@@ -11,6 +11,8 @@ import { useBudgetData } from '@/hooks/useBudgetData'
 
 
 import { CategoryManager } from '@/components/CategoryManager'
+import { AccountManager } from '@/components/AccountManager'
+import { AccountProvider } from '@/contexts/AccountContext'
 
 
 export default function SpendingPage() {
@@ -37,7 +39,12 @@ export default function SpendingPage() {
   return (
     <div className="flex flex-col h-full">
       <SpendingNavigation actionButton={
-        <CategoryManager userId={TEST_USER_ID} />
+        <div className="flex items-center gap-2">
+          <CategoryManager userId={TEST_USER_ID} />
+          <AccountProvider userId={TEST_USER_ID}>
+            <AccountManager userId={TEST_USER_ID} />
+          </AccountProvider>
+        </div>
       } />
       
       <PageLayout>

@@ -10,6 +10,7 @@ export interface Database {
           amount: number
           type: 'INCOME' | 'EXPENSE' | 'TRANSFER'
           category_id: string
+          account_id: string | null
           merchant: string | null
           notes: string | null
           tags: string[] | null
@@ -25,6 +26,7 @@ export interface Database {
           amount: number
           type: 'INCOME' | 'EXPENSE' | 'TRANSFER'
           category_id?: string
+          account_id?: string | null
           merchant?: string | null
           notes?: string | null
           tags?: string[] | null
@@ -40,10 +42,51 @@ export interface Database {
           amount?: number
           type?: 'INCOME' | 'EXPENSE' | 'TRANSFER'
           category_id?: string
+          account_id?: string | null
           merchant?: string | null
           notes?: string | null
           tags?: string[] | null
           is_recurring?: boolean
+          updated_at?: string
+        }
+      }
+      accounts: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          type: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
+          balance: number
+          currency: string
+          is_default: boolean
+          is_active: boolean
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
+          balance?: number
+          currency?: string
+          is_default?: boolean
+          is_active?: boolean
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
+          balance?: number
+          currency?: string
+          is_default?: boolean
+          is_active?: boolean
+          description?: string | null
           updated_at?: string
         }
       }
@@ -286,3 +329,7 @@ export type BudgetUpdate = Database['public']['Tables']['budgets']['Update']
 export type BudgetCategoryDB = Database['public']['Tables']['budget_categories']['Row']
 export type BudgetCategoryInsert = Database['public']['Tables']['budget_categories']['Insert']
 export type BudgetCategoryUpdate = Database['public']['Tables']['budget_categories']['Update']
+
+export type AccountDB = Database['public']['Tables']['accounts']['Row']
+export type AccountInsert = Database['public']['Tables']['accounts']['Insert']
+export type AccountUpdate = Database['public']['Tables']['accounts']['Update']

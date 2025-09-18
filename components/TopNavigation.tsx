@@ -53,6 +53,7 @@ export function SpendingNavigation({ actionButton }: { actionButton?: React.Reac
   const subMenus = [
     { label: "Overview", href: "/spending" },
     { label: "Breakdown", href: "/spending/breakdown" },
+    { label: "Cash Flow", href: "/spending/cashflow" },
     { label: "Transaction", href: "/spending/transaction" }
   ]
   return <TopNavigation subMenus={subMenus} actionButton={actionButton} />

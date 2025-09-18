@@ -11,7 +11,7 @@ const fs = require('fs')
 
 // Load environment variables manually
 function loadEnvFile() {
-  const envPath = path.join(__dirname, '..', '.env.local')
+  const envPath = path.join(__dirname, '..', '..', '.env.local')
   if (!fs.existsSync(envPath)) {
     console.error('❌ .env.local file not found')
     process.exit(1)

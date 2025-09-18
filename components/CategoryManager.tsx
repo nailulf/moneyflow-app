@@ -309,11 +309,12 @@ function CategoryManagerInternal({
           </SheetDescription>
         </SheetHeader>
         
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
+        <div className="mt-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
         
         {loading && (
           <div className="text-center py-8">
@@ -567,6 +568,7 @@ function CategoryManagerInternal({
             </Dialog>
           </div>
         )}
+        </div>
       </SheetContent>
     </Sheet>
   )
