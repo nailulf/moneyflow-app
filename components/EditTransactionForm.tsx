@@ -95,7 +95,12 @@ export function EditTransactionForm({
     setIsSubmitting(true)
     try {
       if (onTransactionUpdated) {
-        await onTransactionUpdated(transaction.id, data)
+        // Transform empty account_id to null to match database schema
+        const transformedData = {
+          ...data,
+          account_id: data.account_id === '' ? null : data.account_id
+        }
+        await onTransactionUpdated(transaction.id, transformedData)
       }
       toast.success('Transaction updated successfully!')
       onOpenChange(false)

@@ -27,6 +27,7 @@ const testTransactions: Transaction[] = [
     amount: 8000000, // 8M IDR salary
     type: 'INCOME',
     category_id: 'salary',
+    account_id: null,
     description: 'Monthly Salary - January',
     date: '2024-01-15',
     user_id: 'test-user',
@@ -42,6 +43,7 @@ const testTransactions: Transaction[] = [
     amount: 2000000, // 2M IDR freelance
     type: 'INCOME',
     category_id: 'freelance',
+    account_id: null,
     description: 'Web Development Project',
     date: '2024-01-20',
     user_id: 'test-user',
@@ -57,6 +59,7 @@ const testTransactions: Transaction[] = [
     amount: 500000, // 500K IDR investment returns
     type: 'INCOME',
     category_id: 'investment',
+    account_id: null,
     description: 'Stock Dividends',
     date: '2024-01-25',
     user_id: 'test-user',
@@ -74,6 +77,7 @@ const testTransactions: Transaction[] = [
     amount: -2500000, // 2.5M IDR rent
     type: 'EXPENSE',
     category_id: 'housing',
+    account_id: null,
     description: 'Monthly Rent',
     date: '2024-01-01',
     user_id: 'test-user',
@@ -89,6 +93,7 @@ const testTransactions: Transaction[] = [
     amount: -1200000, // 1.2M IDR groceries
     type: 'EXPENSE',
     category_id: 'food',
+    account_id: null,
     description: 'Weekly Groceries',
     date: '2024-01-05',
     user_id: 'test-user',
@@ -104,6 +109,7 @@ const testTransactions: Transaction[] = [
     amount: -800000, // 800K IDR utilities
     type: 'EXPENSE',
     category_id: 'utilities',
+    account_id: null,
     description: 'Electricity & Water Bill',
     date: '2024-01-10',
     user_id: 'test-user',
@@ -119,6 +125,7 @@ const testTransactions: Transaction[] = [
     amount: -600000, // 600K IDR transportation
     type: 'EXPENSE',
     category_id: 'transport',
+    account_id: null,
     description: 'Monthly Transport Pass',
     date: '2024-01-12',
     user_id: 'test-user',
@@ -134,6 +141,7 @@ const testTransactions: Transaction[] = [
     amount: -400000, // 400K IDR entertainment
     type: 'EXPENSE',
     category_id: 'entertainment',
+    account_id: null,
     description: 'Movie & Dining Out',
     date: '2024-01-18',
     user_id: 'test-user',
@@ -151,6 +159,7 @@ const testTransactions: Transaction[] = [
     amount: 8000000, // 8M IDR salary
     type: 'INCOME',
     category_id: 'salary',
+    account_id: null,
     description: 'Monthly Salary - February',
     date: '2024-02-15',
     user_id: 'test-user',
@@ -166,6 +175,7 @@ const testTransactions: Transaction[] = [
     amount: -2500000, // 2.5M IDR rent
     type: 'EXPENSE',
     category_id: 'housing',
+    account_id: null,
     description: 'Monthly Rent',
     date: '2024-02-01',
     user_id: 'test-user',
@@ -410,6 +420,7 @@ function testEdgeCases() {
     amount: 0,
     type: 'INCOME',
     category_id: 'salary',
+    account_id: null,
     description: 'Zero Amount Transaction',
     date: '2024-01-15',
     user_id: 'test-user',
@@ -432,6 +443,7 @@ function testEdgeCases() {
     amount: 1000000,
     type: 'INCOME',
     category_id: 'non-existent-category',
+    account_id: null,
     description: 'Uncategorized Transaction',
     date: '2024-01-15',
     user_id: 'test-user',
@@ -465,6 +477,7 @@ function testPerformance() {
       amount: Math.random() > 0.5 ? Math.random() * 5000000 : -Math.random() * 2000000,
       type: Math.random() > 0.5 ? 'INCOME' : 'EXPENSE',
       category_id: testCategories[Math.floor(Math.random() * testCategories.length)].id,
+      account_id: null,
       description: `Performance Test Transaction ${i}`,
       date: `2024-01-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
       user_id: 'test-user',

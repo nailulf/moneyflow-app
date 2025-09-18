@@ -91,9 +91,15 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
   const onSubmit = async (data: TransactionFormData) => {
     setIsSubmitting(true)
     try {
+      // Transform empty account_id to null to match database schema
+      const transformedData = {
+        ...data,
+        account_id: data.account_id === '' ? null : data.account_id
+      }
+      
       // If an external handler is provided, await it (it may call an API)
       if (onTransactionAdded) {
-        await onTransactionAdded(data)
+        await onTransactionAdded(transformedData)
       } else {
         // Otherwise, simulate a short delay
         await new Promise(resolve => setTimeout(resolve, 300))
