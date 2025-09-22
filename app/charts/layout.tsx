@@ -1,6 +1,5 @@
 'use client'
 
-import { CategoryProvider } from '@/contexts/CategoryContext'
 import { BudgetProvider } from '@/contexts/BudgetContext'
 
 export default function ChartsLayout({
@@ -12,10 +11,8 @@ export default function ChartsLayout({
   const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
 
   return (
-    <CategoryProvider userId={TEST_USER_ID}>
-      <BudgetProvider userId={TEST_USER_ID}>
-        {children}
-      </BudgetProvider>
-    </CategoryProvider>
+    <BudgetProvider userId={TEST_USER_ID}>
+      {children}
+    </BudgetProvider>
   )
 }

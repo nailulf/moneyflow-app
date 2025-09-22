@@ -11,6 +11,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { usePathname } from 'next/navigation'
 import { AccountProvider } from '@/contexts/AccountContext'
+import { CategoryProvider } from '@/contexts/CategoryContext'
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -27,8 +28,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
     <SidebarProvider>
       <AccountProvider userId={TEST_USER_ID}>
-        <AppSidebar />
-        <SidebarInset>
+        <CategoryProvider userId={TEST_USER_ID}>
+          <AppSidebar />
+          <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
@@ -65,6 +67,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
             </div>
           </div>
         </SidebarInset>
+        </CategoryProvider>
       </AccountProvider>
       <Toaster />
     </SidebarProvider>
