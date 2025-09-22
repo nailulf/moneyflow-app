@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { transactionSchema, TransactionFormData } from '@/lib/validations'
 // Removed fallback CATEGORIES to ensure only valid user categories (with IDs) are selectable
 import { Button } from '@/components/ui/button'
@@ -17,10 +18,10 @@ import { useAccounts } from '@/contexts/AccountContext'
 
 interface AddTransactionFormProps {
   userId: string
-  onTransactionAdded?: (transaction: TransactionFormData) => void
+  onSuccess?: () => void
 }
 
-export function AddTransactionForm({ userId, onTransactionAdded }: AddTransactionFormProps) {
+export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProps) {
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentDate, setCurrentDate] = useState('')
@@ -87,7 +88,14 @@ export function AddTransactionForm({ userId, onTransactionAdded }: AddTransactio
   // Reset category when type changes
   useEffect(() => {
     setValue('category_id', '')
-  }, [selectedType, setValue])
+    // Clear any existing category validation errors when type changes
+    if (errors.category_id) {
+      // Force re-validation to clear the error
+      setTimeout(() => {
+        setValue('category_id', '', { shouldValidate: true })
+      }, 100)
+    }
+  }, [selectedType, setValue, errors.category_id])
 
   const onSubmit = async (data: TransactionFormData) => {
     setIsSubmitting(true)
@@ -97,19 +105,26 @@ export function AddTransactionForm({ userId, onTransactionAdded }: AddTransactio
         ...data,
         account_id: data.account_id === '' ? null : data.account_id
       }
-      
-      // If an external handler is provided, await it (it may call an API)
-      if (onTransactionAdded) {
-        await onTransactionAdded(transformedData)
-      } else {
-        // Otherwise, simulate a short delay
-        await new Promise(resolve => setTimeout(resolve, 300))
+
+      const response = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...transformedData,
+          amount: Number(transformedData.amount),
+          user_id: '1d16c616-77a6-48de-9a54-dde7845f720d',
+          date: new Date(transformedData.date).toISOString(),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create transaction')
       }
-      toast.success('Transaction added successfully!')
-      reset()
+
+      onSuccess?.()
       setOpen(false)
-    } catch (error) { // eslint-disable-line @typescript-eslint/no-unused-vars
-      toast.error('Failed to add transaction')
+    } catch (error) {
+      console.error('Error creating transaction:', error)
     } finally {
       setIsSubmitting(false)
     }
@@ -216,11 +231,15 @@ export function AddTransactionForm({ userId, onTransactionAdded }: AddTransactio
                 setSuppressCloseUntil(Date.now() + 500)
                 setValue('category_id', value)
               }}
-              disabled={categoriesLoading}
+              disabled={categoriesLoading || !hasDynamicCategories}
               onOpenChange={setIsAnySelectOpen}
             >
               <SelectTrigger className={errors.category_id ? 'border-red-500' : ''} data-testid="category-select-trigger">
-                <SelectValue placeholder={categoriesLoading ? 'Loading...' : 'Select category'} />
+                <SelectValue placeholder={
+                  !hasDynamicCategories 
+                    ? (categoriesLoading ? 'Loading categories...' : `No categories for ${selectedType?.toLowerCase() || 'this type'}`)
+                    : (categoriesLoading ? 'Loading...' : 'Select category')
+                } />
               </SelectTrigger>
               <SelectContent>
                 {hasDynamicCategories ? (
@@ -231,7 +250,7 @@ export function AddTransactionForm({ userId, onTransactionAdded }: AddTransactio
                   ))
                 ) : (
                   <div className="px-2 py-1.5 text-sm text-gray-500">
-                    No categories available for this type
+                    {categoriesLoading ? 'Loading categories...' : `No categories available for ${selectedType?.toLowerCase() || 'this type'}`}
                   </div>
                 )}
               </SelectContent>
