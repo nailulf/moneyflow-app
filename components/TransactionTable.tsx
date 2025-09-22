@@ -407,7 +407,9 @@ export function TransactionTable({
           <div className="flex justify-between items-center gap-3 mb-4 w-full">
             <h1 className="text-md font-semibold text-gray-500">TRANSACTIONS</h1>
             <div className="flex items-center">
-              <AddTransactionForm userId={userId} onTransactionAdded={transactionContext?.addTransaction}/>
+              <AddTransactionForm userId={userId} onSuccess={() => {
+                transactionContext?.refreshTransactions?.()
+              }}/>
             </div>
           </div>
           
