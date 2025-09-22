@@ -150,7 +150,6 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
     const budgetAmount = item.budgetAmount || 0
     const status = calculateBudgetStatus(actualSpent, budgetAmount)
   
-    console.log("actual spent item for", item.category, ":", actualSpent)
     return {
       ...item,
       spentAmount: actualSpent,
@@ -237,7 +236,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
           const budgetAmount = type === 'budget' ? (item as BudgetCategoryData).budgetAmount : undefined
           
           return (
-            <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+            <div key={item.category} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
               <div className="flex items-center space-x-3">
                 <div 
                   className="w-4 h-4 rounded-full" 
@@ -475,12 +474,11 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                     </div>
                     
                     {enhancedBudgetData.map((item, index) => {
-                      console.log('item', item)
                       const available = item.budgetAmount - item.spentAmount
                       const progressPercentage = Math.min((item.spentAmount / item.budgetAmount) * 100, 100)
                       
                       return (
-                        <div key={index} className="grid grid-cols-4 gap-4 items-center py-3 border-b border-gray-100 last:border-b-0">
+                        <div key={item.category} className="grid grid-cols-4 gap-4 items-center py-3 border-b border-gray-100 last:border-b-0">
                           {/* Category */}
                           <div className="flex items-center space-x-3">
                             <div 

@@ -63,7 +63,7 @@ export function SummaryCards({ transactions = [] }: SummaryCardsProps) {
     <div className="grid grid-cols-1 gap-4">
       {cards.map((card, index) => {
         return (
-          <Card key={index} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+          <Card key={card.title} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
             <CardContent>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-base">{card.icon}</span>

@@ -20,10 +20,6 @@ export default function CashFlowChart({ transactions, dateRange, chartType = 'ba
   
   // Fetch categories
   const { allCategories, isLoading: categoriesLoading } = useCategories(TEST_USER_ID)
-  
-  console.log('CashFlowChart received transactions:', transactions)
-  console.log('CashFlowChart received dateRange:', dateRange)
-  console.log('CashFlowChart categories:', allCategories.length)
 
   if (categoriesLoading) {
     return (

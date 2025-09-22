@@ -7,7 +7,7 @@ import { TransactionTable } from '@/components/TransactionTable'
 import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
-import { useBudgetData } from '@/hooks/useBudgetData'
+import { useBudgets } from '@/contexts/BudgetContext'
 
 
 import { CategoryManager } from '@/components/CategoryManager'
@@ -27,14 +27,8 @@ export default function SpendingPage() {
   const currentYear = currentDate.getFullYear()
   const currentMonth = currentDate.getMonth() + 1 // JavaScript months are 0-indexed
   
-  // Use budget data hook
-  const { transformedBudgets, loading: budgetLoading } = useBudgetData(
-    TEST_USER_ID,
-    currentYear,
-    currentMonth,
-    'monthly',
-    transactions
-  )
+  // Use budget context hook
+  const { transformedBudgets, loading: budgetLoading } = useBudgets()
 
   return (
     <div className="flex flex-col h-full">

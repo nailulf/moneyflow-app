@@ -31,27 +31,20 @@ interface TransactionProviderProps {
 }
 
 export function TransactionProvider({ children, userId }: TransactionProviderProps) {
-  console.log('🎬 TransactionProvider initialized with userId:', userId)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasLoaded, setHasLoaded] = useState(false)
   
-  console.log('🎬 TransactionProvider state initialized:', { transactions: transactions.length, loading, error, hasLoaded })
-  
   // Load transactions from database
   const loadTransactions = useCallback(async () => {
-    console.log('🔄 Starting to load transactions for userId:', userId)
     setLoading(true)
     setError(null)
     
     try {
       const data = await getUserTransactions(userId)
-      console.log('✅ Transactions loaded successfully:', data.length)
-      console.log('✅ Setting transactions state with:', data.length, 'transactions')
       setTransactions(data)
       setHasLoaded(true)
-      console.log('✅ State updated: hasLoaded set to true')
     } catch (err) {
       console.error('❌ Error loading transactions:', err)
       setError(err instanceof Error ? err.message : 'Failed to load transactions')
@@ -61,23 +54,12 @@ export function TransactionProvider({ children, userId }: TransactionProviderPro
     }
   }, [userId])
 
-  console.log('🔍 About to set up useEffect hook')
-  console.log('🔍 Current state before useEffect:', { userId, hasLoaded, loading })
-  
   // Load transactions on mount - simplified
   useEffect(() => {
-    console.log('🚀 useEffect ENTRY - userId:', userId, 'hasLoaded:', hasLoaded, 'loading:', loading)
-    console.log('🚀 useEffect condition check:', { hasUserId: !!userId, hasNotLoaded: !hasLoaded, shouldLoad: userId && !hasLoaded })
-    
     if (userId && !hasLoaded) {
-      console.log('🚀 Calling loadTransactions...')
       loadTransactions()
-    } else {
-      console.log('🚀 Skipping loadTransactions - userId:', userId, 'hasLoaded:', hasLoaded)
     }
   }, [userId, hasLoaded, loadTransactions])
-  
-  console.log('✅ useEffect hook has been set up')
 
   const addTransaction = useCallback(async (formData: TransactionFormData) => {
     try {

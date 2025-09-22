@@ -18,8 +18,7 @@ export default function CashFlowPage() {
   // Use shared transaction context
   const { transactions } = useTransactions()
   
-  // Debug logging
-  console.log('CashFlow Page - Transactions:', transactions.length, transactions.slice(0, 3))
+
   
   // Create date range for the last 12 months
   const dateRange = {
@@ -33,8 +32,7 @@ export default function CashFlowPage() {
   const totalExpenses = calculateTotalSpending(transactions)
   const netCashFlow = totalIncome - totalExpenses
   
-  console.log('CashFlow Page - Monthly Data:', monthlyData.slice(0, 3))
-  console.log('CashFlow Page - Summary:', { totalIncome, totalExpenses, netCashFlow })
+
   
   return (
     <div className="flex flex-col h-full">
@@ -97,7 +95,7 @@ export default function CashFlowPage() {
               <CardContent>
                 <div className="space-y-3">
                   {monthlyData.slice(0, 6).map((data, index) => (
-                    <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                    <div key={`month-${data.month}-${index}`} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
                       <span className="text-sm font-medium text-gray-700">
                         {data.month}
                       </span>

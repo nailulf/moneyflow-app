@@ -12,7 +12,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 export async function POST() {
   try {
-    console.log('🔧 Starting database fix for updated_at column...')
+  
     
     // First, check if updated_at column exists by trying to select it
     const { data: testData, error: testError } = await supabase
@@ -21,7 +21,7 @@ export async function POST() {
       .limit(1)
     
     if (!testError) {
-      console.log('✅ updated_at column already exists')
+
       return NextResponse.json({ 
         success: true, 
         message: 'updated_at column already exists',
@@ -31,7 +31,7 @@ export async function POST() {
     
     // If column doesn't exist, we need to add it manually
     // Since we can't execute DDL through Supabase client, let's try a workaround
-    console.log('❌ updated_at column missing:', testError.message)
+    
     
     return NextResponse.json(
       { 

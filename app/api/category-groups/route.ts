@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
       
       // If table doesn't exist, return default category groups
       if (error.message?.includes('relation "public.category_groups" does not exist')) {
-        console.log('Category groups table does not exist, returning default groups')
         return NextResponse.json([
           {
             id: 'temp-expense-group',
@@ -133,7 +132,7 @@ export async function POST(request: NextRequest) {
       
       // If table doesn't exist, return a mock response
       if (error.message?.includes('relation "public.category_groups" does not exist')) {
-        console.log('Category groups table does not exist, returning mock response')
+
         return NextResponse.json({
           id: `temp-${type.toLowerCase()}-${Date.now()}`,
           user_id,

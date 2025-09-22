@@ -215,12 +215,10 @@ export function useCategoryManager({
     const isAlreadyCompleted = sessionStorage.getItem(completedKey)
     
     if (isGloballyInitializing) {
-      console.log('Category initialization already in progress globally')
       return
     }
     
     if (isAlreadyCompleted) {
-      console.log('Category initialization already completed for this session')
       return
     }
 

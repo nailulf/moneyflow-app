@@ -394,7 +394,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                     <p className="text-sm font-medium text-red-800">Validation Errors:</p>
                     <ul className="text-sm text-red-700 space-y-1">
                       {budgetAllocation.validation.errors.map((error, index) => (
-                        <li key={index} className="flex items-start gap-2">
+                        <li key={`error-${index}-${error.slice(0, 20)}`} className="flex items-start gap-2">
                           <span className="text-red-500">•</span>
                           {error}
                         </li>

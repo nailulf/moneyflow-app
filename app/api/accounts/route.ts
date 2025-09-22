@@ -7,8 +7,6 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId')
     const accountId = searchParams.get('accountId')
 
-    console.log('🔍 Accounts API GET - userId:', userId, 'accountId:', accountId)
-
     // Check if we're in build time
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.error('❌ Environment variables not configured')
@@ -16,11 +14,9 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = createServerComponentClient()
-    console.log('✅ Supabase client created')
 
     // If accountId is provided, fetch single account
     if (accountId) {
-      console.log('🔍 Fetching specific account:', accountId)
       const { data, error } = await supabase
         .from('accounts')
         .select('*')
@@ -33,7 +29,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to fetch account' }, { status: 500 })
       }
 
-      console.log('✅ Account fetched:', data)
       return NextResponse.json(data)
     }
 
@@ -43,7 +38,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    console.log('🔍 Fetching accounts for user:', userId)
     const { data, error } = await supabase
       .from('accounts')
       .select('*')
@@ -57,7 +51,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch accounts' }, { status: 500 })
     }
 
-    console.log('✅ Accounts fetched:', data?.length || 0, 'accounts')
     return NextResponse.json(data)
   } catch (error: unknown) {
     console.error('❌ API Error:', error)

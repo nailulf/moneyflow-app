@@ -10,7 +10,7 @@ export async function POST() {
 
     const supabase = createServerComponentClient()
     
-    console.log('🔧 Attempting to remove foreign key constraint...')
+  
     
     // Try to remove the constraint using a simple query approach
     // Since we can't use rpc('exec_sql'), we'll try a different approach

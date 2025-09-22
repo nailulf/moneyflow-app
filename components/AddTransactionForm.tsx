@@ -9,23 +9,24 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-
-import { Plus } from 'lucide-react'
+import { Plus, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
+
 
 interface AddTransactionFormProps {
   userId: string
   onTransactionAdded?: (transaction: TransactionFormData) => void
 }
 
-export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormProps) {
+export function AddTransactionForm({ userId, onTransactionAdded }: AddTransactionFormProps) {
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentDate, setCurrentDate] = useState('')
   const [isAnySelectOpen, setIsAnySelectOpen] = useState(false)
   const [suppressCloseUntil, setSuppressCloseUntil] = useState(0)
+  const [activeTab, setActiveTab] = useState('manual')
 
   // Load user categories from shared context
   const { categories, loading: categoriesLoading } = useCategories()
@@ -119,6 +120,7 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
   const dynamicCategoryItems = groupForType?.categories ?? []
   const hasDynamicCategories = dynamicCategoryItems.length > 0
 
+
   return (
     <Sheet
       open={open}
@@ -134,12 +136,13 @@ export function AddTransactionForm({ onTransactionAdded }: AddTransactionFormPro
           Add Transaction
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent>
         <SheetHeader>
           <SheetTitle>Add New Transaction</SheetTitle>
         </SheetHeader>
-        <div className="mt-6 overflow-y-auto">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        
+        <div className="w-full">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Date</label>
             <Input

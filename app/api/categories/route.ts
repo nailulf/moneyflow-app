@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       
       // If category_group_id column doesn't exist, try without it
       if (error.message?.includes('column "category_group_id" of relation "categories" does not exist')) {
-        console.log('category_group_id column does not exist, creating category without it')
+
         const fallbackData = {
           user_id,
           name,

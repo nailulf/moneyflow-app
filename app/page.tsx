@@ -24,7 +24,6 @@ export default function Home() {
           <NetWorthCard 
               onAddAssets={() => {
                 // TODO: Implement add assets functionality
-                console.log('Add assets clicked')
               }}
             />
         </MainContent>

@@ -80,15 +80,7 @@ export default function CashFlowSankeyChart({ transactions, categories, dateRang
 
   // Google Charts data structure for three-layer hierarchy
   const sankeyData = useMemo(() => {
-    console.log('🔍 CashFlowSankeyChart - Received transactions:', transactions.length)
-    console.log('🔍 Transaction types breakdown:', {
-      INCOME: transactions.filter(t => t.type === 'INCOME').length,
-      EXPENSE: transactions.filter(t => t.type === 'EXPENSE').length,
-      TRANSFER: transactions.filter(t => t.type === 'TRANSFER').length
-    })
-    
     if (!transactions || transactions.length === 0) {
-      console.log('⚠️ No transactions to process')
       return []
     }
 

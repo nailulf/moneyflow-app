@@ -432,7 +432,7 @@ export function TransactionTable({
                   <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
                     {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
+                      <SelectItem key={`category-${category.id}`} value={category.id}>
                         <div className="flex items-center gap-2">
                           <div 
                             className="w-3 h-3 rounded-full" 
@@ -455,7 +455,7 @@ export function TransactionTable({
                   <SelectContent>
                     <SelectItem value="all">All Merchants</SelectItem>
                     {uniqueMerchants.map((merchant) => (
-                      <SelectItem key={merchant} value={merchant}>
+                      <SelectItem key={`merchant-${merchant}`} value={merchant}>
                         {merchant}
                       </SelectItem>
                     ))}
@@ -496,7 +496,7 @@ export function TransactionTable({
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="max-h-[900px] overflow-y-auto">
             <Table>
-              <TableHeader className="sticky top-0 bg-white z-10">
+              <TableHeader className="sticky top-0 bg-white z-[5]">
                 <TableRow className="border-b border-gray-200">
                   <TableHead 
                     className="py-4 px-6 text-left font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50 w-[40%]"
@@ -546,12 +546,16 @@ export function TransactionTable({
               ) : (
                 Object.entries(groupedTransactions)
                   .sort(([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime())
+                  .filter(([dateString, dayTransactions]) => {
+                    const displayedDayTransactions = dayTransactions.filter(t => 
+                      displayTransactions.includes(t)
+                    )
+                    return displayedDayTransactions.length > 0
+                  })
                   .map(([dateString, dayTransactions]) => {
                     const displayedDayTransactions = dayTransactions.filter(t => 
                       displayTransactions.includes(t)
                     )
-                    
-                    if (displayedDayTransactions.length === 0) return null
                     
                     const formattedDate = new Date(dateString).toLocaleDateString('en-US', {
                       weekday: 'long',
@@ -561,7 +565,7 @@ export function TransactionTable({
                     })
                     
                     return (
-                      <React.Fragment key={dateString}>
+                      <React.Fragment key={`date-${dateString}`}>
                         {/* Date Header Row */}
                         <TableRow className="bg-gray-50">
                           <TableCell colSpan={4} className="py-3 px-6 font-medium text-gray-700 text-sm">
@@ -571,7 +575,7 @@ export function TransactionTable({
                         
                         {/* Transactions for this date */}
                         {displayedDayTransactions.map((transaction) => (
-                          <TableRow key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <TableRow key={`transaction-${transaction.id}`} className="border-b border-gray-100 hover:bg-gray-50">
                             <TableCell className="py-4 px-6 w-[40%]">
                               <div className="space-y-1">
                                 <div className="text-sm font-medium text-gray-900">
@@ -631,7 +635,6 @@ export function TransactionTable({
                       </React.Fragment>
                     )
                   })
-                  .filter(Boolean)
               )}
               </TableBody>
             </Table>

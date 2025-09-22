@@ -22,7 +22,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   // Test user ID for development - in production this would come from authentication
   const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
   
-  console.log('🏗️ LayoutWrapper rendering with TEST_USER_ID:', TEST_USER_ID)
+
 
   return (
     <SidebarProvider>
@@ -55,7 +55,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
               <NavUser user={{
                 name: "shadcn",
                 email: "shadcn@example.com",
-                avatar: "/avatars/01.png"
+                avatar: "/avatars/01.svg"
               }} />
             </div>
           </header>
