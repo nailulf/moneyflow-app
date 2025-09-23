@@ -233,6 +233,18 @@ curl -s -X DELETE \
   "http://localhost:3000/api/transactions?transactionId=TRANSACTION_ID" | jq .
 ```
 
+#### Get Monthly Transaction Aggregation
+```bash
+# Get default 12 months of monthly data
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq .
+
+# Get specific number of months (e.g., 6 months)
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d&months=6" | jq .
+
+# Get maximum 24 months of data
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d&months=24" | jq .
+```
+
 ## Testing Scenarios
 
 ### 1. Basic CRUD Operations
@@ -315,6 +327,17 @@ curl -s -X POST -H "Content-Type: application/json" \
   -d '{"amount":"invalid","type":"INCOME"}' \
   "http://localhost:3000/api/transactions"
 
+# Test monthly endpoint with invalid user ID
+curl -s "http://localhost:3000/api/transactions/monthly?userId=invalid-id"
+
+# Test monthly endpoint with invalid months parameter
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d&months=0"
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d&months=25"
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d&months=invalid"
+
+# Test monthly endpoint without user ID
+curl -s "http://localhost:3000/api/transactions/monthly"
+
 # Test invalid budget category data
 curl -s -X POST -H "Content-Type: application/json" \
   -d '{"invalid":"data"}' \
@@ -376,6 +399,12 @@ time curl -s "http://localhost:3000/api/budget-items?budgetId=BUDGET_ID" > /dev/
 
 # Test budget categories API response time
 time curl -s "http://localhost:3000/api/budget-categories?budgetId=BUDGET_ID" > /dev/null
+
+# Test monthly transactions API response time (default 12 months)
+time curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" > /dev/null
+
+# Test monthly transactions API response time (maximum 24 months)
+time curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d&months=24" > /dev/null
 ```
 
 ## Common Issues and Troubleshooting
@@ -539,6 +568,36 @@ BUDGET_CATEGORY_RESPONSE=$(curl -s -X POST -H "Content-Type: application/json" -
 
 # Get total allocated amount for a budget
 curl -s "http://localhost:3000/api/budget-items?budgetId=BUDGET_ID" | jq '[.[] | .allocated_amount] | add'
+
+# Extract monthly data summary from monthly transactions endpoint
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq '.summary'
+
+# Get only the monthly data array
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq '.monthlyData'
+
+# Extract specific month data (e.g., latest month)
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq '.monthlyData[-1]'
+
+# Get total income across all months
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq '.summary.totalIncome'
+
+# Get average monthly net cash flow
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq '.summary.averageNetCashFlow'
+
+# Extract date range information
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq '.dateRange'
+
+# Get months with positive net cash flow
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq '.monthlyData[] | select(.netCashFlow > 0) | {monthName, year, netCashFlow}'
+
+# Get months with highest expenses
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq '.monthlyData | sort_by(.totalExpenses) | reverse | .[0:3] | .[] | {monthName, year, totalExpenses}'
+
+# Count total number of months with data
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" | jq '.monthlyData | length'
+
+# Test monthly endpoint and save response for analysis
+curl -s "http://localhost:3000/api/transactions/monthly?userId=1d16c616-77a6-48de-9a54-dde7845f720d" > monthly_response.json
 ```
 
 This guide should help you thoroughly test all MoneyFlow API endpoints and ensure they're working correctly in your development environment.

@@ -8,8 +8,8 @@ const CACHE_DURATION = 30000 // 30 seconds
 /**
  * Fetch all transactions for a user with deduplication and caching
  */
-export async function getUserTransactions(userId: string): Promise<Transaction[]> {
-  const cacheKey = `transactions-${userId}`
+export async function getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
+  const cacheKey = `transactions-${userId}-${limit || 'all'}`
   
   // Check data cache first
   const cached = dataCache.get(cacheKey)
@@ -27,7 +27,9 @@ export async function getUserTransactions(userId: string): Promise<Transaction[]
     try {
       // Use absolute URL to avoid "Invalid URL" errors in server context
       const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000'
-      const response = await fetch(`${baseUrl}/api/transactions?userId=${userId}`)
+      // Set a high limit to get more transactions (default to 1000 if no limit specified)
+      const limitParam = limit ? `&limit=${limit}` : '&limit=1000'
+      const response = await fetch(`${baseUrl}/api/transactions?userId=${userId}${limitParam}`)
       
       if (!response.ok) {
         const error = await response.json()
@@ -170,13 +172,9 @@ export async function getTransactionsByCategory(
 export async function getTransactionStats(userId: string, startDate?: string, endDate?: string) {
   const params = new URLSearchParams({ userId })
   
-  if (startDate) {
-    params.append('startDate', startDate)
-  }
-  if (endDate) {
-    params.append('endDate', endDate)
-  }
-
+  if (startDate) params.append('startDate', startDate)
+  if (endDate) params.append('endDate', endDate)
+  
   const response = await fetch(`/api/transactions?${params}`)
   
   if (!response.ok) {
@@ -206,4 +204,64 @@ export async function getTransactionStats(userId: string, startDate?: string, en
     netAmount: totalIncome - totalExpense,
     transactionCount: relevant.length
   }
+}
+
+/**
+ * Monthly transaction data interface
+ */
+export interface MonthlyData {
+  year: number
+  month: number
+  monthName: string
+  totalIncome: number
+  totalExpenses: number
+  netCashFlow: number
+  transactionCount: number
+  incomeTransactionCount: number
+  expenseTransactionCount: number
+}
+
+export interface MonthlyTransactionResponse {
+  monthlyData: MonthlyData[]
+  summary: {
+    totalMonths: number
+    averageIncome: number
+    averageExpenses: number
+    averageNetCashFlow: number
+    totalIncome: number
+    totalExpenses: number
+    totalNetCashFlow: number
+  }
+  dateRange: {
+    startDate: string
+    endDate: string
+  }
+}
+
+/**
+ * Fetch monthly aggregated transaction data
+ */
+export async function getMonthlyTransactions(
+  userId: string,
+  options?: {
+    startDate?: string
+    endDate?: string
+    months?: number
+  }
+): Promise<MonthlyTransactionResponse> {
+  const params = new URLSearchParams({ userId })
+  
+  if (options?.startDate) params.append('startDate', options.startDate)
+  if (options?.endDate) params.append('endDate', options.endDate)
+  if (options?.months) params.append('months', options.months.toString())
+  
+  const response = await fetch(`/api/transactions/monthly?${params}`)
+  
+  if (!response.ok) {
+    const error = await response.json()
+    console.error('Error fetching monthly transactions:', error)
+    throw new Error(error.message || 'Failed to fetch monthly transaction data')
+  }
+
+  return response.json()
 }

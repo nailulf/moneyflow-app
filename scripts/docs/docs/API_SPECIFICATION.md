@@ -395,6 +395,186 @@ DELETE /api/transactions?id=987fcdeb-51a2-43d1-9c4e-123456789abc
 }
 ```
 
+### 5. Monthly Transaction Aggregation
+
+**Endpoint**: `GET /api/transactions/monthly`
+
+#### Request Specification
+
+**HTTP Method**: `GET`
+**Query Parameters**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `userId` | string (UUID) | Yes | User identifier |
+| `months` | number | No | Number of months to retrieve (default: 12, max: 24) |
+
+**Example Requests**:
+```http
+# Get 12 months of monthly transaction data (default)
+GET /api/transactions/monthly?userId=550e8400-e29b-41d4-a716-446655440000
+
+# Get 6 months of monthly transaction data
+GET /api/transactions/monthly?userId=550e8400-e29b-41d4-a716-446655440000&months=6
+
+# Get 24 months of monthly transaction data (maximum)
+GET /api/transactions/monthly?userId=550e8400-e29b-41d4-a716-446655440000&months=24
+```
+
+#### Response Specifications
+
+**Success Response (200 OK)**:
+```typescript
+interface MonthlyData {
+  year: number;
+  month: number;
+  monthName: string;
+  totalIncome: number;
+  totalExpenses: number;
+  netCashFlow: number;
+  transactionCount: number;
+  incomeTransactionCount: number;
+  expenseTransactionCount: number;
+}
+
+interface MonthlyTransactionResponse {
+  monthlyData: MonthlyData[];
+  summary: {
+    totalMonths: number;
+    averageIncome: number;
+    averageExpenses: number;
+    averageNetCashFlow: number;
+    totalIncome: number;
+    totalExpenses: number;
+    totalNetCashFlow: number;
+  };
+  dateRange: {
+    startDate: string;  // YYYY-MM-DD format
+    endDate: string;    // YYYY-MM-DD format
+  };
+}
+```
+
+**Example Success Response**:
+```json
+{
+  "monthlyData": [
+    {
+      "year": 2024,
+      "month": 10,
+      "monthName": "October",
+      "totalIncome": 5000.00,
+      "totalExpenses": 3200.50,
+      "netCashFlow": 1799.50,
+      "transactionCount": 25,
+      "incomeTransactionCount": 3,
+      "expenseTransactionCount": 22
+    },
+    {
+      "year": 2024,
+      "month": 11,
+      "monthName": "November",
+      "totalIncome": 5200.00,
+      "totalExpenses": 2950.75,
+      "netCashFlow": 2249.25,
+      "transactionCount": 28,
+      "incomeTransactionCount": 4,
+      "expenseTransactionCount": 24
+    }
+  ],
+  "summary": {
+    "totalMonths": 12,
+    "averageIncome": 5100.00,
+    "averageExpenses": 3075.63,
+    "averageNetCashFlow": 2024.37,
+    "totalIncome": 61200.00,
+    "totalExpenses": 36907.50,
+    "totalNetCashFlow": 24292.50
+  },
+  "dateRange": {
+    "startDate": "2023-12-01",
+    "endDate": "2024-11-30"
+  }
+}
+```
+
+**Empty Result Response**:
+```json
+{
+  "monthlyData": [],
+  "summary": {
+    "totalMonths": 0,
+    "averageIncome": 0,
+    "averageExpenses": 0,
+    "averageNetCashFlow": 0,
+    "totalIncome": 0,
+    "totalExpenses": 0,
+    "totalNetCashFlow": 0
+  },
+  "dateRange": {
+    "startDate": "",
+    "endDate": ""
+  }
+}
+```
+
+#### Error Responses
+
+**400 Bad Request - Missing User ID**:
+```json
+{
+  "error": "User ID is required"
+}
+```
+
+**400 Bad Request - Invalid Months Parameter**:
+```json
+{
+  "error": "Months parameter must be between 1 and 24"
+}
+```
+
+**500 Internal Server Error - Environment Configuration**:
+```json
+{
+  "error": "Environment variables not configured"
+}
+```
+
+**500 Internal Server Error - Database Error**:
+```json
+{
+  "error": "Failed to fetch transaction data",
+  "code": "DATABASE_ERROR"
+}
+```
+**Triggered when**: 
+- Invalid user ID format (not a valid UUID)
+- Database connection issues
+- RLS policy violations
+
+**500 Internal Server Error - General Error**:
+```json
+{
+  "error": "Internal server error"
+}
+```
+
+#### Performance Characteristics
+
+- **Caching**: Response includes cache headers for 5-minute client-side caching
+- **Optimization**: Server-side aggregation reduces data transfer
+- **Memory Usage**: Efficient streaming processing for large datasets
+- **Response Time**: Typically < 500ms for 12 months of data
+
+#### Use Cases
+
+1. **Financial Dashboard**: Display monthly income/expense trends
+2. **Budget Analysis**: Compare monthly spending against budget allocations
+3. **Cash Flow Visualization**: Show net cash flow patterns over time
+4. **Spending Insights**: Identify seasonal spending patterns
+5. **Financial Planning**: Historical data for future budget planning
+
 ## Error Handling Patterns
 
 ### HTTP Status Code Usage
