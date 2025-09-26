@@ -16,6 +16,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-15',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-15T10:00:00Z',
     updated_at: '2024-01-15T10:00:00Z'
   },
@@ -32,6 +37,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-14',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-14T15:30:00Z',
     updated_at: '2024-01-14T15:30:00Z'
   },
@@ -48,6 +58,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-13',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-13T09:00:00Z',
     updated_at: '2024-01-13T09:00:00Z'
   },
@@ -64,6 +79,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-12',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-12T12:00:00Z',
     updated_at: '2024-01-12T12:00:00Z'
   },
@@ -80,6 +100,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-11',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-11T14:00:00Z',
     updated_at: '2024-01-11T14:00:00Z'
   },
@@ -96,6 +121,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-10',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-10T08:30:00Z',
     updated_at: '2024-01-10T08:30:00Z'
   },
@@ -112,6 +142,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-09',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-09T16:45:00Z',
     updated_at: '2024-01-09T16:45:00Z'
   },
@@ -128,6 +163,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-08',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-08T11:00:00Z',
     updated_at: '2024-01-08T11:00:00Z'
   },
@@ -144,6 +184,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-07',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-07T19:20:00Z',
     updated_at: '2024-01-07T19:20:00Z'
   },
@@ -160,6 +205,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-06',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-01-06T17:00:00Z',
     updated_at: '2024-01-06T17:00:00Z'
   },
@@ -176,6 +226,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-02-20',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-02-20T09:00:00Z',
     updated_at: '2024-02-20T09:00:00Z'
   },
@@ -192,6 +247,11 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-02-10',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-02-10T19:30:00Z',
     updated_at: '2024-02-10T19:30:00Z'
   },
@@ -208,13 +268,17 @@ export const mockTransactions: Transaction[] = [
     notes: null,
     tags: null,
     is_recurring: false,
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-02-05',
+    is_duplicate: false,
+    duplicate_of: null,
     created_at: '2024-02-05T08:00:00Z',
     updated_at: '2024-02-05T08:00:00Z'
   }
 ]
 
-// Generate additional mock data for different months
-// Net Worth Data Types
+// Net worth data for charts
 export interface NetWorthData {
   date: string
   value: number
@@ -222,7 +286,7 @@ export interface NetWorthData {
 
 export type TimePeriod = "1W" | "1M" | "3M" | "YTD" | "1Y" | "3Y" | "5Y"
 
-// Mock Net Worth Data
+// Mock net worth data for different time periods
 export const mockNetWorthData: Record<TimePeriod, NetWorthData[]> = {
   "1W": [
     { date: "Mon", value: 98500 },
@@ -269,7 +333,7 @@ export const mockNetWorthData: Record<TimePeriod, NetWorthData[]> = {
   ],
 }
 
-// Asset Types
+// Asset allocation data
 export interface AssetType {
   id: string
   name: string
@@ -280,7 +344,7 @@ export interface AssetType {
   changePercentage: number
 }
 
-// Mock Assets Data
+// Mock asset allocation data
 export const mockAssets: AssetType[] = [
   {
     id: "1",
@@ -330,54 +394,46 @@ export const mockAssets: AssetType[] = [
 ]
 
 export const generateMockTransactions = (months: number = 10): Transaction[] => {
-  const transactions: Transaction[] = [...mockTransactions]
-  const categories = CATEGORIES.filter(cat => cat !== 'Income')
+  const transactions: Transaction[] = []
+  const categories = Object.keys(CATEGORIES)
+  const merchants = ['Amazon', 'Starbucks', 'Shell', 'Whole Foods', 'Netflix', 'Uber', 'Target', 'McDonald\'s']
   
   for (let month = 0; month < months; month++) {
-    const date = new Date()
-    date.setMonth(date.getMonth() - month)
+    const transactionsPerMonth = Math.floor(Math.random() * 20) + 10 // 10-30 transactions per month
     
-    // Add income for each month
-    transactions.push({
-      id: `income-${month}`,
-      user_id: 'user1',
-      date: date.toISOString().split('T')[0],
-      description: 'Monthly Salary',
-      amount: 3500 + (Math.random() * 1000 - 500),
-      type: 'INCOME',
-      category_id: 'Income',
-      account_id: null,
-      merchant: 'Company Inc',
-      notes: null,
-      tags: null,
-      is_recurring: false,
-      created_at: date.toISOString(),
-      updated_at: date.toISOString()
-    })
-    
-    // Add random expenses
-    for (let i = 0; i < 15; i++) {
-      const expenseDate = new Date(date)
-      expenseDate.setDate(Math.floor(Math.random() * 28) + 1)
+    for (let i = 0; i < transactionsPerMonth; i++) {
+      const date = new Date()
+      date.setMonth(date.getMonth() - month)
+      date.setDate(Math.floor(Math.random() * 28) + 1)
+      
+      const isIncome = Math.random() < 0.1 // 10% chance of income
+      const amount = isIncome 
+        ? Math.floor(Math.random() * 3000) + 500 // Income: $500-$3500
+        : -(Math.floor(Math.random() * 200) + 10) // Expense: $10-$210
       
       const category = categories[Math.floor(Math.random() * categories.length)]
-      const amount = -(Math.random() * 200 + 10)
+      const merchant = merchants[Math.floor(Math.random() * merchants.length)]
       
       transactions.push({
-        id: `expense-${month}-${i}`,
+        id: `generated-${month}-${i}`,
         user_id: 'user1',
-        date: expenseDate.toISOString().split('T')[0],
-        description: `${category} expense`,
-        amount: amount,
-        type: 'EXPENSE',
+        date: date.toISOString().split('T')[0],
+        description: isIncome ? 'Salary' : `Purchase at ${merchant}`,
+        amount,
+        type: isIncome ? 'INCOME' : 'EXPENSE',
         category_id: category,
         account_id: null,
-        merchant: 'Various',
+        merchant: isIncome ? 'Company Inc' : merchant,
         notes: null,
         tags: null,
         is_recurring: false,
-        created_at: expenseDate.toISOString(),
-        updated_at: expenseDate.toISOString()
+        statement_id: null,
+        raw_data: null,
+        posting_date: date.toISOString().split('T')[0],
+        is_duplicate: false,
+        duplicate_of: null,
+        created_at: date.toISOString(),
+        updated_at: date.toISOString()
       })
     }
   }

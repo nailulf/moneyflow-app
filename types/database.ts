@@ -15,6 +15,11 @@ export interface Database {
           notes: string | null
           tags: string[] | null
           is_recurring: boolean
+          statement_id: string | null
+          raw_data: string | null
+          posting_date: string | null
+          is_duplicate: boolean
+          duplicate_of: string | null
           created_at: string
           updated_at: string
         }
@@ -31,6 +36,11 @@ export interface Database {
           notes?: string | null
           tags?: string[] | null
           is_recurring?: boolean
+          statement_id?: string | null
+          raw_data?: string | null
+          posting_date?: string | null
+          is_duplicate?: boolean
+          duplicate_of?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -47,6 +57,60 @@ export interface Database {
           notes?: string | null
           tags?: string[] | null
           is_recurring?: boolean
+          statement_id?: string | null
+          raw_data?: string | null
+          posting_date?: string | null
+          is_duplicate?: boolean
+          duplicate_of?: string | null
+          updated_at?: string
+        }
+      }
+      statements: {
+        Row: {
+          id: string
+          user_id: string
+          account_id: string
+          file_name: string
+          file_size: number
+          file_checksum: string
+          bank_name: string
+          statement_period_start: string | null
+          statement_period_end: string | null
+          total_transactions: number
+          processing_status: 'processing' | 'completed' | 'failed'
+          raw_metadata: any | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          account_id: string
+          file_name: string
+          file_size: number
+          file_checksum: string
+          bank_name: string
+          statement_period_start?: string | null
+          statement_period_end?: string | null
+          total_transactions?: number
+          processing_status?: 'processing' | 'completed' | 'failed'
+          raw_metadata?: any | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          account_id?: string
+          file_name?: string
+          file_size?: number
+          file_checksum?: string
+          bank_name?: string
+          statement_period_start?: string | null
+          statement_period_end?: string | null
+          total_transactions?: number
+          processing_status?: 'processing' | 'completed' | 'failed'
+          raw_metadata?: any | null
           updated_at?: string
         }
       }
@@ -333,3 +397,7 @@ export type BudgetCategoryUpdate = Database['public']['Tables']['budget_categori
 export type AccountDB = Database['public']['Tables']['accounts']['Row']
 export type AccountInsert = Database['public']['Tables']['accounts']['Insert']
 export type AccountUpdate = Database['public']['Tables']['accounts']['Update']
+
+export type StatementDB = Database['public']['Tables']['statements']['Row']
+export type StatementInsert = Database['public']['Tables']['statements']['Insert']
+export type StatementUpdate = Database['public']['Tables']['statements']['Update']

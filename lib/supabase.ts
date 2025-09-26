@@ -10,7 +10,15 @@ function createSupabaseClient() {
     throw new Error('Missing Supabase environment variables')
   }
 
-  return createClient<Database>(supabaseUrl, supabaseAnonKey)
+  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    global: {
+      fetch: (url, options = {}) => {
+        // Fix for Next.js 15 compatibility - disable cache signal
+        const { cache, ...restOptions } = options as any;
+        return fetch(url, restOptions);
+      }
+    }
+  })
 }
 
 // Export a getter function instead of direct client
@@ -28,7 +36,15 @@ export const createClientComponentClient = () => {
     throw new Error('Missing Supabase environment variables for client')
   }
 
-  return createClient<Database>(supabaseUrl, supabaseAnonKey)
+  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    global: {
+      fetch: (url, options = {}) => {
+        // Fix for Next.js 15 compatibility - disable cache signal
+        const { cache, ...restOptions } = options as any;
+        return fetch(url, restOptions);
+      }
+    }
+  })
 }
 
 // Server-side Supabase client (for API routes)
@@ -47,6 +63,13 @@ export const createServerComponentClient = () => {
       auth: {
         autoRefreshToken: false,
         persistSession: false
+      },
+      global: {
+        fetch: (url, options = {}) => {
+          // Fix for Next.js 15 compatibility - disable cache signal
+          const { cache, ...restOptions } = options as any;
+          return fetch(url, restOptions);
+        }
       }
     }
   )
