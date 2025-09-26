@@ -3,17 +3,16 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { transactionSchema, TransactionFormData } from '@/lib/validations'
-// Removed fallback CATEGORIES to ensure only valid user categories (with IDs) are selectable
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Plus, Upload } from 'lucide-react'
-import { toast } from 'sonner'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Plus, Upload, Edit } from 'lucide-react'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
+import { PDFStatementUpload } from '@/components/PDFStatementUpload'
 
 
 interface AddTransactionFormProps {
@@ -59,7 +58,6 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
     handleSubmit,
     setValue,
     watch,
-    reset,
     formState: { errors }
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -157,7 +155,20 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
         </SheetHeader>
         
         <div className="w-full">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Tabs defaultValue="manual" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="manual" className="flex items-center gap-2">
+                <Edit className="h-4 w-4" />
+                Manual Entry
+              </TabsTrigger>
+              <TabsTrigger value="upload" className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Upload PDF
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="manual" className="mt-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Date</label>
             <Input
@@ -318,24 +329,35 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
             </div>
           )}
 
-          <div className="flex gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? 'Adding...' : 'Add Transaction'}
-            </Button>
-          </div>
-        </form>
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1"
+                  >
+                    {isSubmitting ? 'Adding...' : 'Add Transaction'}
+                  </Button>
+                </div>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="upload" className="mt-4">
+              <PDFStatementUpload 
+                onSuccess={() => {
+                  onSuccess?.()
+                  setOpen(false)
+                }}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
       </SheetContent>
     </Sheet>

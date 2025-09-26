@@ -36,7 +36,12 @@ const testTransactions: Transaction[] = [
     tags: ['salary', 'monthly'],
     is_recurring: false,
     created_at: '2024-01-15T00:00:00Z',
-    updated_at: '2024-01-15T00:00:00Z'
+    updated_at: '2024-01-15T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-15',
+    is_duplicate: false,
+    duplicate_of: null
   },
   {
     id: '2',
@@ -52,7 +57,12 @@ const testTransactions: Transaction[] = [
     tags: ['freelance', 'web-dev'],
     is_recurring: false,
     created_at: '2024-01-20T00:00:00Z',
-    updated_at: '2024-01-20T00:00:00Z'
+    updated_at: '2024-01-20T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-20',
+    is_duplicate: false,
+    duplicate_of: null
   },
   {
     id: '3',
@@ -68,7 +78,12 @@ const testTransactions: Transaction[] = [
     tags: ['investment', 'dividends'],
     is_recurring: false,
     created_at: '2024-01-25T00:00:00Z',
-    updated_at: '2024-01-25T00:00:00Z'
+    updated_at: '2024-01-25T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-25',
+    is_duplicate: false,
+    duplicate_of: null
   },
   
   // January Expenses
@@ -86,7 +101,12 @@ const testTransactions: Transaction[] = [
     tags: ['housing', 'rent'],
     is_recurring: false,
     created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z'
+    updated_at: '2024-01-01T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-01',
+    is_duplicate: false,
+    duplicate_of: null
   },
   {
     id: '5',
@@ -102,7 +122,12 @@ const testTransactions: Transaction[] = [
     tags: ['food', 'groceries'],
     is_recurring: false,
     created_at: '2024-01-05T00:00:00Z',
-    updated_at: '2024-01-05T00:00:00Z'
+    updated_at: '2024-01-05T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-05',
+    is_duplicate: false,
+    duplicate_of: null
   },
   {
     id: '6',
@@ -118,7 +143,12 @@ const testTransactions: Transaction[] = [
     tags: ['utilities', 'bills'],
     is_recurring: false,
     created_at: '2024-01-10T00:00:00Z',
-    updated_at: '2024-01-10T00:00:00Z'
+    updated_at: '2024-01-10T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-10',
+    is_duplicate: false,
+    duplicate_of: null
   },
   {
     id: '7',
@@ -134,7 +164,12 @@ const testTransactions: Transaction[] = [
     tags: ['transport', 'public'],
     is_recurring: false,
     created_at: '2024-01-12T00:00:00Z',
-    updated_at: '2024-01-12T00:00:00Z'
+    updated_at: '2024-01-12T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-12',
+    is_duplicate: false,
+    duplicate_of: null
   },
   {
     id: '8',
@@ -150,10 +185,15 @@ const testTransactions: Transaction[] = [
     tags: ['entertainment', 'leisure'],
     is_recurring: false,
     created_at: '2024-01-18T00:00:00Z',
-    updated_at: '2024-01-18T00:00:00Z'
+    updated_at: '2024-01-18T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-01-18',
+    is_duplicate: false,
+    duplicate_of: null
   },
   
-  // February transactions (for testing monthly filtering)
+  // February Income
   {
     id: '9',
     amount: 8000000, // 8M IDR salary
@@ -168,7 +208,12 @@ const testTransactions: Transaction[] = [
     tags: ['salary', 'monthly'],
     is_recurring: false,
     created_at: '2024-02-15T00:00:00Z',
-    updated_at: '2024-02-15T00:00:00Z'
+    updated_at: '2024-02-15T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-02-15',
+    is_duplicate: false,
+    duplicate_of: null
   },
   {
     id: '10',
@@ -184,7 +229,12 @@ const testTransactions: Transaction[] = [
     tags: ['housing', 'rent'],
     is_recurring: false,
     created_at: '2024-02-01T00:00:00Z',
-    updated_at: '2024-02-01T00:00:00Z'
+    updated_at: '2024-02-01T00:00:00Z',
+    statement_id: null,
+    raw_data: null,
+    posting_date: '2024-02-01',
+    is_duplicate: false,
+    duplicate_of: null
   }
 ]
 
@@ -294,255 +344,166 @@ const testCategories: CategoryDB[] = [
  * Test individual calculation functions
  */
 function testIndividualCalculations() {
-  console.log('\n=== TESTING INDIVIDUAL CALCULATIONS ===\n')
+  console.log('=== TESTING INDIVIDUAL CALCULATIONS ===\n')
   
-  // Test with January data only
-  const januaryTransactions = filterTransactionsByMonth(testTransactions, new Date('2024-01-15'))
+  const totalIncome = calculateTotalIncome(testTransactions)
+  const totalSpending = calculateTotalSpending(testTransactions)
+  const netCashflow = calculateNetCashflow(testTransactions)
   
-  console.log('📊 January Transactions:', januaryTransactions.length)
+  console.log(`Total Income: ${totalIncome.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
+  console.log(`Total Spending: ${Math.abs(totalSpending).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
+  console.log(`Net Cashflow: ${netCashflow.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
   
-  // 1. Total Income
-  const totalIncome = calculateTotalIncome(januaryTransactions)
-  console.log('💰 Total Income:', new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(totalIncome))
+  // Test category breakdowns
+  const incomeByCategories = calculateIncomeByCategories(testTransactions, testCategories)
+  const spendingByCategories = calculateSpendingByCategories(testTransactions, testCategories)
   
-  // 2. Total Spending
-  const totalSpending = calculateTotalSpending(januaryTransactions)
-  console.log('💸 Total Spending:', new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(totalSpending))
-  
-  // 3. Net Cashflow
-  const netCashflow = calculateNetCashflow(januaryTransactions)
-  console.log('📈 Net Cashflow:', new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(netCashflow), netCashflow >= 0 ? '✅ Surplus' : '⚠️ Deficit')
-  
-  // 4. Income by Categories
-  const incomeByCategories = calculateIncomeByCategories(januaryTransactions, testCategories)
-  console.log('\n📋 Income by Categories:')
+  console.log('\nIncome by Categories:')
   incomeByCategories.forEach(category => {
-    console.log(`   ${category.categoryName}: ${new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(category.amount)} (${category.percentage.toFixed(1)}%) [${category.transactionCount} transactions]`)
+    console.log(`  ${category.categoryName}: ${category.amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })} (${category.percentage.toFixed(1)}%)`)
   })
   
-  // 5. Spending by Categories
-  const spendingByCategories = calculateSpendingByCategories(januaryTransactions, testCategories)
-  console.log('\n💳 Spending by Categories:')
+  console.log('\nSpending by Categories:')
   spendingByCategories.forEach(category => {
-    console.log(`   ${category.categoryName}: ${new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(category.amount)} (${category.percentage.toFixed(1)}%) [${category.transactionCount} transactions]`)
+    console.log(`  ${category.categoryName}: ${Math.abs(category.amount).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })} (${category.percentage.toFixed(1)}%)`)
   })
+  
+  console.log('\n' + '='.repeat(50) + '\n')
 }
 
 /**
  * Test comprehensive metrics calculation
  */
 function testComprehensiveMetrics() {
-  console.log('\n\n=== TESTING COMPREHENSIVE METRICS ===\n')
+  console.log('=== TESTING COMPREHENSIVE METRICS ===\n')
   
-  // Test with all data
-  const allMetrics = calculateAllMetrics(testTransactions, testCategories)
-  console.log(displayFinancialMetrics(allMetrics))
+  const metrics = calculateAllMetrics(testTransactions, testCategories)
+  console.log(displayFinancialMetrics(metrics))
   
-  // Test with January data only
-  const januaryMetrics = calculateAllMetrics(
-    testTransactions,
-    testCategories,
-    new Date('2024-01-01'),
-    new Date('2024-01-31')
-  )
-  console.log('\n=== JANUARY ONLY ===\n')
-  console.log(displayFinancialMetrics(januaryMetrics))
+  console.log('\n' + '='.repeat(50) + '\n')
 }
 
 /**
  * Test monthly filtering
  */
 function testMonthlyFiltering() {
-  console.log('\n\n=== TESTING MONTHLY FILTERING ===\n')
+  console.log('=== TESTING MONTHLY FILTERING ===\n')
   
+  // Test January 2024
   const januaryTransactions = filterTransactionsByMonth(testTransactions, new Date('2024-01-15'))
+  console.log(`January 2024 Transactions: ${januaryTransactions.length}`)
+  
+  const januaryMetrics = calculateAllMetrics(januaryTransactions, testCategories)
+  console.log('January 2024 Metrics:')
+  console.log(displayFinancialMetrics(januaryMetrics))
+  
+  // Test February 2024
   const februaryTransactions = filterTransactionsByMonth(testTransactions, new Date('2024-02-15'))
+  console.log(`\nFebruary 2024 Transactions: ${februaryTransactions.length}`)
   
-  console.log('📅 January Transactions:', januaryTransactions.length)
-  console.log('📅 February Transactions:', februaryTransactions.length)
-  console.log('📅 Total Transactions:', testTransactions.length)
+  const februaryMetrics = calculateAllMetrics(februaryTransactions, testCategories)
+  console.log('February 2024 Metrics:')
+  console.log(displayFinancialMetrics(februaryMetrics))
   
-  // Compare monthly cashflows
-  const janCashflow = calculateNetCashflow(januaryTransactions)
-  const febCashflow = calculateNetCashflow(februaryTransactions)
-  
-  console.log('\n💰 Monthly Comparison:')
-  console.log(`   January: ${new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(janCashflow)}`)
-  console.log(`   February: ${new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(febCashflow)}`)
+  console.log('\n' + '='.repeat(50) + '\n')
 }
 
 /**
  * Test edge cases
  */
 function testEdgeCases() {
-  console.log('\n\n=== TESTING EDGE CASES ===\n')
+  console.log('=== TESTING EDGE CASES ===\n')
   
-  // Empty dataset
-  console.log('🔍 Empty Dataset Test:')
+  // Test with empty data
+  console.log('Empty Dataset Test:')
   const emptyMetrics = calculateAllMetrics([], [])
-  console.log('   Total Income:', emptyMetrics.totalIncome)
-  console.log('   Total Spending:', emptyMetrics.totalSpending)
-  console.log('   Net Cashflow:', emptyMetrics.netCashflow)
-  console.log('   Income Categories:', emptyMetrics.incomeByCategories.length)
-  console.log('   Spending Categories:', emptyMetrics.spendingByCategories.length)
+  console.log(displayFinancialMetrics(emptyMetrics))
   
-  // Transactions with zero amounts
-  const zeroAmountTransactions: Transaction[] = [{
-    id: 'zero-1',
-    amount: 0,
-    type: 'INCOME',
-    category_id: 'salary',
-    account_id: null,
-    description: 'Zero Amount Transaction',
-    date: '2024-01-15',
-    user_id: 'test-user',
-    merchant: null,
-    notes: null,
-    tags: null,
-    is_recurring: false,
-    created_at: '2024-01-15T00:00:00Z',
-    updated_at: '2024-01-15T00:00:00Z'
-  }]
+  // Test with only income
+  const incomeOnlyTransactions = testTransactions.filter(t => t.type === 'INCOME')
+  console.log('\nIncome Only Test:')
+  const incomeOnlyMetrics = calculateAllMetrics(incomeOnlyTransactions, testCategories)
+  console.log(displayFinancialMetrics(incomeOnlyMetrics))
   
-  console.log('\n🔍 Zero Amount Test:')
-  const zeroMetrics = calculateAllMetrics(zeroAmountTransactions, testCategories)
-  console.log('   Total Income:', zeroMetrics.totalIncome)
-  console.log('   Total Spending:', zeroMetrics.totalSpending)
+  // Test with only expenses
+  const expenseOnlyTransactions = testTransactions.filter(t => t.type === 'EXPENSE')
+  console.log('\nExpense Only Test:')
+  const expenseOnlyMetrics = calculateAllMetrics(expenseOnlyTransactions, testCategories)
+  console.log(displayFinancialMetrics(expenseOnlyMetrics))
   
-  // Uncategorized transactions
-  const uncategorizedTransactions: Transaction[] = [{
-    id: 'uncat-1',
-    amount: 1000000,
-    type: 'INCOME',
-    category_id: 'non-existent-category',
-    account_id: null,
-    description: 'Uncategorized Transaction',
-    date: '2024-01-15',
-    user_id: 'test-user',
-    merchant: null,
-    notes: null,
-    tags: null,
-    is_recurring: false,
-    created_at: '2024-01-15T00:00:00Z',
-    updated_at: '2024-01-15T00:00:00Z'
-  }]
+  // Test with missing categories
+  console.log('\nMissing Categories Test:')
+  const missingCategoriesMetrics = calculateAllMetrics(testTransactions, [])
+  console.log(displayFinancialMetrics(missingCategoriesMetrics))
   
-  console.log('\n🔍 Uncategorized Transaction Test:')
-  const uncatMetrics = calculateAllMetrics(uncategorizedTransactions, testCategories)
-  console.log('   Income Categories:', uncatMetrics.incomeByCategories.map(c => c.categoryName))
+  console.log('\n' + '='.repeat(50) + '\n')
 }
 
 /**
- * Performance test with larger dataset
+ * Test performance with larger dataset
  */
 function testPerformance() {
-  console.log('\n\n=== TESTING PERFORMANCE ===\n')
+  console.log('=== TESTING PERFORMANCE ===\n')
   
   // Generate larger dataset
-  const largeDataset: Transaction[] = []
-  const startTime = Date.now()
-  
-  // Generate 1000 transactions
+  const largeTransactionSet: Transaction[] = []
   for (let i = 0; i < 1000; i++) {
-    largeDataset.push({
+    largeTransactionSet.push({
       id: `perf-${i}`,
-      amount: Math.random() > 0.5 ? Math.random() * 5000000 : -Math.random() * 2000000,
+      amount: Math.random() > 0.5 ? Math.floor(Math.random() * 5000000) : -Math.floor(Math.random() * 2000000),
       type: Math.random() > 0.5 ? 'INCOME' : 'EXPENSE',
       category_id: testCategories[Math.floor(Math.random() * testCategories.length)].id,
       account_id: null,
       description: `Performance Test Transaction ${i}`,
-      date: `2024-01-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+      date: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
       user_id: 'test-user',
-      merchant: null,
+      merchant: Math.random() > 0.5 ? `Merchant ${i}` : null,
       notes: null,
       tags: null,
       is_recurring: false,
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T00:00:00Z'
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      statement_id: null,
+      raw_data: null,
+      posting_date: new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+      is_duplicate: false,
+      duplicate_of: null
     })
   }
   
-  const generationTime = Date.now() - startTime
-  console.log(`📊 Generated ${largeDataset.length} transactions in ${generationTime}ms`)
+  console.log(`Testing with ${largeTransactionSet.length} transactions...`)
   
-  // Test calculation performance
-  const calcStartTime = Date.now()
-  const perfMetrics = calculateAllMetrics(largeDataset, testCategories)
-  const calcTime = Date.now() - calcStartTime
+  const startTime = performance.now()
+  const performanceMetrics = calculateAllMetrics(largeTransactionSet, testCategories)
+  const endTime = performance.now()
   
-  console.log(`⚡ Calculated metrics for ${largeDataset.length} transactions in ${calcTime}ms`)
-  console.log(`   Total Income: ${new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(perfMetrics.totalIncome)}`)
-  console.log(`   Total Spending: ${new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(perfMetrics.totalSpending)}`)
-  console.log(`   Income Categories: ${perfMetrics.incomeByCategories.length}`)
-  console.log(`   Spending Categories: ${perfMetrics.spendingByCategories.length}`)
+  console.log(`Calculation completed in ${(endTime - startTime).toFixed(2)}ms`)
+  console.log(`Total Income: ${performanceMetrics.totalIncome.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
+  console.log(`Total Spending: ${Math.abs(performanceMetrics.totalSpending).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
+  console.log(`Net Cashflow: ${performanceMetrics.netCashflow.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
+  
+  console.log('\n' + '='.repeat(50) + '\n')
 }
 
 /**
- * Main test runner
+ * Run all tests
  */
 function runAllTests() {
-  console.log('🚀 FINANCIAL METRICS CALCULATOR TESTS')
-  console.log('=====================================\n')
+  console.log('🧮 FINANCIAL METRICS CALCULATOR - COMPREHENSIVE TESTING\n')
+  console.log('='.repeat(60))
   
-  try {
-    testIndividualCalculations()
-    testComprehensiveMetrics()
-    testMonthlyFiltering()
-    testEdgeCases()
-    testPerformance()
-    
-    console.log('\n\n✅ ALL TESTS COMPLETED SUCCESSFULLY!')
-    console.log('\n📝 Summary:')
-    console.log('   ✓ Individual calculations work correctly')
-    console.log('   ✓ Comprehensive metrics calculation works')
-    console.log('   ✓ Monthly filtering works properly')
-    console.log('   ✓ Edge cases are handled gracefully')
-    console.log('   ✓ Performance is acceptable for large datasets')
-    
-  } catch (error) {
-    console.error('\n❌ TEST FAILED:', error)
-  }
+  testIndividualCalculations()
+  testComprehensiveMetrics()
+  testMonthlyFiltering()
+  testEdgeCases()
+  testPerformance()
+  
+  console.log('✅ All tests completed successfully!')
+  console.log('\nTo run the example usage from the calculator, call exampleUsage()')
+  console.log('To test edge cases from the calculator, call handleEdgeCases()')
 }
 
-/**
- * Export test functions for individual use
- */
+// Export functions for external use
 export {
   testIndividualCalculations,
   testComprehensiveMetrics,
@@ -554,19 +515,13 @@ export {
   testCategories
 }
 
-// Run tests if this file is executed directly
+// Run tests if this file is executed directly (Node.js)
 if (typeof require !== 'undefined' && require.main === module) {
   runAllTests()
 }
 
-// For browser/module usage
+// Run tests if this file is loaded in browser
 if (typeof window !== 'undefined') {
-  (window as any).financialMetricsTests = {
-    runAllTests,
-    testIndividualCalculations,
-    testComprehensiveMetrics,
-    testMonthlyFiltering,
-    testEdgeCases,
-    testPerformance
-  }
+  console.log('Financial Metrics Test Suite loaded. Call runAllTests() to execute all tests.')
+  // Optionally auto-run: runAllTests()
 }

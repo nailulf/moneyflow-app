@@ -363,7 +363,12 @@ export function exampleUsage() {
       tags: null,
       is_recurring: false,
       created_at: '2024-01-15T00:00:00Z',
-      updated_at: '2024-01-15T00:00:00Z'
+      updated_at: '2024-01-15T00:00:00Z',
+      statement_id: null,
+      raw_data: null,
+      posting_date: '2024-01-15',
+      is_duplicate: false,
+      duplicate_of: null
     },
     {
       id: '2',
@@ -379,7 +384,12 @@ export function exampleUsage() {
       tags: null,
       is_recurring: false,
       created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T00:00:00Z'
+      updated_at: '2024-01-01T00:00:00Z',
+      statement_id: null,
+      raw_data: null,
+      posting_date: '2024-01-01',
+      is_duplicate: false,
+      duplicate_of: null
     },
     {
       id: '3',
@@ -395,7 +405,12 @@ export function exampleUsage() {
       tags: ['food', 'weekly'],
       is_recurring: false,
       created_at: '2024-01-10T00:00:00Z',
-      updated_at: '2024-01-10T00:00:00Z'
+      updated_at: '2024-01-10T00:00:00Z',
+      statement_id: null,
+      raw_data: null,
+      posting_date: '2024-01-10',
+      is_duplicate: false,
+      duplicate_of: null
     },
     {
       id: '4',
@@ -411,7 +426,12 @@ export function exampleUsage() {
       tags: ['freelance', 'web'],
       is_recurring: false,
       created_at: '2024-01-20T00:00:00Z',
-      updated_at: '2024-01-20T00:00:00Z'
+      updated_at: '2024-01-20T00:00:00Z',
+      statement_id: null,
+      raw_data: null,
+      posting_date: '2024-01-20',
+      is_duplicate: false,
+      duplicate_of: null
     }
   ]
 
@@ -507,7 +527,12 @@ export function handleEdgeCases() {
       tags: null,
       is_recurring: false,
       created_at: '2024-01-15T00:00:00Z',
-      updated_at: '2024-01-15T00:00:00Z'
+      updated_at: '2024-01-15T00:00:00Z',
+      statement_id: null,
+      raw_data: null,
+      posting_date: '2024-01-15',
+      is_duplicate: false,
+      duplicate_of: null
     }
   ]
   
@@ -531,7 +556,12 @@ export function handleEdgeCases() {
       tags: null,
       is_recurring: false,
       created_at: '2024-01-15T00:00:00Z',
-      updated_at: '2024-01-15T00:00:00Z'
+      updated_at: '2024-01-15T00:00:00Z',
+      statement_id: null,
+      raw_data: null,
+      posting_date: '2024-01-15',
+      is_duplicate: false,
+      duplicate_of: null
     }
   ]
   
