@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient } from '@/lib/supabase'
+import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const accountId = searchParams.get('accountId')
+    const includeHistory = searchParams.get('includeHistory') === 'true'
+    const period = searchParams.get('period') || '1M'
+    const asOfDate = searchParams.get('asOfDate')
 
     // Check if we're in build time
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -17,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     // If accountId is provided, fetch single account
     if (accountId) {
-      const { data, error } = await supabase
+      const { data: account, error } = await supabase
         .from('accounts')
         .select('*')
         .eq('id', accountId)
@@ -29,7 +33,34 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to fetch account' }, { status: 500 })
       }
 
-      return NextResponse.json(data)
+      // If historical balance is requested
+      if (includeHistory || asOfDate) {
+        const targetDate = asOfDate ? new Date(asOfDate) : new Date()
+        
+        // Fetch transactions for this account
+        const { data: transactions, error: transactionError } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('account_id', accountId)
+          .lte('date', targetDate.toISOString())
+          .order('date', { ascending: true })
+
+        if (transactionError) {
+          console.error('❌ Error fetching transactions:', transactionError)
+          return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 })
+        }
+
+        // Calculate historical balance
+         const historicalBalance = calculateAccountBalanceAtDate(transactions || [], targetDate, account.type)
+        
+        return NextResponse.json({
+          ...account,
+          historicalBalance,
+          asOfDate: targetDate.toISOString()
+        })
+      }
+
+      return NextResponse.json(account)
     }
 
     // Otherwise, fetch all accounts for user
@@ -38,7 +69,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const { data, error } = await supabase
+    const { data: accounts, error } = await supabase
       .from('accounts')
       .select('*')
       .eq('user_id', userId)
@@ -51,7 +82,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch accounts' }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    // If historical balances are requested
+    if (includeHistory || asOfDate) {
+      const targetDate = asOfDate ? new Date(asOfDate) : new Date()
+      
+      // Fetch all transactions for these accounts
+      const accountIds = accounts?.map(account => account.id) || []
+      
+      if (accountIds.length > 0) {
+        const { data: transactions, error: transactionError } = await supabase
+          .from('transactions')
+          .select('*')
+          .in('account_id', accountIds)
+          .lte('date', targetDate.toISOString())
+          .order('date', { ascending: true })
+
+        if (transactionError) {
+          console.error('❌ Error fetching transactions:', transactionError)
+          return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 })
+        }
+
+        // Calculate historical balances for each account
+         const accountsWithHistory = accounts?.map(account => {
+           const accountTransactions = transactions?.filter(t => t.account_id === account.id) || []
+           const historicalBalance = calculateAccountBalanceAtDate(accountTransactions, targetDate, account.type)
+          
+          return {
+            ...account,
+            historicalBalance,
+            asOfDate: targetDate.toISOString()
+          }
+        })
+
+        return NextResponse.json(accountsWithHistory)
+      }
+    }
+
+    return NextResponse.json(accounts)
   } catch (error: unknown) {
     console.error('❌ API Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

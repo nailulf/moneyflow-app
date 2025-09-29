@@ -16,6 +16,7 @@ import {
   handleEdgeCases
 } from './financial-metrics-calculator'
 import { Transaction, CategoryDB } from '@/types/database'
+import { formatCurrency } from '@/lib/data-utils'
 
 /**
  * Sample data for testing
@@ -350,9 +351,9 @@ function testIndividualCalculations() {
   const totalSpending = calculateTotalSpending(testTransactions)
   const netCashflow = calculateNetCashflow(testTransactions)
   
-  console.log(`Total Income: ${totalIncome.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
-  console.log(`Total Spending: ${Math.abs(totalSpending).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
-  console.log(`Net Cashflow: ${netCashflow.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
+  console.log(`Total Income: ${formatCurrency(totalIncome)}`)
+  console.log(`Total Spending: ${formatCurrency(Math.abs(totalSpending))}`)
+  console.log(`Net Cashflow: ${formatCurrency(netCashflow)}`)
   
   // Test category breakdowns
   const incomeByCategories = calculateIncomeByCategories(testTransactions, testCategories)
@@ -360,12 +361,12 @@ function testIndividualCalculations() {
   
   console.log('\nIncome by Categories:')
   incomeByCategories.forEach(category => {
-    console.log(`  ${category.categoryName}: ${category.amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })} (${category.percentage.toFixed(1)}%)`)
+    console.log(`  ${category.categoryName}: ${formatCurrency(category.amount)} (${category.percentage.toFixed(1)}%)`)
   })
   
   console.log('\nSpending by Categories:')
   spendingByCategories.forEach(category => {
-    console.log(`  ${category.categoryName}: ${Math.abs(category.amount).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })} (${category.percentage.toFixed(1)}%)`)
+    console.log(`  ${category.categoryName}: ${formatCurrency(Math.abs(category.amount))} (${category.percentage.toFixed(1)}%)`)
   })
   
   console.log('\n' + '='.repeat(50) + '\n')
@@ -478,9 +479,9 @@ function testPerformance() {
   const endTime = performance.now()
   
   console.log(`Calculation completed in ${(endTime - startTime).toFixed(2)}ms`)
-  console.log(`Total Income: ${performanceMetrics.totalIncome.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
-  console.log(`Total Spending: ${Math.abs(performanceMetrics.totalSpending).toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
-  console.log(`Net Cashflow: ${performanceMetrics.netCashflow.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}`)
+  console.log(`Total Income: ${formatCurrency(performanceMetrics.totalIncome)}`)
+  console.log(`Total Spending: ${formatCurrency(Math.abs(performanceMetrics.totalSpending))}`)
+  console.log(`Net Cashflow: ${formatCurrency(performanceMetrics.netCashflow)}`)
   
   console.log('\n' + '='.repeat(50) + '\n')
 }

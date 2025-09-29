@@ -284,7 +284,7 @@ export interface NetWorthData {
   value: number
 }
 
-export type TimePeriod = "1W" | "1M" | "3M" | "YTD" | "1Y" | "3Y" | "5Y"
+export type TimePeriod = "1W" | "1M" | "3M" | "YTD" | "1Y" | "3Y" | "5Y" | "ALL"
 
 // Mock net worth data for different time periods
 export const mockNetWorthData: Record<TimePeriod, NetWorthData[]> = {
@@ -330,6 +330,14 @@ export const mockNetWorthData: Record<TimePeriod, NetWorthData[]> = {
     { date: "2022", value: 45000 },
     { date: "2023", value: 68000 },
     { date: "2024", value: 102300 },
+  ],
+  "ALL": [
+    { date: "2019", value: 15000 },
+    { date: "2020", value: 25000 },
+    { date: "2021", value: 35000 },
+    { date: "2022", value: 45000 },
+    { date: "2023", value: 68000 },
+    { date: "2024", value: 88978 },
   ],
 }
 
@@ -392,6 +400,176 @@ export const mockAssets: AssetType[] = [
     changePercentage: 4.5,
   },
 ]
+
+// Detailed account data for the new design
+export interface AccountItem {
+  id: string
+  name: string
+  value: number
+  percentage: number
+  color: string
+  change: number
+  changePercentage: number
+  addedTime: string
+  icon?: string
+}
+
+export interface AccountCategory {
+  name: string
+  totalValue: number
+  percentage: number
+  accounts: AccountItem[]
+}
+
+// Mock detailed accounts data matching the design
+export const mockDetailedAccounts: AccountCategory[] = [
+  {
+    name: "Cash",
+    totalValue: 3000,
+    percentage: 2,
+    accounts: [
+      {
+        id: "cash-1",
+        name: "Wio",
+        value: 3000,
+        percentage: 2,
+        color: "#10b981",
+        change: 0,
+        changePercentage: 0,
+        addedTime: "Added 2 months ago",
+        icon: "💳"
+      },
+      {
+        id: "cash-2", 
+        name: "Manual-My Bank",
+        value: 0,
+        percentage: 0,
+        color: "#6b7280",
+        change: 0,
+        changePercentage: 0,
+        addedTime: "Added 2 months ago",
+        icon: "🏦"
+      }
+    ]
+  },
+  {
+    name: "Investments",
+    totalValue: 10978,
+    percentage: 7,
+    accounts: [
+      {
+        id: "invest-1",
+        name: "Etoro",
+        value: 10694,
+        percentage: 7,
+        color: "#3b82f6",
+        change: 1694,
+        changePercentage: 1.69,
+        addedTime: "Added 1 minute ago",
+        icon: "📈"
+      },
+      {
+        id: "invest-2",
+        name: "Wio Crypto",
+        value: 284,
+        percentage: 0,
+        color: "#f59e0b",
+        change: -47,
+        changePercentage: -5.47,
+        addedTime: "Added 1 minute ago",
+        icon: "₿"
+      },
+      {
+        id: "invest-3",
+        name: "RHB security",
+        value: 0,
+        percentage: 0,
+        color: "#6b7280",
+        change: 0,
+        changePercentage: 0,
+        addedTime: "Added 1 month ago",
+        icon: "🏛️"
+      }
+    ]
+  },
+  {
+    name: "Real Estate",
+    totalValue: 130000,
+    percentage: 80,
+    accounts: [
+      {
+        id: "realestate-1",
+        name: "Rumah Cinere",
+        value: 130000,
+        percentage: 80,
+        color: "#8b5cf6",
+        change: 0,
+        changePercentage: 0,
+        addedTime: "",
+        icon: "🏠"
+      }
+    ]
+  },
+  {
+    name: "Other",
+    totalValue: 18000,
+    percentage: 11,
+    accounts: [
+      {
+        id: "other-1",
+        name: "CX5 2015",
+        value: 10000,
+        percentage: 6,
+        color: "#ef4444",
+        change: 0,
+        changePercentage: 0,
+        addedTime: "",
+        icon: "🚗"
+      },
+      {
+        id: "other-2",
+        name: "Q50",
+        value: 8000,
+        percentage: 5,
+        color: "#06b6d4",
+        change: 0,
+        changePercentage: 0,
+        addedTime: "",
+        icon: "🚗"
+      }
+    ]
+  }
+]
+
+// Mock liabilities data
+export interface LiabilityItem {
+  id: string
+  name: string
+  value: number
+  percentage: number
+  color: string
+}
+
+export const mockLiabilities: LiabilityItem[] = [
+  {
+    id: "liability-1",
+    name: "Mortgages",
+    value: 73000,
+    percentage: 100,
+    color: "#f97316"
+  }
+]
+
+// Calculate total net worth from all accounts and liabilities
+export const calculateNetWorth = (): number => {
+  const totalAssets = mockDetailedAccounts.reduce((total, category) => 
+    total + category.totalValue, 0
+  )
+  const totalLiabilities = mockLiabilities.reduce((total, liability) => 
+    total + liability.value, 0
+  )
+  return totalAssets - totalLiabilities
+}
 
 export const generateMockTransactions = (months: number = 10): Transaction[] => {
   const transactions: Transaction[] = []

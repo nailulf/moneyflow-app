@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Plus, CreditCard, Search, X, Loader2, Trash2, Edit } from 'lucide-react'
 import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
+import { formatCurrency } from '@/lib/data-utils'
 
 interface AccountManagerProps {
   userId: string
@@ -137,12 +138,7 @@ function AccountManagerInternal({
     setIsDeleteDialogOpen(true)
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount)
-  }
+
 
   return (
     <Sheet>

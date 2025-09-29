@@ -18,6 +18,7 @@ import {
   TrendingUp,
   TrendingDown
 } from 'lucide-react'
+import { formatCurrency } from '@/lib/data-utils'
 
 interface ParsedTransaction {
   id: string
@@ -116,10 +117,7 @@ export default function TransactionConfirmation({
                   <TrendingUp className="h-5 w-5 text-green-600" />
                   <div>
                     <div className="font-semibold text-green-600">
-                      {summary.totalCredits.toLocaleString('en-US', { 
-                        style: 'currency', 
-                        currency: 'USD' 
-                      })}
+                      {formatCurrency(summary.totalCredits)}
                     </div>
                     <div className="text-sm text-gray-600">Credits ({summary.creditCount})</div>
                   </div>
@@ -130,10 +128,7 @@ export default function TransactionConfirmation({
                   <TrendingDown className="h-5 w-5 text-red-600" />
                   <div>
                     <div className="font-semibold text-red-600">
-                      {summary.totalDebits.toLocaleString('en-US', { 
-                        style: 'currency', 
-                        currency: 'USD' 
-                      })}
+                      {formatCurrency(summary.totalDebits)}
                     </div>
                     <div className="text-sm text-gray-600">Debits ({summary.debitCount})</div>
                   </div>
@@ -144,10 +139,7 @@ export default function TransactionConfirmation({
                   <DollarSign className="h-5 w-5 text-purple-600" />
                   <div>
                     <div className={`font-semibold ${summary.totalAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {summary.totalAmount.toLocaleString('en-US', { 
-                        style: 'currency', 
-                        currency: 'USD' 
-                      })}
+                      {formatCurrency(summary.totalAmount)}
                     </div>
                     <div className="text-sm text-gray-600">Net Amount</div>
                   </div>
@@ -228,10 +220,7 @@ export default function TransactionConfirmation({
                         </TableCell>
                         <TableCell className="text-right font-mono">
                           <span className={transaction.amount < 0 ? 'text-red-600' : 'text-green-600'}>
-                            {transaction.amount.toLocaleString('en-US', { 
-                              style: 'currency', 
-                              currency: 'USD' 
-                            })}
+                            {formatCurrency(transaction.amount)}
                           </span>
                         </TableCell>
                         <TableCell>

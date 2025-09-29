@@ -16,6 +16,7 @@ import {
   calculateAllMetrics,
   filterTransactionsByMonth
 } from './financial-metrics-calculator'
+import { formatCurrency } from '@/lib/data-utils'
 
 interface FinancialMetricsDisplayProps {
   transactions: Transaction[]
@@ -113,12 +114,7 @@ export function FinancialMetricsDisplay({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-900">
-              {new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              }).format(totalIncome)}
+              {formatCurrency(totalIncome)}
             </div>
             <p className="text-xs text-green-600 mt-1">
               {incomeByCategories.length} income sources
@@ -136,12 +132,7 @@ export function FinancialMetricsDisplay({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-900">
-              {new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              }).format(totalSpending)}
+              {formatCurrency(totalSpending)}
             </div>
             <p className="text-xs text-red-600 mt-1">
               {spendingByCategories.length} expense categories
@@ -159,12 +150,7 @@ export function FinancialMetricsDisplay({
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold text-${netCashflow >= 0 ? 'blue' : 'orange'}-900`}>
-              {new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              }).format(Math.abs(netCashflow))}
+              {formatCurrency(Math.abs(netCashflow))}
             </div>
             <div className="flex items-center mt-1">
               <Badge 
@@ -220,12 +206,7 @@ export function FinancialMetricsDisplay({
                         </div>
                         <div className="text-right">
                           <div className="font-semibold text-green-700">
-                            {new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 0,
-                            }).format(category.amount)}
+                            {formatCurrency(category.amount)}
                           </div>
                           <div className="text-sm text-gray-500">
                             {category.percentage.toFixed(1)}%
@@ -278,12 +259,7 @@ export function FinancialMetricsDisplay({
                         </div>
                         <div className="text-right">
                           <div className="font-semibold text-red-700">
-                            {new Intl.NumberFormat('id-ID', {
-                              style: 'currency',
-                              currency: 'IDR',
-                              minimumFractionDigits: 0,
-                              maximumFractionDigits: 0,
-                            }).format(category.amount)}
+                            {formatCurrency(category.amount)}
                           </div>
                           <div className="text-sm text-gray-500">
                             {category.percentage.toFixed(1)}%
