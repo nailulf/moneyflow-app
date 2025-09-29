@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { SummaryCards } from '@/components/SummaryCards'
-import { MonthlyChart } from '@/components/MonthlyChart'
-import NetWorthCard from '@/components/NetWorthCard'
+import NetWorthOverview from '@/components/NetWorthOverview'
 import { generateMockTransactions } from '@/lib/mock-data'
 import { Transaction } from '@/types/database'
-import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
+import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 
 export default function Home() {
   // In a real app, this would come from your database
@@ -19,22 +18,28 @@ export default function Home() {
   return (
     <div className="flex flex-col h-full">
       <PageLayout>
-        <ContentWrapper>
-        <MainContent>
-          <NetWorthCard 
-              onAddAssets={() => {
-                // TODO: Implement add assets functionality
-              }}
-            />
-        </MainContent>
+        <TopContent>
+          <NetWorthOverview 
+            onAddAccount={() => {
+              // TODO: Implement add account functionality
+            }}
+          />
+        </TopContent>
         
-        <SideContent>
-          <div className="space-y-6">            
-            <div>
-              <SummaryCards transactions={transactions} />
+        <ContentWrapper>
+          <MainContent>
+            <div className="space-y-6">
+              {/* Additional dashboard content can go here */}
             </div>
-          </div>
-        </SideContent>
+          </MainContent>
+          
+          <SideContent>
+            <div className="space-y-6">            
+              <div>
+                <SummaryCards transactions={transactions} />
+              </div>
+            </div>
+          </SideContent>
         </ContentWrapper>
       </PageLayout>
     </div>

@@ -17,13 +17,18 @@ export function formatCurrency(amount: number, currency: string = DEFAULT_CURREN
   
   const symbol = currencySymbols[currency] || currency
   
-  // For IDR, show without decimals and with thousand separators
+  // Always show with 2 decimal places for all currencies including IDR
+  const formattedAmount = Math.abs(amount).toFixed(2)
+  
+  // For IDR, use Indonesian locale formatting with thousand separators
   if (currency === 'IDR') {
-    return `${symbol} ${Math.round(Math.abs(amount)).toLocaleString('id-ID')}`
+    return `${symbol} ${parseFloat(formattedAmount).toLocaleString('id-ID', { 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    })}`
   }
   
-  // For other currencies, show with 2 decimal places
-  const formattedAmount = Math.abs(amount).toFixed(2)
+  // For other currencies, use standard formatting
   return `${symbol}${formattedAmount}`
 }
 
