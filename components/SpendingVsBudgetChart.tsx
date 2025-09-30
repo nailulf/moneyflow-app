@@ -40,23 +40,40 @@ interface SpendingVsIncomeChartProps {
 
 // Function to transform data for the chart
 function transformDataForChart(transactions: Transaction[], budgets: TransformedBudget[]) {
-  // Get the last 12 months
-  const months = [];
-  const today = new Date();
+  // If no transactions, return empty array
+  if (!transactions || transactions.length === 0) {
+    return [];
+  }
+
+  // Find the actual date range of transactions
+  const transactionDates = transactions.map(t => new Date(t.date));
+  const minDate = new Date(Math.min(...transactionDates.map(d => d.getTime())));
+  const maxDate = new Date(Math.max(...transactionDates.map(d => d.getTime())));
   
-  for (let i = 0; i < 12; i++) {
-    const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const monthName = date.toLocaleString('default', { month: 'long' });
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1; // JavaScript months are 0-indexed
+  // Generate months based on actual transaction data range
+  const months = [];
+  const startDate = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+  const endDate = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+  
+  // Generate all months from start to end
+  const currentDate = new Date(startDate);
+  while (currentDate <= endDate) {
+    const monthName = currentDate.toLocaleString('default', { month: 'long' });
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
     
-    months.unshift({
+    months.push({
       month: monthName,
       year,
       monthNum: month,
       key: `${year}-${month.toString().padStart(2, '0')}`
     });
+    
+    // Move to next month
+    currentDate.setMonth(currentDate.getMonth() + 1);
   }
+  
+  console.log(`📊 Chart data range: ${months.length} months from ${months[0]?.month} ${months[0]?.year} to ${months[months.length-1]?.month} ${months[months.length-1]?.year}`);
   
   // Calculate income, spending, and net cash flow for each month
   return months.map(monthData => {
@@ -101,20 +118,29 @@ function transformDataForChart(transactions: Transaction[], budgets: Transformed
 }
 
 export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: SpendingVsIncomeChartProps) {
-  // Start with the latest month (last 8 months from the most recent data)
-  const [currentMonthIndex, setCurrentMonthIndex] = useState(4);
-  
   const allChartData = useMemo(() => {
     return transformDataForChart(transactions, budgets);
   }, [transactions, budgets]);
   
+  // Start with the most recent months (show last 8 months by default)
+  const [currentMonthIndex, setCurrentMonthIndex] = useState(() => {
+    return Math.max(0, allChartData.length - 8);
+  });
+  
+  // Update currentMonthIndex when data changes
+  React.useEffect(() => {
+    setCurrentMonthIndex(Math.max(0, allChartData.length - 8));
+  }, [allChartData.length]);
+  
   // Get 8 months of data starting from currentMonthIndex
   const chartData = useMemo(() => {
-    return allChartData.slice(currentMonthIndex, currentMonthIndex + 8);
+    const displayCount = Math.min(8, allChartData.length);
+    return allChartData.slice(currentMonthIndex, currentMonthIndex + displayCount);
   }, [allChartData, currentMonthIndex]);
   
+  const displayCount = Math.min(8, allChartData.length);
   const canGoLeft = currentMonthIndex > 0;
-  const canGoRight = currentMonthIndex + 8 < allChartData.length;
+  const canGoRight = currentMonthIndex + displayCount < allChartData.length;
   
   const handlePrevious = () => {
     if (canGoLeft) {
@@ -124,7 +150,7 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
   
   const handleNext = () => {
     if (canGoRight) {
-      setCurrentMonthIndex(prev => Math.min(allChartData.length - 8, prev + 1));
+      setCurrentMonthIndex(prev => Math.min(allChartData.length - displayCount, prev + 1));
     }
   };
   
@@ -212,15 +238,21 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
           <div>
             <CardTitle>Income vs Spending Analysis</CardTitle>
             <CardDescription>
-              Showing {chartData.length} months 
-              {allChartData.length > 8 && (
-                <span className="text-xs text-muted-foreground ml-1">
-                  ({currentMonthIndex + 1}-{currentMonthIndex + chartData.length} of {allChartData.length})
-                </span>
+              {allChartData.length === 0 ? (
+                "No transaction data available"
+              ) : (
+                <>
+                  Showing {chartData.length} months 
+                  {allChartData.length > displayCount && (
+                    <span className="text-xs text-muted-foreground ml-1">
+                      ({currentMonthIndex + 1}-{currentMonthIndex + chartData.length} of {allChartData.length})
+                    </span>
+                  )}
+                </>
               )}
             </CardDescription>
           </div>
-          {allChartData.length > 8 && (
+          {allChartData.length > displayCount && (
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
@@ -245,33 +277,42 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
         </div>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[30vh] min-h-[200px]">
-          <BarChart accessibilityLayer data={chartData}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<CustomTooltip />}
-            />
-            <ChartLegend content={<ChartLegendContent />} />
-            <Bar
-              dataKey="income"
-              fill={chartConfig.income.color}
-              radius={[4, 4, 0, 0]}
-            />
-            <Bar
-              dataKey="spending"
-              fill={chartConfig.spending.color}
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ChartContainer>
+        {allChartData.length === 0 ? (
+          <div className="h-[30vh] min-h-[200px] flex items-center justify-center text-muted-foreground">
+            <div className="text-center">
+              <p className="text-lg font-medium">No transaction data available</p>
+              <p className="text-sm mt-2">Add some transactions to see your spending vs income analysis</p>
+            </div>
+          </div>
+        ) : (
+          <ChartContainer config={chartConfig} className="h-[30vh] min-h-[200px]">
+            <BarChart accessibilityLayer data={chartData}>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tickFormatter={(value) => value.slice(0, 3)}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<CustomTooltip />}
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Bar
+                dataKey="income"
+                fill={chartConfig.income.color}
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="spending"
+                fill={chartConfig.spending.color}
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );

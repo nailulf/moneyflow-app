@@ -42,9 +42,11 @@ export function TransactionProvider({ children, userId }: TransactionProviderPro
     setError(null)
     
     try {
-      const data = await getUserTransactions(userId)
+      // Fetch more transactions to ensure we get all historical data
+      const data = await getUserTransactions(userId, 5000) // Increased limit to 5000
       setTransactions(data)
       setHasLoaded(true)
+      console.log(`📊 Loaded ${data.length} transactions for user ${userId}`)
     } catch (err) {
       console.error('❌ Error loading transactions:', err)
       setError(err instanceof Error ? err.message : 'Failed to load transactions')
