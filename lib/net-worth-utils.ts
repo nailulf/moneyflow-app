@@ -221,6 +221,7 @@ export async function fetchNetWorthData(
   return response.json()
 }
 
+
 /**
  * Validate and sanitize period parameter
  */

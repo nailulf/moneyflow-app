@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
 
     // Check environment variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Environment variables not configured')
       return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
     }
 

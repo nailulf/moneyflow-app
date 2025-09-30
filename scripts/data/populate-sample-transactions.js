@@ -71,23 +71,40 @@ async function generateSampleTransactions(userId) {
   
   console.log(`📋 Found ${categories.length} categories:`, categories.map(c => c.name).join(', '))
   
+  // Fetch actual accounts from database
+  const { data: accounts, error: accountsError } = await supabase
+    .from('accounts')
+    .select('id, name, type, is_default')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+  
+  if (accountsError || !accounts || accounts.length === 0) {
+    console.error('❌ Failed to fetch accounts:', accountsError)
+    throw new Error('No accounts found. Please create accounts first.')
+  }
+  
+  console.log(`🏦 Found ${accounts.length} accounts:`, accounts.map(a => a.name).join(', '))
+  
+  // Get default account or first account
+  const defaultAccount = accounts.find(a => a.is_default) || accounts[0]
+  
   const expenseCategories = categories.filter(c => c.group_type === 'EXPENSE')
   const incomeCategories = categories.filter(c => c.group_type === 'INCOME')
   const transferCategories = categories.filter(c => c.group_type === 'TRANSFER')
   
-  // Generate transactions for the last 6 months
-  for (let month = 0; month < 6; month++) {
-    const date = new Date()
-    date.setMonth(date.getMonth() - month)
+  // Generate transactions for January through September 2025
+  for (let month = 0; month < 9; month++) {
+    const date = new Date(2025, month, 1) // Start with January 2025 (month 0)
     
     // Add monthly salary
     if (incomeCategories.length > 0) {
       const salaryCategory = incomeCategories.find(c => c.name === 'Salary') || incomeCategories[0]
       transactions.push({
         user_id: userId,
+        account_id: defaultAccount.id,
         date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-15`,
         description: 'Monthly Salary',
-        amount: 5000 + Math.random() * 1000, // $5000-6000
+        amount: Math.abs(8000000 + Math.random() * 4000000), // IDR 8,000,000-12,000,000 (positive)
         type: 'INCOME',
         category_id: salaryCategory.id,
         merchant: 'Company Inc',
@@ -102,9 +119,10 @@ async function generateSampleTransactions(userId) {
       const freelanceCategory = incomeCategories.find(c => c.name === 'Investment') || incomeCategories[0]
       transactions.push({
         user_id: userId,
+        account_id: defaultAccount.id,
         date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
         description: 'Freelance Project',
-        amount: 500 + Math.random() * 1500, // $500-2000
+        amount: Math.abs(1000000 + Math.random() * 3000000), // IDR 1,000,000-4,000,000 (positive)
         type: 'INCOME',
         category_id: freelanceCategory.id,
         merchant: 'Client',
@@ -122,7 +140,8 @@ async function generateSampleTransactions(userId) {
       if (expenseCategories.length === 0) continue
       
       const category = expenseCategories[Math.floor(Math.random() * expenseCategories.length)]
-      const amount = -(Math.random() * 300 + 10) // $10-310 expenses
+      // Generate positive IDR amounts with minimum 500 IDR, range 500-500,000 IDR
+      const amount = Math.abs(Math.max(500, Math.random() * 500000))
       
       const merchants = {
         'Food & Dining': ['McDonald\'s', 'Starbucks', 'Local Restaurant', 'Pizza Hut'],
@@ -142,6 +161,7 @@ async function generateSampleTransactions(userId) {
       
       transactions.push({
         user_id: userId,
+        account_id: defaultAccount.id,
         date: expenseDate.toISOString().split('T')[0],
         description: `${category.name} - ${merchant}`,
         amount: amount,
@@ -160,9 +180,10 @@ async function generateSampleTransactions(userId) {
       const savingsCategory = transferCategories.find(c => c.name === 'Bank Transfer') || transferCategories[0]
       transactions.push({
         user_id: userId,
+        account_id: defaultAccount.id,
         date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 5) + 25).padStart(2, '0')}`,
         description: 'Monthly Savings Transfer',
-        amount: -(800 + Math.random() * 400), // $800-1200 transfer
+        amount: Math.abs(1500000 + Math.random() * 1000000), // IDR 1,500,000-2,500,000 (positive)
         type: 'TRANSFER',
         category_id: savingsCategory.id,
         merchant: 'Savings Account',
@@ -176,9 +197,10 @@ async function generateSampleTransactions(userId) {
         const investmentCategory = transferCategories.find(c => c.name === 'Investment') || transferCategories[0]
         transactions.push({
           user_id: userId,
+          account_id: defaultAccount.id,
           date: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 10) + 10).padStart(2, '0')}`,
           description: 'Investment Transfer',
-          amount: -(500 + Math.random() * 1000), // $500-1500 investment
+          amount: Math.abs(1000000 + Math.random() * 2000000), // IDR 1,000,000-3,000,000 (positive)
           type: 'TRANSFER',
           category_id: investmentCategory.id,
           merchant: 'Investment Account',
@@ -194,41 +216,47 @@ async function generateSampleTransactions(userId) {
 }
 
 async function populateTransactions() {
-  console.log('🚀 MoneyFlow Sample Transaction Population Script')
-  console.log('===============================================\n')
+  console.log('🚀 MoneyFlow 2025 Transaction Population Script')
+  console.log('===============================================')
+  console.log('📅 Adding transactions for January - September 2025')
+  console.log('💾 Preserving existing transactions from other periods\n')
   
   try {
-    // Check if transactions already exist
-    const { data: existingTransactions, error: checkError } = await supabase
+    // Check if 2025 transactions already exist
+    const { data: existing2025Transactions, error: checkError } = await supabase
       .from('transactions')
       .select('id')
       .eq('user_id', testUserId)
+      .gte('date', '2025-01-01')
+      .lte('date', '2025-09-30')
       .limit(1)
     
     if (checkError) {
-      throw new Error(`Failed to check existing transactions: ${checkError.message}`)
+      throw new Error(`Failed to check existing 2025 transactions: ${checkError.message}`)
     }
     
-    if (existingTransactions && existingTransactions.length > 0) {
-      console.log('⚠️  Transactions already exist for this user')
-      console.log('   Clearing existing transactions first...')
+    if (existing2025Transactions && existing2025Transactions.length > 0) {
+      console.log('⚠️  2025 transactions already exist for this user')
+      console.log('   Clearing existing 2025 transactions (Jan-Sep) first...')
       
       const { error: deleteError } = await supabase
         .from('transactions')
         .delete()
         .eq('user_id', testUserId)
+        .gte('date', '2025-01-01')
+        .lte('date', '2025-09-30')
       
       if (deleteError) {
-        throw new Error(`Failed to clear existing transactions: ${deleteError.message}`)
+        throw new Error(`Failed to clear existing 2025 transactions: ${deleteError.message}`)
       }
       
-      console.log('✅ Existing transactions cleared')
+      console.log('✅ Existing 2025 transactions cleared')
     }
     
-    // Generate sample transactions
-    console.log('📊 Generating sample transactions...')
+    // Generate sample transactions for 2025
+    console.log('📊 Generating 2025 sample transactions (Jan-Sep)...')
     const sampleTransactions = await generateSampleTransactions(testUserId)
-    console.log(`   Generated ${sampleTransactions.length} transactions`)
+    console.log(`   Generated ${sampleTransactions.length} transactions for 2025`)
     
     // Insert transactions in batches
     const batchSize = 50
@@ -250,11 +278,12 @@ async function populateTransactions() {
       console.log(`   Inserted batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(sampleTransactions.length / batchSize)} (${insertedCount}/${sampleTransactions.length} transactions)`)
     }
     
-    console.log('\n🎉 Sample transactions populated successfully!')
-    console.log(`   Total transactions created: ${insertedCount}`)
+    console.log('\n🎉 2025 transactions populated successfully!')
+    console.log(`   Total 2025 transactions created: ${insertedCount}`)
+    console.log(`   Period: January - September 2025`)
     console.log(`   User ID: ${testUserId}`)
     
-    // Calculate summary
+    // Calculate summary for 2025 transactions
     const totalIncome = sampleTransactions
       .filter(t => t.type === 'INCOME')
       .reduce((sum, t) => sum + t.amount, 0)
@@ -265,15 +294,15 @@ async function populateTransactions() {
         .reduce((sum, t) => sum + t.amount, 0)
     )
     
-    console.log('\n📈 Transaction Summary:')
-    console.log(`   Total Income: $${totalIncome.toFixed(2)}`)
-    console.log(`   Total Expenses: $${totalExpenses.toFixed(2)}`)
-    console.log(`   Net Cash Flow: $${(totalIncome - totalExpenses).toFixed(2)}`)
+    console.log('\n📈 2025 Transaction Summary (Jan-Sep):')
+    console.log(`   Total Income: IDR ${totalIncome.toLocaleString('id-ID')}`)
+    console.log(`   Total Expenses: IDR ${totalExpenses.toLocaleString('id-ID')}`)
+    console.log(`   Net Cash Flow: IDR ${(totalIncome - totalExpenses).toLocaleString('id-ID')}`)
     
     console.log('\nNext steps:')
     console.log('1. Refresh your browser or restart the dev server')
-    console.log('2. Navigate to /spending/cashflow')
-    console.log('3. You should now see the cash flow chart with data!')
+    console.log('2. Navigate to /spending to see updated charts')
+    console.log('3. You should now see data for both 2024 and 2025!')
     
   } catch (error) {
     console.error('\n💥 Failed to populate transactions:', error.message)
