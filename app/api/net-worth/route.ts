@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
           pointDate = new Date(startDateTime.getTime() + (i * 24 * 60 * 60 * 1000))
           break
         case 'week':
-          pointDate = new Date(startDateTime.getTime() + (i * 7 * 24 * 60 * 60 * 1000))
+          pointDate = subWeeks(startDateTime, -i)
           break
         case 'month':
           pointDate = subMonths(startDateTime, -i)
@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
       }
 
       netWorthData.push({
-        date: format(pointDate, intervalType === 'day' ? 'MMM dd' : intervalType === 'month' ? 'MMM yyyy' : 'yyyy'),
+        date: format(pointDate, intervalType === 'day' ? 'dd MMM yyyy' : intervalType === 'week' ? 'dd MMM yyyy' : intervalType === 'month' ? 'MMM yyyy' : 'yyyy'),
         value: Math.round(totalNetWorth * 100) / 100 // Round to 2 decimal places
       })
     }

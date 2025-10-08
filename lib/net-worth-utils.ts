@@ -108,7 +108,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
 
   // Cash accounts
   if (accountGroups.CASH.length > 0) {
-    const total = accountGroups.CASH.reduce((sum, acc) => sum + acc.currentBalance, 0)
+    const total = accountGroups.CASH.reduce((sum, acc) => sum + acc.balance, 0)
     categories.push({
       name: 'Cash',
       accounts: accountGroups.CASH,
@@ -120,7 +120,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
 
   // Bank accounts
   if (accountGroups.BANK.length > 0) {
-    const total = accountGroups.BANK.reduce((sum, acc) => sum + acc.currentBalance, 0)
+    const total = accountGroups.BANK.reduce((sum, acc) => sum + acc.balance, 0)
     categories.push({
       name: 'Bank Accounts',
       accounts: accountGroups.BANK,
@@ -132,7 +132,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
 
   // Investment accounts
   if (accountGroups.INVESTMENT.length > 0) {
-    const total = accountGroups.INVESTMENT.reduce((sum, acc) => sum + acc.currentBalance, 0)
+    const total = accountGroups.INVESTMENT.reduce((sum, acc) => sum + acc.balance, 0)
     categories.push({
       name: 'Investments',
       accounts: accountGroups.INVESTMENT,
@@ -144,7 +144,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
 
   // Credit cards (liabilities)
   if (accountGroups.CREDIT_CARD.length > 0) {
-    const total = accountGroups.CREDIT_CARD.reduce((sum, acc) => sum + acc.currentBalance, 0)
+    const total = accountGroups.CREDIT_CARD.reduce((sum, acc) => sum + acc.balance, 0)
     categories.push({
       name: 'Credit Cards',
       accounts: accountGroups.CREDIT_CARD,
@@ -156,7 +156,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
 
   // Other accounts
   if (accountGroups.OTHER.length > 0) {
-    const total = accountGroups.OTHER.reduce((sum, acc) => sum + acc.currentBalance, 0)
+    const total = accountGroups.OTHER.reduce((sum, acc) => sum + acc.balance, 0)
     categories.push({
       name: 'Other',
       accounts: accountGroups.OTHER,
@@ -203,7 +203,7 @@ export function getNetWorthChange(netWorthData: NetWorthDataPoint[]): {
  */
 export async function fetchNetWorthData(
   userId: string,
-  period: string = '1M',
+  period: string,
   endDate?: string
 ): Promise<NetWorthResponse> {
   const params = new URLSearchParams({
