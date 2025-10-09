@@ -69,8 +69,8 @@ export async function GET(request: NextRequest) {
         break
       default:
         startDateTime = subMonths(endDateTime, 1)
-        dataPoints = 30
-        intervalType = 'day'
+        dataPoints = 7
+        intervalType = 'week'
     }
 
     // Get all accounts for the user
@@ -151,7 +151,9 @@ export async function GET(request: NextRequest) {
         const accountTransactions = transactionsByAccount.get(account.id) || []
         
         // Calculate account balance at this point in time
-        let accountBalance = 0
+        // Start with the account's opening balance
+        let accountBalance = account.balance || 0
+        
         for (const transaction of accountTransactions) {
           const transactionDate = new Date(transaction.date)
           if (transactionDate <= pointDate) {
@@ -188,7 +190,9 @@ export async function GET(request: NextRequest) {
     const accountsWithBalances = accounts.map((account) => {
       const accountTransactions = transactionsByAccount.get(account.id) || []
       
-      let currentBalance = 0
+      // Start with the account's opening balance
+      let currentBalance = account.balance || 0
+      
       for (const transaction of accountTransactions) {
         const transactionDate = new Date(transaction.date)
         if (transactionDate <= endDateTime) {

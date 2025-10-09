@@ -45,7 +45,7 @@ const chartConfig = {
 // Internal component that uses AccountContext
 function NetWorthContent({ userId, onAddAccount }: NetWorthOverviewProps) {
   const { accounts, loading: accountsLoading, error: accountsError } = useAccounts()
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1M")
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1Y")
   const [netWorthData, setNetWorthData] = useState<NetWorthResponse | null>(null)
   const [accountCategories, setAccountCategories] = useState<AccountCategory[]>([])
   const [loading, setLoading] = useState(true)
@@ -79,7 +79,7 @@ function NetWorthContent({ userId, onAddAccount }: NetWorthOverviewProps) {
 
       const assetOwned = data.accounts?.length
         ? data.accounts
-        : (accounts?.map(a => ({ ...a, currentBalance: a.balance })) ?? [])
+        : (accounts?.map(a => ({ ...a, currentBalance: a.balance || 0 })) ?? [])
 
 
       setAccountCategories(categorizeAccounts(assetOwned))
@@ -177,38 +177,40 @@ function NetWorthContent({ userId, onAddAccount }: NetWorthOverviewProps) {
           </div>
         </CardHeader>
         <ChartContainer config={chartConfig} className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={netWorthData.netWorthData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
-                tickFormatter={(value) => {
-                  const date = new Date(value)
-                  if (selectedPeriod === "1W") {
-                    return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
-                  }
-                  if (selectedPeriod === "1M") {
-                    return date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
-                  }
-                  if (selectedPeriod === "3M") {
-                    return date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
-                  }
-                  if (selectedPeriod === "5Y" || selectedPeriod === "ALL") {
-                    return date.toLocaleDateString(undefined, { year: 'numeric' })
-                  }
-                  return date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
-                }}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke="hsl(var(--chart-1))"
-                fill="hsl(var(--chart-1))"
-                fillOpacity={0.3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <AreaChart
+            data={netWorthData.netWorthData}
+            margin={{ top: 8, right: 16, left: 16, bottom: 0 }}
+          >
+            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              minTickGap={24}
+              interval="preserveStartEnd"
+              padding={{ left: 8, right: 16 }}
+              tickFormatter={(value) => {
+                const date = new Date(value)
+                if (selectedPeriod === "1W" || selectedPeriod === "1M" || selectedPeriod === "3M") {
+                  return date.toLocaleDateString(undefined, { day: 'numeric', month: 'numeric' })
+                }
+                if (selectedPeriod === "5Y" || selectedPeriod === "ALL") {
+                  // Show full year to avoid ambiguous labels and clipping
+                  return date.toLocaleDateString(undefined, { year: 'numeric' })
+                }
+                return date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' })
+              }}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="hsl(var(--chart-1))"
+              fill="hsl(var(--chart-1))"
+              fillOpacity={0.3}
+            />
+          </AreaChart>
         </ChartContainer>
         {/* Net Worth Summary */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -276,7 +278,7 @@ function NetWorthContent({ userId, onAddAccount }: NetWorthOverviewProps) {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm">{formatCurrency(account.balance)}</span>
+                            <span className="text-sm">{formatCurrency(account.currentBalance)}</span>
                           </div>
                         </div>
                       ))}
