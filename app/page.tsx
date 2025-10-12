@@ -23,12 +23,16 @@ export default function Home() {
               <NetWorthOverview userId={TEST_USER_ID} />
           </TopContent>
         <ContentWrapper>
-        <MainContent children={undefined}>
-          
+        <MainContent>
+          <div className="space-y-4">
+            {/* Main content will go here */}
+          </div>
         </MainContent>
         
-        <SideContent children={undefined}>
-
+        <SideContent>
+          <div className="space-y-4">
+            {/* Side content will go here */}
+          </div>
         </SideContent>
         </ContentWrapper>
       </PageLayout>
