@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['pdfjs-dist'],
-    webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+  // Move serverComponentsExternalPackages to the correct location
+  serverExternalPackages: ['pdfjs-dist'],
+  
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     // Handle PDF.js worker files
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -11,7 +12,8 @@ const nextConfig = {
     
     return config;
   },
-   async headers() {
+  
+  async headers() {
     return [
       {
         source: '/(.*)',
@@ -28,9 +30,12 @@ const nextConfig = {
       }
     ];
   },
+  
+  experimental: {
+    // Keep only valid experimental features
     serverActions: {}
-    // Or if you don't need specific options, remove serverActions completely
   },
+  
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
