@@ -1,4 +1,4 @@
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+// Using native fetch (Node.js 18+)
 
 const BASE_URL = 'http://localhost:3000';
 const USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID || '1d16c616-77a6-48de-9a54-dde7845f720d';
