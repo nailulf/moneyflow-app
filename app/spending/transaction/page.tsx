@@ -8,6 +8,8 @@ import { useTransactions } from '@/contexts/TransactionContext'
 import { CategoryManager } from '@/components/CategoryManager'
 import { AccountManager } from '@/components/AccountManager'
 import { AccountProvider } from '@/contexts/AccountContext'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { RecurringTransactionsList } from '@/components/RecurringTransactionsList'
 
 
 export default function SpendingTransactionPage() {
@@ -33,13 +35,28 @@ export default function SpendingTransactionPage() {
       
       <PageLayout>
         <TopContent>
-          <TransactionTable 
-              transactions={transactions} 
-              userId={TEST_USER_ID}
-              enableSelfManagement={true}
-              enableLazyLoading={true}
-              pageSize={20}
-            />
+          <Tabs defaultValue="all" className="w-full">
+            <div className="flex items-center justify-between mb-4">
+              <TabsList>
+                <TabsTrigger value="all">All Transactions</TabsTrigger>
+                <TabsTrigger value="recurring">Recurring Transactions</TabsTrigger>
+              </TabsList>
+            </div>
+            
+            <TabsContent value="all" className="mt-0">
+              <TransactionTable 
+                transactions={transactions} 
+                userId={TEST_USER_ID}
+                enableSelfManagement={true}
+                enableLazyLoading={true}
+                pageSize={20}
+              />
+            </TabsContent>
+            
+            <TabsContent value="recurring" className="mt-0">
+              <RecurringTransactionsList userId={TEST_USER_ID} />
+            </TabsContent>
+          </Tabs>
         </TopContent>
         <ContentWrapper>
         <MainContent>

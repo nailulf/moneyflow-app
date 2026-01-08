@@ -13,6 +13,8 @@ export const transactionFormSchema = z.object({
   notes: z.string().optional().nullable(),
   tags: z.array(z.string()).optional().nullable(),
   is_recurring: z.boolean().optional(),
+  recurring_frequency: z.enum(['weekly', 'monthly', 'yearly']).optional().nullable(),
+  recurring_end_date: z.string().optional().nullable(),
 })
 
 // Export as transactionSchema for backward compatibility
