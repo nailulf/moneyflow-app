@@ -60,7 +60,14 @@ export async function processRecurringTransactions(): Promise<ProcessingResult> 
 
       let shouldRun = false
 
-      if (frequency === 'weekly') {
+      if (frequency === 'daily') {
+        // Run if today is different day than last processed
+        // And we haven't processed it today (checked above)
+        // And original start date has passed or is today
+        if (now >= originalDate) {
+          shouldRun = true
+        }
+      } else if (frequency === 'weekly') {
         // Run if today is the same day of week as original date
         // AND it has been at least 6 days since last run
         const daysSinceLastRun = (now.getTime() - lastProcessed.getTime()) / (1000 * 60 * 60 * 24)

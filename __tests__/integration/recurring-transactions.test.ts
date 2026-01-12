@@ -99,6 +99,50 @@ describe('Recurring Transaction Integration', () => {
     }
   })
 
+  it('should process a due daily recurring transaction', async () => {
+    if (!supabase) return
+
+    // 1. Create a daily recurring transaction due today (created yesterday)
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    
+    // Get a category first
+    const { data: categories } = await supabase.from('categories').select('id').limit(1)
+    if (!categories || categories.length === 0) return
+
+    const { data: recurringTx, error } = await supabase.from('transactions').insert({
+      user_id: TEST_USER_ID,
+      date: yesterday.toISOString().split('T')[0],
+      description: 'Test Daily Recurring',
+      amount: 50,
+      type: 'EXPENSE',
+      category_id: categories[0].id,
+      is_recurring: true,
+      recurring_frequency: 'daily',
+      last_processed_date: yesterday.toISOString().split('T')[0]
+    }).select().single()
+
+    if (error) throw error
+    createdTransactionIds.push(recurringTx.id)
+
+    // 2. Run the processor
+    const result = await processRecurringTransactions()
+
+    // 3. Verify
+    const processedTx = result.processedTransactions.find(t => t.originalId === recurringTx.id)
+    expect(processedTx).toBeDefined()
+    if (processedTx) {
+        createdTransactionIds.push(processedTx.newTransactionId)
+        
+        // Check if new transaction exists
+        const { data: newTx } = await supabase.from('transactions').select('*').eq('id', processedTx.newTransactionId).single()
+        expect(newTx).toBeDefined()
+        expect(newTx.description).toBe('Test Daily Recurring')
+        expect(newTx.is_recurring).toBe(false)
+        expect(newTx.date).toBe(new Date().toISOString().split('T')[0])
+    }
+  })
+
   it('should NOT process a transaction that is not due', async () => {
     if (!supabase) return
 

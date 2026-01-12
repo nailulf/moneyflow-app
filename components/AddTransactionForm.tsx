@@ -332,22 +332,23 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Frequency</label>
                   <Select
-                    value={watch('recurring_frequency') || 'monthly'}
-                    onValueChange={(value) => {
-                      setSuppressCloseUntil(Date.now() + 500)
-                      setValue('recurring_frequency', value as 'weekly' | 'monthly' | 'yearly')
-                    }}
-                    onOpenChange={setIsAnySelectOpen}
-                  >
-                    <SelectTrigger data-testid="frequency-select-trigger">
-                      <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="yearly">Yearly</SelectItem>
-                    </SelectContent>
-                  </Select>
+                      value={watch('recurring_frequency') || 'monthly'}
+                      onValueChange={(value) => {
+                        setSuppressCloseUntil(Date.now() + 500)
+                        setValue('recurring_frequency', value as 'daily' | 'weekly' | 'monthly' | 'yearly')
+                      }}
+                      onOpenChange={setIsAnySelectOpen}
+                    >
+                      <SelectTrigger data-testid="frequency-select-trigger">
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
                 </div>
 
                 <div className="space-y-2">
