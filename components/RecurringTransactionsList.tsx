@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Transaction } from '@/types/database'
+import { Transaction, TransactionUpdate } from '@/types/database'
+import { TransactionFormData } from '@/lib/validations'
 import { formatCurrency } from '@/lib/data-utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Edit, Trash2, Search, ArrowUpDown, Play, Pause, Calendar } from 'lucide-react'
+import { Edit, Trash2, Search, ArrowUpDown, Play, Pause, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -43,6 +44,8 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [frequencyFilter, setFrequencyFilter] = useState<string>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   // Filter only recurring transactions
   const recurringTransactions = useMemo(() => {
@@ -59,6 +62,7 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
     // Ideally this should match the exact cron logic
     const nextDate = new Date(lastProcessed)
     if (transaction.last_processed_date) {
+        if (frequency === 'daily') nextDate.setDate(nextDate.getDate() + 1)
         if (frequency === 'weekly') nextDate.setDate(nextDate.getDate() + 7)
         if (frequency === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1)
         if (frequency === 'yearly') nextDate.setFullYear(nextDate.getFullYear() + 1)
@@ -139,9 +143,9 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
     }
   }
 
-  const handleTransactionUpdated = async (id: string, data: Partial<Transaction>) => {
+  const handleTransactionUpdated = async (id: string, data: Partial<TransactionFormData>) => {
     try {
-      await updateTransaction(id, data)
+      await updateTransaction(id, data as unknown as TransactionUpdate)
       refreshTransactions()
       setEditingTransaction(null)
       setIsEditModalOpen(false)
@@ -149,6 +153,13 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
       console.error('Failed to update transaction:', error)
     }
   }
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTransactions.length / pageSize)
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  )
 
   return (
     <div className="space-y-4">
@@ -169,6 +180,7 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Frequencies</SelectItem>
+            <SelectItem value="daily">Daily</SelectItem>
             <SelectItem value="weekly">Weekly</SelectItem>
             <SelectItem value="monthly">Monthly</SelectItem>
             <SelectItem value="yearly">Yearly</SelectItem>
@@ -209,14 +221,14 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredTransactions.length === 0 ? (
+            {paginatedTransactions.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center text-gray-500">
                   No recurring transactions found
                 </TableCell>
               </TableRow>
             ) : (
-              filteredTransactions.map((transaction) => (
+              paginatedTransactions.map((transaction) => (
                 <TableRow key={transaction.id}>
                   <TableCell className="font-medium">
                     <div className="flex flex-col">
@@ -278,6 +290,37 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-gray-500">
+            Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredTransactions.length)} of {filteredTransactions.length} entries
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <div className="text-sm font-medium">
+              Page {currentPage} of {totalPages}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <EditTransactionForm
         userId={userId}
