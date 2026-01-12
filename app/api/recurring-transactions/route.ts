@@ -73,7 +73,9 @@ export async function GET(request: NextRequest) {
         // Skip if already processed today
         if (lastProcessed.getTime() === now.getTime()) return false
 
-        if (frequency === 'weekly') {
+        if (frequency === 'daily') {
+          return now >= originalDate
+        } else if (frequency === 'weekly') {
           const daysSinceLastRun = (now.getTime() - lastProcessed.getTime()) / (1000 * 60 * 60 * 24)
           return now.getDay() === originalDate.getDay() && daysSinceLastRun >= 6
         } else if (frequency === 'monthly') {
