@@ -37,7 +37,7 @@ type SortField = 'description' | 'amount' | 'next_date' | 'frequency'
 type SortDirection = 'asc' | 'desc'
 
 export function RecurringTransactionsList({ userId }: RecurringTransactionsListProps) {
-  const { transactions, refreshTransactions } = useTransactions()
+  const { transactions, refreshTransactions, editTransaction } = useTransactions()
   const [searchTerm, setSearchTerm] = useState('')
   const [sortField, setSortField] = useState<SortField>('next_date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
@@ -133,9 +133,8 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to stop this recurring transaction? This will remove the recurring flag but keep the transaction history.')) {
       try {
-        await updateTransaction(id, { is_recurring: false })
+        await editTransaction(id, { is_recurring: false })
         toast.success('Recurring transaction stopped')
-        refreshTransactions()
       } catch (error) {
         console.error('Failed to stop recurring transaction:', error)
         toast.error('Failed to stop recurring transaction')
@@ -145,12 +144,12 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
 
   const handleTransactionUpdated = async (id: string, data: Partial<TransactionFormData>) => {
     try {
-      await updateTransaction(id, data as unknown as TransactionUpdate)
-      refreshTransactions()
+      await editTransaction(id, data)
       setEditingTransaction(null)
       setIsEditModalOpen(false)
     } catch (error) {
       console.error('Failed to update transaction:', error)
+      toast.error('Failed to update transaction')
     }
   }
 
