@@ -112,7 +112,7 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
         body: JSON.stringify({
           ...transformedData,
           amount: Number(transformedData.amount),
-          user_id: '1d16c616-77a6-48de-9a54-dde7845f720d',
+          user_id: userId,
           date: new Date(transformedData.date).toISOString(),
         }),
       })

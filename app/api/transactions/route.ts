@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { user_id, date, description, amount, type, category_id, merchant, notes, tags, is_recurring } = body
+    const { user_id, date, description, amount, type, category_id, merchant, notes, tags, is_recurring, recurring_frequency, recurring_end_date } = body
 
     if (!user_id || !date || !description || !amount || !type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -114,6 +114,8 @@ export async function POST(request: NextRequest) {
         notes,
         tags,
         is_recurring: is_recurring || false,
+        recurring_frequency,
+        recurring_end_date,
         created_at: new Date().toISOString()
       })
       .select()
