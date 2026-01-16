@@ -100,7 +100,7 @@ function NetWorthContent({ userId, onAddAccount }: NetWorthOverviewProps) {
 
       const assetOwned = data.accounts?.length
         ? data.accounts
-        : (accounts?.map(a => ({ ...a, currentBalance: a.balance || 0 })) ?? [])
+        : (accounts?.map(a => ({ ...a, currentBalance: a.currentBalance ?? a.balance ?? 0 })) ?? [])
 
       setAccountCategories(categorizeAccounts(assetOwned))
       
