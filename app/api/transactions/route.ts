@@ -123,7 +123,12 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating transaction:', error)
-      return NextResponse.json({ error: 'Failed to create transaction' }, { status: 500 })
+      return NextResponse.json({ 
+        error: 'Failed to create transaction',
+        details: error.details,
+        message: error.message,
+        code: error.code
+      }, { status: 500 })
     }
 
     return NextResponse.json(data)
@@ -160,7 +165,12 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       console.error('Error updating transaction:', error)
-      return NextResponse.json({ error: 'Failed to update transaction' }, { status: 500 })
+      return NextResponse.json({ 
+        error: 'Failed to update transaction',
+        details: error.details,
+        message: error.message,
+        code: error.code
+      }, { status: 500 })
     }
 
     return NextResponse.json(data)

@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Upload, Edit } from 'lucide-react'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
+import { toast } from 'sonner'
 import { PDFStatementUpload } from '@/components/PDFStatementUpload'
 
 
@@ -118,13 +119,16 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create transaction')
+        const errorData = await response.json()
+        throw new Error(errorData.details || errorData.message || 'Failed to create transaction')
       }
 
       onSuccess?.()
       setOpen(false)
+      toast.success('Transaction created successfully')
     } catch (error) {
       console.error('Error creating transaction:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to create transaction')
     } finally {
       setIsSubmitting(false)
     }

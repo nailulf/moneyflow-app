@@ -55,13 +55,14 @@ export function calculateNetWorth(accounts: AccountWithBalance[]): number {
 export function calculateAccountBalanceAtDate(
   transactions: Transaction[],
   targetDate: Date,
-  accountType: AccountDB['type'] = 'BANK'
+  accountType: AccountDB['type'] = 'BANK',
+  initialBalance: number = 0
 ): number {
   const filteredTransactions = transactions.filter(
     transaction => new Date(transaction.date) <= targetDate
   )
 
-  let balance = 0
+  let balance = initialBalance
   for (const transaction of filteredTransactions) {
     switch (transaction.type) {
       case 'INCOME':

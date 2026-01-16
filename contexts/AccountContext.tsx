@@ -3,12 +3,17 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { AccountDB } from '@/types/database'
 
+export interface AccountWithHistory extends AccountDB {
+  historicalBalance?: number
+  currentBalance?: number
+}
+
 interface AccountContextType {
-  accounts: AccountDB[]
+  accounts: AccountWithHistory[]
   loading: boolean
   error: string | null
   refreshAccounts: () => Promise<void>
-  getDefaultAccount: () => AccountDB | null
+  getDefaultAccount: () => AccountWithHistory | null
   createAccount: (accountData: Omit<AccountDB, 'id' | 'created_at' | 'updated_at'>) => Promise<AccountDB>
   updateAccount: (id: string, accountData: Partial<AccountDB>) => Promise<AccountDB>
   deleteAccount: (id: string) => Promise<void>
@@ -22,7 +27,7 @@ interface AccountProviderProps {
 }
 
 export function AccountProvider({ children, userId }: AccountProviderProps) {
-  const [accounts, setAccounts] = useState<AccountDB[]>([])
+  const [accounts, setAccounts] = useState<AccountWithHistory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,13 +38,17 @@ export function AccountProvider({ children, userId }: AccountProviderProps) {
       setLoading(true)
       setError(null)
       
-      const response = await fetch(`/api/accounts?userId=${userId}`)
+      const response = await fetch(`/api/accounts?userId=${userId}&includeHistory=true`)
       if (!response.ok) {
         throw new Error('Failed to fetch accounts')
       }
       
       const data = await response.json()
-      setAccounts(Array.isArray(data) ? data : [])
+      const mappedData = Array.isArray(data) ? data.map(acc => ({
+        ...acc,
+        currentBalance: acc.historicalBalance ?? acc.balance
+      })) : []
+      setAccounts(mappedData)
     } catch (err) {
       console.error('Error fetching accounts:', err)
       setError('Failed to load accounts')

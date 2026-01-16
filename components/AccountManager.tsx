@@ -216,8 +216,8 @@ function AccountManagerInternal({
                         <div className="flex items-center space-x-2 text-xs text-gray-500">
                           <span className="capitalize">{account.type.toLowerCase().replace('_', ' ')}</span>
                           <span>•</span>
-                          <span className={account.balance >= 0 ? 'text-green-600' : 'text-red-600'}>
-                            {formatCurrency(account.balance)}
+                          <span className={(account.currentBalance ?? account.balance) >= 0 ? 'text-green-600' : 'text-red-600'}>
+                            {formatCurrency(account.currentBalance ?? account.balance)}
                           </span>
                         </div>
                       </div>

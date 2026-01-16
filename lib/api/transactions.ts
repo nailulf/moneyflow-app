@@ -95,9 +95,9 @@ export async function createTransaction(transaction: TransactionInsert): Promise
   })
 
   if (!response.ok) {
-    const error = await response.json()
-    console.error('Error creating transaction:', error)
-    throw new Error('Failed to create transaction')
+    const errorData = await response.json()
+    console.error('Error creating transaction:', errorData)
+    throw new Error(errorData.details || errorData.message || errorData.error || 'Failed to create transaction')
   }
 
   const result = await response.json()
@@ -120,9 +120,9 @@ export async function updateTransaction(
   })
 
   if (!response.ok) {
-    const error = await response.json()
-    console.error('Error updating transaction:', error)
-    throw new Error('Failed to update transaction')
+    const errorData = await response.json()
+    console.error('Error updating transaction:', errorData)
+    throw new Error(errorData.details || errorData.message || errorData.error || 'Failed to update transaction')
   }
 
   return await response.json()

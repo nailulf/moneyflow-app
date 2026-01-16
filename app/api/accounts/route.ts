@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Calculate historical balance
-         const historicalBalance = calculateAccountBalanceAtDate(transactions || [], targetDate, account.type)
+         const historicalBalance = calculateAccountBalanceAtDate(transactions || [], targetDate, account.type, account.balance)
         
         return NextResponse.json({
           ...account,
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
         // Calculate historical balances for each account
          const accountsWithHistory = accounts?.map(account => {
            const accountTransactions = transactions?.filter(t => t.account_id === account.id) || []
-           const historicalBalance = calculateAccountBalanceAtDate(accountTransactions, targetDate, account.type)
+           const historicalBalance = calculateAccountBalanceAtDate(accountTransactions, targetDate, account.type, account.balance)
           
           return {
             ...account,

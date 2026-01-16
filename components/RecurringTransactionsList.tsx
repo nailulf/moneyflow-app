@@ -149,7 +149,7 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
       setIsEditModalOpen(false)
     } catch (error) {
       console.error('Failed to update transaction:', error)
-      toast.error('Failed to update transaction')
+      // Toast is handled by the context
     }
   }
 
