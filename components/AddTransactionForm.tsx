@@ -13,7 +13,7 @@ import { Plus, Upload, Edit } from 'lucide-react'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { toast } from 'sonner'
-import { PDFStatementUpload } from '@/components/PDFStatementUpload'
+import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
 
 
 interface AddTransactionFormProps {
@@ -70,6 +70,7 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
       category_id: '',
       account_id: '',
       merchant: '',
+      currency: 'IDR',
       is_recurring: false,
       recurring_frequency: 'monthly',
       recurring_end_date: null
@@ -429,7 +430,8 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
             </TabsContent>
             
             <TabsContent value="upload" className="mt-4">
-              <PDFStatementUpload 
+              <UnifiedStatementProcessor 
+                userId={userId}
                 onSuccess={() => {
                   onSuccess?.()
                   setOpen(false)

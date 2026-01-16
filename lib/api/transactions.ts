@@ -83,9 +83,11 @@ export async function getTransactionsByDateRange(
 }
 
 /**
- * Create a new transaction
+ * Create a new transaction (single or bulk)
  */
-export async function createTransaction(transaction: TransactionInsert): Promise<Transaction> {
+export async function createTransaction(transaction: TransactionInsert): Promise<Transaction>;
+export async function createTransaction(transaction: TransactionInsert[]): Promise<Transaction[]>;
+export async function createTransaction(transaction: TransactionInsert | TransactionInsert[]): Promise<Transaction | Transaction[]> {
   const response = await fetch('/api/transactions', {
     method: 'POST',
     headers: {
@@ -101,7 +103,12 @@ export async function createTransaction(transaction: TransactionInsert): Promise
   }
 
   const result = await response.json()
-  return result.transactions || []
+  
+  // Return array for bulk ops, single object for single op
+  if (Array.isArray(transaction)) {
+      return result.transactions || []
+  }
+  return result
 }
 
 /**
