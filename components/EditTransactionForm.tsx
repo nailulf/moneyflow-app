@@ -68,6 +68,7 @@ export function EditTransactionForm({
       category_id:'',
       account_id: '',
       merchant: '',
+      currency: 'IDR',
       is_recurring: false,
       recurring_frequency: 'monthly',
       recurring_end_date: null
