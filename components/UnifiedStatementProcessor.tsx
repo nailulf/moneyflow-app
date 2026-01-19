@@ -155,8 +155,22 @@ export function UnifiedStatementProcessor({
       setUploadProgress(100)
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to process statement')
+        let errorMessage = 'Failed to process statement';
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const error = await response.json();
+            errorMessage = error.error || error.message || errorMessage;
+          } else {
+            const text = await response.text();
+            console.error('Non-JSON error response:', text);
+            errorMessage = `Server Error (${response.status}): ${text.slice(0, 100)}`;
+          }
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+          errorMessage = `Server Error (${response.status})`;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json()
@@ -316,7 +330,16 @@ export function UnifiedStatementProcessor({
         body: JSON.stringify(validTransactions)
       })
 
-      const result = await response.json()
+      let result;
+      try {
+        result = await response.json();
+      } catch (e) {
+        if (!response.ok) {
+           const text = await response.text().catch(() => '');
+           throw new Error(`Import failed (${response.status}): ${text.slice(0, 100)}`);
+        }
+        throw new Error('Invalid server response (not JSON)');
+      }
 
       if (!response.ok) {
         console.error('Import failed:', result)
