@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { parseStatementWithAI } from '@/lib/statement-parser';
 import { createServerComponentClient } from '@/lib/supabase';
-
-// Import pdfjs-dist legacy build for Node.js environment
-// We use the standard import but will configure the worker
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+// @ts-ignore
+import pdf from 'pdf-parse/lib/pdf-parse.js';
 
 // Force dynamic since we're handling file uploads
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Increase timeout for AI processing
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,40 +32,19 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const checksum = crypto.createHash('sha256').update(buffer).digest('hex');
     
-    // Extract text from PDF using pdfjs-dist
+    // Extract text from PDF using pdf-parse (more stable for serverless)
     let text = '';
     let numpages = 0;
     
     try {
-        // Convert Buffer to Uint8Array for pdfjs
-        const uint8Array = new Uint8Array(buffer);
+        const data = await pdf(buffer);
+        text = data.text;
+        numpages = data.numpages;
         
-        // Load the document
-        const loadingTask = pdfjsLib.getDocument({
-            data: uint8Array,
-            // Disable worker for Node.js environment
-            // In legacy build, this might be handled automatically or we might need to set up a fake worker
-            // But usually for text content, the main thread is fine
-            disableFontFace: true,
-            useSystemFonts: true
-        });
-
-        const pdfDocument = await loadingTask.promise;
-        numpages = pdfDocument.numPages;
-
-        // Extract text from all pages
-        for (let i = 1; i <= numpages; i++) {
-            const page = await pdfDocument.getPage(i);
-            const textContent = await page.getTextContent();
-            // Join items with space, but preserve some structure if possible
-            // pdfjs returns items with 'str' property
-            const pageText = textContent.items
-                .map((item: any) => item.str)
-                .join(' ');
-            
-            text += `Page ${i}\n${pageText}\n\n`;
+        // Basic validation of extracted text
+        if (!text || text.trim().length === 0) {
+            throw new Error('Empty text extracted');
         }
-
     } catch (e) {
         console.error("PDF Parse Error", e);
         return NextResponse.json({ error: 'Failed to extract text from PDF. The file might be corrupted or encrypted.' }, { status: 500 });
