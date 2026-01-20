@@ -14,7 +14,6 @@ import { formatCurrency } from '@/lib/data-utils'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useBudgets } from '@/contexts/BudgetContext'
 import { toast } from 'sonner'
-import { CATEGORIES, CATEGORY_COLORS } from '@/types/app'
 import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
 import { fromExistingBudgetData, toDatabase } from '@/lib/budget-allocation'
 
@@ -54,6 +53,8 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
   const [errors, setErrors] = useState<Record<string, string>>({})
   const { categories } = useCategories()
   
+  const [selectedAddCategoryId, setSelectedAddCategoryId] = useState<string>('')
+
   // Initialize budget allocation hook with minimum value to prevent zero error
   const budgetAllocation = useBudgetAllocation(1, 'USD')
 
@@ -298,22 +299,20 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
     }
   }
 
-  const addCategory = () => {
-    const availableCategories = CATEGORIES.filter(cat => 
-      cat !== 'Income' && !editForm.categories.some(existing => existing.category === cat)
-    )
-    
-    if (availableCategories.length === 0) {
-      toast.error('All categories have been added')
+  const handleAddCategory = () => {
+    if (!selectedAddCategoryId) {
+      toast.error('Please select a category to add')
       return
     }
 
-    const categoryName = availableCategories[0]
-    const categoryColor = CATEGORY_COLORS[categoryName as keyof typeof CATEGORY_COLORS] || '#6b7280'
-    const categoryId = `new-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const categoryToAdd = categories.find(c => c.id === selectedAddCategoryId)
+    if (!categoryToAdd) {
+      toast.error('Selected category not found')
+      return
+    }
     
     // Use allocation hook to add category
-    const success = budgetAllocation.addCategory(categoryId, categoryName, categoryColor, 0)
+    const success = budgetAllocation.addCategory(categoryToAdd.id, categoryToAdd.name, categoryToAdd.color, 0)
     if (!success) {
       toast.error('Cannot add category')
       return
@@ -333,6 +332,18 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
       }
     })
     setEditForm(prev => ({ ...prev, categories: syncedCategories }))
+    
+    // Clear selection after successful add
+    setSelectedAddCategoryId('')
+    
+    // Clear categories error if any
+    if (errors.categories) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors.categories
+        return newErrors
+      })
+    }
   }
 
   const removeCategory = (index: number) => {
@@ -377,8 +388,8 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
   const remainingBudget = budgetAllocation.remainingAmount
   const isOverAllocated = remainingBudget < 0
 
-  const availableCategoriesForAdd = CATEGORIES.filter(cat => 
-    cat !== 'Income' && !editForm.categories.some(existing => existing.category === cat)
+  const availableCategoriesForAdd = categories.filter(cat => 
+    cat.name !== 'Income' && !editForm.categories.some(existing => existing.category === cat.name)
   )
 
   return (
@@ -538,21 +549,44 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
           {/* Category Allocations */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                 <CardTitle className="text-lg">Category Allocations</CardTitle>
-                <Button
-                  onClick={addCategory}
-                  size="sm"
-                  variant="outline"
-                  disabled={availableCategoriesForAdd.length === 0 || isLoading}
-                  title={availableCategoriesForAdd.length === 0 ? 'All categories have been added' : 'Add a new category'}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Category
-                  {availableCategoriesForAdd.length === 0 && (
-                    <span className="ml-2 text-xs text-gray-500">({availableCategoriesForAdd.length} left)</span>
-                  )}
-                </Button>
+                <div className="flex w-full sm:w-auto items-center space-x-2">
+                  <Select
+                    value={selectedAddCategoryId}
+                    onValueChange={setSelectedAddCategoryId}
+                  >
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableCategoriesForAdd.length === 0 ? (
+                        <SelectItem value="none" disabled>No categories available</SelectItem>
+                      ) : (
+                        availableCategoriesForAdd.map(cat => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            <div className="flex items-center">
+                              <div 
+                                className="w-3 h-3 rounded-full mr-2" 
+                                style={{ backgroundColor: cat.color }}
+                              />
+                              {cat.name}
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={handleAddCategory}
+                    size="sm"
+                    disabled={!selectedAddCategoryId || isLoading}
+                    title={!selectedAddCategoryId ? 'Select a category first' : 'Add selected category'}
+                  >
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Add</span>
+                  </Button>
+                </div>
               </div>
               {errors.categories && (
                 <p className="text-sm text-red-500">{errors.categories}</p>

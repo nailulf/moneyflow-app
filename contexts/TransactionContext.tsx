@@ -11,6 +11,7 @@ import {
   deleteTransaction,
   getTransactionsByDateRange
 } from '@/lib/api/transactions'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface TransactionContextType {
   transactions: Transaction[]
@@ -27,10 +28,11 @@ const TransactionContext = createContext<TransactionContextType | undefined>(und
 
 interface TransactionProviderProps {
   children: React.ReactNode
-  userId: string
 }
 
-export function TransactionProvider({ children, userId }: TransactionProviderProps) {
+export function TransactionProvider({ children }: TransactionProviderProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -38,6 +40,11 @@ export function TransactionProvider({ children, userId }: TransactionProviderPro
   
   // Load transactions from database
   const loadTransactions = useCallback(async () => {
+    if (!userId) {
+      setTransactions([])
+      return
+    }
+
     setLoading(true)
     setError(null)
     
@@ -56,12 +63,12 @@ export function TransactionProvider({ children, userId }: TransactionProviderPro
     }
   }, [userId])
 
-  // Load transactions on mount - simplified
+  // Load transactions on mount or when userId changes
   useEffect(() => {
-    if (userId && !hasLoaded) {
+    if (userId) {
       loadTransactions()
     }
-  }, [userId, hasLoaded, loadTransactions])
+  }, [userId, loadTransactions])
 
   const addTransaction = useCallback(async (formData: TransactionFormData) => {
     try {

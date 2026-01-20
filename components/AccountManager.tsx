@@ -8,19 +8,20 @@ import { Input } from '@/components/ui/input'
 import { Plus, CreditCard, Search, X, Loader2, Trash2, Edit } from 'lucide-react'
 import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { formatCurrency } from '@/lib/data-utils'
 
 interface AccountManagerProps {
-  userId: string
   onAccountUpdated?: () => void
   className?: string
 }
 
 function AccountManagerInternal({ 
-  userId,
   onAccountUpdated,
   className = ''
 }: AccountManagerProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const { 
     accounts, 
     loading, 

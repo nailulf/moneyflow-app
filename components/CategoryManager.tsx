@@ -8,9 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Settings, Search, X, Loader2, Trash2 } from 'lucide-react'
 import { CategoryGroupDB, CategoryDB } from '@/types/database'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface CategoryManagerProps {
-  userId: string
   onCategoryUpdated?: () => void
   className?: string
 }
@@ -26,10 +26,12 @@ interface DisplayGroup {
 
 // Internal component that contains all the logic
 function CategoryManagerInternal({ 
-  userId,
   onCategoryUpdated,
   className = ''
 }: CategoryManagerProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
+  
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)

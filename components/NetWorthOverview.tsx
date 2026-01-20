@@ -19,6 +19,7 @@ import dynamic from 'next/dynamic'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AccountProvider, useAccounts } from '@/contexts/AccountContext'
 import { formatDistanceToNow } from 'date-fns'
+import { useAuth } from '@/contexts/AuthContext'
 
 // Lazy-loaded components with skeleton fallbacks to preserve layout
 const AccountManagerLazy = dynamic(() => import('@/components/AccountManager').then(mod => ({ default: mod.AccountManager })), {
@@ -40,7 +41,6 @@ const ChartContainerLazy = dynamic(() => import('@/components/ui/chart').then(mo
 })
 
 interface NetWorthOverviewProps {
-  userId: string
   onAddAccount?: () => void
 }
 
@@ -63,7 +63,9 @@ const chartConfig = {
 }
 
 // Internal component that uses AccountContext
-function NetWorthContent({ userId, onAddAccount }: NetWorthOverviewProps) {
+function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const { accounts, loading: accountsLoading, error: accountsError } = useAccounts()
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("1Y")
   const [netWorthData, setNetWorthData] = useState<NetWorthResponse | null>(null)
@@ -465,7 +467,6 @@ function NetWorthContent({ userId, onAddAccount }: NetWorthOverviewProps) {
       <div className="flex justify-center">
         <Suspense fallback={<div className="w-full max-w-sm flex justify-center"><Skeleton className="h-9 w-[140px] rounded-md" /></div>}>
           <AccountManagerLazy 
-            userId={userId} 
             onAccountUpdated={() => {
               // Refresh net worth data when accounts are updated
               const loadNetWorthData = async () => {
@@ -504,10 +505,8 @@ function NetWorthContent({ userId, onAddAccount }: NetWorthOverviewProps) {
 }
 
 // Main component that wraps NetWorthContent with AccountProvider  
-export default function NetWorthOverview({ userId, onAddAccount }: NetWorthOverviewProps) {
+export default function NetWorthOverview({ onAddAccount }: NetWorthOverviewProps) {
   return (
-    <AccountProvider userId={userId}>
-      <NetWorthContent userId={userId} onAddAccount={onAddAccount} />
-    </AccountProvider>
+    <NetWorthContent onAddAccount={onAddAccount} />
   )
 }

@@ -14,7 +14,6 @@ import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
 
 interface EditTransactionFormProps {
-  userId: string
   transaction: Transaction | null
   open: boolean
   onOpenChange: (open: boolean) => void

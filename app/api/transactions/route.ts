@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase-server'
 import { z } from 'zod'
 import { apiTransactionSchema } from '@/lib/validations'
 
@@ -8,8 +8,13 @@ const TransactionSchema = apiTransactionSchema
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if we're in build time
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    }
+
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
+    const paramUserId = searchParams.get('userId')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const categoryId = searchParams.get('categoryId')
@@ -20,19 +25,22 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'date'
     const sortOrder = searchParams.get('sortOrder') || 'desc'
 
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    if (paramUserId && paramUserId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized: User ID mismatch' }, { status: 403 })
     }
+
+    const userId = user.id
 
     // Calculate offset for pagination
     const offset = (page - 1) * limit
 
-    const supabase = createServerComponentClient()
     let query = supabase
       .from('transactions')
       .select('*', { count: 'exact' })
@@ -96,11 +104,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     
     // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
     }
 
-    const supabase = createServerComponentClient()
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     // Handle bulk insertion if body is an array
     if (Array.isArray(body)) {
@@ -131,6 +144,7 @@ export async function POST(request: NextRequest) {
 
           validTransactions.push({
             ...parsed,
+            user_id: user.id, // Enforce user_id from session
             created_at: new Date().toISOString()
           })
         } catch (validationError) {
@@ -195,22 +209,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle single insertion (existing logic)
-    const { user_id, date, description, amount, type, category_id, merchant, notes, tags, is_recurring, recurring_frequency, recurring_end_date } = body
+    const { user_id: bodyUserId, date, description, amount, type, category_id, account_id, merchant, currency, notes, tags, is_recurring, recurring_frequency, recurring_end_date } = body
 
-    if (!user_id || !date || !description || !amount || !type) {
+    if (!date || !description || !amount || !type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
     const { data, error } = await supabase
       .from('transactions')
       .insert({
-        user_id,
+        user_id: user.id, // Enforce user_id from session
         date,
         description,
         amount,
         type,
         category_id,
+        account_id,
         merchant,
+        currency: currency || 'IDR',
         notes,
         tags,
         is_recurring: is_recurring || false,
@@ -248,11 +264,28 @@ export async function PUT(request: NextRequest) {
     }
 
     // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
     }
 
-    const supabase = createServerComponentClient()
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check ownership
+    const { data: existingTransaction } = await supabase
+        .from('transactions')
+        .select('user_id')
+        .eq('id', id)
+        .single()
+    
+    if (!existingTransaction || existingTransaction.user_id !== user.id) {
+        return NextResponse.json({ error: 'Transaction not found or access denied' }, { status: 404 })
+    }
+
     const { data, error } = await supabase
       .from('transactions')
       .update({
@@ -260,6 +293,7 @@ export async function PUT(request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
+      .eq('user_id', user.id) // Ensure user still owns it
       .select()
       .single()
 
@@ -274,38 +308,6 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json(data)
-  } catch (error) {
-    console.error('API Error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
-
-export async function DELETE(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-
-    if (!id) {
-      return NextResponse.json({ error: 'Transaction ID is required' }, { status: 400 })
-    }
-
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
-    }
-
-    const supabase = createServerComponentClient()
-    const { error } = await supabase
-      .from('transactions')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Error deleting transaction:', error)
-      return NextResponse.json({ error: 'Failed to delete transaction' }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('API Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

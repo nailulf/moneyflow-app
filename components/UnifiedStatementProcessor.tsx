@@ -43,11 +43,11 @@ import { Label } from '@/components/ui/label'
 
 import { useAccounts } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { ParsedTransaction } from '@/lib/bank-parsers/types'
 import { cn } from '@/lib/utils'
 
 interface UnifiedStatementProcessorProps {
-  userId: string
   onSuccess?: () => void
   defaultAccountId?: string
 }
@@ -55,10 +55,11 @@ interface UnifiedStatementProcessorProps {
 type ViewState = 'UPLOAD' | 'REVIEW'
 
 export function UnifiedStatementProcessor({ 
-  userId, 
   onSuccess,
   defaultAccountId 
 }: UnifiedStatementProcessorProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   // Global State
   const [viewState, setViewState] = useState<ViewState>('UPLOAD')
   const [showExitConfirmation, setShowExitConfirmation] = useState(false)

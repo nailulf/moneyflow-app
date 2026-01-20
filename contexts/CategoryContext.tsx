@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { getUserCategories } from '@/lib/api/categories'
 import { CategoryDB } from '@/types/database'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface CategoryContextType {
   categories: CategoryDB[]
@@ -17,10 +18,12 @@ const CategoryContext = createContext<CategoryContextType | undefined>(undefined
 
 interface CategoryProviderProps {
   children: ReactNode
-  userId: string
 }
 
-export function CategoryProvider({ children, userId }: CategoryProviderProps) {
+export function CategoryProvider({ children }: CategoryProviderProps) {
+  const { user } = useAuth()
+  const userId = user?.id
+
   const [categories, setCategories] = useState<CategoryDB[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

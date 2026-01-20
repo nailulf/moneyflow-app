@@ -56,9 +56,6 @@ interface Budget {
 }
 
 export default function BudgetingBreakdownPage() {
-  // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
-  
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false)
   const [selectedYear, setSelectedYear] = useState(2025) // Set to 2025 where we have budget data
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
@@ -119,13 +116,12 @@ export default function BudgetingBreakdownPage() {
   const {
     monthlyIncome,
     monthlySpending,
-    netCashFlow  } = useFilteredTransactions(transactions, timeRange, selectedYear, selectedMonth)
+    netCashFlow
+  } = useFilteredTransactions(transactions, timeRange, selectedYear, selectedMonth)
 
-  const handleBudgetCreated = (budget: Budget) => {
-    refetchBudgets()
-    setSelectedBudget(budget)
+  const handleBudgetCreated = () => {
     setIsBudgetModalOpen(false)
-    toast.success('Budget created successfully!')
+    refetchBudgets()
   }
 
   // Calculate budget overview
@@ -137,10 +133,8 @@ export default function BudgetingBreakdownPage() {
     <div className="flex flex-col h-full">
       <SpendingNavigation actionButton={
           <div className="flex items-center gap-2">
-            <CategoryManager userId={TEST_USER_ID} />
-            <AccountProvider userId={TEST_USER_ID}>
-              <AccountManager userId={TEST_USER_ID} />
-            </AccountProvider>
+            <CategoryManager />
+            <AccountManager />
           </div>
         } />
       
@@ -279,11 +273,9 @@ export default function BudgetingBreakdownPage() {
         <MainContent>
           <div className="space-y-6">
             {/* Cash Flow Breakdown with Tabs */}
-            <BudgetProvider userId={TEST_USER_ID} year={selectedYear} month={selectedMonth}>
               <CashFlowBreakdown 
                 transactions={filteredTransactions}
               />
-            </BudgetProvider>
           </div>
         </MainContent>
         
@@ -380,7 +372,6 @@ export default function BudgetingBreakdownPage() {
         onClose={() => setIsBudgetModalOpen(false)}
         onBudgetCreated={handleBudgetCreated}
         categories={categories}
-        userId={TEST_USER_ID}
       />
     </div>
   )

@@ -9,22 +9,34 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createServerComponentClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     
     // Parse JSON data from client-side parsing
     const body = await request.json();
     const { 
-      userId, 
+      userId: bodyUserId, 
       accountId, 
       statement, 
       transactions, 
       metadata 
     } = body;
 
+    // Validate user matches session
+    if (bodyUserId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized: User ID mismatch' }, { status: 403 });
+    }
+
+    const userId = user.id;
+
     // Validate required fields
-    if (!userId || !statement || !transactions) {
+    if (!statement || !transactions) {
       return NextResponse.json({ 
         error: 'Missing required fields', 
-        details: 'userId, statement, and transactions are required' 
+        details: 'statement and transactions are required' 
       }, { status: 400 });
     }
 
@@ -118,15 +130,22 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const paramUserId = searchParams.get('userId');
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+    const supabase = createServerComponentClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const supabase = createServerComponentClient();
+    if (paramUserId && paramUserId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized: User ID mismatch' }, { status: 403 });
+    }
+
+    const userId = user.id;
 
     const { data: statements, error } = await supabase
       .from('statements')

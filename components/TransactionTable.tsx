@@ -35,6 +35,7 @@ import { useTransactionManager } from '@/hooks/use-transaction-manager'
 import { EditTransactionForm } from '@/components/EditTransactionForm'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useTransactions } from '@/contexts/TransactionContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { DateRangePicker, DateRange } from '@/components/DateRangePicker'
 import { AddTransactionForm } from './AddTransactionForm'
 import { useFilteredTransactions } from '@/hooks/useFilteredTransactions'
@@ -44,7 +45,6 @@ interface TransactionTableProps {
   limit?: number
   onEditTransaction?: (transaction: Transaction) => void
   onDeleteTransaction?: (id: string) => void
-  userId: string
   categories?: CategoryDB[]
   onTransactionUpdate?: (updatedTransaction: Transaction) => void
   // New prop to enable self-contained transaction management
@@ -68,13 +68,14 @@ export function TransactionTable({
   limit = 10, 
   onEditTransaction, 
   onDeleteTransaction,
-  userId,
   categories: propCategories,
   onTransactionUpdate,
   enableSelfManagement = false,
   enableLazyLoading = false,
   pageSize = 50
 }: TransactionTableProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const [isClient, setIsClient] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [sortField, setSortField] = useState<SortField>('date')
@@ -100,7 +101,7 @@ export function TransactionTable({
   const categories = propCategories || contextCategories
   
   // Self-contained transaction management - always call hooks to follow React rules
-  const transactionManager = useTransactionManager({ userId })
+  const transactionManager = useTransactionManager({})
   const transactionContext = useTransactions()
   
   // Use either prop transactions or context transactions when self-managing
@@ -407,8 +408,12 @@ export function TransactionTable({
           <div className="flex justify-between items-center gap-3 mb-4 w-full">
             <h1 className="text-md font-semibold text-gray-500">TRANSACTIONS</h1>
             <div className="flex items-center">
-              <AddTransactionForm userId={userId} onSuccess={() => {
+              <AddTransactionForm onSuccess={() => {
                 transactionContext?.refreshTransactions?.()
+                // Also refresh local manager if enabled
+                if (enableSelfManagement && transactionManager) {
+                  transactionManager.loadTransactions()
+                }
               }}/>
             </div>
           </div>
@@ -744,7 +749,6 @@ export function TransactionTable({
       {/* Edit Transaction Modal for self-management */}
       {enableSelfManagement && (
         <EditTransactionForm
-          userId={userId}
           transaction={editingTransaction}
           open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}

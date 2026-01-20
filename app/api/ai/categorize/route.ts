@@ -11,8 +11,17 @@ const CategorizationSchema = z.object({
   }))
 });
 
+import { createServerComponentClient } from '@/lib/supabase';
+
 export async function POST(request: Request) {
   try {
+    const supabase = createServerComponentClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { transactions, categories } = await request.json();
 
     if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {
