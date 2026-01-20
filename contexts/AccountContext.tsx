@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { AccountDB } from '@/types/database'
+import { useAuth } from '@/contexts/AuthContext'
 
 export interface AccountWithHistory extends AccountDB {
   historicalBalance?: number
@@ -23,10 +24,12 @@ const AccountContext = createContext<AccountContextType | undefined>(undefined)
 
 interface AccountProviderProps {
   children: React.ReactNode
-  userId: string
 }
 
-export function AccountProvider({ children, userId }: AccountProviderProps) {
+export function AccountProvider({ children }: AccountProviderProps) {
+  const { user } = useAuth()
+  const userId = user?.id
+
   const [accounts, setAccounts] = useState<AccountWithHistory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

@@ -26,17 +26,20 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { EditTransactionForm } from '@/components/EditTransactionForm'
 import { useTransactions } from '@/contexts/TransactionContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { updateTransaction, deleteTransaction } from '@/lib/api/transactions'
 import { toast } from 'sonner'
 
 interface RecurringTransactionsListProps {
-  userId: string
+  // No props needed as userId comes from auth context
 }
 
 type SortField = 'description' | 'amount' | 'next_date' | 'frequency'
 type SortDirection = 'asc' | 'desc'
 
-export function RecurringTransactionsList({ userId }: RecurringTransactionsListProps) {
+export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const { transactions, refreshTransactions, editTransaction } = useTransactions()
   const [searchTerm, setSearchTerm] = useState('')
   const [sortField, setSortField] = useState<SortField>('next_date')
@@ -322,7 +325,6 @@ export function RecurringTransactionsList({ userId }: RecurringTransactionsListP
       )}
 
       <EditTransactionForm
-        userId={userId}
         transaction={editingTransaction}
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}

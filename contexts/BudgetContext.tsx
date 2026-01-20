@@ -6,6 +6,7 @@ import { createBudgetCategory, getBudgetCategories, updateBudgetCategory, delete
 import { BudgetDB, BudgetInsert, BudgetUpdate, BudgetCategoryDB, BudgetCategoryInsert, BudgetCategoryUpdate } from '@/types/database'
 import { BudgetItem } from '@/types/app'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 
 // Budget interfaces for the context
 interface BudgetCategory {
@@ -67,7 +68,6 @@ const BudgetContext = createContext<BudgetContextType | undefined>(undefined)
 
 interface BudgetProviderProps {
   children: ReactNode
-  userId: string
   autoFetch?: boolean
   year?: number
   month?: number
@@ -75,11 +75,12 @@ interface BudgetProviderProps {
 
 export function BudgetProvider({ 
   children, 
-  userId, 
   autoFetch = true,
   year,
   month 
 }: BudgetProviderProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const [budgets, setBudgets] = useState<Budget[]>([])
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null)
   const [loading, setLoading] = useState(true)

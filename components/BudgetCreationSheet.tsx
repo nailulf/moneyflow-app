@@ -13,6 +13,7 @@ import { CategoryDB } from '@/types/database'
 import { formatCurrency, DEFAULT_CURRENCY } from '@/lib/data-utils'
 import { preferences } from '@/lib/api/user-preferences'
 import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface BudgetCategory {
   category_id: string
@@ -46,7 +47,6 @@ interface BudgetCreationModalProps {
   onClose: () => void
   onBudgetCreated: (budget: Budget) => void
   categories: CategoryDB[]
-  userId?: string
 }
 
 const MONTHS = [
@@ -69,7 +69,9 @@ const YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR + i)
 
 
 
-export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categories, userId }: BudgetCreationModalProps) {
+export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categories }: BudgetCreationModalProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   
@@ -211,6 +213,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
       const allocationData = budgetAllocation.toDatabaseFormat()
       
       const budgetData = {
+        userId, // Add userId to the payload
         name: budgetName,
         total_amount: parseFloat(totalAmount),
         period,

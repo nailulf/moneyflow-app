@@ -13,8 +13,6 @@ import { RecurringTransactionsList } from '@/components/RecurringTransactionsLis
 
 
 export default function SpendingTransactionPage() {
-  // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
   
   // Use shared transaction context
   const { transactions, addTransaction } = useTransactions()
@@ -26,9 +24,9 @@ export default function SpendingTransactionPage() {
     <div className="flex flex-col h-full">
       <SpendingNavigation actionButton={
         <div className="flex items-center gap-2">
-          <CategoryManager userId={TEST_USER_ID} />
-          <AccountProvider userId={TEST_USER_ID}>
-            <AccountManager userId={TEST_USER_ID} />
+          <CategoryManager />
+          <AccountProvider>
+            <AccountManager />
           </AccountProvider>
         </div>
       } />
@@ -46,7 +44,6 @@ export default function SpendingTransactionPage() {
             <TabsContent value="all" className="mt-0">
               <TransactionTable 
                 transactions={transactions} 
-                userId={TEST_USER_ID}
                 enableSelfManagement={true}
                 enableLazyLoading={true}
                 pageSize={20}
@@ -54,7 +51,7 @@ export default function SpendingTransactionPage() {
             </TabsContent>
             
             <TabsContent value="recurring" className="mt-0">
-              <RecurringTransactionsList userId={TEST_USER_ID} />
+              <RecurringTransactionsList />
             </TabsContent>
           </Tabs>
         </TopContent>

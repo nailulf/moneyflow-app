@@ -16,9 +16,6 @@ import { AccountProvider } from '@/contexts/AccountContext'
 
 
 export default function SpendingPage() {
-  // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
-  
   // Use shared transaction context
   const { transactions } = useTransactions()
   
@@ -34,10 +31,8 @@ export default function SpendingPage() {
     <div className="flex flex-col h-full">
       <SpendingNavigation actionButton={
         <div className="flex items-center gap-2">
-          <CategoryManager userId={TEST_USER_ID} />
-          <AccountProvider userId={TEST_USER_ID}>
-            <AccountManager userId={TEST_USER_ID} />
-          </AccountProvider>
+          <CategoryManager />
+          <AccountManager />
         </div>
       } />
       
@@ -56,7 +51,6 @@ export default function SpendingPage() {
             <TransactionTable 
               transactions={transactions} 
               limit={8}
-              userId={TEST_USER_ID}
               enableSelfManagement={true}
             />
           </div>

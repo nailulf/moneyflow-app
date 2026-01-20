@@ -12,16 +12,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Upload, Edit } from 'lucide-react'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
 import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
 
 
 interface AddTransactionFormProps {
-  userId: string
   onSuccess?: () => void
 }
 
-export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProps) {
+export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentDate, setCurrentDate] = useState('')
@@ -30,14 +32,28 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
   const [activeTab, setActiveTab] = useState('manual')
 
   // Load user categories from shared context
-  const { categories, loading: categoriesLoading } = useCategories()
+  const { categories, loading: categoriesLoading, error: categoriesError, refreshCategories } = useCategories()
+
+  // Debug logging & Auto-refresh
+  useEffect(() => {
+    if (categoriesError) {
+      console.error('Category loading error:', categoriesError)
+    }
+    console.log('Loaded categories:', categories.length, categories)
+    
+    // Attempt to refresh if empty and no error
+    if (categories.length === 0 && !categoriesLoading && !categoriesError) {
+      console.log('Categories empty, refreshing...')
+      refreshCategories()
+    }
+  }, [categories, categoriesError, categoriesLoading, refreshCategories])
   
   // Load user accounts from shared context
   const { accounts, loading: accountsLoading } = useAccounts()
   
   // Group categories by type for display
   const categoryGroups = categories.reduce((groups, category) => {
-    const groupType = category.group_type || 'EXPENSE'
+    const groupType = (category.group_type || 'EXPENSE').toUpperCase()
     const existingGroup = groups.find(g => g.type === groupType)
     if (existingGroup) {
       existingGroup.categories.push(category)
@@ -121,7 +137,7 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.details || errorData.message || 'Failed to create transaction')
+        throw new Error(errorData.error || errorData.details || errorData.message || 'Failed to create transaction')
       }
 
       onSuccess?.()
@@ -243,6 +259,16 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Category</label>
+            <div className="flex justify-between items-center">
+               {categoriesError && (
+                 <p className="text-xs text-red-500 mb-1">Error: {categoriesError}</p>
+               )}
+               {process.env.NODE_ENV === 'development' && (
+                 <span className="text-[10px] text-gray-400">
+                   {categories.length} cats / User: {user?.id?.slice(0, 8)}...
+                 </span>
+               )}
+            </div>
             <Select
               value={(selectedCategoryId as string) || undefined}
               onValueChange={(value) => {
@@ -431,7 +457,6 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
             
             <TabsContent value="upload" className="mt-4">
               <UnifiedStatementProcessor 
-                userId={userId}
                 onSuccess={() => {
                   onSuccess?.()
                   setOpen(false)

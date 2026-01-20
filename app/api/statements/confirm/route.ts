@@ -33,16 +33,28 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createServerComponentClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     
     // Parse request body
     const body: ConfirmStatementRequest = await request.json();
-    const { userId, accountId, file, metadata, transactions, warnings } = body;
+    const { userId: bodyUserId, accountId, file, metadata, transactions, warnings } = body;
+
+    // Validate user matches session
+    if (bodyUserId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized: User ID mismatch' }, { status: 403 });
+    }
+
+    const userId = user.id;
 
     // Validate required fields
-    if (!userId || !file || !metadata || !transactions) {
+    if (!file || !metadata || !transactions) {
       return NextResponse.json({ 
         error: 'Missing required fields', 
-        details: 'userId, file, metadata, and transactions are required' 
+        details: 'file, metadata, and transactions are required' 
       }, { status: 400 });
     }
 
@@ -246,15 +258,26 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const statementId = searchParams.get('statementId');
-    const userId = searchParams.get('userId');
-
-    if (!statementId || !userId) {
-      return NextResponse.json({ 
-        error: 'statementId and userId are required' 
-      }, { status: 400 });
-    }
+    const paramUserId = searchParams.get('userId');
 
     const supabase = createServerComponentClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (paramUserId && paramUserId !== user.id) {
+       return NextResponse.json({ error: 'Unauthorized: User ID mismatch' }, { status: 403 });
+    }
+
+    const userId = user.id;
+
+    if (!statementId) {
+      return NextResponse.json({ 
+        error: 'statementId is required' 
+      }, { status: 400 });
+    }
 
     // Get statement details
     const { data: statement, error: statementError } = await supabase

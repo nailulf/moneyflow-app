@@ -12,23 +12,42 @@ import { Separator } from '@/components/ui/separator'
 import { usePathname } from 'next/navigation'
 import { AccountProvider } from '@/contexts/AccountContext'
 import { CategoryProvider } from '@/contexts/CategoryContext'
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { Loader2 } from 'lucide-react'
 
 interface LayoutWrapperProps {
   children: React.ReactNode
 }
 
-export default function LayoutWrapper({ children }: LayoutWrapperProps) {
+function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const { user, loading } = useAuth()
   
   // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
+  // const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
   
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
+  // If we are on auth pages, don't show the sidebar layout
+  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth')) {
+    return <>{children}</>
+  }
+
+  if (!user) {
+    // Middleware should handle redirect, but just in case
+    return null
+  }
 
   return (
     <SidebarProvider>
-      <AccountProvider userId={TEST_USER_ID}>
-        <CategoryProvider userId={TEST_USER_ID}>
+      <AccountProvider>
+        <CategoryProvider>
           <AppSidebar />
           <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -55,9 +74,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
             </h1>
             <div className="ml-auto px-4">
               <NavUser user={{
-                name: "shadcn",
-                email: "shadcn@example.com",
-                avatar: "/avatars/01.svg"
+                name: user.user_metadata.full_name || user.email?.split('@')[0] || "User",
+                email: user.email || "",
+                avatar: user.user_metadata.avatar_url || "/avatars/01.svg"
               }} />
             </div>
           </header>
@@ -71,5 +90,13 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
       </AccountProvider>
       <Toaster />
     </SidebarProvider>
+  )
+}
+
+export default function LayoutWrapper({ children }: LayoutWrapperProps) {
+  return (
+    <AuthProvider>
+      <AuthenticatedLayout>{children}</AuthenticatedLayout>
+    </AuthProvider>
   )
 }

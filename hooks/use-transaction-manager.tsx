@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Transaction, TransactionInsert, TransactionUpdate } from '@/types/database'
 import { TransactionFormData } from '@/lib/validations'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 import { 
   getUserTransactions,
   createTransaction,
@@ -13,7 +14,6 @@ import {
 } from '@/lib/api/transactions'
 
 interface UseTransactionManagerProps {
-  userId: string
   initialTransactions?: Transaction[]
 }
 
@@ -30,9 +30,10 @@ interface UseTransactionManagerReturn {
 }
 
 export function useTransactionManager({
-  userId,
   initialTransactions = [],
-}: UseTransactionManagerProps): UseTransactionManagerReturn {
+}: UseTransactionManagerProps = {}): UseTransactionManagerReturn {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

@@ -1,23 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
     const accountId = searchParams.get('accountId')
     const includeHistory = searchParams.get('includeHistory') === 'true'
-    const period = searchParams.get('period') || '1M'
     const asOfDate = searchParams.get('asOfDate')
 
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Environment variables not configured')
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
-    }
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    const supabase = createServerComponentClient()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     // If accountId is provided, fetch single account
     if (accountId) {
@@ -25,6 +22,7 @@ export async function GET(request: NextRequest) {
         .from('accounts')
         .select('*')
         .eq('id', accountId)
+        .eq('user_id', user.id) // Ensure user owns the account
         .eq('is_active', true)
         .single()
 
@@ -42,6 +40,7 @@ export async function GET(request: NextRequest) {
           .from('transactions')
           .select('*')
           .eq('account_id', accountId)
+          .eq('user_id', user.id)
           .lte('date', targetDate.toISOString())
           .order('date', { ascending: true })
 
@@ -63,16 +62,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(account)
     }
 
-    // Otherwise, fetch all accounts for user
-    if (!userId) {
-      console.error('❌ Missing userId parameter')
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
-    }
-
     const { data: accounts, error } = await supabase
       .from('accounts')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .eq('is_active', true)
       .order('is_default', { ascending: false })
       .order('created_at', { ascending: true })
@@ -94,6 +87,7 @@ export async function GET(request: NextRequest) {
           .from('transactions')
           .select('*')
           .in('account_id', accountIds)
+          .eq('user_id', user.id)
           .lte('date', targetDate.toISOString())
           .order('date', { ascending: true })
 
@@ -128,30 +122,30 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { user_id, name, type, balance, currency, is_default, description } = body
+    const { name, type, balance, currency, is_default, description } = body
 
-    if (!user_id || !name) {
-      return NextResponse.json({ error: 'User ID and name are required' }, { status: 400 })
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    if (!name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
-
-    const supabase = createServerComponentClient()
 
     // If this is being set as default, unset other defaults first
     if (is_default) {
       await supabase
         .from('accounts')
         .update({ is_default: false, updated_at: new Date().toISOString() })
-        .eq('user_id', user_id)
+        .eq('user_id', user.id)
         .eq('is_default', true)
     }
 
     const insertData = {
-      user_id,
+      user_id: user.id,
       name,
       type: type || 'BANK',
       balance: balance || 0.00,
@@ -190,12 +184,12 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Account ID is required' }, { status: 400 })
     }
 
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
-    }
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    const supabase = createServerComponentClient()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
     // Get the account to check user_id
     const { data: existingAccount, error: fetchError } = await supabase
@@ -205,7 +199,11 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (fetchError || !existingAccount) {
-      return NextResponse.json({ error: 'Account not found' }, { status: 404 })
+        return NextResponse.json({ error: 'Account not found' }, { status: 404 })
+    }
+
+    if (existingAccount.user_id !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     // If this is being set as default, unset other defaults first
@@ -213,9 +211,8 @@ export async function PUT(request: NextRequest) {
       await supabase
         .from('accounts')
         .update({ is_default: false, updated_at: new Date().toISOString() })
-        .eq('user_id', existingAccount.user_id)
+        .eq('user_id', user.id)
         .eq('is_default', true)
-        .neq('id', id)
     }
 
     const updateData: any = {
@@ -234,6 +231,7 @@ export async function PUT(request: NextRequest) {
       .from('accounts')
       .update(updateData)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -250,67 +248,35 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const accountId = searchParams.get('accountId')
+    try {
+        const { searchParams } = new URL(request.url)
+        const id = searchParams.get('id')
 
-    if (!accountId) {
-      return NextResponse.json({ error: 'Account ID is required' }, { status: 400 })
+        if (!id) {
+            return NextResponse.json({ error: 'Account ID is required' }, { status: 400 })
+        }
+
+        const supabase = await createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const { error } = await supabase
+            .from('accounts')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.id)
+
+        if (error) {
+            console.error('Error deleting account:', error)
+            return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 })
+        }
+
+        return NextResponse.json({ success: true })
+    } catch (error: unknown) {
+        console.error('API Error:', error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
-
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
-    }
-
-    const supabase = createServerComponentClient()
-
-    // Check if account has transactions
-    const { data: transactions, error: transactionError } = await supabase
-      .from('transactions')
-      .select('id')
-      .eq('account_id', accountId)
-      .limit(1)
-
-    if (transactionError) {
-      console.error('Error checking transactions:', transactionError)
-      return NextResponse.json({ error: 'Failed to check account usage' }, { status: 500 })
-    }
-
-    if (transactions && transactions.length > 0) {
-      // Soft delete - mark as inactive instead of hard delete
-      const { data, error } = await supabase
-        .from('accounts')
-        .update({ 
-          is_active: false, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('id', accountId)
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Error deactivating account:', error)
-        return NextResponse.json({ error: 'Failed to deactivate account' }, { status: 500 })
-      }
-
-      return NextResponse.json({ message: 'Account deactivated successfully', data })
-    } else {
-      // Hard delete if no transactions
-      const { error } = await supabase
-        .from('accounts')
-        .delete()
-        .eq('id', accountId)
-
-      if (error) {
-        console.error('Error deleting account:', error)
-        return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 })
-      }
-
-      return NextResponse.json({ message: 'Account deleted successfully' })
-    }
-  } catch (error: unknown) {
-    console.error('API Error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
 }

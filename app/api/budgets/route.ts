@@ -46,46 +46,95 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, name, amount, type } = await request.json()
+    const body = await request.json()
+    const { userId, name, total_amount, amount, period, type, year, month, currency, categories } = body
+
+    // Handle legacy field names if necessary (amount -> total_amount, type -> period)
+    const finalTotalAmount = total_amount || amount
+    const finalPeriod = period || type
+    const finalYear = year || new Date().getFullYear()
+    const finalMonth = month || (finalPeriod === 'monthly' ? new Date().getMonth() + 1 : null)
+    const finalCurrency = currency || 'IDR'
+
+    if (!userId || !name || !finalTotalAmount) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
 
     const supabase = createServerComponentClient()
-    const insertData: {
-      user_id: string;
-      name: string;
-      period: string;
-      total_amount: number;
-      currency: string;
-      month: number;
-      year: number;
-      is_active: boolean;
-      created_at: string;
-      updated_at: string;
-    } = {
+    
+    // 1. Create the budget
+    const insertData = {
       user_id: userId,
       name,
-      period: type,
-      total_amount: amount,
-      currency : 'IDR',
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear(),
+      period: finalPeriod,
+      total_amount: finalTotalAmount,
+      currency: finalCurrency,
+      month: finalMonth,
+      year: finalYear,
       is_active: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
 
-    const { data, error } = await supabase
+    const { data: budget, error: budgetError } = await supabase
       .from('budgets')
       .insert(insertData)
       .select()
       .single()
 
-
-    if (error) {
-      console.error('Error creating budget:', error)
+    if (budgetError) {
+      console.error('Error creating budget:', budgetError)
       return NextResponse.json({ error: 'Failed to create budget' }, { status: 500 })
     }
 
-    return NextResponse.json(data)
+    // 2. Create budget categories if provided
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      const budgetCategoriesData = categories.map((cat: any) => ({
+        budget_id: budget.id,
+        category_id: cat.category_id,
+        allocated_amount: cat.allocated_amount,
+        spent_amount: 0, // Initial spent amount is 0
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }))
+
+      const { error: categoriesError } = await supabase
+        .from('budget_categories')
+        .insert(budgetCategoriesData)
+
+      if (categoriesError) {
+        console.error('Error creating budget categories:', categoriesError)
+        // Note: We don't rollback the budget creation here, but we could return a warning
+        // or delete the budget if strict atomicity is required.
+        // For now, we'll log it and return the budget (user can edit categories later).
+      }
+    }
+
+    // 3. Return the complete budget with categories
+    const { data: completeBudget, error: fetchError } = await supabase
+      .from('budgets')
+      .select(`
+        *,
+        budget_categories (
+          id,
+          allocated_amount,
+          spent_amount,
+          categories (
+            id,
+            name,
+            color
+          )
+        )
+      `)
+      .eq('id', budget.id)
+      .single()
+
+    if (fetchError) {
+      console.error('Error fetching complete budget:', fetchError)
+      return NextResponse.json(budget) // Return basic budget if fetch fails
+    }
+
+    return NextResponse.json(completeBudget)
   } catch (error: unknown) {
     console.error('API Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
