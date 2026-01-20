@@ -26,6 +26,7 @@ import { toast } from 'sonner'
 import { createCategory } from '@/lib/api/categories'
 import { getUserCategoryGroups } from '@/lib/api/category-groups'
 import { CategoryInsert, CategoryDB } from '@/types/database'
+import { useAuth } from '@/contexts/AuthContext'
 
 const chartConfig = {
   amount: {
@@ -51,6 +52,7 @@ const calculateBudgetStatus = (spentAmount: number, budgetAmount: number): 'good
 }
 
 export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
+  const { user } = useAuth()
   const [viewBy, setViewBy] = useState<'category' | 'amount'>('category')
   const [budgetItemsLoading, setBudgetItemsLoading] = useState(false)
   const [budgetItemsError, setBudgetItemsError] = useState<string | null>(null)
@@ -583,7 +585,11 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
             return
           }
 
-          const userId = process.env.NEXT_PUBLIC_TEST_USER_ID!
+          if (!user?.id) {
+            toast.error('User not authenticated')
+            return
+          }
+          const userId = user.id
           
           // Validate budget data before processing
           if (!updatedBudget.categories || updatedBudget.categories.length === 0) {
