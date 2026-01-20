@@ -12,8 +12,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, getMonthlyData, calculateTotalIncome, calculateTotalSpending } from '@/lib/data-utils'
 
 export default function CashFlowPage() {
-  // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
   
   // Use shared transaction context
   const { transactions } = useTransactions()
@@ -38,9 +36,9 @@ export default function CashFlowPage() {
     <div className="flex flex-col h-full">
       <SpendingNavigation actionButton={
         <div className="flex items-center gap-2">
-          <CategoryManager userId={TEST_USER_ID} />
-          <AccountProvider userId={TEST_USER_ID}>
-            <AccountManager userId={TEST_USER_ID} />
+          <CategoryManager />
+          <AccountProvider>
+            <AccountManager />
           </AccountProvider>
         </div>
       } />

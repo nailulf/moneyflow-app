@@ -15,11 +15,9 @@ interface CashFlowChartProps {
 }
 
 export default function CashFlowChart({ transactions, dateRange, chartType = 'bar' }: CashFlowChartProps) {
-  // Get test user ID from environment
-  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
   
   // Fetch categories
-  const { allCategories, isLoading: categoriesLoading } = useCategories(TEST_USER_ID)
+  const { allCategories, isLoading: categoriesLoading } = useCategories()
 
   if (categoriesLoading) {
     return (
