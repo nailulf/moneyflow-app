@@ -12,15 +12,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Plus, Upload, Edit } from 'lucide-react'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
-import { PDFStatementUpload } from '@/components/PDFStatementUpload'
+import { useAuth } from '@/contexts/AuthContext'
+import { toast } from 'sonner'
+import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
 
 
 interface AddTransactionFormProps {
-  userId: string
   onSuccess?: () => void
 }
 
-export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProps) {
+export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentDate, setCurrentDate] = useState('')
@@ -29,14 +32,28 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
   const [activeTab, setActiveTab] = useState('manual')
 
   // Load user categories from shared context
-  const { categories, loading: categoriesLoading } = useCategories()
+  const { categories, loading: categoriesLoading, error: categoriesError, refreshCategories } = useCategories()
+
+  // Debug logging & Auto-refresh
+  useEffect(() => {
+    if (categoriesError) {
+      console.error('Category loading error:', categoriesError)
+    }
+    console.log('Loaded categories:', categories.length, categories)
+    
+    // Attempt to refresh if empty and no error
+    if (categories.length === 0 && !categoriesLoading && !categoriesError) {
+      console.log('Categories empty, refreshing...')
+      refreshCategories()
+    }
+  }, [categories, categoriesError, categoriesLoading, refreshCategories])
   
   // Load user accounts from shared context
   const { accounts, loading: accountsLoading } = useAccounts()
   
   // Group categories by type for display
   const categoryGroups = categories.reduce((groups, category) => {
-    const groupType = category.group_type || 'EXPENSE'
+    const groupType = (category.group_type || 'EXPENSE').toUpperCase()
     const existingGroup = groups.find(g => g.type === groupType)
     if (existingGroup) {
       existingGroup.categories.push(category)
@@ -58,6 +75,7 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors }
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -69,7 +87,10 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
       category_id: '',
       account_id: '',
       merchant: '',
-      is_recurring: false
+      currency: 'IDR',
+      is_recurring: false,
+      recurring_frequency: 'monthly',
+      recurring_end_date: null
     }
   })
 
@@ -110,19 +131,37 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
         body: JSON.stringify({
           ...transformedData,
           amount: Number(transformedData.amount),
-          user_id: '1d16c616-77a6-48de-9a54-dde7845f720d',
+          user_id: userId,
           date: new Date(transformedData.date).toISOString(),
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create transaction')
+        const errorData = await response.json()
+        throw new Error(errorData.error || errorData.details || errorData.message || 'Failed to create transaction')
       }
 
       onSuccess?.()
       setOpen(false)
+      toast.success('Transaction created successfully')
+      
+      // Reset form to default values
+      reset({
+        date: new Date().toISOString().split('T')[0],
+        description: '',
+        amount: 0,
+        type: 'EXPENSE',
+        category_id: '',
+        account_id: '',
+        merchant: '',
+        currency: 'IDR',
+        is_recurring: false,
+        recurring_frequency: 'monthly',
+        recurring_end_date: null
+      })
     } catch (error) {
       console.error('Error creating transaction:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to create transaction')
     } finally {
       setIsSubmitting(false)
     }
@@ -236,6 +275,16 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Category</label>
+            <div className="flex justify-between items-center">
+               {categoriesError && (
+                 <p className="text-xs text-red-500 mb-1">Error: {categoriesError}</p>
+               )}
+               {process.env.NODE_ENV === 'development' && (
+                 <span className="text-[10px] text-gray-400">
+                   {categories.length} cats / User: {user?.id?.slice(0, 8)}...
+                 </span>
+               )}
+            </div>
             <Select
               value={(selectedCategoryId as string) || undefined}
               onValueChange={(value) => {
@@ -312,22 +361,95 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="is_recurring"
-              {...register('is_recurring')}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="is_recurring" className="text-sm font-medium">
-              Recurring Transaction
-            </label>
-          </div>
-          {isRecurring && (
-            <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded">
-              💡 This transaction will be marked as recurring. You can set up automatic scheduling separately.
+          <div className="space-y-4 border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="is_recurring"
+                {...register('is_recurring')}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="is_recurring" className="text-sm font-medium">
+                Recurring Transaction
+              </label>
             </div>
-          )}
+            
+            {isRecurring && (
+              <div className="space-y-4 pl-6 border-l-2 border-blue-200 ml-1">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Frequency</label>
+                  <Select
+                      value={watch('recurring_frequency') || 'monthly'}
+                      onValueChange={(value) => {
+                        setSuppressCloseUntil(Date.now() + 500)
+                        setValue('recurring_frequency', value as 'daily' | 'weekly' | 'monthly' | 'yearly')
+                      }}
+                      onOpenChange={setIsAnySelectOpen}
+                    >
+                      <SelectTrigger data-testid="frequency-select-trigger">
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Period</label>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="period_continuous"
+                        name="period_type"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full"
+                        checked={!watch('recurring_end_date')}
+                        onChange={() => setValue('recurring_end_date', null)}
+                      />
+                      <label htmlFor="period_continuous" className="text-sm text-gray-700">
+                        Continuous (No end date)
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="period_ended"
+                        name="period_type"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full"
+                        checked={!!watch('recurring_end_date')}
+                        onChange={() => {
+                          // Set default end date to one year from now if not set
+                          if (!watch('recurring_end_date')) {
+                            const nextYear = new Date()
+                            nextYear.setFullYear(nextYear.getFullYear() + 1)
+                            setValue('recurring_end_date', nextYear.toISOString().split('T')[0])
+                          }
+                        }}
+                      />
+                      <label htmlFor="period_ended" className="text-sm text-gray-700">
+                        End Date
+                      </label>
+                    </div>
+                  </div>
+                  
+                  {!!watch('recurring_end_date') && (
+                    <div className="mt-2">
+                      <Input
+                        type="date"
+                        {...register('recurring_end_date')}
+                        min={currentDate}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
                 <div className="flex gap-2 pt-4">
                   <Button
@@ -350,7 +472,7 @@ export function AddTransactionForm({ userId, onSuccess }: AddTransactionFormProp
             </TabsContent>
             
             <TabsContent value="upload" className="mt-4">
-              <PDFStatementUpload 
+              <UnifiedStatementProcessor 
                 onSuccess={() => {
                   onSuccess?.()
                   setOpen(false)

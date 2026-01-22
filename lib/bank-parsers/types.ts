@@ -12,8 +12,12 @@ export interface ParsedTransaction {
   currency: string;
   rawData: string;
   category?: string;
+  category_id?: string;
+  isAiSuggested?: boolean;
   isDuplicate?: boolean;
   duplicateReason?: string;
+  notes?: string;
+  type?: 'INCOME' | 'EXPENSE' | 'TRANSFER';
 }
 
 export interface StatementMetadata {

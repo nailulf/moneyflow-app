@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient } from '@/lib/supabase'
 import { format, subDays, subWeeks, subMonths, subYears, startOfDay, endOfDay } from 'date-fns'
+import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -151,23 +152,12 @@ export async function GET(request: NextRequest) {
         const accountTransactions = transactionsByAccount.get(account.id) || []
         
         // Calculate account balance at this point in time
-        // Start with the account's opening balance
-        let accountBalance = account.balance || 0
-        
-        for (const transaction of accountTransactions) {
-          const transactionDate = new Date(transaction.date)
-          if (transactionDate <= pointDate) {
-            switch (transaction.type) {
-              case 'INCOME':
-                accountBalance += transaction.amount
-                break
-              case 'EXPENSE':
-                accountBalance -= transaction.amount
-                break
-              // TRANSFER transactions are handled separately to avoid double counting
-            }
-          }
-        }
+        const accountBalance = calculateAccountBalanceAtDate(
+          accountTransactions,
+          pointDate,
+          account.type,
+          account.balance || 0
+        )
 
         // For credit cards, negative balance is actually positive net worth (less debt)
         if (account.type === 'CREDIT_CARD') {
@@ -190,26 +180,16 @@ export async function GET(request: NextRequest) {
     const accountsWithBalances = accounts.map((account) => {
       const accountTransactions = transactionsByAccount.get(account.id) || []
       
-      // Start with the account's opening balance
-      let currentBalance = account.balance || 0
-      
-      for (const transaction of accountTransactions) {
-        const transactionDate = new Date(transaction.date)
-        if (transactionDate <= endDateTime) {
-          switch (transaction.type) {
-            case 'INCOME':
-              currentBalance += transaction.amount
-              break
-            case 'EXPENSE':
-              currentBalance -= transaction.amount
-              break
-          }
-        }
-      }
+      const currentBalance = calculateAccountBalanceAtDate(
+        accountTransactions,
+        endDateTime,
+        account.type,
+        account.balance || 0
+      )
 
       return {
         ...account,
-        currentBalance: Math.round(currentBalance * 100) / 100
+        currentBalance
       }
     })
 

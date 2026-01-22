@@ -51,19 +51,11 @@ interface MonthlyTransactionResponse {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
+    const paramUserId = searchParams.get('userId')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const monthsParam = searchParams.get('months')
     
-    // Validation
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required', code: 'MISSING_USER_ID' }, 
-        { status: 400 }
-      )
-    }
-
     // Environment check
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return NextResponse.json(
@@ -71,6 +63,19 @@ export async function GET(request: NextRequest) {
         { status: 503 }
       )
     }
+
+    const supabase = createServerComponentClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (paramUserId && paramUserId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized: User ID mismatch' }, { status: 403 })
+    }
+
+    const userId = user.id
 
     // Parse and validate months parameter
     const months = monthsParam ? Math.min(Math.max(parseInt(monthsParam), 1), 24) : 12
@@ -91,8 +96,6 @@ export async function GET(request: NextRequest) {
         queryStartDate = startDateObj.toISOString().split('T')[0]
       }
     }
-
-    const supabase = createServerComponentClient()
 
     // Optimized query to fetch transactions with minimal data transfer
     const { data: transactions, error } = await supabase

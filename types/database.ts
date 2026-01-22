@@ -15,6 +15,9 @@ export interface Database {
           notes: string | null
           tags: string[] | null
           is_recurring: boolean
+          recurring_frequency: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+          recurring_end_date: string | null
+          last_processed_date: string | null
           statement_id: string | null
           raw_data: string | null
           posting_date: string | null
@@ -36,6 +39,9 @@ export interface Database {
           notes?: string | null
           tags?: string[] | null
           is_recurring?: boolean
+          recurring_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+          recurring_end_date?: string | null
+          last_processed_date?: string | null
           statement_id?: string | null
           raw_data?: string | null
           posting_date?: string | null
@@ -57,6 +63,9 @@ export interface Database {
           notes?: string | null
           tags?: string[] | null
           is_recurring?: boolean
+          recurring_frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+          recurring_end_date?: string | null
+          last_processed_date?: string | null
           statement_id?: string | null
           raw_data?: string | null
           posting_date?: string | null

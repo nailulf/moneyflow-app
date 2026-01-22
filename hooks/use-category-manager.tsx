@@ -18,9 +18,10 @@ import {
   convertCategoryGroupsToGroupData,
   convertToGroupInsert
 } from '@/lib/api/category-groups'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface UseCategoryManagerProps {
-  userId: string
+  userId?: string
   onCategoriesChanged?: (groups: CategoryGroupData[]) => void
 }
 
@@ -40,9 +41,10 @@ interface UseCategoryManagerReturn {
 }
 
 export function useCategoryManager({
-  userId,
   onCategoriesChanged
-}: UseCategoryManagerProps): UseCategoryManagerReturn {
+}: UseCategoryManagerProps = {}): UseCategoryManagerReturn {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroupData[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -288,8 +290,8 @@ export function useCategoryManager({
 }
 
 // Helper hook for getting categories in a simple format
-export function useCategories(userId: string) {
-  const { categoryGroups, isLoading, error } = useCategoryManager({ userId })
+export function useCategories() {
+  const { categoryGroups, isLoading, error } = useCategoryManager({})
   
   // Memoize computed categories to prevent unnecessary recalculations
   const allCategories = useMemo(() => 

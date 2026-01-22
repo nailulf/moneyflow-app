@@ -12,7 +12,7 @@ import { useFilteredTransactions } from '@/hooks/useFilteredTransactions'
 import { calculateBudgetProgress, calculateTotalSpent } from '@/lib/budget-utils'
 import { BudgetCreationModal } from '@/components/BudgetCreationSheet'
 import { useCategories } from '@/contexts/CategoryContext'
-import { BudgetProvider } from '@/contexts/BudgetContext'
+import { BudgetProvider, useBudgets } from '@/contexts/BudgetContext'
 // Simple progress component inline
 const Progress = ({ value = 0, className = '' }: { value?: number; className?: string }) => {
   const percentage = Math.min(Math.max(value, 0), 100)
@@ -56,35 +56,41 @@ interface Budget {
 }
 
 export default function BudgetingBreakdownPage() {
-  // Test user ID for development - in production this would come from authentication
-  const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
-  
   const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false)
-  const [selectedYear, setSelectedYear] = useState(2025) // Set to 2025 where we have budget data
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  
+  // Initialize date state - default to current date but allow hydration to settle
+  const [selectedYear, setSelectedYear] = useState<number>(2025)
+  const [selectedMonth, setSelectedMonth] = useState<number>(1)
+  const [isInitialized, setIsInitialized] = useState(false)
+  
+  // Set current date on mount to ensure correct local time
+  useEffect(() => {
+    const now = new Date()
+    setSelectedYear(now.getFullYear())
+    setSelectedMonth(now.getMonth() + 1)
+    setIsInitialized(true)
+  }, [])
+
   const [timeRange, setTimeRange] = useState<'monthly' | 'yearly'>('monthly')
-  const [budgets, setBudgets] = useState<Budget[]>([])
-  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null)
-  const [budgetLoading, setBudgetLoading] = useState(true)
+  
+  // Use global budget context
+  const { 
+    budgets, 
+    selectedBudget, 
+    loading: budgetLoading,
+    fetchBudgets,
+    selectBudget: setSelectedBudget
+  } = useBudgets()
+
+  // Sync context with local date selection
+  useEffect(() => {
+    if (isInitialized) {
+      fetchBudgets(selectedYear, selectedMonth)
+    }
+  }, [selectedYear, selectedMonth, isInitialized, fetchBudgets])
   
   const { transactions, loading, error } = useTransactions()
   const { categories } = useCategories()
-
-  // Handle budgets loaded from ClientBudgetFetcher
-  const handleBudgetsLoaded = (loadedBudgets: Budget[]) => {
-    setBudgets(loadedBudgets)
-    setBudgetLoading(false)
-    
-    // Auto-select the first budget if none selected
-    if (loadedBudgets.length > 0 && !selectedBudget) {
-      setSelectedBudget(loadedBudgets[0])
-    }
-  }
-
-  const refetchBudgets = () => {
-     setBudgetLoading(true)
-     // The ClientBudgetFetcher will handle refetching
-   }
 
    // Transform budgets for CashFlowBreakdown component
    const transformedBudgets = budgets.map(budget => ({
@@ -119,28 +125,25 @@ export default function BudgetingBreakdownPage() {
   const {
     monthlyIncome,
     monthlySpending,
-    netCashFlow  } = useFilteredTransactions(transactions, timeRange, selectedYear, selectedMonth)
+    netCashFlow
+  } = useFilteredTransactions(transactions, timeRange, selectedYear, selectedMonth)
 
-  const handleBudgetCreated = (budget: Budget) => {
-    refetchBudgets()
-    setSelectedBudget(budget)
+  const handleBudgetCreated = () => {
     setIsBudgetModalOpen(false)
-    toast.success('Budget created successfully!')
+    fetchBudgets(selectedYear, selectedMonth)
   }
 
   // Calculate budget overview
   const totalBudget = selectedBudget?.total_amount || 0
-  const totalSpent = selectedBudget?.budget_categories.reduce((sum, cat) => sum + cat.spent_amount, 0) || 0
+  const totalSpent = selectedBudget?.budget_categories?.reduce((sum, cat) => sum + cat.spent_amount, 0) || 0
   const budgetProgress = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0
 
   return (
     <div className="flex flex-col h-full">
       <SpendingNavigation actionButton={
           <div className="flex items-center gap-2">
-            <CategoryManager userId={TEST_USER_ID} />
-            <AccountProvider userId={TEST_USER_ID}>
-              <AccountManager userId={TEST_USER_ID} />
-            </AccountProvider>
+            <CategoryManager />
+            <AccountManager />
           </div>
         } />
       
@@ -279,11 +282,9 @@ export default function BudgetingBreakdownPage() {
         <MainContent>
           <div className="space-y-6">
             {/* Cash Flow Breakdown with Tabs */}
-            <BudgetProvider userId={TEST_USER_ID} year={selectedYear} month={selectedMonth}>
               <CashFlowBreakdown 
                 transactions={filteredTransactions}
               />
-            </BudgetProvider>
           </div>
         </MainContent>
         
@@ -309,7 +310,7 @@ export default function BudgetingBreakdownPage() {
                       <div className="text-center p-4 bg-green-50 rounded-lg">
                          <div className="text-2xl font-bold text-green-600">
                            {formatCurrency(
-                             selectedBudget.budget_categories.reduce((sum: number, bc) => 
+                             (selectedBudget.budget_categories || []).reduce((sum: number, bc) => 
                                sum + (filteredTransactions
                                  .filter(t => t.amount < 0 && t.category_id === bc.category?.id)
                                  .reduce((catSum, t) => catSum + Math.abs(t.amount), 0)
@@ -325,7 +326,7 @@ export default function BudgetingBreakdownPage() {
                          <span>Overall Progress</span>
                          <span>
                            {calculateBudgetProgress(
-                             selectedBudget.budget_categories.reduce((sum: number, bc) => 
+                             (selectedBudget.budget_categories || []).reduce((sum: number, bc) => 
                                sum + (filteredTransactions
                                  .filter(t => t.amount < 0 && t.category_id === bc.category?.id)
                                  .reduce((catSum, t) => catSum + Math.abs(t.amount), 0)
@@ -337,7 +338,7 @@ export default function BudgetingBreakdownPage() {
                        <Progress 
                          value={Math.min(
                            calculateBudgetProgress(
-                             selectedBudget.budget_categories.reduce((sum: number, bc) => 
+                             (selectedBudget.budget_categories || []).reduce((sum: number, bc) => 
                                sum + (filteredTransactions
                                  .filter(t => t.amount < 0 && t.category_id === bc.category?.id)
                                  .reduce((catSum, t) => catSum + Math.abs(t.amount), 0)
@@ -380,7 +381,6 @@ export default function BudgetingBreakdownPage() {
         onClose={() => setIsBudgetModalOpen(false)}
         onBudgetCreated={handleBudgetCreated}
         categories={categories}
-        userId={TEST_USER_ID}
       />
     </div>
   )
