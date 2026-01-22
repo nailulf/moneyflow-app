@@ -56,6 +56,7 @@ export function EditTransactionForm({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors }
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -108,6 +109,7 @@ export function EditTransactionForm({
       }
       toast.success('Transaction updated successfully!')
       onOpenChange(false)
+      reset() // Clear form state after successful update
     } catch {
       toast.error('Failed to update transaction')
     } finally {

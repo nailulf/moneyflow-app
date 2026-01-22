@@ -75,6 +75,7 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors }
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -143,6 +144,21 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
       onSuccess?.()
       setOpen(false)
       toast.success('Transaction created successfully')
+      
+      // Reset form to default values
+      reset({
+        date: new Date().toISOString().split('T')[0],
+        description: '',
+        amount: 0,
+        type: 'EXPENSE',
+        category_id: '',
+        account_id: '',
+        merchant: '',
+        currency: 'IDR',
+        is_recurring: false,
+        recurring_frequency: 'monthly',
+        recurring_end_date: null
+      })
     } catch (error) {
       console.error('Error creating transaction:', error)
       toast.error(error instanceof Error ? error.message : 'Failed to create transaction')
