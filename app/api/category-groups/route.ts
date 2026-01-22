@@ -84,9 +84,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { user_id, name, type, color, icon, is_default, sort_order } = body
+    const { user_id: bodyUserId, name, type, color, icon, is_default, sort_order } = body
 
-    if (!user_id || !name || !type) {
+    if (!name || !type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -96,7 +96,15 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createServerComponentClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     
+    // Use session user id
+    const user_id = user.id
+
     // Get the next sort order if not provided
     let finalSortOrder = sort_order
     if (!finalSortOrder) {
@@ -173,6 +181,12 @@ export async function PUT(request: NextRequest) {
     }
 
     const supabase = createServerComponentClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { data, error } = await supabase
       .from('category_groups')
       .update({
@@ -180,6 +194,7 @@ export async function PUT(request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
+      .eq('user_id', user.id) // Ensure ownership
       .select()
       .single()
 
@@ -210,16 +225,26 @@ export async function DELETE(request: NextRequest) {
     }
 
     const supabase = createServerComponentClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     
     // Check if this is a default group
     const { data: groupData } = await supabase
       .from('category_groups')
-      .select('is_default')
+      .select('is_default, user_id')
       .eq('id', id)
       .single()
     
-    if (groupData?.is_default) {
-      return NextResponse.json({ error: 'Cannot delete default category groups' }, { status: 400 })
+    if (groupData) {
+        if (groupData.user_id !== user.id) {
+             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+        }
+        if (groupData.is_default) {
+            return NextResponse.json({ error: 'Cannot delete default category groups' }, { status: 400 })
+        }
     }
 
     // Soft delete the category group
@@ -230,6 +255,7 @@ export async function DELETE(request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
       console.error('Error deleting category group:', error)
@@ -244,6 +270,7 @@ export async function DELETE(request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('category_group_id', id)
+      .eq('user_id', user.id) // Ensure ownership of categories too (though group check should suffice if relational integrity holds)
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -14,7 +14,6 @@ import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
 
 interface EditTransactionFormProps {
-  userId: string
   transaction: Transaction | null
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -57,6 +56,7 @@ export function EditTransactionForm({
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors }
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -68,7 +68,10 @@ export function EditTransactionForm({
       category_id:'',
       account_id: '',
       merchant: '',
-      is_recurring: false
+      currency: 'IDR',
+      is_recurring: false,
+      recurring_frequency: 'monthly',
+      recurring_end_date: null
     }
   })
 
@@ -83,6 +86,8 @@ export function EditTransactionForm({
       setValue('account_id', transaction.account_id || '')
       setValue('merchant', transaction.merchant || '')
       setValue('is_recurring', transaction.is_recurring || false)
+      setValue('recurring_frequency', transaction.recurring_frequency || 'monthly')
+      setValue('recurring_end_date', transaction.recurring_end_date ? transaction.recurring_end_date.split('T')[0] : null)
     }
   }, [transaction, open, setValue])
 
@@ -104,6 +109,7 @@ export function EditTransactionForm({
       }
       toast.success('Transaction updated successfully!')
       onOpenChange(false)
+      reset() // Clear form state after successful update
     } catch {
       toast.error('Failed to update transaction')
     } finally {
@@ -288,22 +294,92 @@ export function EditTransactionForm({
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-4 border rounded-lg p-4 bg-gray-50">
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 id="is_recurring"
                 {...register('is_recurring')}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="is_recurring" className="text-sm font-medium">
                 Recurring Transaction
               </label>
             </div>
+            
             {watch('is_recurring') && (
-              <p className="text-xs text-blue-600">
-                This transaction will be marked as recurring
-              </p>
+              <div className="space-y-4 pl-6 border-l-2 border-blue-200 ml-1">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Frequency</label>
+                  <Select
+                    value={watch('recurring_frequency') || 'monthly'}
+                    onValueChange={(value) => {
+                      setSuppressCloseUntil(Date.now() + 500)
+                      setValue('recurring_frequency', value as 'daily' | 'weekly' | 'monthly' | 'yearly')
+                    }}
+                    onOpenChange={setIsAnySelectOpen}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Period</label>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="period_continuous"
+                        name="period_type"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full"
+                        checked={!watch('recurring_end_date')}
+                        onChange={() => setValue('recurring_end_date', null)}
+                      />
+                      <label htmlFor="period_continuous" className="text-sm text-gray-700">
+                        Continuous (No end date)
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="period_ended"
+                        name="period_type"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full"
+                        checked={!!watch('recurring_end_date')}
+                        onChange={() => {
+                          // Set default end date to one year from now if not set
+                          if (!watch('recurring_end_date')) {
+                            const nextYear = new Date()
+                            nextYear.setFullYear(nextYear.getFullYear() + 1)
+                            setValue('recurring_end_date', nextYear.toISOString().split('T')[0])
+                          }
+                        }}
+                      />
+                      <label htmlFor="period_ended" className="text-sm text-gray-700">
+                        End Date
+                      </label>
+                    </div>
+                  </div>
+                  
+                  {!!watch('recurring_end_date') && (
+                    <div className="mt-2">
+                      <Input
+                        type="date"
+                        {...register('recurring_end_date')}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
 

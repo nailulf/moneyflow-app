@@ -8,19 +8,20 @@ import { Input } from '@/components/ui/input'
 import { Plus, CreditCard, Search, X, Loader2, Trash2, Edit } from 'lucide-react'
 import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { formatCurrency } from '@/lib/data-utils'
 
 interface AccountManagerProps {
-  userId: string
   onAccountUpdated?: () => void
   className?: string
 }
 
 function AccountManagerInternal({ 
-  userId,
   onAccountUpdated,
   className = ''
 }: AccountManagerProps) {
+  const { user } = useAuth()
+  const userId = user?.id || ''
   const { 
     accounts, 
     loading, 
@@ -216,8 +217,8 @@ function AccountManagerInternal({
                         <div className="flex items-center space-x-2 text-xs text-gray-500">
                           <span className="capitalize">{account.type.toLowerCase().replace('_', ' ')}</span>
                           <span>•</span>
-                          <span className={account.balance >= 0 ? 'text-green-600' : 'text-red-600'}>
-                            {formatCurrency(account.balance)}
+                          <span className={(account.currentBalance ?? account.balance) >= 0 ? 'text-green-600' : 'text-red-600'}>
+                            {formatCurrency(account.currentBalance ?? account.balance)}
                           </span>
                         </div>
                       </div>

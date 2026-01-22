@@ -25,7 +25,8 @@ import { BudgetEditSheet } from '@/components/BudgetEditSheet'
 import { toast } from 'sonner'
 import { createCategory } from '@/lib/api/categories'
 import { getUserCategoryGroups } from '@/lib/api/category-groups'
-import { CategoryInsert } from '@/types/database'
+import { CategoryInsert, CategoryDB } from '@/types/database'
+import { useAuth } from '@/contexts/AuthContext'
 
 const chartConfig = {
   amount: {
@@ -51,6 +52,7 @@ const calculateBudgetStatus = (spentAmount: number, budgetAmount: number): 'good
 }
 
 export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
+  const { user } = useAuth()
   const [viewBy, setViewBy] = useState<'category' | 'amount'>('category')
   const [budgetItemsLoading, setBudgetItemsLoading] = useState(false)
   const [budgetItemsError, setBudgetItemsError] = useState<string | null>(null)
@@ -583,7 +585,11 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
             return
           }
 
-          const userId = process.env.NEXT_PUBLIC_TEST_USER_ID!
+          if (!user?.id) {
+            toast.error('User not authenticated')
+            return
+          }
+          const userId = user.id
           
           // Validate budget data before processing
           if (!updatedBudget.categories || updatedBudget.categories.length === 0) {
@@ -603,12 +609,22 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
           }, 0)
           const budgetExceedsLimit = totalAllocated > updatedBudget.totalAmount
           
-          // Ensure "Others" category exists if budget exceeds limit or if it's referenced
+          // Ensure all referenced categories exist (restore if deleted)
           const othersCategory = updatedBudget.categories.find(cat => cat.category === 'Others')
-          let othersExists = categories.find(cat => cat.name === 'Others')
+          const othersNeeded = budgetExceedsLimit || othersCategory
           
-          if ((budgetExceedsLimit || othersCategory) && !othersExists) {
-            // Get expense category group
+          // Find missing categories
+          const missingCategories = updatedBudget.categories.filter(cat => 
+            cat.category !== 'Others' && !categories.find(c => c.name === cat.category)
+          )
+          
+          const othersMissing = othersNeeded && !categories.find(c => c.name === 'Others')
+          
+          // Map to store locally created categories (to avoid stale closure issues)
+          const localCategories = new Map<string, CategoryDB>()
+          
+          if (missingCategories.length > 0 || othersMissing) {
+            // Get expense category group for new categories
             const categoryGroups = await getUserCategoryGroups(userId)
             const expenseGroup = categoryGroups.find(group => group.type === 'EXPENSE')
             
@@ -616,24 +632,55 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
               throw new Error('No expense category group found')
             }
             
-            // Create "Others" category
-            const newOthersCategory: CategoryInsert = {
-              user_id: userId,
-              name: 'Others',
-              color: '#AED6F1',
-              group_type: 'EXPENSE',
-              category_group_id: expenseGroup.id,
-              is_custom: true,
-              is_active: true
+            // Restore missing categories
+            for (const cat of missingCategories) {
+              if (localCategories.has(cat.category)) continue
+
+              const newCategory: CategoryInsert = {
+                user_id: userId,
+                name: cat.category,
+                color: cat.color || '#cccccc',
+                group_type: 'EXPENSE',
+                category_group_id: expenseGroup.id,
+                is_custom: true,
+                is_active: true
+              }
+              
+              try {
+                const created = await createCategory(newCategory)
+                localCategories.set(created.name, created)
+                toast.success(`Restored category: ${cat.category}`)
+              } catch (err) {
+                console.error(`Failed to restore category ${cat.category}`, err)
+              }
             }
             
-            othersExists = await createCategory(newOthersCategory)
+            // Create Others if needed
+            if (othersMissing && !localCategories.has('Others')) {
+              const newOthersCategory: CategoryInsert = {
+                user_id: userId,
+                name: 'Others',
+                color: '#AED6F1',
+                group_type: 'EXPENSE',
+                category_group_id: expenseGroup.id,
+                is_custom: true,
+                is_active: true
+              }
+              
+              try {
+                const created = await createCategory(newOthersCategory)
+                localCategories.set('Others', created)
+                toast.success('"Others" category created successfully')
+              } catch (err) {
+                console.error('Failed to create Others category', err)
+              }
+            }
             
-            // Refresh categories to include the new "Others" category
+            // Refresh categories context
             await refreshCategories()
-            
-            toast.success('"Others" category created successfully')
           }
+          
+          let othersExists = categories.find(cat => cat.name === 'Others') || localCategories.get('Others')
           
           // If budget exceeds limit and no "Others" item exists, create it
           if (budgetExceedsLimit && !othersCategory) {
@@ -653,8 +700,9 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
 
           // Transform BudgetEditData categories to BudgetCategoryDB format
           const budgetCategories = updatedBudget.categories.map(category => {
-            // Find category ID by name
+            // Find category ID by name (check global list, then local restored list)
             const categoryData = categories.find(cat => cat.name === category.category) || 
+                               localCategories.get(category.category) ||
                                (category.category === 'Others' ? othersExists : null)
             
             if (!categoryData) {

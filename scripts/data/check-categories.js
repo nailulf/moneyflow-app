@@ -1,25 +1,43 @@
 const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+// Read .env.local file manually
+const envPath = path.join(__dirname, '..', '..', '.env.local');
+const envContent = fs.readFileSync(envPath, 'utf8');
+const envVars = {};
 
-const USER_ID = '550e8400-e29b-41d4-a716-446655440000';
+envContent.split('\n').forEach(line => {
+  const [key, value] = line.split('=');
+  if (key && value) {
+    envVars[key.trim()] = value.trim();
+  }
+});
+
+const supabaseUrl = envVars.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = envVars.SUPABASE_SERVICE_ROLE_KEY;
+const testUserId = envVars.NEXT_PUBLIC_TEST_USER_ID;
+
+if (!supabaseUrl || !supabaseServiceKey || !testUserId) {
+  console.error('Missing Supabase environment variables');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function checkCategories() {
-  console.log('🔍 Checking categories for user:', USER_ID);
+  console.log('🔍 Checking categories for user:', testUserId);
   
   try {
     const { data, error } = await supabase
       .from('categories')
       .select('*')
-      .eq('user_id', USER_ID);
+      .eq('user_id', testUserId);
     
     const { data: activeData, error: activeError } = await supabase
       .from('categories')
       .select('*')
-      .eq('user_id', USER_ID)
+      .eq('user_id', testUserId)
       .eq('is_active', true);
     
     if (error) {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerComponentClient } from '@/lib/supabase';
 import { ParsedTransaction } from '@/lib/bank-parsers/types';
+import { z } from 'zod';
+import { apiTransactionSchema } from '@/lib/validations';
 
 interface ConfirmStatementRequest {
   userId: string;
@@ -19,7 +21,7 @@ interface ConfirmStatementRequest {
     confidence: number;
     detectedBank?: string;
   };
-  transactions: ParsedTransaction[];
+  transactions: any[]; // Using any[] to allow for extended fields like category_id
   warnings?: string[];
 }
 
@@ -31,16 +33,28 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createServerComponentClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     
     // Parse request body
     const body: ConfirmStatementRequest = await request.json();
-    const { userId, accountId, file, metadata, transactions, warnings } = body;
+    const { userId: bodyUserId, accountId, file, metadata, transactions, warnings } = body;
+
+    // Validate user matches session
+    if (bodyUserId !== user.id) {
+        return NextResponse.json({ error: 'Unauthorized: User ID mismatch' }, { status: 403 });
+    }
+
+    const userId = user.id;
 
     // Validate required fields
-    if (!userId || !file || !metadata || !transactions) {
+    if (!file || !metadata || !transactions) {
       return NextResponse.json({ 
         error: 'Missing required fields', 
-        details: 'userId, file, metadata, and transactions are required' 
+        details: 'file, metadata, and transactions are required' 
       }, { status: 400 });
     }
 
@@ -51,14 +65,10 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    try {
-      // Start transaction
-      const { data, error } = await supabase.rpc('begin_transaction');
-      if (error) {
-        console.error('Error starting transaction:', error);
-        return NextResponse.json({ error: 'Database transaction failed' }, { status: 500 });
-      }
+    const startTime = performance.now();
+    console.log(`[Statement Confirm] Starting processing of ${transactions.length} transactions`);
 
+    try {
       // Create statement record
       const statementData = {
         user_id: userId,
@@ -94,29 +104,78 @@ export async function POST(request: NextRequest) {
         }, { status: 500 });
       }
 
-      // Prepare transaction records
-      const transactionRecords = transactions.map(transaction => ({
-        user_id: userId,
-        account_id: accountId || null,
-        statement_id: statement.id,
-        date: transaction.date,
-        posting_date: transaction.postingDate || transaction.date,
-        description: transaction.description,
-        merchant: transaction.merchant || null,
-        amount: transaction.amount,
-        type: transaction.amount >= 0 ? 'INCOME' as const : 'EXPENSE' as const,
-        currency: transaction.currency,
-        raw_data: transaction.rawData,
-        is_duplicate: false,
-        duplicate_of: null
-      }));
+      // Validate and prepare transaction records
+      const validTransactions = [];
+      const validationErrors = [];
+      const transactionWarnings: string[] = [];
 
-      // Insert transactions in batches (Supabase has a limit)
+      for (const [index, item] of transactions.entries()) {
+        try {
+          // Prepare item for validation (inject user_id if missing)
+          const itemToValidate = {
+            ...item,
+            user_id: userId,
+            // Ensure type matches enum if not provided, otherwise trust the input
+            type: item.type || (item.amount >= 0 ? 'INCOME' : 'EXPENSE'),
+            // Ensure currency is set
+            currency: item.currency || 'IDR'
+          };
+
+          // Parse and validate using Zod schema
+          const parsed = apiTransactionSchema.parse(itemToValidate);
+
+          // Check for missing optional but recommended fields
+          if (!parsed.merchant) {
+            transactionWarnings.push(`Transaction at index ${index}: Missing merchant information`);
+          }
+          if (!parsed.category_id) {
+            transactionWarnings.push(`Transaction at index ${index}: Missing category assignment`);
+          }
+
+          validTransactions.push({
+            ...parsed,
+            statement_id: statement.id, // Link to statement
+            posting_date: item.postingDate || parsed.date, // Preserve posting date if available
+            raw_data: item.rawData, // Preserve raw data
+            created_at: new Date().toISOString()
+          });
+
+        } catch (validationError) {
+          if (validationError instanceof z.ZodError) {
+            validationErrors.push({
+              index,
+              description: item.description || 'Unknown',
+              errors: (validationError as any).errors.map((e: any) => `${e.path.join('.')}: ${e.message}`)
+            });
+          } else {
+             validationErrors.push({
+              index,
+              error: 'Unknown validation error'
+            });
+          }
+        }
+      }
+
+      // If validation fails for some, we currently fail all to ensure consistency.
+      // Alternatively, we could filter out bad ones, but user wants "complete synchronization".
+      if (validationErrors.length > 0) {
+        console.error('[Statement Confirm] Validation failed for some items:', validationErrors);
+        // Clean up the statement we just created
+        await supabase.from('statements').delete().eq('id', statement.id);
+        
+        return NextResponse.json({ 
+          error: 'Validation failed for some transactions', 
+          details: validationErrors,
+          warnings: transactionWarnings
+        }, { status: 400 });
+      }
+
+      // Insert transactions in batches
       const batchSize = 100;
       const insertedTransactions = [];
       
-      for (let i = 0; i < transactionRecords.length; i += batchSize) {
-        const batch = transactionRecords.slice(i, i + batchSize);
+      for (let i = 0; i < validTransactions.length; i += batchSize) {
+        const batch = validTransactions.slice(i, i + batchSize);
         
         const { data: batchResult, error: batchError } = await supabase
           .from('transactions')
@@ -127,13 +186,16 @@ export async function POST(request: NextRequest) {
           console.error('Error inserting transaction batch:', batchError);
           // Rollback by deleting the statement
           await supabase.from('statements').delete().eq('id', statement.id);
+          
           return NextResponse.json({ 
             error: 'Failed to insert transactions', 
             details: batchError.message 
           }, { status: 500 });
         }
 
-        insertedTransactions.push(...(batchResult || []));
+        if (batchResult) {
+            insertedTransactions.push(...batchResult);
+        }
       }
 
       // Update statement with final transaction count
@@ -141,6 +203,9 @@ export async function POST(request: NextRequest) {
         .from('statements')
         .update({ total_transactions: insertedTransactions.length })
         .eq('id', statement.id);
+
+      const duration = performance.now() - startTime;
+      console.log(`[Statement Confirm] Successfully processed ${insertedTransactions.length} transactions in ${duration.toFixed(2)}ms`);
 
       return NextResponse.json({
         success: true,
@@ -155,19 +220,18 @@ export async function POST(request: NextRequest) {
           },
           createdAt: statement.created_at
         },
-        transactions: insertedTransactions.map(t => ({
-          id: t.id,
-          date: t.date,
-          description: t.description,
-          amount: t.amount,
-          type: t.type
-        })),
+        transactions: insertedTransactions,
         summary: {
           totalTransactions: insertedTransactions.length,
           totalAmount: insertedTransactions.reduce((sum, t) => sum + t.amount, 0),
           incomeCount: insertedTransactions.filter(t => t.amount >= 0).length,
           expenseCount: insertedTransactions.filter(t => t.amount < 0).length
-        }
+        },
+        performance: {
+          durationMs: duration,
+          itemsPerSecond: (insertedTransactions.length) / (duration / 1000)
+        },
+        warnings: transactionWarnings
       });
 
     } catch (dbError) {
@@ -194,15 +258,26 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const statementId = searchParams.get('statementId');
-    const userId = searchParams.get('userId');
-
-    if (!statementId || !userId) {
-      return NextResponse.json({ 
-        error: 'statementId and userId are required' 
-      }, { status: 400 });
-    }
+    const paramUserId = searchParams.get('userId');
 
     const supabase = createServerComponentClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (paramUserId && paramUserId !== user.id) {
+       return NextResponse.json({ error: 'Unauthorized: User ID mismatch' }, { status: 403 });
+    }
+
+    const userId = user.id;
+
+    if (!statementId) {
+      return NextResponse.json({ 
+        error: 'statementId is required' 
+      }, { status: 400 });
+    }
 
     // Get statement details
     const { data: statement, error: statementError } = await supabase
@@ -230,7 +305,8 @@ export async function GET(request: NextRequest) {
         type,
         currency,
         is_duplicate,
-        created_at
+        created_at,
+        category_id
       `)
       .eq('statement_id', statementId)
       .eq('user_id', userId)
