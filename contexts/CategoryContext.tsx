@@ -55,7 +55,7 @@ export function CategoryProvider({ children }: CategoryProviderProps) {
 
   const getCategoryColor = (categoryId: string): string => {
     const category = categories.find(cat => cat.id === categoryId)
-    return category?.color || '#6B7280'
+    return category?.color || 'hsl(var(--muted-foreground))'
   }
 
   useEffect(() => {

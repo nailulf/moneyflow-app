@@ -4,10 +4,16 @@ import { ParsedTransaction } from '@/lib/bank-parsers/types'
 import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { toast } from 'sonner'
 
 // Mocks
+jest.mock('@/lib/supabase/client', () => ({ createClient: jest.fn() }))
 jest.mock('@/contexts/AccountContext')
 jest.mock('@/contexts/CategoryContext')
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuth: jest.fn()
+}))
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }))
 
 // Mock Select to make testing easier
@@ -31,10 +37,13 @@ jest.mock('@/components/ui/select', () => ({
       {children}
     </div>
   ),
+  SelectGroup: ({ children }: any) => <div>{children}</div>,
+  SelectLabel: ({ children }: any) => <div>{children}</div>,
+  SelectSeparator: () => <hr />,
 }))
 
 // Mock Dialog to avoid Radix UI issues in tests
-jest.mock('../../components/ui/dialog', () => ({
+jest.mock('@/components/ui/dialog', () => ({
   Dialog: ({ open, children, onOpenChange }: any) => {
     return open ? (
       <div data-testid="dialog">
@@ -48,6 +57,71 @@ jest.mock('../../components/ui/dialog', () => ({
   DialogTitle: ({ children }: any) => <div>{children}</div>,
   DialogDescription: ({ children }: any) => <div>{children}</div>,
   DialogFooter: ({ children }: any) => <div>{children}</div>,
+}))
+
+// Mock AlertDialog
+jest.mock('@/components/ui/alert-dialog', () => ({
+  AlertDialog: ({ open, children }: any) => open ? <div>{children}</div> : null,
+  AlertDialogAction: ({ onClick, children }: any) => <button onClick={onClick}>{children}</button>,
+  AlertDialogCancel: ({ children }: any) => <button>{children}</button>,
+  AlertDialogContent: ({ children }: any) => <div>{children}</div>,
+  AlertDialogDescription: ({ children }: any) => <div>{children}</div>,
+  AlertDialogFooter: ({ children }: any) => <div>{children}</div>,
+  AlertDialogHeader: ({ children }: any) => <div>{children}</div>,
+  AlertDialogTitle: ({ children }: any) => <div>{children}</div>,
+}))
+
+// Mock basic UI components to avoid JSDOM/Radix issues
+jest.mock('@/components/ui/checkbox', () => ({
+  Checkbox: ({ checked, onCheckedChange, ...props }: any) => (
+    <input 
+      type="checkbox" 
+      checked={checked} 
+      onChange={(e) => onCheckedChange?.(e.target.checked)}
+      role="checkbox"
+      {...props}
+    />
+  )
+}))
+
+jest.mock('@/components/ui/button', () => ({
+  Button: ({ children, onClick, disabled, className }: any) => (
+    <button onClick={onClick} disabled={disabled} className={className}>
+      {children}
+    </button>
+  )
+}))
+
+jest.mock('@/components/ui/input', () => ({
+  Input: (props: any) => <input {...props} />
+}))
+
+jest.mock('@/components/ui/label', () => ({
+  Label: ({ children, htmlFor, className }: any) => <label htmlFor={htmlFor} className={className}>{children}</label>
+}))
+
+jest.mock('@/components/ui/progress', () => ({
+  Progress: ({ value }: any) => <div role="progressbar" aria-valuenow={value} />
+}))
+
+jest.mock('@/components/ui/card', () => ({
+  Card: ({ children, className }: any) => <div className={className}>{children}</div>,
+  CardContent: ({ children, className }: any) => <div className={className}>{children}</div>,
+  CardHeader: ({ children, className }: any) => <div className={className}>{children}</div>,
+  CardTitle: ({ children, className }: any) => <div className={className}>{children}</div>,
+  CardDescription: ({ children, className }: any) => <div className={className}>{children}</div>,
+}))
+
+jest.mock('lucide-react', () => ({
+  Upload: () => <div data-testid="icon-upload" />,
+  FileText: () => <div data-testid="icon-file-text" />,
+  Loader2: () => <div data-testid="icon-loader" />,
+  Save: () => <div data-testid="icon-save" />,
+  X: () => <div data-testid="icon-x" />,
+  Calendar: () => <div data-testid="icon-calendar" />,
+  RefreshCw: () => <div data-testid="icon-refresh" />,
+  Search: () => <div data-testid="icon-search" />,
+  AlertCircle: () => <div data-testid="icon-alert" />,
 }))
 
 // Improved Virtualizer Mock to render all items based on count
@@ -86,6 +160,7 @@ describe('UnifiedStatementProcessor', () => {
     jest.clearAllMocks();
     (useAccounts as jest.Mock).mockReturnValue({ accounts: mockAccounts, loading: false });
     (useCategories as jest.Mock).mockReturnValue({ categories: mockCategories });
+    (useAuth as jest.Mock).mockReturnValue({ user: { id: 'user1' } });
     // Default successful upload response
     (global.fetch as jest.Mock).mockImplementation((url) => {
       if (url.includes('/api/statements/parse')) {
@@ -106,7 +181,7 @@ describe('UnifiedStatementProcessor', () => {
 
   const uploadFile = async () => {
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
-    render(<UnifiedStatementProcessor userId="user1" defaultAccountId="acc1" />)
+    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
     
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
@@ -120,7 +195,7 @@ describe('UnifiedStatementProcessor', () => {
   }
 
   it('renders upload state initially', () => {
-    render(<UnifiedStatementProcessor userId="user1" />)
+    render(<UnifiedStatementProcessor />)
     expect(screen.getByText(/Drop your PDF statement here/i)).toBeInTheDocument()
     expect(screen.getByText(/Upload & Process/i)).toBeDisabled()
   })
@@ -151,7 +226,7 @@ describe('UnifiedStatementProcessor', () => {
     const descriptionInputs = screen.getAllByPlaceholderText('Description')
     fireEvent.change(descriptionInputs[0], { target: { value: '' } })
     expect(descriptionInputs[0]).toHaveValue('')
-    expect(descriptionInputs[0]).toHaveClass('border-red-500')
+    expect(descriptionInputs[0]).toHaveClass('border-destructive')
   })
 
   it('handles bulk selection', async () => {
@@ -185,10 +260,12 @@ describe('UnifiedStatementProcessor', () => {
     
     const dialog = screen.getByTestId('dialog')
     const inputs = within(dialog).getAllByTestId('select-trigger-input')
-    // inputs[0] is Type Filter in the toolbar
+    // inputs[0] is Account
+    // inputs[1] is Currency
+    // inputs[2] is Type Filter in the toolbar
     
     // Filter to INCOME
-    fireEvent.change(inputs[0], { target: { value: 'INCOME' } })
+    fireEvent.change(inputs[2], { target: { value: 'INCOME' } })
     
     // Expect 0 rows (since both are expense)
     await waitFor(() => {
@@ -197,7 +274,7 @@ describe('UnifiedStatementProcessor', () => {
     })
     
     // Filter to EXPENSE
-    fireEvent.change(inputs[0], { target: { value: 'EXPENSE' } })
+    fireEvent.change(inputs[2], { target: { value: 'EXPENSE' } })
     await waitFor(() => {
         const checkboxes = within(dialog).getAllByRole('checkbox')
         expect(checkboxes).toHaveLength(3) // Header + 2 rows
@@ -248,7 +325,7 @@ describe('UnifiedStatementProcessor', () => {
             })
          })
        }
-       if (url.includes('/api/statements/confirm')) {
+       if (url.includes('/api/transactions')) {
          return Promise.resolve({
            ok: true,
            json: async () => ({ count: 2 })
@@ -259,7 +336,7 @@ describe('UnifiedStatementProcessor', () => {
     
     await uploadFile();
 
-    const importBtn = screen.getByText(/Add to Transaction List/i)
+    const importBtn = screen.getByText(/Add transactions/i)
     fireEvent.click(importBtn)
 
     await waitFor(() => {
@@ -283,10 +360,11 @@ describe('UnifiedStatementProcessor', () => {
             })
          })
        }
-       if (url.includes('/api/statements/confirm')) {
+       if (url.includes('/api/transactions')) {
          return Promise.resolve({
            ok: false,
-           status: 500
+           status: 500,
+           text: async () => 'Internal Server Error'
          })
        }
        return Promise.resolve({ ok: true })
@@ -294,16 +372,45 @@ describe('UnifiedStatementProcessor', () => {
     
     await uploadFile();
 
-    const importBtn = screen.getByText(/Add to Transaction List/i)
+    const importBtn = screen.getByText(/Add transactions/i)
     fireEvent.click(importBtn)
 
     await waitFor(() => {
       const toast = require('sonner').toast
-      expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Failed to import'))
+      expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Import failed'))
     })
     
     // Should stay on review modal
     expect(screen.getByText(/Review Transactions/i)).toBeInTheDocument()
+  })
+
+  it('applies correct color tokens for amounts', async () => {
+    await uploadFile()
+    
+    const dialog = screen.getByTestId('dialog')
+    const inputs = within(dialog).getAllByTestId('select-trigger-input')
+    // inputs[0] is Account
+    // inputs[1] is Currency
+    // inputs[2] is Filter Type
+    // inputs[3] is Row 1 Type
+    
+    // Change first transaction type to INCOME
+    fireEvent.change(inputs[3], { target: { value: 'INCOME' } })
+    
+    await waitFor(() => {
+        const amountDisplays = screen.getAllByTestId('amount-display')
+        
+        // First transaction (INCOME, 100)
+        // Check for text content loosely because of currency formatting
+        const firstAmount = amountDisplays[0]
+        expect(firstAmount).toHaveClass('text-success')
+        expect(firstAmount.textContent).toContain('100')
+        
+        // Second transaction (EXPENSE, -200)
+        const secondAmount = amountDisplays[1]
+        expect(secondAmount).toHaveClass('text-destructive')
+        expect(secondAmount.textContent).toContain('200')
+    })
   })
 
   it('handles detailed transaction editing', async () => {
@@ -317,11 +424,13 @@ describe('UnifiedStatementProcessor', () => {
     // 2. Edit Type
     const dialog = screen.getByTestId('dialog')
     const inputs = within(dialog).getAllByTestId('select-trigger-input')
-    // inputs[0] is Type Filter
-    // inputs[1] is Row 1 Type
+    // inputs[0] is Account
+    // inputs[1] is Currency
+    // inputs[2] is Type Filter
+    // inputs[3] is Row 1 Type
     
-    fireEvent.change(inputs[1], { target: { value: 'INCOME' } })
-    expect(inputs[1]).toHaveValue('INCOME')
+    fireEvent.change(inputs[3], { target: { value: 'INCOME' } })
+    expect(inputs[3]).toHaveValue('INCOME')
 
     // 3. Edit Merchant
     const merchantInputs = screen.getAllByPlaceholderText('Merchant')
@@ -334,15 +443,15 @@ describe('UnifiedStatementProcessor', () => {
     expect(notesInputs[0]).toHaveValue('My Note')
 
     // 5. Edit Category
-    // inputs[2] is Row 1 Category
-    fireEvent.change(inputs[2], { target: { value: 'cat2' } })
-    expect(inputs[2]).toHaveValue('cat2')
+    // inputs[4] is Row 1 Category
+    fireEvent.change(inputs[4], { target: { value: 'cat2' } })
+    expect(inputs[4]).toHaveValue('cat2')
   })
 
   it('handles modal close cancellation', async () => {
     // Inline uploadFile logic to avoid scope issues
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
-    render(<UnifiedStatementProcessor userId="user1" defaultAccountId="acc1" />)
+    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
     const uploadButton = screen.getByText(/Upload & Process/i)
@@ -351,18 +460,28 @@ describe('UnifiedStatementProcessor', () => {
       expect(screen.getByText(/Review Transactions/i)).toBeInTheDocument()
     })
     
-    // Mock confirm to return false (Cancel)
-    ;(global.confirm as jest.Mock).mockReturnValue(false)
-    
     const closeBtn = screen.getByTestId('dialog-close')
     fireEvent.click(closeBtn)
     
-    // Should still be open
+    // Alert Dialog should appear
+    expect(screen.getByText(/Discard changes\?/i)).toBeInTheDocument()
+    
+    // Click Cancel in Alert Dialog (first button with Cancel text)
+    const cancelBtns = screen.getAllByText('Cancel')
+    // One is in Review Dialog footer, one is in Alert Dialog footer
+    // In Alert Dialog, it's typically the second one or we find it within alert dialog
+    // Since mock renders children directly, we can just click the last one or strict match
+    fireEvent.click(cancelBtns[cancelBtns.length - 1])
+    
+    // Dialog should still be open
     expect(screen.getByTestId('dialog')).toBeInTheDocument()
     
-    // Mock confirm to return true (Confirm)
-    ;(global.confirm as jest.Mock).mockReturnValue(true)
+    // Click close again
     fireEvent.click(closeBtn)
+    
+    // Click Discard
+    const discardBtn = screen.getByText('Discard')
+    fireEvent.click(discardBtn)
     
     // Should be closed
     expect(screen.queryByTestId('dialog')).not.toBeInTheDocument()
@@ -387,7 +506,7 @@ describe('UnifiedStatementProcessor', () => {
     })
 
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
-    render(<UnifiedStatementProcessor userId="user1" defaultAccountId="acc1" />)
+    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
     fireEvent.click(screen.getByText(/Upload & Process/i))
@@ -442,7 +561,7 @@ describe('UnifiedStatementProcessor', () => {
   })
 
   it('handles drag and drop', async () => {
-    render(<UnifiedStatementProcessor userId="user1" defaultAccountId="acc1" />)
+    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
     const dropZone = screen.getByText(/Drop your PDF statement here/i).closest('div')
     
     // Test dragover
@@ -487,7 +606,7 @@ describe('UnifiedStatementProcessor', () => {
   })
 
   it('toggles AI checkbox', () => {
-    render(<UnifiedStatementProcessor userId="user1" />)
+    render(<UnifiedStatementProcessor />)
     const checkbox = screen.getByLabelText(/Use AI/i)
     
     expect(checkbox).toBeChecked() // Default true
@@ -500,7 +619,7 @@ describe('UnifiedStatementProcessor', () => {
   })
 
   it('opens file selector on click', () => {
-    render(<UnifiedStatementProcessor userId="user1" />)
+    render(<UnifiedStatementProcessor />)
     const dropZone = screen.getByText(/Drop your PDF statement here/i).closest('div')
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     const clickSpy = jest.spyOn(fileInput, 'click')
@@ -552,7 +671,7 @@ describe('UnifiedStatementProcessor', () => {
     })
     
     // Button should be disabled
-    const importBtn = screen.getByText(/Add to Transaction List/i)
+    const importBtn = screen.getByText(/Add transactions/i)
     expect(importBtn).toBeDisabled()
   })
 
@@ -596,6 +715,10 @@ describe('UnifiedStatementProcessor', () => {
        if (url.includes('/api/statements/parse')) {
          return Promise.resolve({
             ok: false,
+            status: 400,
+            headers: {
+                get: (key: string) => key === 'content-type' ? 'application/json' : null
+            },
             json: async () => ({ error: 'Upload failed' })
          })
        }
@@ -603,7 +726,7 @@ describe('UnifiedStatementProcessor', () => {
     })
     
     // We can't use uploadFile() helper because it expects success
-    render(<UnifiedStatementProcessor userId="user1" defaultAccountId="acc1" />)
+    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
@@ -616,4 +739,6 @@ describe('UnifiedStatementProcessor', () => {
       expect(toast.error).toHaveBeenCalledWith('Upload failed')
     })
   })
+
+
 })

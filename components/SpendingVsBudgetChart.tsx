@@ -219,7 +219,7 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
               />
               <span className="text-sm text-muted-foreground">Net Cash Flow:</span>
               <span className={`text-sm font-medium ${
-                netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'
+                netCashFlow >= 0 ? 'text-success' : 'text-destructive'
               }`}>
                 {formatCurrency(netCashFlow)}
               </span>

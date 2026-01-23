@@ -52,12 +52,12 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
   
   if (categoryData.length === 0) {
     return (
-      <Card className="bg-white border border-gray-200 shadow-sm">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Spending Breakdown</CardTitle>
+          <CardTitle className="text-lg font-semibold text-foreground">Spending Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-64 text-gray-500">
+          <div className="flex items-center justify-center h-64 text-muted-foreground">
             No spending data available
           </div>
         </CardContent>
@@ -72,9 +72,9 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
   }))
 
   return (
-    <Card className="bg-white border border-gray-200 shadow-sm">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-900">Spending</CardTitle>
+        <CardTitle className="text-lg font-semibold text-foreground">Spending</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer

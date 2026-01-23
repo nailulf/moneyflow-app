@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Settings, Search, X, Loader2, Trash2 } from 'lucide-react'
 import { CategoryGroupDB, CategoryDB } from '@/types/database'
 import { useAuth } from '@/contexts/AuthContext'
+import { SEMANTIC_COLORS } from '@/lib/constants'
 
 interface CategoryManagerProps {
   onCategoryUpdated?: () => void
@@ -36,11 +37,11 @@ function CategoryManagerInternal({
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [newCategoryName, setNewCategoryName] = useState('')
-  const [newCategoryColor, setNewCategoryColor] = useState('#6B7280')
+  const [newCategoryColor, setNewCategoryColor] = useState(SEMANTIC_COLORS[0].value)
   const [isNewGroupDialogOpen, setIsNewGroupDialogOpen] = useState(false)
   const [newGroupName, setNewGroupName] = useState('')
   const [newGroupType, setNewGroupType] = useState<'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM'>('EXPENSE')
-  const [newGroupColor, setNewGroupColor] = useState('#6B7280')
+  const [newGroupColor, setNewGroupColor] = useState(SEMANTIC_COLORS[0].value)
   const [deleteGroupId, setDeleteGroupId] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   
@@ -144,7 +145,7 @@ function CategoryManagerInternal({
           id: `type-${type.toLowerCase()}`,
           name: type.charAt(0) + type.slice(1).toLowerCase(),
           type: type as 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM',
-          color: type === 'EXPENSE' ? '#EF4444' : type === 'INCOME' ? '#10B981' : '#6B7280',
+          color: type === 'EXPENSE' ? 'hsl(var(--destructive))' : type === 'INCOME' ? 'hsl(var(--success))' : 'hsl(var(--muted-foreground))',
           isDefault: true,
           categories: cats
         })
@@ -192,7 +193,7 @@ function CategoryManagerInternal({
       await loadData()
       onCategoryUpdated?.()
       setNewCategoryName('')
-      setNewCategoryColor('#6B7280')
+      setNewCategoryColor(SEMANTIC_COLORS[0].value)
       setSelectedGroupId(null)
     } catch (err) {
       console.error('Failed to add category:', err)
@@ -254,7 +255,7 @@ function CategoryManagerInternal({
       onCategoryUpdated?.()
       setNewGroupName('')
       setNewGroupType('EXPENSE')
-      setNewGroupColor('#6B7280')
+      setNewGroupColor(SEMANTIC_COLORS[0].value)
       setIsNewGroupDialogOpen(false)
     } catch (err) {
       console.error('Failed to add group:', err)
@@ -313,8 +314,8 @@ function CategoryManagerInternal({
         
         <div className="mt-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3 mb-4">
+                <p className="text-sm text-destructive">{error}</p>
               </div>
             )}
         
@@ -322,7 +323,7 @@ function CategoryManagerInternal({
           <div className="text-center py-8">
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <p className="text-gray-500">Loading categories...</p>
+              <p className="text-muted-foreground">Loading categories...</p>
             </div>
           </div>
         )}
@@ -331,7 +332,7 @@ function CategoryManagerInternal({
           <div className="mt-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
             {/* Search Bar */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search"
                 value={searchTerm}
@@ -351,14 +352,14 @@ function CategoryManagerInternal({
                   <div key={group.id} className="space-y-3">
                     {/* Group Header */}
                     <div className="flex items-center justify-between">
-                      <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+                      <div className="text-sm font-semibold text-foreground uppercase tracking-wide">
                         {group.name}
                       </div>
                       {!group.isDefault && (
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-xs px-3 py-1 h-7 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-xs px-3 py-1 h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => openDeleteDialog(group.id)}
                           disabled={isSubmitting}
                         >
@@ -371,13 +372,13 @@ function CategoryManagerInternal({
                     {/* Categories in this group */}
                     <div className="space-y-2">
                       {groupCategories.map((category) => (
-                        <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                        <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                           <div className="flex items-center space-x-3">
                             <div 
-                              className="w-6 h-6 rounded-full border-2 border-gray-200"
+                              className="w-6 h-6 rounded-full border-2 border-border"
                               style={{ backgroundColor: category.color }}
                             />
-                            <span className="font-medium text-sm text-gray-900">{category.name}</span>
+                            <span className="font-medium text-sm text-foreground">{category.name}</span>
                           </div>
                           <div className="flex items-center space-x-2">
                             {category.is_custom && (
@@ -385,7 +386,7 @@ function CategoryManagerInternal({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDeleteCategory(category.id)}
-                                className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                                 disabled={isSubmitting}
                               >
                                 <X className="h-4 w-4" />
@@ -397,13 +398,29 @@ function CategoryManagerInternal({
                       
                       {/* Add new category for this group */}
                       {selectedGroupId === group.id && (
-                        <div className="flex items-center space-x-2 p-3 border-2 border-dashed border-gray-300 rounded-lg">
-                          <input
-                            type="color"
-                            value={newCategoryColor}
-                            onChange={(e) => setNewCategoryColor(e.target.value)}
-                            className="w-6 h-6 rounded-full border-2 border-gray-200 cursor-pointer"
-                          />
+                        <div className="flex items-center space-x-2 p-3 border-2 border-dashed border-muted rounded-lg">
+                          <Select value={newCategoryColor} onValueChange={setNewCategoryColor}>
+                            <SelectTrigger className="w-[60px] h-8 p-1">
+                              <div 
+                                className="w-full h-full rounded"
+                                style={{ backgroundColor: newCategoryColor }}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <div className="grid grid-cols-5 gap-2 p-2">
+                                {SEMANTIC_COLORS.map((color) => (
+                                  <SelectItem 
+                                    key={color.name} 
+                                    value={color.value}
+                                    className="p-0 h-6 w-6 rounded-full cursor-pointer focus:ring-2 focus:ring-offset-2"
+                                    style={{ backgroundColor: color.value }}
+                                  >
+                                    <span className="sr-only">{color.name}</span>
+                                  </SelectItem>
+                                ))}
+                              </div>
+                            </SelectContent>
+                          </Select>
                           <Input
                             placeholder="Category name"
                             value={newCategoryName}
@@ -436,7 +453,7 @@ function CategoryManagerInternal({
                           variant="ghost"
                           size="sm"
                           onClick={() => setSelectedGroupId(group.id)}
-                          className="w-full justify-start text-gray-500 hover:text-gray-700 border-2 border-dashed border-gray-300 hover:border-gray-400 h-12"
+                          className="w-full justify-start text-muted-foreground hover:text-foreground border-2 border-dashed border-muted hover:border-muted-foreground/50 h-12"
                           disabled={isSubmitting}
                         >
                           <Plus className="h-4 w-4 mr-2" />
@@ -503,19 +520,32 @@ function CategoryManagerInternal({
                           Color
                         </label>
                         <div className="col-span-3 flex items-center space-x-2">
-                          <input
-                            id="group-color"
-                            type="color"
-                            value={newGroupColor}
-                            onChange={(e) => setNewGroupColor(e.target.value)}
-                            className="w-10 h-10 rounded border cursor-pointer"
-                          />
-                          <Input
-                            value={newGroupColor}
-                            onChange={(e) => setNewGroupColor(e.target.value)}
-                            placeholder="#6B7280"
-                            className="flex-1"
-                          />
+                          <Select value={newGroupColor} onValueChange={setNewGroupColor}>
+                            <SelectTrigger className="w-full h-10">
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="w-6 h-6 rounded-full"
+                                  style={{ backgroundColor: newGroupColor }}
+                                />
+                                <span className="text-muted-foreground">
+                                  {SEMANTIC_COLORS.find(c => c.value === newGroupColor)?.name || 'Select Color'}
+                                </span>
+                              </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {SEMANTIC_COLORS.map((color) => (
+                                <SelectItem key={color.name} value={color.value}>
+                                  <div className="flex items-center gap-2">
+                                    <div 
+                                      className="w-4 h-4 rounded-full" 
+                                      style={{ backgroundColor: color.value }}
+                                    />
+                                    {color.name}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     </div>

@@ -194,7 +194,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
     if (!validateForm()) {
       toast.error('Please fix the validation errors before saving')
       // Focus on first error field
-      const firstErrorField = document.querySelector('.border-red-500') as HTMLElement
+      const firstErrorField = document.querySelector('.border-destructive') as HTMLElement
       if (firstErrorField) {
         firstErrorField.focus()
       }
@@ -437,11 +437,11 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                     }
                   }}
                   placeholder="e.g., Monthly Budget"
-                  className={errors.name ? 'border-red-500' : ''}
+                  className={errors.name ? 'border-destructive' : ''}
                   maxLength={50}
                 />
                 {errors.name && (
-                  <p className="text-sm text-red-500">{errors.name}</p>
+                  <p className="text-sm text-destructive">{errors.name}</p>
                 )}
               </div>
 
@@ -502,33 +502,33 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                       }
                     }}
                     placeholder="3000"
-                    className={errors.totalAmount ? 'border-red-500' : ''}
+                    className={errors.totalAmount ? 'border-destructive' : ''}
                     min="0"
                     // Removed max limit
                     step="0.01"
                   />
                   {errors.totalAmount && (
-                    <p className="text-sm text-red-500">{errors.totalAmount}</p>
+                    <p className="text-sm text-destructive">{errors.totalAmount}</p>
                   )}
                 </div>
               </div>
 
               {/* Budget Summary */}
-              <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+              <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Total Budget:</span>
                   <span className="font-medium">{formatCurrency(editForm.totalAmount)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Total Allocated:</span>
-                  <span className={`font-medium ${isOverAllocated ? 'text-red-600' : 'text-gray-900'}`}>
+                  <span className={`font-medium ${isOverAllocated ? 'text-destructive' : 'text-foreground'}`}>
                     {formatCurrency(totalAllocated)}
                   </span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-sm">
                   <span>Remaining:</span>
-                  <span className={`font-medium ${isOverAllocated ? 'text-red-600' : 'text-green-600'}`}>
+                  <span className={`font-medium ${isOverAllocated ? 'text-destructive' : 'text-success'}`}>
                     {formatCurrency(remainingBudget)}
                   </span>
                 </div>
@@ -568,7 +568,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                             <div className="flex items-center">
                               <div 
                                 className="w-3 h-3 rounded-full mr-2" 
-                                style={{ backgroundColor: cat.color }}
+                                style={{ backgroundColor: cat.color || 'hsl(var(--muted))' }}
                               />
                               {cat.name}
                             </div>
@@ -589,12 +589,12 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                 </div>
               </div>
               {errors.categories && (
-                <p className="text-sm text-red-500">{errors.categories}</p>
+                <p className="text-sm text-destructive">{errors.categories}</p>
               )}
             </CardHeader>
             <CardContent className="space-y-4">
               {editForm.categories.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-muted-foreground">
                   <p>No categories added yet</p>
                   <p className="text-sm">Click "Add Category" to get started</p>
                 </div>
@@ -605,7 +605,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                       <div className="flex items-center space-x-3">
                         <div
                           className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: category.color }}
+                          style={{ backgroundColor: category.color || 'hsl(var(--muted-foreground))' }}
                         />
                         <div>
                           <p className="font-medium">{category.category}</p>
@@ -617,7 +617,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                           onClick={() => removeCategory(index)}
                           size="sm"
                           variant="ghost"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           disabled={isLoading}
                           title="Remove this category"
                           aria-label={`Remove ${category.category} category`}
@@ -661,7 +661,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                           }
                         }}
                         placeholder="0"
-                        className={errors[`category-${index}`] ? 'border-red-500' : ''}
+                        className={errors[`category-${index}`] ? 'border-destructive' : ''}
                         min="0"
                         max={editForm.totalAmount}
                         step="0.01"
@@ -669,10 +669,10 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                         title={category.category === 'Others' ? 'Others category is automatically calculated' : ''}
                       />
                       {errors[`category-${index}`] && (
-                        <p className="text-sm text-red-500">{errors[`category-${index}`]}</p>
+                        <p className="text-sm text-destructive">{errors[`category-${index}`]}</p>
                       )}
                       {category.category === 'Others' && (
-                        <p className="text-xs text-gray-500">This amount is automatically calculated from unallocated budget</p>
+                        <p className="text-xs text-muted-foreground">This amount is automatically calculated from unallocated budget</p>
                       )}
                     </div>
                   </div>
@@ -683,8 +683,8 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
 
           {/* Budget Exceeded Error Message */}
           {isOverAllocated && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-              <p className="text-red-700 font-medium">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-center">
+              <p className="text-destructive font-medium">
                 Budget exceeded - please reduce item allocations
               </p>
             </div>

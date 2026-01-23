@@ -115,7 +115,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
       accounts: accountGroups.CASH,
       total,
       percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
-      color: '#10b981' // emerald-500
+      color: 'hsl(var(--success))'
     })
   }
 
@@ -127,7 +127,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
       accounts: accountGroups.BANK,
       total,
       percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
-      color: '#3b82f6' // blue-500
+      color: 'hsl(var(--primary))'
     })
   }
 
@@ -139,7 +139,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
       accounts: accountGroups.INVESTMENT,
       total,
       percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
-      color: '#8b5cf6' // violet-500
+      color: 'hsl(var(--chart-2))'
     })
   }
 
@@ -151,7 +151,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
       accounts: accountGroups.CREDIT_CARD,
       total: -total, // Show as negative since it's debt
       percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
-      color: '#ef4444' // red-500
+      color: 'hsl(var(--destructive))'
     })
   }
 
@@ -163,7 +163,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
       accounts: accountGroups.OTHER,
       total,
       percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
-      color: '#6b7280' // gray-500
+      color: 'hsl(var(--muted-foreground))'
     })
   }
 

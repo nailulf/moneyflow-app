@@ -51,7 +51,7 @@ export function getCategoryBreakdown(transactions: Transaction[]): CategoryData[
       category: category as Category,
       amount,
       percentage: totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0,
-      color: CATEGORY_COLORS[category as Category] || '#AED6F1'
+      color: CATEGORY_COLORS[category as Category] || 'hsl(var(--muted))'
     }))
     .sort((a, b) => b.amount - a.amount)
 }

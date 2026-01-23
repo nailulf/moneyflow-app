@@ -267,7 +267,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-700">Budget Name</div>
+                <div className="text-sm font-medium text-foreground">Budget Name</div>
                 <Input
                   id="budget-name"
                   placeholder="e.g., Monthly Budget"
@@ -276,7 +276,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                 />
               </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-700">Period</div>
+                <div className="text-sm font-medium text-foreground">Period</div>
                 <Select value={period} onValueChange={(value: 'monthly' | 'yearly') => setPeriod(value)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -291,7 +291,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-700">Year</div>
+                <div className="text-sm font-medium text-foreground">Year</div>
                 <Select value={year.toString()} onValueChange={(value) => setYear(parseInt(value))}>
                   <SelectTrigger>
                     <SelectValue />
@@ -305,7 +305,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
               </div>
               {period === 'monthly' && (
                 <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-700">Month</div>
+                  <div className="text-sm font-medium text-foreground">Month</div>
                   <Select value={month.toString()} onValueChange={(value) => setMonth(parseInt(value))}>
                     <SelectTrigger>
                       <SelectValue />
@@ -322,7 +322,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-700">Total Budget Amount</div>
+                <div className="text-sm font-medium text-foreground">Total Budget Amount</div>
                 <Input
                   id="total-amount"
                   type="number"
@@ -332,7 +332,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                 />
               </div>
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-700">Currency</div>
+                <div className="text-sm font-medium text-foreground">Currency</div>
                 <Select value={currency} onValueChange={setCurrency}>
                   <SelectTrigger>
                     <SelectValue />
@@ -382,7 +382,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                   </div>
                   <div>
                     <p className="text-muted-foreground">Remaining</p>
-                    <p className={`font-semibold ${getRemainingAmount() < 0 ? 'text-red-500' : 'text-green-500'}`}>
+                    <p className={`font-semibold ${getRemainingAmount() < 0 ? 'text-destructive' : 'text-success'}`}>
                       {formatCurrency(getRemainingAmount(), currency)}
                     </p>
                   </div>
@@ -391,14 +391,14 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
             </Card>
 
             {!budgetAllocation.isValid && budgetAllocation.validation.errors.length > 0 && (
-              <Card className="border-red-200 bg-red-50">
+              <Card className="border-destructive/20 bg-destructive/10">
                 <CardContent className="pt-4">
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-red-800">Validation Errors:</p>
-                    <ul className="text-sm text-red-700 space-y-1">
+                    <p className="text-sm font-medium text-destructive">Validation Errors:</p>
+                    <ul className="text-sm text-destructive space-y-1">
                       {budgetAllocation.validation.errors.map((error, index) => (
                         <li key={`error-${index}-${error.slice(0, 20)}`} className="flex items-start gap-2">
-                          <span className="text-red-500">•</span>
+                          <span className="text-destructive">•</span>
                           {error}
                         </li>
                       ))}
@@ -451,7 +451,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-4 h-4 rounded-full" 
-                          style={{ backgroundColor: budgetCategory.category?.color }}
+                          style={{ backgroundColor: budgetCategory.category?.color || 'hsl(var(--muted-foreground))' }}
                         />
                         <span className="font-medium">{budgetCategory.category?.name}</span>
                         <Badge variant="secondary">

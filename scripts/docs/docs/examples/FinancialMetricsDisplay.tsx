@@ -63,8 +63,8 @@ export function FinancialMetricsDisplay({
           {[1, 2, 3].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardContent className="p-6">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                <div className="h-8 bg-muted rounded w-1/2"></div>
               </CardContent>
             </Card>
           ))}
@@ -77,7 +77,7 @@ export function FinancialMetricsDisplay({
     return (
       <Card>
         <CardContent className="p-6 text-center">
-          <p className="text-gray-500">No financial data available</p>
+          <p className="text-muted-foreground">No financial data available</p>
         </CardContent>
       </Card>
     )
@@ -97,7 +97,7 @@ export function FinancialMetricsDisplay({
       {/* Header */}
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">Financial Metrics</h2>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           {period.startDate} - {period.endDate}
         </p>
       </div>
@@ -105,51 +105,51 @@ export function FinancialMetricsDisplay({
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total Income Card */}
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border-success/20 bg-success/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-800">
+            <CardTitle className="text-sm font-medium text-success">
               Total Income
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-600" />
+            <TrendingUp className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-900">
+            <div className="text-2xl font-bold text-success">
               {formatCurrency(totalIncome)}
             </div>
-            <p className="text-xs text-green-600 mt-1">
+            <p className="text-xs text-success/80 mt-1">
               {incomeByCategories.length} income sources
             </p>
           </CardContent>
         </Card>
 
         {/* Total Spending Card */}
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-destructive/20 bg-destructive/10">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-red-800">
+            <CardTitle className="text-sm font-medium text-destructive">
               Total Spending
             </CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-600" />
+            <TrendingDown className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-900">
+            <div className="text-2xl font-bold text-destructive">
               {formatCurrency(totalSpending)}
             </div>
-            <p className="text-xs text-red-600 mt-1">
+            <p className="text-xs text-destructive/80 mt-1">
               {spendingByCategories.length} expense categories
             </p>
           </CardContent>
         </Card>
 
         {/* Net Cashflow Card */}
-        <Card className={`border-${netCashflow >= 0 ? 'blue' : 'orange'}-200 bg-${netCashflow >= 0 ? 'blue' : 'orange'}-50`}>
+        <Card className={netCashflow >= 0 ? "border-primary/20 bg-primary/10" : "border-warning/20 bg-warning/10"}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className={`text-sm font-medium text-${netCashflow >= 0 ? 'blue' : 'orange'}-800`}>
+            <CardTitle className={netCashflow >= 0 ? "text-sm font-medium text-primary" : "text-sm font-medium text-warning"}>
               Net Cashflow
             </CardTitle>
-            <DollarSign className={`h-4 w-4 text-${netCashflow >= 0 ? 'blue' : 'orange'}-600`} />
+            <DollarSign className={netCashflow >= 0 ? "h-4 w-4 text-primary" : "h-4 w-4 text-warning"} />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold text-${netCashflow >= 0 ? 'blue' : 'orange'}-900`}>
+            <div className={netCashflow >= 0 ? "text-2xl font-bold text-primary" : "text-2xl font-bold text-warning"}>
               {formatCurrency(Math.abs(netCashflow))}
             </div>
             <div className="flex items-center mt-1">
@@ -182,7 +182,7 @@ export function FinancialMetricsDisplay({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+                <TrendingUp className="h-5 w-5 text-success" />
                 Income by Categories
               </CardTitle>
             </CardHeader>
@@ -196,7 +196,7 @@ export function FinancialMetricsDisplay({
                           <div 
                             className="w-3 h-3 rounded-full"
                             style={{ 
-                              backgroundColor: categories.find(c => c.id === category.categoryId)?.color || '#6B7280' 
+                              backgroundColor: categories.find(c => c.id === category.categoryId)?.color || 'hsl(var(--muted-foreground))' 
                             }}
                           />
                           <span className="font-medium">{category.categoryName}</span>
@@ -205,10 +205,10 @@ export function FinancialMetricsDisplay({
                           </Badge>
                         </div>
                         <div className="text-right">
-                          <div className="font-semibold text-green-700">
+                          <div className="font-semibold text-success">
                             {formatCurrency(category.amount)}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-muted-foreground">
                             {category.percentage.toFixed(1)}%
                           </div>
                         </div>
@@ -221,7 +221,7 @@ export function FinancialMetricsDisplay({
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-muted-foreground">
                   <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No income transactions found for this period</p>
                 </div>
@@ -235,7 +235,7 @@ export function FinancialMetricsDisplay({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <PieChart className="h-5 w-5 text-red-600" />
+                <PieChart className="h-5 w-5 text-destructive" />
                 Spending by Categories
               </CardTitle>
             </CardHeader>
@@ -249,7 +249,7 @@ export function FinancialMetricsDisplay({
                           <div 
                             className="w-3 h-3 rounded-full"
                             style={{ 
-                              backgroundColor: categories.find(c => c.id === category.categoryId)?.color || '#6B7280' 
+                              backgroundColor: categories.find(c => c.id === category.categoryId)?.color || 'hsl(var(--muted-foreground))' 
                             }}
                           />
                           <span className="font-medium">{category.categoryName}</span>
@@ -258,10 +258,10 @@ export function FinancialMetricsDisplay({
                           </Badge>
                         </div>
                         <div className="text-right">
-                          <div className="font-semibold text-red-700">
+                          <div className="font-semibold text-destructive">
                             {formatCurrency(category.amount)}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-muted-foreground">
                             {category.percentage.toFixed(1)}%
                           </div>
                         </div>
@@ -274,7 +274,7 @@ export function FinancialMetricsDisplay({
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-muted-foreground">
                   <PieChart className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No expense transactions found for this period</p>
                 </div>
@@ -292,28 +292,28 @@ export function FinancialMetricsDisplay({
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-primary">
                 {filteredTransactions.length}
               </div>
-              <div className="text-sm text-gray-500">Total Transactions</div>
+              <div className="text-sm text-muted-foreground">Total Transactions</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-success">
                 {filteredTransactions.filter(t => t.type === 'INCOME').length}
               </div>
-              <div className="text-sm text-gray-500">Income Transactions</div>
+              <div className="text-sm text-muted-foreground">Income Transactions</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-2xl font-bold text-destructive">
                 {filteredTransactions.filter(t => t.type === 'EXPENSE').length}
               </div>
-              <div className="text-sm text-gray-500">Expense Transactions</div>
+              <div className="text-sm text-muted-foreground">Expense Transactions</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-chart-4">
                 {new Set(filteredTransactions.map(t => t.category_id)).size}
               </div>
-              <div className="text-sm text-gray-500">Unique Categories</div>
+              <div className="text-sm text-muted-foreground">Unique Categories</div>
             </div>
           </div>
         </CardContent>

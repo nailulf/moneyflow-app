@@ -34,7 +34,7 @@ export default function PortfolioPage() {
                   <CardDescription>Year-to-date returns</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-600">+8.2%</div>
+                  <div className="text-2xl font-bold text-success">+8.2%</div>
                   <p className="text-xs text-muted-foreground">Outperforming market by 1.5%</p>
                 </CardContent>
               </Card>

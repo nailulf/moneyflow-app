@@ -91,13 +91,13 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
           </div>
           <div className="flex items-center gap-2">
             {isPositiveChange ? (
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <TrendingUp className="h-4 w-4 text-success" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-red-500" />
+              <TrendingDown className="h-4 w-4 text-destructive" />
             )}
             <span
               className={`text-sm font-medium ${
-                isPositiveChange ? "text-green-500" : "text-red-500"
+                isPositiveChange ? "text-success" : "text-destructive"
               }`}
             >
               {formatCurrency(Math.abs(netWorthChange))} ({formatPercentage(netWorthChangePercentage)})
@@ -146,9 +146,9 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
               <Area
                 dataKey="value"
                 type="natural"
-                fill="hsl(var(--chart-1))"
+                fill="var(--color-value)"
                 fillOpacity={0.4}
-                stroke="hsl(var(--chart-1))"
+                stroke="var(--color-value)"
                 strokeWidth={2}
               />
             </AreaChart>

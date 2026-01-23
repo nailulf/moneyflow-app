@@ -114,15 +114,15 @@ export default function InvestPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm">S&P 500</span>
-                        <span className="text-sm font-medium text-green-600">+1.2%</span>
+                        <span className="text-sm font-medium text-success">+1.2%</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">NASDAQ</span>
-                        <span className="text-sm font-medium text-green-600">+0.8%</span>
+                        <span className="text-sm font-medium text-success">+0.8%</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">DOW</span>
-                        <span className="text-sm font-medium text-red-600">-0.3%</span>
+                        <span className="text-sm font-medium text-destructive">-0.3%</span>
                       </div>
                     </div>
                   </div>

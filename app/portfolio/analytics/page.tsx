@@ -82,8 +82,8 @@ export default function PortfolioAnalyticsPage() {
                   <CardContent>
                     <div className="text-2xl font-bold">{data.value}</div>
                     <div className={`text-sm font-medium ${
-                      data.changeType === 'positive' ? 'text-green-600' : 
-                      data.changeType === 'negative' ? 'text-red-600' : 'text-muted-foreground'
+                      data.changeType === 'positive' ? 'text-success' : 
+                      data.changeType === 'negative' ? 'text-destructive' : 'text-muted-foreground'
                     }`}>
                       {data.change} vs last period
                     </div>
@@ -135,11 +135,11 @@ export default function PortfolioAnalyticsPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Risk Score</span>
-                    <span className="font-medium text-orange-600">Medium</span>
+                    <span className="font-medium text-chart-5">Medium</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Diversification</span>
-                    <span className="font-medium text-green-600">Good</span>
+                    <span className="font-medium text-success">Good</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Correlation</span>
@@ -158,7 +158,7 @@ export default function PortfolioAnalyticsPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Your Portfolio</span>
-                    <span className="font-medium text-green-600">+8.2%</span>
+                    <span className="font-medium text-success">+8.2%</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">S&P 500</span>
@@ -166,7 +166,7 @@ export default function PortfolioAnalyticsPage() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Outperformance</span>
-                    <span className="font-medium text-green-600">+1.5%</span>
+                    <span className="font-medium text-success">+1.5%</span>
                   </div>
                 </div>
               </CardContent>

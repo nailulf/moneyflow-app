@@ -158,16 +158,16 @@ function AccountManagerInternal({
         </SheetHeader>
         
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-            <p className="text-sm text-red-600">{error}</p>
+          <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3 mb-4">
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
         
         {loading && (
           <div className="text-center py-8">
             <div className="flex items-center justify-center space-x-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <p className="text-gray-500">Loading accounts...</p>
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <p className="text-muted-foreground">Loading accounts...</p>
             </div>
           </div>
         )}
@@ -176,7 +176,7 @@ function AccountManagerInternal({
           <div className="mt-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
             {/* Search Bar */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search accounts..."
                 value={searchTerm}
@@ -197,27 +197,27 @@ function AccountManagerInternal({
 
             {/* Accounts List */}
             <div className="space-y-3">
-              <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
+              <div className="text-sm font-semibold text-foreground uppercase tracking-wide">
                 Your Accounts ({filteredAccounts.length})
               </div>
               
               <div className="space-y-2">
                 {filteredAccounts.map((account) => (
-                  <div key={account.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div key={account.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                     <div className="flex items-center space-x-3">
                       <div className="flex flex-col">
                         <div className="flex items-center space-x-2">
-                          <span className="font-medium text-sm text-gray-900">{account.name}</span>
+                          <span className="font-medium text-sm text-foreground">{account.name}</span>
                           {account.is_default && (
-                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                            <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">
                               Default
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center space-x-2 text-xs text-gray-500">
+                        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                           <span className="capitalize">{account.type.toLowerCase().replace('_', ' ')}</span>
                           <span>•</span>
-                          <span className={(account.currentBalance ?? account.balance) >= 0 ? 'text-green-600' : 'text-red-600'}>
+                          <span className={(account.currentBalance ?? account.balance) >= 0 ? 'text-success' : 'text-destructive'}>
                             {formatCurrency(account.currentBalance ?? account.balance)}
                           </span>
                         </div>
@@ -228,7 +228,7 @@ function AccountManagerInternal({
                         variant="ghost"
                         size="sm"
                         onClick={() => openEditDialog(account)}
-                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                         disabled={isSubmitting}
                       >
                         <Edit className="h-4 w-4" />
@@ -238,7 +238,7 @@ function AccountManagerInternal({
                           variant="ghost"
                           size="sm"
                           onClick={() => openDeleteDialog(account.id)}
-                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                           disabled={isSubmitting}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -249,7 +249,7 @@ function AccountManagerInternal({
                 ))}
                 
                 {filteredAccounts.length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-muted-foreground">
                     {searchTerm ? 'No accounts found matching your search.' : 'No accounts found. Create your first account!'}
                   </div>
                 )}
@@ -396,7 +396,7 @@ function AccountManagerInternal({
                   <DialogDescription>
                     Are you sure you want to delete "{selectedAccount?.name}"? This action cannot be undone.
                     {selectedAccount?.is_default && (
-                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-sm">
+                      <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded text-destructive text-sm">
                         This is your default account and cannot be deleted.
                       </div>
                     )}

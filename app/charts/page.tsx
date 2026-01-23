@@ -62,7 +62,7 @@ export default function ChartsPage() {
           budgetAmount: 1500000,
           spentAmount: 1200000,
           status: 'good' as const,
-          color: '#8884d8'
+          color: 'hsl(var(--chart-1))'
         },
         {
           id: '2', 
@@ -70,7 +70,7 @@ export default function ChartsPage() {
           budgetAmount: 800000,
           spentAmount: 900000,
           status: 'over' as const,
-          color: '#82ca9d'
+          color: 'hsl(var(--chart-2))'
         },
         {
           id: '3',
@@ -78,7 +78,7 @@ export default function ChartsPage() {
           budgetAmount: 600000,
           spentAmount: 450000,
           status: 'good' as const,
-          color: '#ffc658'
+          color: 'hsl(var(--chart-4))'
         },
         {
           id: '4',
@@ -86,7 +86,7 @@ export default function ChartsPage() {
           budgetAmount: 1000000,
           spentAmount: 850000,
           status: 'warning' as const,
-          color: '#ff7300'
+          color: 'hsl(var(--chart-5))'
         }
       ]
     },
@@ -102,7 +102,7 @@ export default function ChartsPage() {
           budgetAmount: 18000000,
           spentAmount: 14400000,
           status: 'good' as const,
-          color: '#8884d8'
+          color: 'hsl(var(--chart-1))'
         },
         {
           id: '6',
@@ -110,7 +110,7 @@ export default function ChartsPage() {
           budgetAmount: 9600000,
           spentAmount: 10800000,
           status: 'over' as const,
-          color: '#82ca9d'
+          color: 'hsl(var(--chart-2))'
         }
       ]
     }
@@ -153,7 +153,7 @@ export default function ChartsPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-blue-600" />
+                  <TrendingUp className="w-5 h-5 text-primary" />
                   <CardTitle>Spending vs Budget Comparison</CardTitle>
                 </div>
                 <CardDescription>
@@ -180,7 +180,7 @@ export default function ChartsPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <PieChart className="w-5 h-5 text-green-600" />
+                  <PieChart className="w-5 h-5 text-chart-2" />
                   <CardTitle>Cash Flow Breakdown</CardTitle>
                 </div>
                 <CardDescription>
@@ -189,7 +189,7 @@ export default function ChartsPage() {
               </CardHeader>
               <CardContent>
                 {/* <CashFlowBreakdown transactions={mockTransactions} /> */}
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-8 text-center text-muted-foreground">
                   <p>Cash Flow Breakdown temporarily disabled to prevent hydration issues</p>
                   <p className="text-sm mt-2">This component requires budget context integration</p>
                 </div>
@@ -200,7 +200,7 @@ export default function ChartsPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-purple-600" />
+                  <BarChart3 className="w-5 h-5 text-chart-3" />
                   <CardTitle>Financial Overview</CardTitle>
                 </div>
                 <CardDescription>
@@ -230,7 +230,7 @@ export default function ChartsPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-orange-600" />
+                  <DollarSign className="w-5 h-5 text-chart-4" />
                   <CardTitle className="text-lg">Category Spending</CardTitle>
                 </div>
                 <CardDescription>

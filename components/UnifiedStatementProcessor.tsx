@@ -586,9 +586,9 @@ export function UnifiedStatementProcessor({
                   <div
                     key={`${index}-${originalIndex}`}
                     className={cn(
-                      "grid grid-cols-[40px_130px_100px_minmax(200px,1.5fr)_minmax(150px,1fr)_minmax(150px,1fr)_160px_120px] gap-2 p-2 border-b transition-colors text-sm items-center hover:bg-muted/30",
-                      isSelected ? "bg-primary/5" : "bg-background",
-                      hasError && "bg-red-50 dark:bg-red-900/10"
+            "grid grid-cols-[40px_130px_100px_minmax(200px,1.5fr)_minmax(150px,1fr)_minmax(150px,1fr)_160px_120px] gap-2 p-2 border-b transition-colors text-sm items-center hover:bg-muted/50",
+            isSelected ? "bg-primary/5" : "bg-background",
+                      hasError && "bg-destructive/10"
                     )}
                   >
                     {/* Checkbox */}
@@ -613,7 +613,14 @@ export function UnifiedStatementProcessor({
                     <div>
                       <Select 
                         value={t.type || (t.amount >= 0 ? 'INCOME' : 'EXPENSE')} 
-                        onValueChange={(val: any) => updateTransaction(originalIndex, { type: val })}
+                        onValueChange={(val: any) => {
+                          const newSign = val === 'EXPENSE' ? -1 : 1;
+                          const currentAbsAmount = Math.abs(t.amount);
+                          updateTransaction(originalIndex, { 
+                              type: val,
+                              amount: currentAbsAmount * newSign
+                          })
+                        }}
                       >
                         <SelectTrigger className="h-8 w-full">
                           <SelectValue />
@@ -631,7 +638,7 @@ export function UnifiedStatementProcessor({
                       <Input 
                         value={t.description} 
                         onChange={(e) => updateTransaction(originalIndex, { description: e.target.value })}
-                        className={cn("h-8 w-full", !t.description && "border-red-500")}
+                        className={cn("h-8 w-full", !t.description && "border-destructive")}
                         placeholder="Description"
                       />
                     </div>
@@ -681,7 +688,7 @@ export function UnifiedStatementProcessor({
                                 {groupedCategories.EXPENSE.map(c => (
                                   <SelectItem key={c.id} value={c.id}>
                                     <span className="flex items-center gap-2">
-                                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
+                                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color || 'hsl(var(--muted))' }} />
                                       {c.name}
                                     </span>
                                   </SelectItem>
@@ -698,7 +705,7 @@ export function UnifiedStatementProcessor({
                                 {groupedCategories.INCOME.map(c => (
                                   <SelectItem key={c.id} value={c.id}>
                                     <span className="flex items-center gap-2">
-                                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
+                                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color || 'hsl(var(--muted))' }} />
                                       {c.name}
                                     </span>
                                   </SelectItem>
@@ -715,7 +722,7 @@ export function UnifiedStatementProcessor({
                                 {groupedCategories.TRANSFER.map(c => (
                                   <SelectItem key={c.id} value={c.id}>
                                     <span className="flex items-center gap-2">
-                                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
+                                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: c.color || 'hsl(var(--muted))' }} />
                                       {c.name}
                                     </span>
                                   </SelectItem>
@@ -742,7 +749,10 @@ export function UnifiedStatementProcessor({
                             className="h-8 w-24 text-right mb-1"
                             step="0.01"
                          />
-                         <span className={cn("text-xs font-medium", t.amount > 0 ? "text-green-600" : "text-red-600")}>
+                         <span 
+                            data-testid="amount-display"
+                            className={cn("text-xs font-medium", t.amount > 0 ? "text-success" : "text-destructive")}
+                         >
                             {formatCurrency(t.amount, t.currency)}
                          </span>
                       </div>

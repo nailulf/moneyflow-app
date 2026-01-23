@@ -17,9 +17,9 @@ import { BudgetProvider, useBudgets } from '@/contexts/BudgetContext'
 const Progress = ({ value = 0, className = '' }: { value?: number; className?: string }) => {
   const percentage = Math.min(Math.max(value, 0), 100)
   return (
-    <div className={`relative h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800 ${className}`}>
+    <div className={`relative h-2 w-full overflow-hidden rounded-full bg-muted ${className}`}>
       <div
-        className="h-full bg-blue-600 transition-all duration-300 ease-in-out"
+        className="h-full bg-primary transition-all duration-300 ease-in-out"
         style={{ width: `${percentage}%` }}
       />
     </div>
@@ -215,9 +215,9 @@ export default function BudgetingBreakdownPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">{timeRange === 'monthly' ? 'Monthly' : 'Avg Monthly'} Income</p>
-                      <p className="text-2xl font-bold text-green-600">{formatCurrency(monthlyIncome)}</p>
+                      <p className="text-2xl font-bold text-success">{formatCurrency(monthlyIncome)}</p>
                     </div>
-                    <TrendingUp className="h-8 w-8 text-green-600" />
+                    <TrendingUp className="h-8 w-8 text-success" />
                   </div>
                 </CardContent>
               </Card>
@@ -227,9 +227,9 @@ export default function BudgetingBreakdownPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">{timeRange === 'monthly' ? 'Monthly' : 'Avg Monthly'} Expenses</p>
-                      <p className="text-2xl font-bold text-red-600">{formatCurrency(monthlySpending)}</p>
+                      <p className="text-2xl font-bold text-destructive">{formatCurrency(monthlySpending)}</p>
                     </div>
-                    <TrendingDown className="h-8 w-8 text-red-600" />
+                    <TrendingDown className="h-8 w-8 text-destructive" />
                   </div>
                 </CardContent>
               </Card>
@@ -239,13 +239,13 @@ export default function BudgetingBreakdownPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">{timeRange === 'monthly' ? 'Monthly' : 'Avg Monthly'} Net Cash Flow</p>
-                      <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-success' : 'text-destructive'}`}>
                         {formatCurrency(netCashFlow)}
                       </p>
                     </div>
                     {netCashFlow >= 0 ? 
-                      <TrendingUp className="h-8 w-8 text-green-600" /> : 
-                      <TrendingDown className="h-8 w-8 text-red-600" />
+                      <TrendingUp className="h-8 w-8 text-success" /> : 
+                      <TrendingDown className="h-8 w-8 text-destructive" />
                     }
                   </div>
                 </CardContent>
@@ -257,8 +257,8 @@ export default function BudgetingBreakdownPage() {
                     <div>
                       <p className="text-sm text-muted-foreground">Budget Status</p>
                       <p className={`text-2xl font-bold ${
-                        budgetProgress > 100 ? 'text-red-600' : 
-                        budgetProgress > 80 ? 'text-yellow-600' : 'text-green-600'
+                        budgetProgress > 100 ? 'text-destructive' : 
+                        budgetProgress > 80 ? 'text-warning' : 'text-success'
                       }`}>
                         {formatCurrency(totalBudget - totalSpent)}
                       </p>
@@ -270,7 +270,7 @@ export default function BudgetingBreakdownPage() {
                       <p className="text-xs text-muted-foreground">of {formatCurrency(totalBudget)}</p>
                       <Progress value={budgetProgress} className="w-16 h-2 mt-1" />
                       {budgetProgress > 100 && (
-                        <p className="text-xs text-red-600 mt-1">Over budget!</p>
+                        <p className="text-xs text-destructive mt-1">Over budget!</p>
                       )}
                     </div>
                   </div>
@@ -301,14 +301,14 @@ export default function BudgetingBreakdownPage() {
                 {selectedBudget ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-center p-4 bg-primary/10 rounded-lg">
+                        <div className="text-2xl font-bold text-primary">
                           {formatCurrency(selectedBudget.total_amount)}
                         </div>
-                        <div className="text-sm text-blue-600">Total Budget</div>
+                        <div className="text-sm text-primary">Total Budget</div>
                       </div>
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                         <div className="text-2xl font-bold text-green-600">
+                      <div className="text-center p-4 bg-success/10 rounded-lg">
+                         <div className="text-2xl font-bold text-success">
                            {formatCurrency(
                              (selectedBudget.budget_categories || []).reduce((sum: number, bc) => 
                                sum + (filteredTransactions
@@ -317,7 +317,7 @@ export default function BudgetingBreakdownPage() {
                                ), 0)
                            )}
                          </div>
-                         <div className="text-sm text-green-600">Total Spent</div>
+                         <div className="text-sm text-success">Total Spent</div>
                        </div>
                      </div>
                      
@@ -352,7 +352,7 @@ export default function BudgetingBreakdownPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-gray-500">
+                  <div className="text-center py-6 text-muted-foreground">
                     <p>No budget selected</p>
                     <p className="text-sm mt-1">Select a budget to see overview</p>
                   </div>

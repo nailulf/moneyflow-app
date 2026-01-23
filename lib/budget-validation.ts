@@ -389,7 +389,8 @@ export function validateBudgetAllocationState(state: BudgetAllocationState): Val
       })
     }
     
-    if (!category.category_color || !/^#[0-9A-Fa-f]{6}$/.test(category.category_color)) {
+    // Validate color (hex or hsl/var format)
+    if (!category.category_color || (!/^#[0-9A-Fa-f]{6}$/.test(category.category_color) && !category.category_color.startsWith('hsl') && !category.category_color.startsWith('var'))) {
       errors.push({
         type: ValidationErrorType.INVALID_TOTAL,
         message: `Category at index ${index} has invalid color`,

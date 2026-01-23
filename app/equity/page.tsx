@@ -25,8 +25,8 @@ export default function EquityPage() {
             <div className="space-y-3">
               <div className="text-2xl font-bold">$485,000</div>
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-green-500" />
-                <span className="text-sm text-green-600">+3.2% this year</span>
+                <TrendingUp className="h-4 w-4 text-success" />
+                <span className="text-sm text-success">+3.2% this year</span>
               </div>
               <p className="text-xs text-muted-foreground">Last updated: March 2024</p>
             </div>
@@ -62,14 +62,14 @@ export default function EquityPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="text-2xl font-bold text-green-600">$200,000</div>
+              <div className="text-2xl font-bold text-success">$200,000</div>
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm">Equity Percentage</span>
                   <span className="text-sm font-medium">41.2%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-600 h-2 rounded-full" style={{width: '41.2%'}}></div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div className="bg-success h-2 rounded-full" style={{width: '41.2%'}}></div>
                 </div>
               </div>
             </div>

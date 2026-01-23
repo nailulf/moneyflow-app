@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Transaction } from '@/types/database'
 import { getTotalBalance, getMonthlySpending, getMonthlyIncome, formatCurrency } from '@/lib/data-utils'
 import { Card, CardContent } from '@/components/ui/card'
+import { Wallet, TrendingUp, Activity } from 'lucide-react'
 
 
 interface SummaryCardsProps {
@@ -38,24 +39,24 @@ export function SummaryCards({ transactions = [] }: SummaryCardsProps) {
       value: formatCurrency(totalBalance),
       subtitle: `${formatCurrency(totalBalance)} invested`,
       change: totalBalance >= 0 ? '+2.4%' : '-1.2%',
-      changeColor: totalBalance >= 0 ? 'text-green-600' : 'text-red-600',
-      icon: '💰'
+      changeColor: totalBalance >= 0 ? 'text-success' : 'text-destructive',
+      icon: <Wallet className="h-4 w-4" />
     },
     {
       title: 'Total return',
       value: formatCurrency(netThisMonth),
       subtitle: `${netThisMonth >= 0 ? '+' : ''}${monthlyIncome > 0 ? ((netThisMonth / monthlyIncome) * 100).toFixed(1) : '0.0'}%`,
       change: '26.4%',
-      changeColor: 'text-green-600',
-      icon: '📈'
+      changeColor: 'text-success',
+      icon: <TrendingUp className="h-4 w-4" />
     },
     {
       title: 'Positive Income',
       value: '11.74%',
       subtitle: `${formatCurrency(monthlyIncome)} monthly`,
       change: '+4.7%',
-      changeColor: 'text-green-600',
-      icon: '💚'
+      changeColor: 'text-success',
+      icon: <Activity className="h-4 w-4" />
     }
   ]
 
@@ -63,19 +64,19 @@ export function SummaryCards({ transactions = [] }: SummaryCardsProps) {
     <div className="grid grid-cols-1 gap-4">
       {cards.map((card, index) => {
         return (
-          <Card key={card.title} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardContent>
+          <Card key={card.title} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-base">{card.icon}</span>
-                <span className="text-sm font-medium text-gray-600">
+                <span className="text-sm font-medium text-muted-foreground">
                   {card.title}
                 </span>
               </div>
               <div className="space-y-1">
-                <div className="text-xl font-bold text-gray-900">
+                <div className="text-xl font-bold text-foreground">
                   {card.value}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-muted-foreground">
                   {card.subtitle}
                 </div>
                 <div className={`text-xs font-medium ${card.changeColor}`}>

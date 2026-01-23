@@ -88,7 +88,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
       acc[categoryName] = {
         category: categoryName,
         amount: 0,
-        color: getCategoryColor(transaction.category_id) || '#8884d8'
+        color: getCategoryColor(transaction.category_id) || 'hsl(var(--chart-1))'
       }
     }
     acc[categoryName].amount += amount
@@ -125,7 +125,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
       acc[categoryName] = {
         category: categoryName,
         amount: 0,
-        color: getCategoryColor(transaction.category_id) || '#82ca9d'
+        color: getCategoryColor(transaction.category_id) || 'hsl(var(--chart-2))'
       }
     }
     acc[categoryName].amount += amount
@@ -188,7 +188,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
   const renderPieChart = (data: CategoryDataWithPercentage[], dataKey: string, nameKey: string) => {
     if (data.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64 text-gray-500">
+        <div className="flex items-center justify-center h-64 text-muted-foreground">
           <p>No data available</p>
         </div>
       )
@@ -209,7 +209,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
             strokeWidth={5}
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
+              <Cell key={`cell-${index}`} fill={entry.color || `hsl(var(--chart-${(index % 12) + 1}))`} />
             ))}
           </Pie>
           <ChartLegend
@@ -224,7 +224,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
   const renderCategoryList = (data: CategoryDataWithPercentage[] | BudgetCategoryData[], type: 'expense' | 'income' | 'budget') => {
     if (data.length === 0) {
       return (
-        <div className="flex items-center justify-center h-32 text-gray-500">
+        <div className="flex items-center justify-center h-32 text-muted-foreground">
           <p>No {type} data available</p>
         </div>
       )
@@ -238,7 +238,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
           const budgetAmount = type === 'budget' ? (item as BudgetCategoryData).budgetAmount : undefined
           
           return (
-            <div key={item.category} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+            <div key={item.category} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex items-center space-x-3">
                 <div 
                   className="w-4 h-4 rounded-full" 
@@ -247,7 +247,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                 <div>
                   <span className="font-medium text-sm">{item.category}</span>
                   {type === 'budget' && (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       {formatCurrency(amount)} of {formatCurrency(budgetAmount || 0)}
                     </div>
                   )}
@@ -258,7 +258,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                   {formatCurrency(amount)}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">
                     {percentage.toFixed(1)}%
                   </span>
                   {type === 'budget' && (
@@ -285,7 +285,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-semibold">Cash Flow Breakdown</CardTitle>
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">View by</span>
+            <span className="text-sm text-muted-foreground">View by</span>
             <Select value={viewBy} onValueChange={(value: 'category' | 'amount') => setViewBy(value)}>
               <SelectTrigger className="w-32">
                 <SelectValue />
@@ -320,14 +320,14 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
               <div>
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold mb-2">Expenses</h3>
-                  <p className="text-sm text-gray-600">Total spending this month: {formatCurrency(totalExpenses)}</p>
+                  <p className="text-sm text-muted-foreground">Total spending this month: {formatCurrency(totalExpenses)}</p>
                 </div>
                 {renderPieChart(expenseData, 'amount', 'category')}
               </div>
               <div>
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold mb-2">Expenses Breakdown</h3>
-                  <p className="text-sm text-gray-600">{expenseData.length} expense categories</p>
+                  <p className="text-sm text-muted-foreground">{expenseData.length} expense categories</p>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {renderCategoryList(expenseData, 'expense')}
@@ -342,7 +342,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Budget Overview</h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     {budgetLoading ? 'Loading budgets...' : 
                      budgetError ? `Error: ${budgetError}` :
                      budgetItemsLoading ? 'Loading budget items...' :
@@ -399,7 +399,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                           cx="50"
                           cy="50"
                           r="45"
-                          stroke="#e5e7eb"
+                          stroke="hsl(var(--muted))"
                           strokeWidth="8"
                           fill="none"
                         />
@@ -408,7 +408,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                           cx="50"
                           cy="50"
                           r="45"
-                          stroke={actualTotalSpent > totalBudget ? '#ef4444' : actualTotalSpent > totalBudget * 0.8 ? '#f59e0b' : '#10b981'}
+                          stroke={actualTotalSpent > totalBudget ? 'hsl(var(--destructive))' : actualTotalSpent > totalBudget * 0.8 ? 'hsl(var(--chart-4))' : 'hsl(var(--success))'}
                           strokeWidth="8"
                           fill="none"
                           strokeDasharray={`${Math.min((actualTotalSpent / totalBudget) * 283, 283)} 283`}
@@ -416,10 +416,10 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <div className="text-2xl font-bold text-gray-900">
+                        <div className="text-2xl font-bold text-foreground">
                           {totalBudget > 0 ? Math.round((actualTotalSpent / totalBudget) * 100) : 0}%
                         </div>
-                        <div className="text-sm text-gray-500">of budget used</div>
+                        <div className="text-sm text-muted-foreground">of budget used</div>
                       </div>
                     </div>
                     
@@ -432,7 +432,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                         >
                           {totalSpent > totalBudget ? 'Over Budget' : totalSpent > totalBudget * 0.8 ? 'Near Limit' : 'On Track'}
                         </Badge>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-muted-foreground">
                           {formatCurrency(Math.abs(totalBudget - totalSpent))} {totalSpent > totalBudget ? 'over' : 'remaining'}
                         </span>
                       </div>
@@ -441,7 +441,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                     {/* Edit Budget Button */}
                     <button 
                       onClick={() => setIsBudgetEditOpen(true)}
-                      className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+                      className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                       disabled={!selectedBudget}
                     >
                       <span className="text-sm font-medium underline">EDIT BUDGET</span>
@@ -454,7 +454,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                   {/* View By Dropdown */}
                   <div className="flex justify-end">
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">View by</span>
+                      <span className="text-sm text-muted-foreground">View by</span>
                       <Select value="category" onValueChange={() => {}}>
                         <SelectTrigger className="w-48">
                           <SelectValue />
@@ -468,7 +468,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
 
                   {/* Budget Table */}
                   <div className="space-y-4">
-                    <div className="grid grid-cols-4 gap-4 text-sm font-medium text-gray-500 border-b pb-2">
+                    <div className="grid grid-cols-4 gap-4 text-sm font-medium text-muted-foreground border-b pb-2">
                       <div>Category</div>
                       <div className="text-center">Spent</div>
                       <div className="text-center">Budget</div>
@@ -480,7 +480,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                       const progressPercentage = Math.min((item.spentAmount / item.budgetAmount) * 100, 100)
                       
                       return (
-                        <div key={item.category} className="grid grid-cols-4 gap-4 items-center py-3 border-b border-gray-100 last:border-b-0">
+                        <div key={item.category} className="grid grid-cols-4 gap-4 items-center py-3 border-b border-border last:border-b-0">
                           {/* Category */}
                           <div className="flex items-center space-x-3">
                             <div 
@@ -489,11 +489,11 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                             />
                             <div>
                               <div className="font-medium text-sm">{item.category}</div>
-                              <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                              <div className="w-full bg-secondary rounded-full h-2 mt-1">
                                 <div 
                                   className={`h-2 rounded-full transition-all duration-300 ${
-                                    item.status === 'over' ? 'bg-red-500' : 
-                                    item.status === 'warning' ? 'bg-yellow-500' : 'bg-green-500'
+                                    item.status === 'over' ? 'bg-destructive' : 
+                                    item.status === 'warning' ? 'bg-[hsl(var(--chart-4))]' : 'bg-success'
                                   }`}
                                   style={{ width: `${progressPercentage}%` }}
                                 />
@@ -503,20 +503,20 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                           
                           {/* Spent */}
                           <div className="text-center">
-                            <div className="font-semibold text-gray-900">
+                            <div className="font-semibold text-foreground">
                               {formatCurrency(item.spentAmount)}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-muted-foreground">
                               vs {formatCurrency(item.budgetAmount)} budgeted
                             </div>
                           </div>
                           
                           {/* Budget */}
                           <div className="text-center">
-                            <div className="font-semibold text-gray-900">
+                            <div className="font-semibold text-foreground">
                               {formatCurrency(item.budgetAmount)}
                             </div>
-                            <div className="text-xs text-gray-500 mt-1">
+                            <div className="text-xs text-muted-foreground mt-1">
                               Target
                             </div>
                           </div>
@@ -524,12 +524,12 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                           {/* Available/Variance */}
                           <div className="text-center">
                             <div className={`font-semibold ${
-                              available < 0 ? 'text-red-600' : 'text-green-600'
+                              available < 0 ? 'text-destructive' : 'text-success'
                             }`}>
                               {formatCurrency(Math.abs(available))}
                             </div>
                             <div className={`text-xs mt-1 ${
-                              available < 0 ? 'text-red-500' : 'text-green-500'
+                              available < 0 ? 'text-destructive' : 'text-success'
                             }`}>
                               {available < 0 ? 'Over' : 'Remaining'}
                             </div>
@@ -548,14 +548,14 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
               <div>
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold mb-2">Income Sources</h3>
-                  <p className="text-sm text-gray-600">Total income this month: {formatCurrency(totalIncome)}</p>
+                  <p className="text-sm text-muted-foreground">Total income this month: {formatCurrency(totalIncome)}</p>
                 </div>
                 {renderPieChart(incomeData, 'amount', 'category')}
               </div>
               <div>
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold mb-2">Income Breakdown</h3>
-                  <p className="text-sm text-gray-600">{incomeData.length} income sources</p>
+                  <p className="text-sm text-muted-foreground">{incomeData.length} income sources</p>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {renderCategoryList(incomeData, 'income')}
@@ -660,7 +660,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
               const newOthersCategory: CategoryInsert = {
                 user_id: userId,
                 name: 'Others',
-                color: '#AED6F1',
+                color: 'hsl(var(--chart-5))',
                 group_type: 'EXPENSE',
                 category_group_id: expenseGroup.id,
                 is_custom: true,

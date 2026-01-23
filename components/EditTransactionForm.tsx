@@ -131,9 +131,9 @@ export function EditTransactionForm({
   const renderCategoryWithColor = (category: { name: string; color?: string }) => (
     <div className="flex items-center gap-2">
       <div 
-        className="w-3 h-3 rounded-full flex-shrink-0" 
-        style={{ backgroundColor: category.color || '#6B7280' }}
-      />
+                        className="w-3 h-3 rounded-full flex-shrink-0" 
+                        style={{ backgroundColor: category.color || 'hsl(var(--muted-foreground))' }}
+                      />
       <span>{category.name}</span>
     </div>
   )
@@ -159,10 +159,10 @@ export function EditTransactionForm({
             <Input
               type="date"
               {...register('date')}
-              className={errors.date ? 'border-red-500' : ''}
+              className={errors.date ? 'border-destructive' : ''}
             />
             {errors.date && (
-              <p className="text-sm text-red-500">{errors.date.message}</p>
+              <p className="text-sm text-destructive">{errors.date.message}</p>
             )}
           </div>
 
@@ -171,10 +171,10 @@ export function EditTransactionForm({
             <Input
               placeholder="Enter description"
               {...register('description')}
-              className={errors.description ? 'border-red-500' : ''}
+              className={errors.description ? 'border-destructive' : ''}
             />
             {errors.description && (
-              <p className="text-sm text-red-500">{errors.description.message}</p>
+              <p className="text-sm text-destructive">{errors.description.message}</p>
             )}
           </div>
 
@@ -185,12 +185,12 @@ export function EditTransactionForm({
               step="0.01"
               placeholder="0.00"
               {...register('amount', { valueAsNumber: true })}
-              className={errors.amount ? 'border-red-500' : ''}
+              className={errors.amount ? 'border-destructive' : ''}
             />
             {errors.amount && (
-              <p className="text-sm text-red-500">{errors.amount.message}</p>
+              <p className="text-sm text-destructive">{errors.amount.message}</p>
             )}
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Use positive numbers for income, negative for expenses
             </p>
           </div>
@@ -205,7 +205,7 @@ export function EditTransactionForm({
               }}
               onOpenChange={setIsAnySelectOpen}
             >
-              <SelectTrigger className={errors.type ? 'border-red-500' : ''}>
+              <SelectTrigger className={errors.type ? 'border-destructive' : ''}>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
@@ -215,7 +215,7 @@ export function EditTransactionForm({
               </SelectContent>
             </Select>
             {errors.type && (
-              <p className="text-sm text-red-500">{errors.type.message}</p>
+              <p className="text-sm text-destructive">{errors.type.message}</p>
             )}
           </div>
 
@@ -229,7 +229,7 @@ export function EditTransactionForm({
               }}
               onOpenChange={setIsAnySelectOpen}
             >
-              <SelectTrigger className={errors.category_id ? 'border-red-500' : ''}>
+              <SelectTrigger className={errors.category_id ? 'border-destructive' : ''}>
                 <SelectValue placeholder="Select category">
                   {selectedCategory ? renderCategoryWithColor(selectedCategory) : "Select category"}
                 </SelectValue>
@@ -242,14 +242,14 @@ export function EditTransactionForm({
                     </SelectItem>
                   ))
                 ) : (
-                  <div className="px-2 py-1 text-sm text-gray-500">
+                  <div className="px-2 py-1 text-sm text-muted-foreground">
                     No categories available for this type
                   </div>
                 )}
               </SelectContent>
             </Select>
             {errors.category_id && (
-              <p className="text-sm text-red-500">{errors.category_id.message}</p>
+              <p className="text-sm text-destructive">{errors.category_id.message}</p>
             )}
           </div>
 
@@ -264,7 +264,7 @@ export function EditTransactionForm({
               disabled={accountsLoading}
               onOpenChange={setIsAnySelectOpen}
             >
-              <SelectTrigger className={errors.account_id ? 'border-red-500' : ''} data-testid="account-select-trigger">
+              <SelectTrigger className={errors.account_id ? 'border-destructive' : ''} data-testid="account-select-trigger">
                 <SelectValue placeholder={accountsLoading ? 'Loading...' : 'Select account'} />
               </SelectTrigger>
               <SelectContent>
@@ -275,14 +275,14 @@ export function EditTransactionForm({
                     </SelectItem>
                   ))
                 ) : (
-                  <div className="px-2 py-1.5 text-sm text-gray-500">
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
                     No accounts available
                   </div>
                 )}
               </SelectContent>
             </Select>
             {errors.account_id && (
-              <p className="text-sm text-red-500">{errors.account_id.message}</p>
+              <p className="text-sm text-destructive">{errors.account_id.message}</p>
             )}
           </div>
 
@@ -294,13 +294,13 @@ export function EditTransactionForm({
             />
           </div>
 
-          <div className="space-y-4 border rounded-lg p-4 bg-gray-50">
+          <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 id="is_recurring"
                 {...register('is_recurring')}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
               />
               <label htmlFor="is_recurring" className="text-sm font-medium">
                 Recurring Transaction
@@ -308,7 +308,7 @@ export function EditTransactionForm({
             </div>
             
             {watch('is_recurring') && (
-              <div className="space-y-4 pl-6 border-l-2 border-blue-200 ml-1">
+              <div className="space-y-4 pl-6 border-l-2 border-primary/20 ml-1">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Frequency</label>
                   <Select
@@ -339,11 +339,11 @@ export function EditTransactionForm({
                         type="radio"
                         id="period_continuous"
                         name="period_type"
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded-full"
                         checked={!watch('recurring_end_date')}
                         onChange={() => setValue('recurring_end_date', null)}
                       />
-                      <label htmlFor="period_continuous" className="text-sm text-gray-700">
+                      <label htmlFor="period_continuous" className="text-sm text-muted-foreground">
                         Continuous (No end date)
                       </label>
                     </div>
@@ -352,7 +352,7 @@ export function EditTransactionForm({
                         type="radio"
                         id="period_ended"
                         name="period_type"
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded-full"
                         checked={!!watch('recurring_end_date')}
                         onChange={() => {
                           // Set default end date to one year from now if not set
@@ -363,7 +363,7 @@ export function EditTransactionForm({
                           }
                         }}
                       />
-                      <label htmlFor="period_ended" className="text-sm text-gray-700">
+                      <label htmlFor="period_ended" className="text-sm text-muted-foreground">
                         End Date
                       </label>
                     </div>
