@@ -50,33 +50,33 @@ export default function CashFlowPage() {
         
         <ContentWrapper>
           <MainContent>
-            <Card className="bg-white border border-gray-200 shadow-sm">
+            <Card className="bg-card border border-border shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">
+                <CardTitle className="text-lg font-semibold text-foreground">
                   Cash Flow Summary
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">
+                  <div className="text-center p-4 bg-success/10 rounded-lg">
+                    <div className="text-2xl font-bold text-success">
                       {formatCurrency(totalIncome)}
                     </div>
-                    <div className="text-sm text-gray-600">Total Income</div>
+                    <div className="text-sm text-muted-foreground">Total Income</div>
                   </div>
-                  <div className="text-center p-4 bg-red-50 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">
+                  <div className="text-center p-4 bg-destructive/10 rounded-lg">
+                    <div className="text-2xl font-bold text-destructive">
                       {formatCurrency(totalExpenses)}
                     </div>
-                    <div className="text-sm text-gray-600">Total Expenses</div>
+                    <div className="text-sm text-muted-foreground">Total Expenses</div>
                   </div>
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-center p-4 bg-primary/10 rounded-lg">
                     <div className={`text-2xl font-bold ${
-                      netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'
+                      netCashFlow >= 0 ? 'text-success' : 'text-destructive'
                     }`}>
                       {formatCurrency(netCashFlow)}
                     </div>
-                    <div className="text-sm text-gray-600">Net Cash Flow</div>
+                    <div className="text-sm text-muted-foreground">Net Cash Flow</div>
                   </div>
                 </div>
               </CardContent>
@@ -84,21 +84,21 @@ export default function CashFlowPage() {
           </MainContent>
           
           <SideContent>
-            <Card className="bg-white border border-gray-200 shadow-sm">
+            <Card className="bg-card border border-border shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900">
+                <CardTitle className="text-lg font-semibold text-foreground">
                   Monthly Trends
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {monthlyData.slice(0, 6).map((data, index) => (
-                    <div key={`month-${data.month}-${index}`} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                      <span className="text-sm font-medium text-gray-700">
+                    <div key={`month-${data.month}-${index}`} className="flex justify-between items-center py-2 border-b border-border last:border-b-0">
+                      <span className="text-sm font-medium text-foreground">
                         {data.month}
                       </span>
                       <span className={`text-sm font-semibold ${
-                        data.net >= 0 ? 'text-green-600' : 'text-red-600'
+                        data.net >= 0 ? 'text-success' : 'text-destructive'
                       }`}>
                         {formatCurrency(data.net)}
                       </span>

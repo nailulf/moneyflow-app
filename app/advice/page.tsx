@@ -26,8 +26,8 @@ export default function AdvicePage() {
                       <span className="text-sm font-medium">House Down Payment</span>
                       <span className="text-sm text-muted-foreground">$45,000 / $60,000</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{width: '75%'}}></div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full" style={{width: '75%'}}></div>
                     </div>
                   </div>
                   <div>
@@ -35,8 +35,8 @@ export default function AdvicePage() {
                       <span className="text-sm font-medium">Vacation Fund</span>
                       <span className="text-sm text-muted-foreground">$3,200 / $5,000</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-600 h-2 rounded-full" style={{width: '64%'}}></div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-success h-2 rounded-full" style={{width: '64%'}}></div>
                     </div>
                   </div>
                   <div>
@@ -44,8 +44,8 @@ export default function AdvicePage() {
                       <span className="text-sm font-medium">Retirement</span>
                       <span className="text-sm text-muted-foreground">$125,000 / $1,000,000</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-purple-600 h-2 rounded-full" style={{width: '12.5%'}}></div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-chart-5 h-2 rounded-full" style={{width: '12.5%'}}></div>
                     </div>
                   </div>
                 </div>
@@ -65,7 +65,7 @@ export default function AdvicePage() {
           </CardHeader>
           <CardContent>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">8.2</div>
+              <div className="text-3xl font-bold text-success">8.2</div>
               <p className="text-sm text-muted-foreground">out of 10</p>
               <Badge className="mt-2" variant="secondary">Excellent</Badge>
             </div>
@@ -109,11 +109,11 @@ export default function AdvicePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="p-3 bg-blue-50 rounded-lg">
+              <div className="p-3 bg-primary/10 rounded-lg">
                 <p className="text-sm font-medium">Increase Emergency Fund</p>
                 <p className="text-xs text-muted-foreground">Aim for 6 months of expenses</p>
               </div>
-              <div className="p-3 bg-green-50 rounded-lg">
+              <div className="p-3 bg-success/10 rounded-lg">
                 <p className="text-sm font-medium">Diversify Portfolio</p>
                 <p className="text-xs text-muted-foreground">Consider international stocks</p>
               </div>
@@ -134,7 +134,7 @@ export default function AdvicePage() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                    <div className="w-2 h-2 bg-destructive rounded-full mt-2"></div>
                     <div>
                       <p className="font-medium text-sm">Reduce Credit Card Debt</p>
                       <p className="text-xs text-muted-foreground">Pay off high-interest debt first</p>
@@ -142,7 +142,7 @@ export default function AdvicePage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                    <div className="w-2 h-2 bg-chart-4 rounded-full mt-2"></div>
                     <div>
                       <p className="font-medium text-sm">Optimize Tax Strategy</p>
                       <p className="text-xs text-muted-foreground">Consider tax-advantaged accounts</p>
@@ -150,7 +150,7 @@ export default function AdvicePage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                    <div className="w-2 h-2 bg-success rounded-full mt-2"></div>
                     <div>
                       <p className="font-medium text-sm">Increase Savings Rate</p>
                       <p className="text-xs text-muted-foreground">Automate your savings</p>

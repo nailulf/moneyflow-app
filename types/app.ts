@@ -120,16 +120,16 @@ export interface CategoryData {
 }
 
 export const CATEGORY_COLORS: Record<Category, string> = {
-  'Food & Dining': '#FF6B6B',
-  'Transportation': '#4ECDC4',
-  'Shopping': '#45B7D1',
-  'Entertainment': '#96CEB4',
-  'Bills & Utilities': '#FFEAA7',
-  'Healthcare': '#DDA0DD',
-  'Education': '#98D8C8',
-  'Travel': '#F7DC6F',
-  'Income': '#82E0AA',
-  'Other': '#AED6F1'
+  'Food & Dining': 'hsl(var(--chart-1))',
+  'Transportation': 'hsl(var(--chart-2))',
+  'Shopping': 'hsl(var(--chart-3))',
+  'Entertainment': 'hsl(var(--chart-4))',
+  'Bills & Utilities': 'hsl(var(--chart-5))',
+  'Healthcare': 'hsl(var(--primary))',
+  'Education': 'hsl(var(--secondary))',
+  'Travel': 'hsl(var(--accent))',
+  'Income': 'hsl(var(--success))',
+  'Other': 'hsl(var(--muted-foreground))'
 }
 export interface CashFlowBreakdownProps {
   transactions: Transaction[]

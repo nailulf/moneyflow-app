@@ -106,7 +106,7 @@ export default function LoginPage() {
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -125,8 +125,8 @@ export default function LoginPage() {
                 {...register('password')}
               />
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
-              )}
+                  <p className="text-sm text-destructive">{errors.password.message}</p>
+                )}
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="remember" />
@@ -158,7 +158,7 @@ export default function LoginPage() {
 
           <Button
             variant="outline"
-            className="w-full bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200"
+            className="w-full bg-warning/10 hover:bg-warning/20 text-warning border-warning/50"
             onClick={handleTestUserLogin}
             disabled={isLoading}
           >

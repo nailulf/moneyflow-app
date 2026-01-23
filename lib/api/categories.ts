@@ -125,21 +125,21 @@ export async function initializeDefaultCategories(userId: string, categoryGroups
 
   const defaultCategories: CategoryInsert[] = [
     // Expense categories
-    { user_id: userId, name: 'Food & Dining', color: '#FF6B6B', category_group_id: expenseGroupId, is_custom: false },
-    { user_id: userId, name: 'Transportation', color: '#4ECDC4', category_group_id: expenseGroupId, is_custom: false },
-    { user_id: userId, name: 'Shopping', color: '#45B7D1', category_group_id: expenseGroupId, is_custom: false },
-    { user_id: userId, name: 'Entertainment', color: '#96CEB4', category_group_id: expenseGroupId, is_custom: false },
-    { user_id: userId, name: 'Bills & Utilities', color: '#FFEAA7', category_group_id: expenseGroupId, is_custom: false },
-    { user_id: userId, name: 'Healthcare', color: '#DDA0DD', category_group_id: expenseGroupId, is_custom: false },
-    { user_id: userId, name: 'Education', color: '#98D8C8', category_group_id: expenseGroupId, is_custom: false },
-    { user_id: userId, name: 'Travel', color: '#F7DC6F', category_group_id: expenseGroupId, is_custom: false },
-    { user_id: userId, name: 'Other', color: '#AED6F1', category_group_id: expenseGroupId, is_custom: false },
+    { user_id: userId, name: 'Food & Dining', color: 'hsl(var(--chart-1))', category_group_id: expenseGroupId, is_custom: false },
+    { user_id: userId, name: 'Transportation', color: 'hsl(var(--chart-2))', category_group_id: expenseGroupId, is_custom: false },
+    { user_id: userId, name: 'Shopping', color: 'hsl(var(--chart-3))', category_group_id: expenseGroupId, is_custom: false },
+    { user_id: userId, name: 'Entertainment', color: 'hsl(var(--chart-4))', category_group_id: expenseGroupId, is_custom: false },
+    { user_id: userId, name: 'Bills & Utilities', color: 'hsl(var(--chart-5))', category_group_id: expenseGroupId, is_custom: false },
+    { user_id: userId, name: 'Healthcare', color: 'hsl(var(--primary))', category_group_id: expenseGroupId, is_custom: false },
+    { user_id: userId, name: 'Education', color: 'hsl(var(--secondary))', category_group_id: expenseGroupId, is_custom: false },
+    { user_id: userId, name: 'Travel', color: 'hsl(var(--accent))', category_group_id: expenseGroupId, is_custom: false },
+    { user_id: userId, name: 'Other', color: 'hsl(var(--muted-foreground))', category_group_id: expenseGroupId, is_custom: false },
     // Income category
-    { user_id: userId, name: 'Income', color: '#82E0AA', category_group_id: incomeGroupId, is_custom: false },
+    { user_id: userId, name: 'Income', color: 'hsl(var(--success))', category_group_id: incomeGroupId, is_custom: false },
     // Transfer categories
-    { user_id: userId, name: 'Transfer', color: '#9CA3AF', category_group_id: transferGroupId, is_custom: false },
-    { user_id: userId, name: 'Savings transfer', color: '#6B7280', category_group_id: transferGroupId, is_custom: false },
-    { user_id: userId, name: 'Credit card payment', color: '#4B5563', category_group_id: transferGroupId, is_custom: false }
+    { user_id: userId, name: 'Transfer', color: 'hsl(var(--muted))', category_group_id: transferGroupId, is_custom: false },
+    { user_id: userId, name: 'Savings transfer', color: 'hsl(var(--muted-foreground))', category_group_id: transferGroupId, is_custom: false },
+    { user_id: userId, name: 'Credit card payment', color: 'hsl(var(--destructive))', category_group_id: transferGroupId, is_custom: false }
   ]
 
   // Create categories one by one using the API
@@ -200,7 +200,7 @@ export function convertToGroupData(categories: CategoryDB[]): CategoryGroupData[
       id: 'EXPENSE',
       name: 'Expense',
       type: 'EXPENSE',
-      color: '#EF4444',
+      color: 'hsl(var(--destructive))',
       isDefault: true,
       isActive: true,
       sortOrder: 1,
@@ -210,7 +210,7 @@ export function convertToGroupData(categories: CategoryDB[]): CategoryGroupData[
       id: 'INCOME',
       name: 'Income',
       type: 'INCOME',
-      color: '#10B981',
+      color: 'hsl(var(--success))',
       isDefault: true,
       isActive: true,
       sortOrder: 2,
@@ -223,7 +223,7 @@ export function convertToGroupData(categories: CategoryDB[]): CategoryGroupData[
       id: 'TRANSFER',
       name: 'Transfer',
       type: 'TRANSFER',
-      color: '#6B7280',
+      color: 'hsl(var(--muted-foreground))',
       isDefault: true,
       isActive: true,
       sortOrder: 3,

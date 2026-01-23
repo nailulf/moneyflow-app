@@ -167,7 +167,7 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
         <div className="relative w-full sm:w-64">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search recurring..."
             value={searchTerm}
@@ -190,29 +190,29 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
         </Select>
       </div>
 
-      <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+      <div className="border rounded-lg overflow-hidden bg-card shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[30%] cursor-pointer hover:bg-gray-50" onClick={() => handleSort('description')}>
+              <TableHead className="w-[30%] cursor-pointer hover:bg-muted/50" onClick={() => handleSort('description')}>
                 <div className="flex items-center gap-1">
                   Transaction Name
                   {sortField === 'description' && <ArrowUpDown className="h-3 w-3" />}
                 </div>
               </TableHead>
-              <TableHead className="w-[15%] cursor-pointer hover:bg-gray-50" onClick={() => handleSort('amount')}>
+              <TableHead className="w-[15%] cursor-pointer hover:bg-muted/50" onClick={() => handleSort('amount')}>
                  <div className="flex items-center gap-1">
                   Amount
                   {sortField === 'amount' && <ArrowUpDown className="h-3 w-3" />}
                 </div>
               </TableHead>
-              <TableHead className="w-[15%] cursor-pointer hover:bg-gray-50" onClick={() => handleSort('frequency')}>
+              <TableHead className="w-[15%] cursor-pointer hover:bg-muted/50" onClick={() => handleSort('frequency')}>
                 <div className="flex items-center gap-1">
                   Frequency
                   {sortField === 'frequency' && <ArrowUpDown className="h-3 w-3" />}
                 </div>
               </TableHead>
-              <TableHead className="w-[20%] cursor-pointer hover:bg-gray-50" onClick={() => handleSort('next_date')}>
+              <TableHead className="w-[20%] cursor-pointer hover:bg-muted/50" onClick={() => handleSort('next_date')}>
                 <div className="flex items-center gap-1">
                   Next Scheduled
                   {sortField === 'next_date' && <ArrowUpDown className="h-3 w-3" />}
@@ -225,7 +225,7 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
           <TableBody>
             {paginatedTransactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-gray-500">
+                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                   No recurring transactions found
                 </TableCell>
               </TableRow>
@@ -235,11 +235,11 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
                   <TableCell className="font-medium">
                     <div className="flex flex-col">
                       <span>{transaction.merchant || transaction.description}</span>
-                      <span className="text-xs text-gray-500">{transaction.category_id}</span>
+                      <span className="text-xs text-muted-foreground">{transaction.category_id}</span>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className={transaction.type === 'EXPENSE' ? 'text-red-600' : 'text-green-600'}>
+                    <span className={transaction.type === 'EXPENSE' ? 'text-destructive' : 'text-success'}>
                       {formatCurrency(transaction.amount)}
                     </span>
                   </TableCell>
@@ -249,18 +249,18 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="h-3 w-3" />
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
                       {getNextScheduledDate(transaction).toLocaleDateString()}
                     </div>
                   </TableCell>
                   <TableCell>
                     {transaction.recurring_end_date ? (
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-muted-foreground">
                         Ends {new Date(transaction.recurring_end_date).toLocaleDateString()}
                       </span>
                     ) : (
-                      <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100">
+                      <Badge variant="secondary" className="bg-success/10 text-success hover:bg-success/20">
                         Never Ending
                       </Badge>
                     )}
@@ -273,14 +273,14 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
                         onClick={() => handleEdit(transaction)}
                         title="Edit Configuration"
                       >
-                        <Edit className="h-4 w-4 text-gray-500" />
+                        <Edit className="h-4 w-4 text-muted-foreground" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(transaction.id)}
                         title="Stop Recurring"
-                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -295,7 +295,7 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-muted-foreground">
             Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredTransactions.length)} of {filteredTransactions.length} entries
           </div>
           <div className="flex items-center space-x-2">

@@ -145,9 +145,9 @@ export function TransactionTable({
   }, [categories])
 
   const getCategoryColor = (categoryId: string | null) => {
-    if (!categoryId) return '#6B7280' // Default gray color
+    if (!categoryId) return 'hsl(var(--muted-foreground))' // Default muted color
     const category = categories.find(cat => cat.id === categoryId)
-    return category?.color || '#6B7280'
+    return category?.color || 'hsl(var(--muted-foreground))'
   }
 
   const renderCategoryWithColor = (categoryId: string | null) => {
@@ -385,12 +385,12 @@ export function TransactionTable({
   
   if (!isClient) {
     return (
-      <Card className="bg-white border border-gray-200 shadow-sm">
+      <Card className="bg-card border border-border shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Recent Transactions</CardTitle>
+          <CardTitle className="text-lg font-semibold text-foreground">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-32 text-gray-500">
+          <div className="flex items-center justify-center h-32 text-muted-foreground">
             Loading...
           </div>
         </CardContent>
@@ -406,7 +406,7 @@ export function TransactionTable({
         {/* Header Section */}
         <div className="mb-6">
           <div className="flex justify-between items-center gap-3 mb-4 w-full">
-            <h1 className="text-md font-semibold text-gray-500">TRANSACTIONS</h1>
+            <h1 className="text-md font-semibold text-muted-foreground">TRANSACTIONS</h1>
             <div className="flex items-center">
               <AddTransactionForm onSuccess={() => {
                 transactionContext?.refreshTransactions?.()
@@ -473,18 +473,18 @@ export function TransactionTable({
             
             {/* Right-aligned Search Bar */}
             <div className="relative min-w-0 w-64">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-8 bg-gray-50 border-gray-200 w-full"
+                className="pl-10 h-8 bg-muted/50 border-border w-full"
               />
             </div>
           </div>
           
           {/* Transaction Summary */}
-           <div className="mt-4 text-sm text-gray-600">
+           <div className="mt-4 text-sm text-muted-foreground">
              <span className="font-medium">Total transactions:</span> {filteredTransactions.length} • 
              <span className="font-medium">Date range:</span> {(() => {
                if (filteredTransactions.length === 0) return 'No transactions';
@@ -493,20 +493,20 @@ export function TransactionTable({
                const endDate = dates[dates.length - 1].toLocaleDateString();
                return dates.length === 1 ? startDate : `${startDate} - ${endDate}`;
              })()} • 
-             <span className="font-medium">Total expenses:</span> <span className="text-red-600">{formatCurrency(calculateTotalSpending(filteredTransactions))}</span> • 
-             <span className="font-medium">Total income:</span> <span className="text-green-600">{formatCurrency(calculateTotalIncome(filteredTransactions))}</span> • 
-             <span className="font-medium">Balance:</span> <span className={getTotalBalance(filteredTransactions) >= 0 ? 'text-green-600' : 'text-red-600'}>{formatCurrency(getTotalBalance(filteredTransactions))}</span>
+             <span className="font-medium">Total expenses:</span> <span className="text-destructive">{formatCurrency(calculateTotalSpending(filteredTransactions))}</span> • 
+             <span className="font-medium">Total income:</span> <span className="text-success">{formatCurrency(calculateTotalIncome(filteredTransactions))}</span> • 
+             <span className="font-medium">Balance:</span> <span className={getTotalBalance(filteredTransactions) >= 0 ? 'text-success' : 'text-destructive'}>{formatCurrency(getTotalBalance(filteredTransactions))}</span>
            </div>
         </div>
         
         {/* Table */}
-        <div className="bg-white rounded-lg border border-gray-200">
+        <div className="bg-card rounded-lg border border-border">
           <div className="max-h-[900px] overflow-y-auto">
             <Table>
-              <TableHeader className="sticky top-0 bg-white z-[5]">
-                <TableRow className="border-b border-gray-200">
+              <TableHeader className="sticky top-0 bg-card z-[5]">
+                <TableRow className="border-b border-border">
                   <TableHead 
-                    className="py-4 px-6 text-left font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50 w-[40%]"
+                    className="py-4 px-6 text-left font-medium text-foreground text-sm cursor-pointer hover:bg-muted/50 w-[40%]"
                     onClick={() => handleSort('description')}
                   >
                     <div className="flex items-center gap-2">
@@ -517,7 +517,7 @@ export function TransactionTable({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="py-4 px-6 text-left font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50 w-[25%]"
+                    className="py-4 px-6 text-left font-medium text-foreground text-sm cursor-pointer hover:bg-muted/50 w-[25%]"
                     onClick={() => handleSort('category')}
                   >
                     <div className="flex items-center gap-2">
@@ -528,7 +528,7 @@ export function TransactionTable({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="py-4 px-6 text-right font-medium text-gray-700 text-sm cursor-pointer hover:bg-gray-50 w-[20%]"
+                    className="py-4 px-6 text-right font-medium text-foreground text-sm cursor-pointer hover:bg-muted/50 w-[20%]"
                     onClick={() => handleSort('amount')}
                   >
                     <div className="flex items-center justify-end gap-2">
@@ -538,7 +538,7 @@ export function TransactionTable({
                       )}
                     </div>
                   </TableHead>
-                  <TableHead className="py-4 px-6 text-center font-medium text-gray-700 text-sm w-[15%]">
+                  <TableHead className="py-4 px-6 text-center font-medium text-foreground text-sm w-[15%]">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -546,7 +546,7 @@ export function TransactionTable({
               <TableBody>
               {displayTransactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="py-12 text-center text-gray-500">
+                  <TableCell colSpan={4} className="py-12 text-center text-muted-foreground">
                     No transactions found
                   </TableCell>
                 </TableRow>
@@ -574,18 +574,18 @@ export function TransactionTable({
                     return (
                       <React.Fragment key={`date-${dateString}`}>
                         {/* Date Header Row */}
-                        <TableRow className="bg-gray-50">
-                          <TableCell colSpan={4} className="py-3 px-6 font-medium text-gray-700 text-sm">
+                        <TableRow className="bg-muted/50">
+                          <TableCell colSpan={4} className="py-3 px-6 font-medium text-foreground text-sm">
                             {formattedDate}
                           </TableCell>
                         </TableRow>
                         
                         {/* Transactions for this date */}
                         {displayedDayTransactions.map((transaction) => (
-                          <TableRow key={`transaction-${transaction.id}`} className="border-b border-gray-100 hover:bg-gray-50">
+                          <TableRow key={`transaction-${transaction.id}`} className="border-b border-border hover:bg-muted/50">
                             <TableCell className="py-4 px-6 w-[40%]">
                               <div className="space-y-1">
-                                <div className="text-sm font-medium text-gray-900">
+                                <div className="text-sm font-medium text-foreground">
                                   {transaction.merchant || transaction.description || 'No description'}
                                 </div>
                               </div>
@@ -596,7 +596,7 @@ export function TransactionTable({
                                   className="w-3 h-3 rounded-full" 
                                   style={{ backgroundColor: getCategoryColor(transaction.category_id) }}
                                 />
-                                <span className="text-sm text-gray-900">
+                                <span className="text-sm text-foreground">
                                   {getCategoryName(transaction.category_id)}
                                 </span>
                               </div>
@@ -604,8 +604,8 @@ export function TransactionTable({
                             <TableCell className="py-4 px-6 text-right w-[20%]">
                               <div className={`text-sm font-medium ${
                                 transaction.type === 'INCOME' 
-                                  ? 'text-green-600'
-                                  : 'text-gray-900'
+                                  ? 'text-success'
+                                  : 'text-foreground'
                               }`}>
                                 {transaction.type === 'INCOME' ? '+' : ''}{formatCurrency(Math.abs(transaction.amount))}
                               </div>
@@ -623,17 +623,17 @@ export function TransactionTable({
                                       setIsEditModalOpen(true)
                                     }
                                   }}
-                                  className="h-8 w-8 p-0 hover:bg-gray-100"
+                                  className="h-8 w-8 p-0 hover:bg-muted"
                                 >
-                                  <Edit className="h-4 w-4 text-gray-600" />
+                                  <Edit className="h-4 w-4 text-muted-foreground" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleDeleteTransactionClick(transaction)}
-                                  className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                                 >
-                                  <Trash2 className="h-4 w-4 text-gray-600" />
+                                  <Trash2 className="h-4 w-4 text-muted-foreground" />
                                 </Button>
                               </div>
                             </TableCell>
@@ -653,7 +653,7 @@ export function TransactionTable({
               {displayedCount < filteredTransactions.length && (
                 <div ref={tableEndRef} className="flex justify-center py-4">
                   {isLoadingMore ? (
-                    <div className="flex items-center gap-2 text-gray-500">
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       <span>Loading more transactions...</span>
                     </div>
@@ -670,7 +670,7 @@ export function TransactionTable({
               )}
               
               {displayedCount >= filteredTransactions.length && filteredTransactions.length > 0 && (
-                <div className="text-center py-4 text-gray-500 text-sm">
+                <div className="text-center py-4 text-muted-foreground text-sm">
                   All transactions loaded ({filteredTransactions.length} total)
                 </div>
               )}

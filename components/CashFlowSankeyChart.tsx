@@ -41,11 +41,11 @@ interface SankeyData {
 export default function CashFlowSankeyChart({ transactions, categories, dateRange }: CashFlowSankeyChartProps) {
   // Helper function to get category name and color
   const getCategoryInfo = (categoryId: string | null) => {
-    if (!categoryId) return { name: 'Uncategorized', color: '#6B7280' }
+    if (!categoryId) return { name: 'Uncategorized', color: 'hsl(var(--muted-foreground))' }
     const category = categories.find(cat => cat.id === categoryId)
     return {
       name: category?.name || 'Unknown Category',
-      color: category?.color || '#6B7280'
+      color: category?.color || 'hsl(var(--muted-foreground))'
     }
   }
 
@@ -198,22 +198,22 @@ export default function CashFlowSankeyChart({ transactions, categories, dateRang
           node: {
             // Enhanced color scheme for three-layer hierarchy
             colors: [
-              '#059669', // Layer 1: Total Income (emerald-600)
-              '#dc2626', // Layer 2: Total Expense (red-600)
-              '#2563eb', // Layer 2: Total Transfer (blue-600)
-              '#f59e0b', // Layer 3: Groceries (amber-500)
-              '#ef4444', // Layer 3: Eating Out (red-500)
-              '#8b5cf6', // Layer 3: Billings (violet-500)
-              '#6b7280', // Layer 3: Other Expenses (gray-500)
-              '#10b981', // Layer 3: Savings (emerald-500)
-              '#3b82f6', // Layer 3: Current Account (blue-500)
-              '#ec4899', // Layer 3: Investments (pink-500)
-              '#64748b'  // Layer 3: Other Transfers (slate-500)
+              'hsl(var(--success))', // Layer 1: Total Income
+              'hsl(var(--destructive))', // Layer 2: Total Expense
+              'hsl(var(--primary))', // Layer 2: Total Transfer
+              'hsl(var(--chart-4))', // Layer 3: Groceries
+              'hsl(var(--destructive))', // Layer 3: Eating Out
+              'hsl(var(--chart-5))', // Layer 3: Billings
+              'hsl(var(--muted-foreground))', // Layer 3: Other Expenses
+              'hsl(var(--success))', // Layer 3: Savings
+              'hsl(var(--primary))', // Layer 3: Current Account
+              'hsl(var(--chart-3))', // Layer 3: Investments
+              'hsl(var(--muted-foreground))'  // Layer 3: Other Transfers
             ],
             label: {
               fontName: 'system-ui, -apple-system, sans-serif',
               fontSize: isMobile ? 11 : 13,
-              color: '#1f2937',
+              color: 'hsl(var(--foreground))',
               bold: true
             },
             nodePadding: isMobile ? 80 : 100,
@@ -223,8 +223,8 @@ export default function CashFlowSankeyChart({ transactions, categories, dateRang
           link: {
             colorMode: 'gradient',
             colors: [
-              '#059669', '#dc2626', '#2563eb', '#f59e0b', '#ef4444', 
-              '#8b5cf6', '#6b7280', '#10b981', '#3b82f6', '#ec4899', '#64748b'
+              'hsl(var(--success))', 'hsl(var(--destructive))', 'hsl(var(--primary))', 'hsl(var(--chart-4))', 'hsl(var(--destructive))', 
+              'hsl(var(--chart-5))', 'hsl(var(--muted-foreground))', 'hsl(var(--success))', 'hsl(var(--primary))', 'hsl(var(--chart-3))', 'hsl(var(--muted-foreground))'
             ],
             fillOpacity: 0.7,
             strokeOpacity: 0.3
@@ -236,7 +236,7 @@ export default function CashFlowSankeyChart({ transactions, categories, dateRang
           textStyle: {
             fontSize: 13,
             fontName: 'system-ui, -apple-system, sans-serif',
-            color: '#1f2937'
+            color: 'hsl(var(--foreground))'
           },
           showColorCode: true
         }

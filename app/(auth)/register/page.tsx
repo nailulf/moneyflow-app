@@ -92,7 +92,7 @@ export default function RegisterPage() {
                 {...register('fullName')}
               />
               {errors.fullName && (
-                <p className="text-sm text-red-500">{errors.fullName.message}</p>
+                <p className="text-sm text-destructive">{errors.fullName.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -104,7 +104,7 @@ export default function RegisterPage() {
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -115,7 +115,7 @@ export default function RegisterPage() {
                 {...register('password')}
               />
               {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
+                <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -126,7 +126,7 @@ export default function RegisterPage() {
                 {...register('confirmPassword')}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
               )}
             </div>
             <Button className="w-full" type="submit" disabled={isLoading}>

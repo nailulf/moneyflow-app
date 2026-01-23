@@ -105,7 +105,7 @@ export function BudgetProvider({
       category: bc.category?.name || 'Unknown',
       budgetAmount: bc.allocated_amount,
       spentAmount: bc.spent_amount,
-      color: bc.category?.color || '#6B7280',
+      color: bc.category?.color || 'hsl(var(--muted-foreground))',
       status: calculateBudgetStatus(bc.spent_amount, bc.allocated_amount)
     })) || []
   }))

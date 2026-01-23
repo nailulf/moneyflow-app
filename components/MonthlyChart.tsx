@@ -21,15 +21,15 @@ interface MonthlyChartProps {
 const chartConfig = {
   income: {
     label: "Income",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--success))",
   },
   expenses: {
     label: "Expenses",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(var(--destructive))",
   },
   net: {
     label: "Net",
-    color: "hsl(var(--chart-3))",
+    color: "hsl(var(--primary))",
   },
 } satisfies ChartConfig
 
@@ -38,12 +38,12 @@ export function MonthlyChart({ transactions, type, title, displayMonths = 6 }: M
   
   if (monthlyData.length === 0) {
     return (
-      <Card className="bg-white border border-gray-200 shadow-sm">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">{title}</CardTitle>
+          <CardTitle className="text-lg font-semibold text-foreground">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-64 text-gray-500">
+          <div className="flex items-center justify-center h-64 text-muted-foreground">
             No data available
           </div>
         </CardContent>
@@ -52,9 +52,9 @@ export function MonthlyChart({ transactions, type, title, displayMonths = 6 }: M
   }
 
   return (
-    <Card className="bg-white border border-gray-200 shadow-sm">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-gray-900">{title}</CardTitle>
+        <CardTitle className="text-lg font-semibold text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-80 w-full">

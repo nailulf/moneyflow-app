@@ -59,7 +59,7 @@ export function CreateBudget({
           category,
           budgetAmount: parseFloat(amount),
           spentAmount: 0,
-          color: CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || '#6b7280'
+          color: CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || 'hsl(var(--muted-foreground))'
         }))
     }
 

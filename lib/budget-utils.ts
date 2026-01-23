@@ -58,8 +58,8 @@ export function getBudgetCategoryColor(
 ): string {
   const isCustomCategory = !Object.keys(CATEGORY_COLORS).includes(categoryName)
   return isCustomCategory 
-    ? (customColor || '#6B7280')
-    : CATEGORY_COLORS[categoryName as keyof typeof CATEGORY_COLORS] || '#AED6F1'
+    ? (customColor || 'hsl(var(--muted-foreground))')
+    : CATEGORY_COLORS[categoryName as keyof typeof CATEGORY_COLORS] || 'hsl(var(--muted-foreground))'
 }
 
 /**

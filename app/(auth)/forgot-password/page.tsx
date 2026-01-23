@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
             <Button className="w-full" type="submit" disabled={isLoading}>

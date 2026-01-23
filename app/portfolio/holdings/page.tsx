@@ -95,7 +95,7 @@ export default function PortfolioHoldingsPage() {
                         <div className="font-semibold">${holding.totalValue.toLocaleString()}</div>
                         <div className="text-sm text-muted-foreground">${holding.currentPrice.toFixed(2)} per share</div>
                         <div className={`text-sm font-medium ${
-                          holding.dayChangePercent >= 0 ? 'text-green-600' : 'text-red-600'
+                          holding.dayChangePercent >= 0 ? 'text-success' : 'text-destructive'
                         }`}>
                           {holding.dayChangePercent >= 0 ? '+' : ''}{holding.dayChangePercent.toFixed(2)}%
                           ({holding.dayChangePercent >= 0 ? '+' : ''}${holding.dayChange.toFixed(2)})
@@ -125,7 +125,7 @@ export default function PortfolioHoldingsPage() {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Day Change</span>
                     <span className={`font-medium ${
-                      totalDayChangePercent >= 0 ? 'text-green-600' : 'text-red-600'
+                      totalDayChangePercent >= 0 ? 'text-success' : 'text-destructive'
                     }`}>
                       {totalDayChangePercent >= 0 ? '+' : ''}{totalDayChangePercent.toFixed(2)}%
                     </span>
@@ -152,7 +152,7 @@ export default function PortfolioHoldingsPage() {
                     .map((holding) => (
                       <div key={holding.symbol} className="flex justify-between items-center">
                         <span className="text-sm font-medium">{holding.symbol}</span>
-                        <span className="text-sm text-green-600">+{holding.dayChangePercent.toFixed(2)}%</span>
+                        <span className="text-sm text-success">+{holding.dayChangePercent.toFixed(2)}%</span>
                       </div>
                     ))
                   }

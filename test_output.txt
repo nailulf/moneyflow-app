@@ -1,0 +1,957 @@
+
+> moneyflow-app@0.1.0 test
+> jest __tests__/components/UnifiedStatementProcessor.test.tsx
+
+  console.error
+    Auto-categorize error: Error: Categorization failed
+        at handleAutoCategorize (/Users/nailul.fadloil/Documents/Personal spaces/moneyflow-app/components/UnifiedStatementProcessor.tsx:271:26)
+
+      290 |       toast.success(`Categorized ${assignments.length} transactions`)
+      291 |     } catch (error) {
+    > 292 |       console.error('Auto-categorize error:', error)
+          |               ^
+      293 |       toast.error('Failed to auto-categorize')
+      294 |     } finally {
+      295 |       setIsCategorizing(false)
+
+      at handleAutoCategorize (components/UnifiedStatementProcessor.tsx:292:15)
+
+  console.error
+    Failed to parse error response: TypeError: Cannot read properties of undefined (reading 'get')
+        at handleUpload (/Users/nailul.fadloil/Documents/Personal spaces/moneyflow-app/components/UnifiedStatementProcessor.tsx:161:48)
+
+      169 |           }
+      170 |         } catch (e) {
+    > 171 |           console.error('Failed to parse error response:', e);
+          |                   ^
+      172 |           errorMessage = `Server Error (${response.status})`;
+      173 |         }
+      174 |         throw new Error(errorMessage);
+
+      at handleUpload (components/UnifiedStatementProcessor.tsx:171:19)
+
+  console.error
+    Upload error: Error: Server Error (undefined)
+        at handleUpload (/Users/nailul.fadloil/Documents/Personal spaces/moneyflow-app/components/UnifiedStatementProcessor.tsx:174:15)
+
+      195 |       }
+      196 |     } catch (error) {
+    > 197 |       console.error('Upload error:', error)
+          |               ^
+      198 |       toast.error(error instanceof Error ? error.message : 'Upload failed')
+      199 |       setUploadProgress(0)
+      200 |     } finally {
+
+      at handleUpload (components/UnifiedStatementProcessor.tsx:197:15)
+
+FAIL __tests__/components/UnifiedStatementProcessor.test.tsx
+  UnifiedStatementProcessor
+    ✓ renders upload state initially (28 ms)
+    ✓ handles file upload and transitions to review modal (60 ms)
+    ✓ allows editing transaction fields (38 ms)
+    ✓ validates required fields (31 ms)
+    ✓ handles bulk selection (63 ms)
+    ✕ filters transactions (1031 ms)
+    ✓ handles auto-categorization trigger (39 ms)
+    ✕ handles import submission successfully (22 ms)
+    ✕ handles import failure (22 ms)
+    ✓ applies correct color tokens for amounts (29 ms)
+    ✓ handles detailed transaction editing (49 ms)
+    ✕ handles modal close cancellation (31 ms)
+    ✓ handles invalid currency gracefully (18 ms)
+    ✓ handles large transaction lists (load test) (1342 ms)
+    ✓ handles drag and drop (6 ms)
+    ✓ handles single item deselection (42 ms)
+    ✕ toggles AI checkbox (4 ms)
+    ✓ opens file selector on click (3 ms)
+    ✓ handles auto-categorization failure (48 ms)
+    ✓ prevents import with no selection (31 ms)
+    ✓ selects all transactions when "Select All" is clicked from unchecked state (39 ms)
+    ✓ filters transactions by text search (28 ms)
+    ✕ handles upload failure (1009 ms)
+
+  ● UnifiedStatementProcessor › filters transactions
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 3
+    Received array:  [<input checked="" role="checkbox" type="checkbox" />, <input checked="" role="checkbox" type="checkbox" />, <input checked="" role="checkbox" type="checkbox" />]
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"w-full h-full border-0 shadow-none"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"p-0 h-full"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"space-y-6 p-4"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer border-primary bg-primary/5"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33maccept[39m=[32m".pdf"[39m
+                    [33mclass[39m=[32m"hidden"[39m
+                    [33mtype[39m=[32m"file"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex flex-col items-center gap-2"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"icon-file-text"[39m
+                    [36m/>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"font-medium"[39m
+                    [36m>[39m
+                      [0mtest.pdf[0m
+                    [36m</p>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
+                    [36m>[39m
+                      [0m0.00[0m
+                      [0m MB[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"space-y-4"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"grid gap-2"[39m
+                  [36m>[39m
+                    [36m<label>[39m
+                      [0mSelect Account[0m
+                    [36m</label>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"mock-select"[39m
+                      [33mdata-value[39m=[32m"INCOME"[39m
+                    [36m>[39m
+                      [36m<input[39m
+                        [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                        [33mstyle[39m=[32m"display: none;"[39m
+                        [33mvalue[39m=[32m"INCOME"[39m
+                      [36m/>[39m
+                      [36m<div>[39m
+                        [36m<div>[39m
+                          [0mChoose account...[0m
+                        [36m</div>[39m
+                      [36m</div>[39m
+                      [36m<div>[39m
+                        [36m<div[39m
+                          [33mdata-testid[39m=[32m"select-item-acc1"[39m
+                          [33mdata-value[39m=[32m"acc1"[39m
+                        [36m>[39m
+                          [0mBank A[0m
+                        [36m</div>[39m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-center space-x-2"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mchecked[39m=[32m""[39m
+                      [33mrole[39m=[32m"checkbox"[39m
+                      [33mtype[39m=[32m"checkbox"[39m
+                    [36m/>[39m
+                    [36m<label[39m
+                      [33mclass[39m=[32m"cursor-pointer"[39m
+                      [33mfor[39m=[32m"use-ai"[39m
+                    [36m>[39m
+                      [0mUse AI for enhanced extraction & categorization[0m
+                    [36m</label>[39m
+                  [36m</div>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"w-full"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"icon-upload"[39m
+                    [36m/>[39m
+                    [0mUpload & Process[0m
+                  [36m</button>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mdata-testid[39m=[32m"dialog"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mdata-testid[39m=[32m"dialog-close"[39m
+            [36m>[39m
+              [0mClose Dialog[0m
+            [36m</button>[39m
+            [36m<div>[39m
+              [36m<div>[39m
+                [36m<div>[39m
+                  [0mReview Transactions[0m
+                [36m</div>[39m
+                [36m<div>[39m
+                  [0m2[0m
+                  [0m of [0m
+                  [0m2[0m
+                  [0m selected. Review and edit before importing.[0m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-b bg-muted/20 shrink-0"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center space-x-2"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"w-20 font-medium"[39m
+                  [36m>[39m
+                    [0mAccount:[0m
+                  [36m</label>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-select"[39m
+                    [33mdata-value[39m=[32m"INCOME"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                      [33mstyle[39m=[32m"display: none;"[39m
+                      [33mvalue[39m=[32m"INCOME"[39m
+                    [36m/>[39m
+                    [36m<div>[39m
+                      [36m<div>[39m
+                        [0mChoose account...[0m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                    [36m<div>[39m
+                      [36m<div[39m
+                        [33mdata-testid[39m=[32m"select-item-acc1"[39m
+                        [33mdata-value[39m=[32m"acc1"[39m
+                      [36m>[39m
+                        [0mBank A[0m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center space-x-2"[39m
+                [36m>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"w-20 font-medium"[39m
+                  [36m>[39m
+                    [0mCurrency:[0m
+                  [36m</label>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-select"[39m
+                    [33mdata-value[39m=[32m"IDR"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                      [33mstyle[39m=[32m"display: none;"[39m
+                      [33mvalue[39m=[32m"IDR"[39m
+                    [36m/>[39m
+                    [36m<div>[39m
+                      [36m<div>[39m
+                        [0mSelectValue[0m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                    [36m<div>[39m
+                      [36m<div[39m
+                  ...
+
+      268 |     await waitFor(() => {
+      269 |         const checkboxes = within(dialog).getAllByRole('checkbox')
+    > 270 |         expect(checkboxes).toHaveLength(1) // Header only
+          |                            ^
+      271 |     })
+      272 |     
+      273 |     // Filter to EXPENSE
+
+      at __tests__/components/UnifiedStatementProcessor.test.tsx:270:28
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:520:19)
+
+  ● UnifiedStatementProcessor › handles import submission successfully
+
+    TestingLibraryElementError: Unable to find an element with the text: /Add to Transaction List/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full h-full border-0 shadow-none"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"p-0 h-full"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"space-y-6 p-4"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer border-primary bg-primary/5"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33maccept[39m=[32m".pdf"[39m
+                  [33mclass[39m=[32m"hidden"[39m
+                  [33mtype[39m=[32m"file"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex flex-col items-center gap-2"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"icon-file-text"[39m
+                  [36m/>[39m
+                  [36m<p[39m
+                    [33mclass[39m=[32m"font-medium"[39m
+                  [36m>[39m
+                    [0mtest.pdf[0m
+                  [36m</p>[39m
+                  [36m<p[39m
+                    [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
+                  [36m>[39m
+                    [0m0.00[0m
+                    [0m MB[0m
+                  [36m</p>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"space-y-4"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"grid gap-2"[39m
+                [36m>[39m
+                  [36m<label>[39m
+                    [0mSelect Account[0m
+                  [36m</label>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-select"[39m
+                    [33mdata-value[39m=[32m"acc1"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                      [33mstyle[39m=[32m"display: none;"[39m
+                      [33mvalue[39m=[32m"acc1"[39m
+                    [36m/>[39m
+                    [36m<div>[39m
+                      [36m<div>[39m
+                        [0mChoose account...[0m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                    [36m<div>[39m
+                      [36m<div[39m
+                        [33mdata-testid[39m=[32m"select-item-acc1"[39m
+                        [33mdata-value[39m=[32m"acc1"[39m
+                      [36m>[39m
+                        [0mBank A[0m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center space-x-2"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mchecked[39m=[32m""[39m
+                    [33mrole[39m=[32m"checkbox"[39m
+                    [33mtype[39m=[32m"checkbox"[39m
+                  [36m/>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"cursor-pointer"[39m
+                    [33mfor[39m=[32m"use-ai"[39m
+                  [36m>[39m
+                    [0mUse AI for enhanced extraction & categorization[0m
+                  [36m</label>[39m
+                [36m</div>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"icon-upload"[39m
+                  [36m/>[39m
+                  [0mUpload & Process[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"dialog"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mdata-testid[39m=[32m"dialog-close"[39m
+          [36m>[39m
+            [0mClose Dialog[0m
+          [36m</button>[39m
+          [36m<div>[39m
+            [36m<div>[39m
+              [36m<div>[39m
+                [0mReview Transactions[0m
+              [36m</div>[39m
+              [36m<div>[39m
+                [0m2[0m
+                [0m of [0m
+                [0m2[0m
+                [0m selected. Review and edit before importing.[0m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-b bg-muted/20 shrink-0"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center space-x-2"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"w-20 font-medium"[39m
+                [36m>[39m
+                  [0mAccount:[0m
+                [36m</label>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-select"[39m
+                  [33mdata-value[39m=[32m"acc1"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                    [33mstyle[39m=[32m"display: none;"[39m
+                    [33mvalue[39m=[32m"acc1"[39m
+                  [36m/>[39m
+                  [36m<div>[39m
+                    [36m<div>[39m
+                      [0mChoose account...[0m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"select-item-acc1"[39m
+                      [33mdata-value[39m=[32m"acc1"[39m
+                    [36m>[39m
+                      [0mBank A[0m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center space-x-2"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"w-20 font-medium"[39m
+                [36m>[39m
+                  [0mCurrency:[0m
+                [36m</label>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-select"[39m
+                  [33mdata-value[39m=[32m"IDR"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                    [33mstyle[39m=[32m"display: none;"[39m
+                    [33mvalue[39m=[32m"IDR"[39m
+                  [36m/>[39m
+                  [36m<div>[39m
+                    [36m<div>[39m
+                      [0mSelectValue[0m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"select-item-IDR"[39m
+                      [33mdata-value[39m=[32m"IDR"[39m
+                    [36m>[39m
+                      [0mIDR - Indonesian Rupiah[0m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"select-item-USD"[39m
+                      [33mdata-value[39m=[32m"USD"[39m
+                    [36m>[39...
+
+      334 |     await uploadFile();
+      335 |
+    > 336 |     const importBtn = screen.getByText(/Add to Transaction List/i)
+          |                              ^
+      337 |     fireEvent.click(importBtn)
+      338 |
+      339 |     await waitFor(() => {
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (__tests__/components/UnifiedStatementProcessor.test.tsx:336:30)
+
+  ● UnifiedStatementProcessor › handles import failure
+
+    TestingLibraryElementError: Unable to find an element with the text: /Add to Transaction List/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full h-full border-0 shadow-none"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"p-0 h-full"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"space-y-6 p-4"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer border-primary bg-primary/5"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33maccept[39m=[32m".pdf"[39m
+                  [33mclass[39m=[32m"hidden"[39m
+                  [33mtype[39m=[32m"file"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex flex-col items-center gap-2"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"icon-file-text"[39m
+                  [36m/>[39m
+                  [36m<p[39m
+                    [33mclass[39m=[32m"font-medium"[39m
+                  [36m>[39m
+                    [0mtest.pdf[0m
+                  [36m</p>[39m
+                  [36m<p[39m
+                    [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
+                  [36m>[39m
+                    [0m0.00[0m
+                    [0m MB[0m
+                  [36m</p>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"space-y-4"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"grid gap-2"[39m
+                [36m>[39m
+                  [36m<label>[39m
+                    [0mSelect Account[0m
+                  [36m</label>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-select"[39m
+                    [33mdata-value[39m=[32m"acc1"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                      [33mstyle[39m=[32m"display: none;"[39m
+                      [33mvalue[39m=[32m"acc1"[39m
+                    [36m/>[39m
+                    [36m<div>[39m
+                      [36m<div>[39m
+                        [0mChoose account...[0m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                    [36m<div>[39m
+                      [36m<div[39m
+                        [33mdata-testid[39m=[32m"select-item-acc1"[39m
+                        [33mdata-value[39m=[32m"acc1"[39m
+                      [36m>[39m
+                        [0mBank A[0m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center space-x-2"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mchecked[39m=[32m""[39m
+                    [33mrole[39m=[32m"checkbox"[39m
+                    [33mtype[39m=[32m"checkbox"[39m
+                  [36m/>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"cursor-pointer"[39m
+                    [33mfor[39m=[32m"use-ai"[39m
+                  [36m>[39m
+                    [0mUse AI for enhanced extraction & categorization[0m
+                  [36m</label>[39m
+                [36m</div>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"icon-upload"[39m
+                  [36m/>[39m
+                  [0mUpload & Process[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mdata-testid[39m=[32m"dialog"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mdata-testid[39m=[32m"dialog-close"[39m
+          [36m>[39m
+            [0mClose Dialog[0m
+          [36m</button>[39m
+          [36m<div>[39m
+            [36m<div>[39m
+              [36m<div>[39m
+                [0mReview Transactions[0m
+              [36m</div>[39m
+              [36m<div>[39m
+                [0m2[0m
+                [0m of [0m
+                [0m2[0m
+                [0m selected. Review and edit before importing.[0m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-b bg-muted/20 shrink-0"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center space-x-2"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"w-20 font-medium"[39m
+                [36m>[39m
+                  [0mAccount:[0m
+                [36m</label>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-select"[39m
+                  [33mdata-value[39m=[32m"acc1"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                    [33mstyle[39m=[32m"display: none;"[39m
+                    [33mvalue[39m=[32m"acc1"[39m
+                  [36m/>[39m
+                  [36m<div>[39m
+                    [36m<div>[39m
+                      [0mChoose account...[0m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"select-item-acc1"[39m
+                      [33mdata-value[39m=[32m"acc1"[39m
+                    [36m>[39m
+                      [0mBank A[0m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center space-x-2"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"w-20 font-medium"[39m
+                [36m>[39m
+                  [0mCurrency:[0m
+                [36m</label>[39m
+                [36m<div[39m
+                  [33mdata-testid[39m=[32m"mock-select"[39m
+                  [33mdata-value[39m=[32m"IDR"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                    [33mstyle[39m=[32m"display: none;"[39m
+                    [33mvalue[39m=[32m"IDR"[39m
+                  [36m/>[39m
+                  [36m<div>[39m
+                    [36m<div>[39m
+                      [0mSelectValue[0m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"select-item-IDR"[39m
+                      [33mdata-value[39m=[32m"IDR"[39m
+                    [36m>[39m
+                      [0mIDR - Indonesian Rupiah[0m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"select-item-USD"[39m
+                      [33mdata-value[39m=[32m"USD"[39m
+                    [36m>[39...
+
+      369 |     await uploadFile();
+      370 |
+    > 371 |     const importBtn = screen.getByText(/Add to Transaction List/i)
+          |                              ^
+      372 |     fireEvent.click(importBtn)
+      373 |
+      374 |     await waitFor(() => {
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (__tests__/components/UnifiedStatementProcessor.test.tsx:371:30)
+
+  ● UnifiedStatementProcessor › handles modal close cancellation
+
+    expect(element).not.toBeInTheDocument()
+
+    expected document not to contain element, found <div data-testid="dialog"><button data-testid="dialog-close">Close Dialog</button><div><div><div>Review Transactions</div><div>2 of 2 selected. Review and edit before importing.</div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-b bg-muted/20 shrink-0"><div class="flex items-center space-x-2"><label class="w-20 font-medium">Account:</label><div data-testid="mock-select" data-value="acc1"><input data-testid="select-trigger-input" style="display: none;" value="acc1" /><div><div>Choose account...</div></div><div><div data-testid="select-item-acc1" data-value="acc1">Bank A</div></div></div></div><div class="flex items-center space-x-2"><label class="w-20 font-medium">Currency:</label><div data-testid="mock-select" data-value="IDR"><input data-testid="select-trigger-input" style="display: none;" value="IDR" /><div><div>SelectValue</div></div><div><div data-testid="select-item-IDR" data-value="IDR">IDR - Indonesian Rupiah</div><div data-testid="select-item-USD" data-value="USD">USD - US Dollar</div><div data-testid="select-item-EUR" data-value="EUR">EUR - Euro</div><div data-testid="select-item-SGD" data-value="SGD">SGD - Singapore Dollar</div><div data-testid="select-item-JPY" data-value="JPY">JPY - Japanese Yen</div><div data-testid="select-item-GBP" data-value="GBP">GBP - British Pound</div><div data-testid="select-item-AUD" data-value="AUD">AUD - Australian Dollar</div></div></div></div></div><div class="flex flex-wrap gap-2 items-center p-4 border-b bg-muted/10 shrink-0"><div class="relative flex-1 min-w-[200px]"><div data-testid="icon-search" /><input class="pl-8 bg-background" placeholder="Search description or merchant..." value="" /></div><div data-testid="mock-select" data-value="ALL"><input data-testid="select-trigger-input" style="display: none;" value="ALL" /><div><div>SelectValue</div></div><div><div data-testid="select-item-ALL" data-value="ALL">All Types</div><div data-testid="select-item-INCOME" data-value="INCOME">Income Only</div><div data-testid="select-item-EXPENSE" data-value="EXPENSE">Expense Only</div></div></div><button><div data-testid="icon-refresh" />Re-categorize</button></div><div class="flex-1 overflow-auto bg-background border-t"><div class="sticky top-0 z-10 grid grid-cols-[40px_130px_100px_minmax(200px,1.5fr)_minmax(150px,1fr)_minmax(150px,1fr)_160px_120px] gap-2 p-3 bg-muted/90 backdrop-blur border-b font-medium text-xs uppercase text-muted-foreground items-center min-w-[1000px]"><div class="flex items-center justify-center"><input checked="" role="checkbox" type="checkbox" /></div><div>Date</div><div>Type</div><div>Description</div><div>Merchant</div><div>Notes</div><div>Category</div><div class="text-right">Amount</div></div><div class="min-w-[1000px]"><div class="grid grid-cols-[40px_130px_100px_minmax(200px,1.5fr)_minmax(150px,1fr)_minmax(150px,1fr)_160px_120px] gap-2 p-2 border-b transition-colors text-sm items-center hover:bg-muted/30 bg-primary/5"><div class="flex items-center justify-center"><input checked="" role="checkbox" type="checkbox" /></div><div><input class="h-8 w-full" type="date" value="2023-01-01" /></div><div><div data-testid="mock-select" data-value="EXPENSE"><input data-testid="select-trigger-input" style="display: none;" value="EXPENSE" /><div><div>SelectValue</div></div><div><div data-testid="select-item-INCOME" data-value="INCOME">Income</div><div data-testid="select-item-EXPENSE" data-value="EXPENSE">Expense</div><div data-testid="select-item-TRANSFER" data-value="TRANSFER">Transfer</div></div></div></div><div><input class="h-8 w-full" placeholder="Description" value="Transaction 1" /></div><div><input class="h-8 w-full" placeholder="Merchant" value="" /></div><div><input class="h-8 w-full" placeholder="Notes" value="" /></div><div><div data-testid="mock-select" data-value="cat1"><input data-testid="select-trigger-input" style="display: none;" value="cat1" /><div><div>Category</div></div><div><div data-testid="select-item-uncategorized" data-value="uncategorized"><span class="flex items-center gap-2"><span … />Uncategorized</span></div><hr /><div><div>Expenses</div><div data-testid="select-item-cat1" data-value="cat1"><span … /></div><div data-testid="select-item-cat2" data-value="cat2"><span … /></div></div></div></div></div><div class="text-right"><div class="flex flex-col items-end"><input class="h-8 w-24 text-right mb-1" step="0.01" type="number" value="100" /><span class="text-xs font-medium text-destructive">-Rp 100,00</span></div></div></div><div class="grid grid-cols-[40px_130px_100px_minmax(200px,1.5fr)_minmax(150px,1fr)_minmax(150px,1fr)_160px_120px] gap-2 p-2 border-b transition-colors text-sm items-center hover:bg-muted/30 bg-primary/5"><div class="flex items-center justify-center"><input checked="" role="checkbox" type="checkbox" /></div><div><input class="h-8 w-full" type="date" value="2023-01-02" /></div><div><div data-testid="mock-select" data-value="EXPENSE"><input data-testid="select-trigger-input" style="display: none;" value="EXPENSE" /><div><div>SelectValue</div></div><div><div data-testid="select-item-INCOME" data-value="INCOME">Income</div><div data-testid="select-item-EXPENSE" data-value="EXPENSE">Expense</div><div data-testid="select-item-TRANSFER" data-value="TRANSFER">Transfer</div></div></div></div><div><input class="h-8 w-full" placeholder="Description" value="Transaction 2" /></div><div><input class="h-8 w-full" placeholder="Merchant" value="" /></div><div><input class="h-8 w-full" placeholder="Notes" value="" /></div><div><div data-testid="mock-select" data-value="uncategorized"><input data-testid="select-trigger-input" style="display: none;" value="uncategorized" /><div><div>Category</div></div><div><div data-testid="select-item-uncategorized" data-value="uncategorized"><span class="flex items-center gap-2"><span … />Uncategorized</span></div><hr /><div><div>Expenses</div><div data-testid="select-item-cat1" data-value="cat1"><span … /></div><div data-testid="select-item-cat2" data-value="cat2"><span … /></div></div></div></div></div><div class="text-right"><div class="flex flex-col items-end"><input class="h-8 w-24 text-right mb-1" step="0.01" type="number" value="200" /><span class="text-xs font-medium text-destructive">-Rp 200,00</span></div></div></div></div></div><div><div class="flex justify-between w-full items-center"><div class="text-sm text-muted-foreground flex gap-4"><span>Selected: 2</span><span>Total: -Rp 300,00</span></div><div class="flex gap-2"><button>Cancel</button><button><div data-testid="icon-save" />Add transactions</button></div></div></div></div></div> instead
+
+      470 |     
+      471 |     // Should be closed
+    > 472 |     expect(screen.queryByTestId('dialog')).not.toBeInTheDocument()
+          |                                                ^
+      473 |   })
+      474 |
+      475 |   it('handles invalid currency gracefully', async () => {
+
+      at Object.<anonymous> (__tests__/components/UnifiedStatementProcessor.test.tsx:472:48)
+
+  ● UnifiedStatementProcessor › toggles AI checkbox
+
+    TestingLibraryElementError: Found a label with the text of: /Use AI/i, however no form control was found associated to that label. Make sure you're using the "for" attribute or "aria-labelledby" attribute correctly.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-full h-full border-0 shadow-none"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"p-0 h-full"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"space-y-6 p-4"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer border-muted-foreground/25 hover:border-primary/50"[39m
+              [36m>[39m
+                [36m<input[39m
+                  [33maccept[39m=[32m".pdf"[39m
+                  [33mclass[39m=[32m"hidden"[39m
+                  [33mtype[39m=[32m"file"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex flex-col items-center gap-2"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"icon-upload"[39m
+                  [36m/>[39m
+                  [36m<p[39m
+                    [33mclass[39m=[32m"font-medium"[39m
+                  [36m>[39m
+                    [0mDrop your PDF statement here[0m
+                  [36m</p>[39m
+                  [36m<p[39m
+                    [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
+                  [36m>[39m
+                    [0mor click to browse[0m
+                  [36m</p>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"space-y-4"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"grid gap-2"[39m
+                [36m>[39m
+                  [36m<label>[39m
+                    [0mSelect Account[0m
+                  [36m</label>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"mock-select"[39m
+                    [33mdata-value[39m=[32m""[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                      [33mstyle[39m=[32m"display: none;"[39m
+                      [33mvalue[39m=[32m""[39m
+                    [36m/>[39m
+                    [36m<div>[39m
+                      [36m<div>[39m
+                        [0mChoose account...[0m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                    [36m<div>[39m
+                      [36m<div[39m
+                        [33mdata-testid[39m=[32m"select-item-acc1"[39m
+                        [33mdata-value[39m=[32m"acc1"[39m
+                      [36m>[39m
+                        [0mBank A[0m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center space-x-2"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33mchecked[39m=[32m""[39m
+                    [33mrole[39m=[32m"checkbox"[39m
+                    [33mtype[39m=[32m"checkbox"[39m
+                  [36m/>[39m
+                  [36m<label[39m
+                    [33mclass[39m=[32m"cursor-pointer"[39m
+                    [33mfor[39m=[32m"use-ai"[39m
+                  [36m>[39m
+                    [0mUse AI for enhanced extraction & categorization[0m
+                  [36m</label>[39m
+                [36m</div>[39m
+                [36m<button[39m
+                  [33mclass[39m=[32m"w-full"[39m
+                  [33mdisabled[39m=[32m""[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mdata-testid[39m=[32m"icon-upload"[39m
+                  [36m/>[39m
+                  [0mUpload & Process[0m
+                [36m</button>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      593 |   it('toggles AI checkbox', () => {
+      594 |     render(<UnifiedStatementProcessor />)
+    > 595 |     const checkbox = screen.getByLabelText(/Use AI/i)
+          |                             ^
+      596 |     
+      597 |     expect(checkbox).toBeChecked() // Default true
+      598 |     
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at getAllByLabelText (node_modules/@testing-library/dom/dist/queries/label-text.js:108:40)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (__tests__/components/UnifiedStatementProcessor.test.tsx:595:29)
+
+  ● UnifiedStatementProcessor › handles upload failure
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "Upload failed"
+    Received: "Server Error (undefined)"
+
+    Number of calls: 1
+
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"w-full h-full border-0 shadow-none"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"p-0 h-full"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"space-y-6 p-4"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer border-primary bg-primary/5"[39m
+                [36m>[39m
+                  [36m<input[39m
+                    [33maccept[39m=[32m".pdf"[39m
+                    [33mclass[39m=[32m"hidden"[39m
+                    [33mtype[39m=[32m"file"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex flex-col items-center gap-2"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"icon-file-text"[39m
+                    [36m/>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"font-medium"[39m
+                    [36m>[39m
+                      [0mtest.pdf[0m
+                    [36m</p>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"text-sm text-muted-foreground"[39m
+                    [36m>[39m
+                      [0m0.00[0m
+                      [0m MB[0m
+                    [36m</p>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"space-y-4"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"grid gap-2"[39m
+                  [36m>[39m
+                    [36m<label>[39m
+                      [0mSelect Account[0m
+                    [36m</label>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"mock-select"[39m
+                      [33mdata-value[39m=[32m"acc1"[39m
+                    [36m>[39m
+                      [36m<input[39m
+                        [33mdata-testid[39m=[32m"select-trigger-input"[39m
+                        [33mstyle[39m=[32m"display: none;"[39m
+                        [33mvalue[39m=[32m"acc1"[39m
+                      [36m/>[39m
+                      [36m<div>[39m
+                        [36m<div>[39m
+                          [0mChoose account...[0m
+                        [36m</div>[39m
+                      [36m</div>[39m
+                      [36m<div>[39m
+                        [36m<div[39m
+                          [33mdata-testid[39m=[32m"select-item-acc1"[39m
+                          [33mdata-value[39m=[32m"acc1"[39m
+                        [36m>[39m
+                          [0mBank A[0m
+                        [36m</div>[39m
+                      [36m</div>[39m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-center space-x-2"[39m
+                  [36m>[39m
+                    [36m<input[39m
+                      [33mchecked[39m=[32m""[39m
+                      [33mrole[39m=[32m"checkbox"[39m
+                      [33mtype[39m=[32m"checkbox"[39m
+                    [36m/>[39m
+                    [36m<label[39m
+                      [33mclass[39m=[32m"cursor-pointer"[39m
+                      [33mfor[39m=[32m"use-ai"[39m
+                    [36m>[39m
+                      [0mUse AI for enhanced extraction & categorization[0m
+                    [36m</label>[39m
+                  [36m</div>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"w-full"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mdata-testid[39m=[32m"icon-upload"[39m
+                    [36m/>[39m
+                    [0mUpload & Process[0m
+                  [36m</button>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</body>[39m
+    [36m</html>[39m
+
+      718 |     await waitFor(() => {
+      719 |       const toast = require('sonner').toast
+    > 720 |       expect(toast.error).toHaveBeenCalledWith('Upload failed')
+          |                           ^
+      721 |     })
+      722 |   })
+      723 |
+
+      at __tests__/components/UnifiedStatementProcessor.test.tsx:720:27
+      at runWithExpensiveErrorDiagnosticsDisabled (node_modules/@testing-library/dom/dist/config.js:47:12)
+      at checkCallback (node_modules/@testing-library/dom/dist/wait-for.js:124:77)
+      at checkRealTimersCallback (node_modules/@testing-library/dom/dist/wait-for.js:118:16)
+      at Timeout.task [as _onTimeout] (node_modules/jsdom/lib/jsdom/browser/Window.js:520:19)
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 17 passed, 23 total
+Snapshots:   0 total
+Time:        4.653 s, estimated 5 s
+Ran all test suites matching __tests__/components/UnifiedStatementProcessor.test.tsx.

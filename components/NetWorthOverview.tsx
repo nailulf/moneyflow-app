@@ -139,9 +139,9 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
     return (
       <Card className="w-full">
         <CardContent className="p-6">
-          <div className="flex items-center justify-center h-96 text-red-500">
-            <span>Error: {error || accountsError}</span>
-          </div>
+          <div className="flex items-center justify-center h-96 text-destructive">
+      <span>Error: {error || accountsError}</span>
+    </div>
         </CardContent>
       </Card>
     )
@@ -174,7 +174,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
               ) : netWorthData ? (
                 <>
                   <CardTitle className="text-2xl">{formatCurrency(netWorthData.currentNetWorth)}</CardTitle>
-                  <div className={cn("flex items-center text-sm", isPositiveChange ? "text-green-600" : "text-red-600")}>
+                  <div className={cn("flex items-center text-sm", isPositiveChange ? "text-success" : "text-destructive")}>
                     {isPositiveChange ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
                     {formatCurrency(Math.abs(netWorthChange.amount))} ({Math.abs(netWorthChange.percentage).toFixed(1)}%)
                   </div>
@@ -266,7 +266,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
             ) : (
               <>
                 <div className="text-2xl font-bold">{formatCurrency(assetsTotal - liabilitiesTotal)}</div>
-                <div className={cn("flex items-center text-sm", isPositiveChange ? "text-green-600" : "text-red-600")}>
+                <div className={cn("flex items-center text-sm", isPositiveChange ? "text-success" : "text-destructive")}>
                   {isPositiveChange ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
                   {formatCurrency(Math.abs(netWorthChange.amount))} ({Math.abs(netWorthChange.percentage).toFixed(1)}%)
                 </div>
@@ -281,7 +281,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
             {(loading || accountsLoading || isPending) ? (
               <Skeleton className="h-8 w-32" />
             ) : (
-              <div className="text-2xl font-bold text-green-600">{formatCurrency(assetsTotal)}</div>
+              <div className="text-2xl font-bold text-success">{formatCurrency(assetsTotal)}</div>
             )}
           </CardContent>
         </Card>
@@ -292,7 +292,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
             {(loading || accountsLoading || isPending) ? (
               <Skeleton className="h-8 w-32" />
             ) : (
-              <div className="text-2xl font-bold text-red-600">{formatCurrency(liabilitiesTotal)}</div>
+              <div className="text-2xl font-bold text-destructive">{formatCurrency(liabilitiesTotal)}</div>
             )}
           </CardContent>
         </Card>
@@ -385,7 +385,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
               <span className="text-lg font-bold">Liabilities</span>
-              <span className="text-lg font-bold text-red-600">
+              <span className="text-lg font-bold text-destructive">
                 {(loading || accountsLoading || isPending) ? (
                   <Skeleton className="h-6 w-20" />
                 ) : (

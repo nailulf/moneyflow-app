@@ -213,10 +213,10 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
             <Input
               type="date"
               {...register('date')}
-              className={errors.date ? 'border-red-500' : ''}
+              className={errors.date ? 'border-destructive' : ''}
             />
             {errors.date && (
-              <p className="text-sm text-red-500">{errors.date.message}</p>
+              <p className="text-sm text-destructive">{errors.date.message}</p>
             )}
           </div>
 
@@ -225,10 +225,10 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
             <Input
               placeholder="Enter description"
               {...register('description')}
-              className={errors.description ? 'border-red-500' : ''}
+              className={errors.description ? 'border-destructive' : ''}
             />
             {errors.description && (
-              <p className="text-sm text-red-500">{errors.description.message}</p>
+              <p className="text-sm text-destructive">{errors.description.message}</p>
             )}
           </div>
 
@@ -239,12 +239,12 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
               step="0.01"
               placeholder="0.00"
               {...register('amount', { valueAsNumber: true })}
-              className={errors.amount ? 'border-red-500' : ''}
+              className={errors.amount ? 'border-destructive' : ''}
             />
             {errors.amount && (
-              <p className="text-sm text-red-500">{errors.amount.message}</p>
+              <p className="text-sm text-destructive">{errors.amount.message}</p>
             )}
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Use positive numbers for income, negative for expenses
             </p>
           </div>
@@ -259,7 +259,7 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
               }}
               onOpenChange={setIsAnySelectOpen}
             >
-              <SelectTrigger className={errors.type ? 'border-red-500' : ''} data-testid="type-select-trigger">
+              <SelectTrigger className={errors.type ? 'border-destructive' : ''} data-testid="type-select-trigger">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
@@ -269,7 +269,7 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
               </SelectContent>
             </Select>
             {errors.type && (
-              <p className="text-sm text-red-500">{errors.type.message}</p>
+              <p className="text-sm text-destructive">{errors.type.message}</p>
             )}
           </div>
 
@@ -277,10 +277,10 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
             <label className="text-sm font-medium">Category</label>
             <div className="flex justify-between items-center">
                {categoriesError && (
-                 <p className="text-xs text-red-500 mb-1">Error: {categoriesError}</p>
+                 <p className="text-xs text-destructive mb-1">Error: {categoriesError}</p>
                )}
                {process.env.NODE_ENV === 'development' && (
-                 <span className="text-[10px] text-gray-400">
+                 <span className="text-[10px] text-muted-foreground">
                    {categories.length} cats / User: {user?.id?.slice(0, 8)}...
                  </span>
                )}
@@ -294,7 +294,7 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
               disabled={categoriesLoading || !hasDynamicCategories}
               onOpenChange={setIsAnySelectOpen}
             >
-              <SelectTrigger className={errors.category_id ? 'border-red-500' : ''} data-testid="category-select-trigger">
+              <SelectTrigger className={errors.category_id ? 'border-destructive' : ''} data-testid="category-select-trigger">
                 <SelectValue placeholder={
                   !hasDynamicCategories 
                     ? (categoriesLoading ? 'Loading categories...' : `No categories for ${selectedType?.toLowerCase() || 'this type'}`)
@@ -305,18 +305,24 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
                 {hasDynamicCategories ? (
                   dynamicCategoryItems.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id} data-testid={`category-option-${cat.id}`}>
-                      {cat.name}
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full flex-shrink-0" 
+                          style={{ backgroundColor: cat.color || 'hsl(var(--muted-foreground))' }}
+                        />
+                        {cat.name}
+                      </div>
                     </SelectItem>
                   ))
                 ) : (
-                  <div className="px-2 py-1.5 text-sm text-gray-500">
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
                     {categoriesLoading ? 'Loading categories...' : `No categories available for ${selectedType?.toLowerCase() || 'this type'}`}
                   </div>
                 )}
               </SelectContent>
             </Select>
             {errors.category_id && (
-              <p className="text-sm text-red-500">{errors.category_id.message}</p>
+              <p className="text-sm text-destructive">{errors.category_id.message}</p>
             )}
           </div>
 
@@ -331,7 +337,7 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
               disabled={accountsLoading}
               onOpenChange={setIsAnySelectOpen}
             >
-              <SelectTrigger className={errors.account_id ? 'border-red-500' : ''} data-testid="account-select-trigger">
+              <SelectTrigger className={errors.account_id ? 'border-destructive' : ''} data-testid="account-select-trigger">
                 <SelectValue placeholder={accountsLoading ? 'Loading...' : 'Select account'} />
               </SelectTrigger>
               <SelectContent>
@@ -342,14 +348,14 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
                     </SelectItem>
                   ))
                 ) : (
-                  <div className="px-2 py-1.5 text-sm text-gray-500">
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
                     No accounts available
                   </div>
                 )}
               </SelectContent>
             </Select>
             {errors.account_id && (
-              <p className="text-sm text-red-500">{errors.account_id.message}</p>
+              <p className="text-sm text-destructive">{errors.account_id.message}</p>
             )}
           </div>
 
@@ -361,13 +367,13 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
             />
           </div>
 
-          <div className="space-y-4 border rounded-lg p-4 bg-gray-50">
+          <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 id="is_recurring"
                 {...register('is_recurring')}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
               />
               <label htmlFor="is_recurring" className="text-sm font-medium">
                 Recurring Transaction
@@ -375,7 +381,7 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
             </div>
             
             {isRecurring && (
-              <div className="space-y-4 pl-6 border-l-2 border-blue-200 ml-1">
+              <div className="space-y-4 pl-6 border-l-2 border-primary/20 ml-1">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Frequency</label>
                   <Select
@@ -406,11 +412,11 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
                         type="radio"
                         id="period_continuous"
                         name="period_type"
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded-full"
                         checked={!watch('recurring_end_date')}
                         onChange={() => setValue('recurring_end_date', null)}
                       />
-                      <label htmlFor="period_continuous" className="text-sm text-gray-700">
+                      <label htmlFor="period_continuous" className="text-sm text-muted-foreground">
                         Continuous (No end date)
                       </label>
                     </div>
@@ -419,7 +425,7 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
                         type="radio"
                         id="period_ended"
                         name="period_type"
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded-full"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded-full"
                         checked={!!watch('recurring_end_date')}
                         onChange={() => {
                           // Set default end date to one year from now if not set
@@ -430,7 +436,7 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
                           }
                         }}
                       />
-                      <label htmlFor="period_ended" className="text-sm text-gray-700">
+                      <label htmlFor="period_ended" className="text-sm text-muted-foreground">
                         End Date
                       </label>
                     </div>

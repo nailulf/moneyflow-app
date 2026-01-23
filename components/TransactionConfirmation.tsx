@@ -26,6 +26,7 @@ interface ParsedTransaction {
   description: string
   amount: number
   category?: string
+  category_id?: string
   account?: string
   reference?: string
   isDuplicate?: boolean
@@ -51,6 +52,17 @@ export default function TransactionConfirmation({
   isLoading = false
 }: TransactionConfirmationProps) {
   const [showAllTransactions, setShowAllTransactions] = useState(false)
+  const [page, setPage] = useState(1)
+  const itemsPerPage = 10
+  
+  const totalPages = Math.ceil(transactions.length / itemsPerPage)
+  
+  const paginatedTransactions = useMemo(() => {
+    const start = (page - 1) * itemsPerPage
+    return transactions.slice(start, start + itemsPerPage)
+  }, [transactions, page])
+
+  const displayTransactions = showAllTransactions ? paginatedTransactions : transactions.slice(0, 10)
 
   // Calculate summary statistics
   const summary = useMemo(() => {
@@ -88,8 +100,6 @@ export default function TransactionConfirmation({
     }
   }, [transactions])
 
-  const displayTransactions = showAllTransactions ? transactions : transactions.slice(0, 10)
-
   return (
     <div className="space-y-6">
       <Card>
@@ -105,43 +115,43 @@ export default function TransactionConfirmation({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="p-4">
                 <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-blue-600" />
+                  <FileText className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-semibold">{summary.totalTransactions}</div>
-                    <div className="text-sm text-gray-600">Transactions</div>
+                    <div className="text-sm text-muted-foreground">Transactions</div>
                   </div>
                 </div>
               </Card>
               <Card className="p-4">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
+                  <TrendingUp className="h-5 w-5 text-success" />
                   <div>
-                    <div className="font-semibold text-green-600">
+                    <div className="font-semibold text-success">
                       {formatCurrency(summary.totalCredits)}
                     </div>
-                    <div className="text-sm text-gray-600">Credits ({summary.creditCount})</div>
+                    <div className="text-sm text-muted-foreground">Credits ({summary.creditCount})</div>
                   </div>
                 </div>
               </Card>
               <Card className="p-4">
                 <div className="flex items-center gap-2">
-                  <TrendingDown className="h-5 w-5 text-red-600" />
+                  <TrendingDown className="h-5 w-5 text-destructive" />
                   <div>
-                    <div className="font-semibold text-red-600">
+                    <div className="font-semibold text-destructive">
                       {formatCurrency(summary.totalDebits)}
                     </div>
-                    <div className="text-sm text-gray-600">Debits ({summary.debitCount})</div>
+                    <div className="text-sm text-muted-foreground">Debits ({summary.debitCount})</div>
                   </div>
                 </div>
               </Card>
               <Card className="p-4">
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-purple-600" />
+                  <DollarSign className="h-5 w-5 text-primary" />
                   <div>
-                    <div className={`font-semibold ${summary.totalAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={`font-semibold ${summary.totalAmount >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {formatCurrency(summary.totalAmount)}
                     </div>
-                    <div className="text-sm text-gray-600">Net Amount</div>
+                    <div className="text-sm text-muted-foreground">Net Amount</div>
                   </div>
                 </div>
               </Card>
@@ -150,16 +160,16 @@ export default function TransactionConfirmation({
             {/* Account Information */}
             <Card className="p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
+                <Calendar className="h-5 w-5 text-primary" />
                 <span className="font-semibold">Import Details</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-600">Target Account:</span>
+                  <span className="text-muted-foreground">Target Account:</span>
                   <span className="ml-2 font-medium">{accountName || accountId}</span>
                 </div>
                 <div>
-                  <span className="text-gray-600">Date Range:</span>
+                  <span className="text-muted-foreground">Date Range:</span>
                   <span className="ml-2 font-medium">
                     {summary.dateRange.earliest.toLocaleDateString()} - {summary.dateRange.latest.toLocaleDateString()}
                   </span>
@@ -218,16 +228,16 @@ export default function TransactionConfirmation({
                             {transaction.description}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right font-mono">
-                          <span className={transaction.amount < 0 ? 'text-red-600' : 'text-green-600'}>
+                        <TableCell className="text-right">
+                          <span className={transaction.amount < 0 ? 'text-destructive' : 'text-success'}>
                             {formatCurrency(transaction.amount)}
                           </span>
                         </TableCell>
                         <TableCell>
-                          {transaction.category ? (
-                            <Badge variant="outline">{transaction.category}</Badge>
+                          {transaction.category_id ? (
+                            <Badge variant="outline">{transaction.category_id}</Badge>
                           ) : (
-                            <span className="text-gray-400">Uncategorized</span>
+                            <span className="text-muted-foreground">Uncategorized</span>
                           )}
                         </TableCell>
                       </TableRow>
@@ -235,9 +245,28 @@ export default function TransactionConfirmation({
                   </TableBody>
                 </Table>
                 
-                {!showAllTransactions && transactions.length > 10 && (
-                  <div className="p-3 text-center text-sm text-gray-600 border-t">
-                    Showing 10 of {transactions.length} transactions
+                {totalPages > 1 && (
+                  <div className="p-3 text-center text-sm text-muted-foreground border-t">
+                    Showing {paginatedTransactions.length} of {transactions.length} transactions
+                    <div className="flex justify-center gap-2 mt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                      >
+                        Previous
+                      </Button>
+                      <span className="py-1">Page {page} of {totalPages}</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages}
+                      >
+                        Next
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -255,7 +284,7 @@ export default function TransactionConfirmation({
                     You are about to import {summary.totalTransactions} transactions 
                     into {accountName || 'the selected account'}. This action cannot be undone.
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     Please review the transaction details above and click "Import Transactions" to proceed.
                   </div>
                 </div>
