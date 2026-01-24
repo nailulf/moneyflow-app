@@ -1,8 +1,3 @@
 {
-  "crons": [
-    {
-      "path": "/api/recurring-transactions",
-      "schedule": "0 0 * * *"
-    }
-  ]
+  "_comment": "Vercel Cron Jobs require a Pro plan or higher. We use GitHub Actions instead (see .github/workflows/recurring-transactions.yml)"
 }

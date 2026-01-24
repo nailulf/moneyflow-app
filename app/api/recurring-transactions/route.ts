@@ -3,23 +3,41 @@ import { createServerComponentClient } from '@/lib/supabase'
 import { processRecurringTransactions } from '@/lib/recurring-processor'
 
 // This endpoint processes recurring transactions and generates new ones
-// It should be called by a cron job on a daily basis
+// It should be called by a cron job (GitHub Actions) on a daily basis
 export async function POST(request: NextRequest) {
   try {
     // Verify the request is from an authorized source (cron job)
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
-    
-    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!cronSecret) {
+      console.error('CRON_SECRET environment variable is not configured')
+      return NextResponse.json({
+        error: 'Server configuration error',
+        details: 'CRON_SECRET is not set. Please configure it in your environment variables.'
+      }, { status: 500 })
+    }
+
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      console.error('Unauthorized request - invalid or missing authorization header')
+      return NextResponse.json({
+        error: 'Unauthorized',
+        details: 'Invalid or missing authorization token'
+      }, { status: 401 })
     }
 
     // Check if we're in build time
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+      console.error('Supabase environment variables not configured')
+      return NextResponse.json({
+        error: 'Database configuration error',
+        details: 'Supabase environment variables not configured'
+      }, { status: 500 })
     }
 
+    console.log('Processing recurring transactions...')
     const result = await processRecurringTransactions()
+    console.log(`Processed ${result.processedCount} recurring transactions`)
 
     return NextResponse.json({
       ...result,
@@ -27,7 +45,10 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('API Error:', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 })
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Internal server error',
+      details: error instanceof Error ? error.stack : undefined
+    }, { status: 500 })
   }
 }
 
