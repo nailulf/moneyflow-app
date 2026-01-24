@@ -1,6 +1,5 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
 import { SummaryCards } from '@/components/SummaryCards'
 import SpendingVsBudgetChart from '@/components/SpendingVsBudgetChart'
 import { TransactionTable } from '@/components/TransactionTable'
@@ -12,7 +11,6 @@ import { useBudgets } from '@/contexts/BudgetContext'
 
 import { CategoryManager } from '@/components/CategoryManager'
 import { AccountManager } from '@/components/AccountManager'
-import { AccountProvider } from '@/contexts/AccountContext'
 
 
 export default function SpendingPage() {
