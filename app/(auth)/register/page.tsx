@@ -1,31 +1,30 @@
+
 'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { z } from 'zod'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Info } from 'lucide-react'
+import { PasswordInput } from '@/components/ui/password-input'
+import { AuthErrorMessage } from '@/components/auth/auth-error-message'
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
+  verificationConsent: z.boolean().refine(val => val === true, {
+    message: "You must acknowledge the email verification requirement"
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -36,18 +35,28 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 export default function RegisterPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [authError, setAuthError] = useState<any>(null)
   const supabase = createClient()
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      verificationConsent: false,
+    },
   })
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true)
+    setAuthError(null)
     try {
       const { error } = await supabase.auth.signUp({
         email: data.email,
@@ -65,90 +74,125 @@ export default function RegisterPage() {
       }
 
       toast.success('Registration successful! Please check your email to verify your account.')
-      router.push('/login')
+      router.push(`/verify-email?email=${encodeURIComponent(data.email)}`)
     } catch (error: any) {
-      toast.error(error.message || 'Failed to register')
-    } finally {
+      setAuthError(error)
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <Card className="overflow-hidden">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-          <CardDescription>
-            Enter your details below to create your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col items-start gap-2">
+        <h1 className="text-3xl font-serif text-auth-sidebar-foreground">Create an account</h1>
+        <p className="text-auth-sidebar-foreground/60">
+          Enter your details below to create your account
+        </p>
+      </div>
+
+      <div className="grid gap-6">
+        <AuthErrorMessage error={authError} />
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="fullName" className="text-auth-sidebar-foreground/80">Full Name</Label>
               <Input
                 id="fullName"
                 placeholder="John Doe"
+                className="bg-white/10 border-white/20 text-auth-sidebar-foreground placeholder:text-white/40 rounded-full h-12 px-6 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-auth-accent"
                 {...register('fullName')}
               />
               {errors.fullName && (
-                <p className="text-sm text-destructive">{errors.fullName.message}</p>
+                <p className="text-sm text-[#ff6b6b]">{errors.fullName.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="grid gap-2">
+              <Label htmlFor="email" className="text-auth-sidebar-foreground/80">Email</Label>
               <Input
                 id="email"
                 placeholder="m@example.com"
                 type="email"
+                className="bg-white/10 border-white/20 text-auth-sidebar-foreground placeholder:text-white/40 rounded-full h-12 px-6 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-auth-accent"
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-[#ff6b6b]">{errors.email.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
+            <div className="grid gap-2">
+              <Label htmlFor="password" className="text-auth-sidebar-foreground/80">Password</Label>
+              <PasswordInput
                 id="password"
-                type="password"
+                className="bg-white/10 border-white/20 text-auth-sidebar-foreground placeholder:text-white/40 rounded-full h-12 px-6 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-auth-accent"
                 {...register('password')}
               />
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-sm text-[#ff6b6b]">{errors.password.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
+            <div className="grid gap-2">
+              <Label htmlFor="confirmPassword" className="text-auth-sidebar-foreground/80">Confirm Password</Label>
+              <PasswordInput
                 id="confirmPassword"
-                type="password"
+                className="bg-white/10 border-white/20 text-auth-sidebar-foreground placeholder:text-white/40 rounded-full h-12 px-6 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-auth-accent"
                 {...register('confirmPassword')}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-[#ff6b6b]">{errors.confirmPassword.message}</p>
               )}
             </div>
-            <Button className="w-full" type="submit" disabled={isLoading}>
+            
+            <div className="rounded-xl bg-white/10 border border-white/10 p-4">
+              <div className="flex gap-3 text-sm text-auth-sidebar-foreground/90">
+                <Info className="h-5 w-5 shrink-0 text-auth-accent" />
+                <p className="leading-relaxed">
+                  We&apos;ll send a verification link to your email address. You&apos;ll need to click it before you can sign in.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-3">
+              <Controller
+                control={control}
+                name="verificationConsent"
+                render={({ field }) => (
+                  <Checkbox 
+                    id="verificationConsent" 
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="border-white/40 data-[state=checked]:bg-auth-accent data-[state=checked]:text-auth-accent-foreground data-[state=checked]:border-auth-accent mt-0.5"
+                  />
+                )}
+              />
+              <div className="grid gap-1.5 leading-none">
+                <label
+                  htmlFor="verificationConsent"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-auth-sidebar-foreground/80"
+                >
+                  I understand that I will need to verify my email address to access my account.
+                </label>
+                {errors.verificationConsent && (
+                  <p className="text-sm text-[#ff6b6b]">{errors.verificationConsent.message}</p>
+                )}
+              </div>
+            </div>
+            
+            <Button className="w-full h-12 rounded-full bg-auth-accent text-auth-accent-foreground hover:bg-auth-accent/90 font-medium text-base mt-2" type="submit" disabled={isLoading}>
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
               Sign Up
             </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <div className="text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline">
-              Sign in
-            </Link>
           </div>
-        </CardFooter>
-      </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        </form>
+      </div>
+
+      <div className="text-center text-sm text-auth-sidebar-foreground/60">
+        Already have an account?{" "}
+        <Link href="/login" className="text-auth-accent hover:text-auth-accent/90 underline underline-offset-4">
+          Sign in
+        </Link>
       </div>
     </div>
   )

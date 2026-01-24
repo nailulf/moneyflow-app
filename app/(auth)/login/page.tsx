@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState } from 'react'
@@ -10,17 +11,10 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { AuthErrorMessage } from '@/components/auth/auth-error-message'
+import { PasswordInput } from '@/components/ui/password-input'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -32,6 +26,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [authError, setAuthError] = useState<any>(null)
   const supabase = createClient()
 
   const {
@@ -44,6 +39,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true)
+    setAuthError(null)
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
@@ -58,14 +54,19 @@ export default function LoginPage() {
       router.push('/')
       router.refresh()
     } catch (error: any) {
-      toast.error(error.message || 'Failed to login')
-    } finally {
+      setAuthError(error)
+      if (error.message?.includes('Email not confirmed')) {
+        setTimeout(() => {
+          router.push(`/verify-email?email=${encodeURIComponent(data.email)}`)
+        }, 2000)
+      }
       setIsLoading(false)
     }
   }
 
   const handleTestUserLogin = async () => {
     setIsLoading(true)
+    setAuthError(null)
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: 'test@moneyflow.com',
@@ -80,110 +81,95 @@ export default function LoginPage() {
       router.push('/')
       router.refresh()
     } catch (error: any) {
-      toast.error('Failed to login as Test User. Make sure the test user exists.')
+      setAuthError(error)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <Card className="overflow-hidden">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
-            Login to your MoneyFlow account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col items-start gap-2">
+        <h1 className="text-3xl font-serif text-white">Welcome back</h1>
+        <p className="text-white/60">
+          Enter your email below to login to your account
+        </p>
+      </div>
+      
+      <div className="grid gap-6">
+        <AuthErrorMessage error={authError} />
+        
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="email" className="text-auth-sidebar-foreground/80">Email</Label>
               <Input
                 id="email"
-                placeholder="m@example.com"
                 type="email"
+                placeholder="m@example.com"
+                className="bg-white/10 border-white/20 text-auth-sidebar-foreground placeholder:text-white/40 rounded-full h-12 px-6 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-auth-accent"
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-sm text-[#ff6b6b]">{errors.email.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password" className="text-auth-sidebar-foreground/80">Password</Label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm font-medium text-primary hover:underline"
+                  className="ml-auto text-sm text-auth-accent hover:text-auth-accent/90 underline-offset-4 hover:underline"
                 >
-                  Forgot password?
+                  Forgot your password?
                 </Link>
               </div>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
+                className="bg-white/10 border-white/20 text-auth-sidebar-foreground placeholder:text-white/40 rounded-full h-12 px-6 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-auth-accent"
                 {...register('password')}
               />
               {errors.password && (
-                  <p className="text-sm text-destructive">{errors.password.message}</p>
-                )}
+                <p className="text-sm text-[#ff6b6b]">{errors.password.message}</p>
+              )}
             </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="remember" />
-              <label
-                htmlFor="remember"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Remember me
-              </label>
-            </div>
-            <Button className="w-full" type="submit" disabled={isLoading}>
+            
+            <Button type="submit" className="w-full h-12 rounded-full bg-auth-accent text-auth-accent-foreground hover:bg-auth-accent/90 font-medium text-base mt-2" disabled={isLoading}>
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
-              Sign In
+              Login
             </Button>
-          </form>
+          </div>
+        </form>
 
-          {(process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') && (
-            <>
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                variant="outline"
-                className="w-full bg-warning/10 hover:bg-warning/20 text-warning border-warning/50"
-                onClick={handleTestUserLogin}
-                disabled={isLoading}
-              >
-                {isLoading ? (
+        {(process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') && (
+          <>
+            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-white/20">
+              <span className="relative z-10 bg-auth-sidebar px-2 text-auth-sidebar-foreground/60">
+                Or continue with
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              className="w-full h-12 rounded-full bg-transparent border-white/20 text-auth-sidebar-foreground hover:bg-white/10 hover:text-white"
+              onClick={handleTestUserLogin}
+              disabled={isLoading}
+            >
+               {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Test User Bypass
-              </Button>
-            </>
-          )}
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <div className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-primary hover:underline">
-              Sign up
-            </Link>
-          </div>
-        </CardFooter>
-      </Card>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+              Test User Bypass
+            </Button>
+          </>
+        )}
+      </div>
+      
+      <div className="text-center text-sm text-auth-sidebar-foreground/60">
+        Don&apos;t have an account?{" "}
+        <Link href="/register" className="text-auth-accent hover:text-auth-accent/90 underline underline-offset-4">
+          Sign up
+        </Link>
       </div>
     </div>
   )

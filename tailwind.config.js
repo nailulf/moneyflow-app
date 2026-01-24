@@ -66,6 +66,14 @@ module.exports = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
+  			},
+  			auth: {
+  				sidebar: '#205781',
+  				'sidebar-foreground': '#FFFFFF',
+  				card: '#F6F8D5',
+  				'card-foreground': '#205781',
+  				accent: '#98D2C0',
+  				'accent-foreground': '#205781'
   			}
   		},
   		borderRadius: {

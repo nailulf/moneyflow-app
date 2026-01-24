@@ -35,7 +35,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   }
 
   // If we are on auth pages, don't show the sidebar layout
-  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth')) {
+  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth') || pathname.startsWith('/verify-email')) {
     return <>{children}</>
   }
 
