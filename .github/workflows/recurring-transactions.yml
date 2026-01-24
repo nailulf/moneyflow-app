@@ -26,15 +26,20 @@ jobs:
             exit 1
           fi
 
-          echo "Sending request to: ${{ secrets.APP_URL }}/api/recurring-transactions"
+          # Strip trailing slash from APP_URL if present
+          APP_URL="${{ secrets.APP_URL }}"
+          APP_URL="${APP_URL%/}"
 
-          response=$(curl -X POST "${{ secrets.APP_URL }}/api/recurring-transactions" \
+          echo "Sending request to: ${APP_URL}/api/recurring-transactions"
+
+          response=$(curl -X POST "${APP_URL}/api/recurring-transactions" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             -w "\n%{http_code}" \
             -s \
-            -f) || {
-            echo "Error: curl command failed with exit code $?"
+            -L) || {
+            curl_exit_code=$?
+            echo "Error: curl command failed with exit code $curl_exit_code"
             echo "This usually means:"
             echo "  - Exit code 3: URL is malformed (check APP_URL format)"
             echo "  - Exit code 6: Could not resolve host"
@@ -52,6 +57,13 @@ jobs:
 
           if [ "$http_code" -ne 200 ]; then
             echo "Error: Request failed with status $http_code"
+            if [ "$http_code" -eq 401 ]; then
+              echo "💡 Authorization failed. Check that CRON_SECRET matches in both GitHub and Vercel."
+            elif [ "$http_code" -eq 500 ]; then
+              echo "💡 Server error. Check Vercel function logs for details."
+            elif [ "$http_code" -eq 308 ] || [ "$http_code" -eq 301 ]; then
+              echo "💡 Redirect detected. Make sure APP_URL has no trailing slash."
+            fi
             exit 1
           fi
 
