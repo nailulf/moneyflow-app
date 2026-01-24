@@ -1,5 +1,5 @@
 
-import { GalleryVerticalEnd, Receipt, Banknote, CreditCard, Users, FileText, Send } from "lucide-react"
+import { GalleryVerticalEnd, Receipt, Banknote, CreditCard, Users, FileText, Send, ChartBar, HelpingHand, Coins, Waves, WavesIcon, Star } from "lucide-react"
 
 export default function AuthLayout({
   children,
@@ -36,21 +36,24 @@ export default function AuthLayout({
           <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.1)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.1)_50%,rgba(255,255,255,0.1)_75%,transparent_75%,transparent)] bg-[length:64px_64px] opacity-10 pointer-events-none"></div>
           
           <h2 className="relative text-4xl md:text-5xl lg:text-6xl font-serif text-auth-accent-foreground mb-16 leading-tight max-w-3xl">
-            The expense management app that does it all, for every business.
+            Know where your money goes—and where it can take you.
           </h2>
+          {/* <h3 className="relative text-4xl md:text-5xl lg:text-6xl font-serif text-auth-accent-foreground mb-16 leading-tight max-w-3xl">
+            See every expense clearly, so your money feels under control.
+            </h3> */}
 
           {/* Icons Grid */}
           <div className="relative grid grid-cols-3 gap-6 md:gap-8 max-w-3xl">
-            <FeatureIcon icon={Receipt} label="Track receipts" />
-            <FeatureIcon icon={Banknote} label="Manage expenses" />
-            <FeatureIcon icon={CreditCard} label="Corporate cards" />
-            <FeatureIcon icon={Users} label="Reimburse employees" />
-            <FeatureIcon icon={Send} label="Send invoices" />
-            <FeatureIcon icon={FileText} label="Pay bills" />
+            <FeatureIcon icon={Receipt} label="Upload Expenses" />
+            <FeatureIcon icon={Banknote} label="Manage Budgets" />
+            <FeatureIcon icon={WavesIcon} label="Cash Flow Clarity" />
+            <FeatureIcon icon={Coins} label="Networth Tracker" />
+            <FeatureIcon icon={HelpingHand} label="Connect CFP" />
+            <FeatureIcon icon={Star} label="AI powered" />
           </div>
 
           <p className="relative mt-16 text-auth-accent-foreground text-lg font-medium opacity-90 max-w-2xl">
-            Save yourself, your team, and your company time and money. Get started with MoneyFlow today.
+            See every expense clearly, so your money feels under control. Get started with MoneyFlow today.
           </p>
         </div>
       </div>
