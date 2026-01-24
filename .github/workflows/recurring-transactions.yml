@@ -13,21 +13,46 @@ jobs:
     steps:
       - name: Trigger recurring transactions processing
         run: |
+          # Validate environment variables
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "Error: APP_URL secret is not set"
+            echo "Please add APP_URL to your GitHub repository secrets"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "Error: CRON_SECRET secret is not set"
+            echo "Please add CRON_SECRET to your GitHub repository secrets"
+            exit 1
+          fi
+
+          echo "Sending request to: ${{ secrets.APP_URL }}/api/recurring-transactions"
+
           response=$(curl -X POST "${{ secrets.APP_URL }}/api/recurring-transactions" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -H "Content-Type: application/json" \
             -w "\n%{http_code}" \
-            -s)
+            -s \
+            -f) || {
+            echo "Error: curl command failed with exit code $?"
+            echo "This usually means:"
+            echo "  - Exit code 3: URL is malformed (check APP_URL format)"
+            echo "  - Exit code 6: Could not resolve host"
+            echo "  - Exit code 7: Failed to connect to host"
+            echo "  - Exit code 22: HTTP error (400+ status code)"
+            exit 1
+          }
 
           http_code=$(echo "$response" | tail -n 1)
           body=$(echo "$response" | sed '$d')
 
           echo "HTTP Status: $http_code"
-          echo "Response: $body"
+          echo "Response Body:"
+          echo "$body"
 
           if [ "$http_code" -ne 200 ]; then
             echo "Error: Request failed with status $http_code"
             exit 1
           fi
 
-          echo "Successfully processed recurring transactions"
+          echo "✅ Successfully processed recurring transactions"
