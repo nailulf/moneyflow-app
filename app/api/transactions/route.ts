@@ -299,7 +299,7 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       console.error('Error updating transaction:', error)
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: 'Failed to update transaction',
         details: error.details,
         message: error.message,
@@ -308,6 +308,61 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json(data)
+  } catch (error) {
+    console.error('API Error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'Transaction ID is required' }, { status: 400 })
+    }
+
+    // Check if we're in build time
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    }
+
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check ownership before deleting
+    const { data: existingTransaction } = await supabase
+      .from('transactions')
+      .select('user_id')
+      .eq('id', id)
+      .single()
+
+    if (!existingTransaction || existingTransaction.user_id !== user.id) {
+      return NextResponse.json({ error: 'Transaction not found or access denied' }, { status: 404 })
+    }
+
+    const { error } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      console.error('Error deleting transaction:', error)
+      return NextResponse.json({
+        error: 'Failed to delete transaction',
+        details: error.details,
+        message: error.message,
+        code: error.code
+      }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('API Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
