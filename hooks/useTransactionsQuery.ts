@@ -99,6 +99,7 @@ export function useTransactionsQuery(options: UseTransactionsQueryOptions) {
     hasNextPage: query.hasNextPage,
     fetchNextPage: query.fetchNextPage,
     refetch: query.refetch,
+    data: query.data,
   }
 }
 
@@ -111,16 +112,21 @@ export function useAllTransactions(options: UseTransactionsQueryOptions) {
 
   // Automatically fetch all pages in the background
   if (query.hasNextPage && !query.isFetchingNextPage && !query.isLoading) {
-    // Use setTimeout to avoid blocking the main thread
-    setTimeout(() => {
-      query.fetchNextPage()
-    }, 100)
+    // Check safety limit to prevent infinite loops (e.g. max 100 pages = 10,000 transactions)
+    const currentPages = query.data?.pages.length || 0
+    if (currentPages < 100) {
+      // Use setTimeout to avoid blocking the main thread, increased to 500ms to reduce UI jank
+      setTimeout(() => {
+        query.fetchNextPage()
+      }, 500)
+    }
   }
 
   return {
     transactions: query.transactions,
     totalCount: query.totalCount,
-    isLoading: query.isLoading || (query.hasNextPage && query.transactions.length > 0),
+    // Optimize: show data as soon as we have it (streaming), don't wait for all pages
+    isLoading: query.isLoading && query.transactions.length === 0,
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,
