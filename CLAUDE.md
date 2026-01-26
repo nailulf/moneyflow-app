@@ -86,18 +86,28 @@ Core tables:
 
 ### State Management Architecture
 
-1. **React Context** (`contexts/`) - Provides global state for accounts, budgets, categories, transactions
-2. **Custom Hooks** (`hooks/`) - Encapsulates business logic and API interactions
-3. **TanStack Query** - Used for server state management and caching in some features
+1. **React Query** (`@tanstack/react-query`) - Primary server state management with automatic caching, pagination, and invalidation
+2. **React Context** (`contexts/`) - Provides backward-compatible API wrapping React Query
+3. **Custom Hooks** (`hooks/`) - Encapsulates business logic and API interactions
 
-Example pattern:
+**Transaction Management**:
 ```typescript
-// Context provides state
-TransactionContext → useTransaction hook → Components
+// New approach (React Query) - Recommended
+import { useAllTransactions } from '@/hooks/useTransactionsQuery'
+const { transactions, isLoading } = useAllTransactions({ userId })
 
-// API layer provides data access
-lib/api/transactions.ts → hooks → components
+// Legacy approach (Context) - Still works, wraps React Query
+import { useTransactions } from '@/contexts/TransactionContext'
+const { transactions, loading } = useTransactions()
 ```
+
+**Key Features**:
+- Automatic pagination (100 transactions per page)
+- Background loading for remaining pages
+- Optimistic updates support
+- Automatic cache invalidation on mutations
+- Request deduplication
+- See `TRANSACTION_PAGINATION_IMPROVEMENTS.md` for details
 
 ### Bank Statement Processing
 
