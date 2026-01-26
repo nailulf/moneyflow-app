@@ -1,17 +1,12 @@
 'use client'
 
-import React, { createContext, useContext, useCallback, useEffect, useState } from 'react'
+import React, { createContext, useContext, useCallback } from 'react'
 import { Transaction, TransactionInsert, TransactionUpdate } from '@/types/database'
 import { TransactionFormData } from '@/lib/validations'
 import { toast } from 'sonner'
-import { 
-  getUserTransactions,
-  createTransaction,
-  updateTransaction,
-  deleteTransaction,
-  getTransactionsByDateRange
-} from '@/lib/api/transactions'
 import { useAuth } from '@/contexts/AuthContext'
+import { useAllTransactions, useTransactionMutations } from '@/hooks/useTransactionsQuery'
+import { getTransactionsByDateRange } from '@/lib/api/transactions'
 
 interface TransactionContextType {
   transactions: Transaction[]
@@ -33,136 +28,88 @@ interface TransactionProviderProps {
 export function TransactionProvider({ children }: TransactionProviderProps) {
   const { user } = useAuth()
   const userId = user?.id || ''
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [hasLoaded, setHasLoaded] = useState(false)
-  
-  // Load transactions from database
-  const loadTransactions = useCallback(async () => {
-    if (!userId) {
-      setTransactions([])
-      return
-    }
 
-    setLoading(true)
-    setError(null)
-    
-    try {
-      // Fetch more transactions to ensure we get all historical data
-      const data = await getUserTransactions(userId, 5000) // Increased limit to 5000
-      setTransactions(data)
-      setHasLoaded(true)
-      console.log(`📊 Loaded ${data.length} transactions for user ${userId}`)
-    } catch (err) {
-      console.error('❌ Error loading transactions:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load transactions')
-      toast.error('Failed to load transactions')
-    } finally {
-      setLoading(false)
-    }
-  }, [userId])
+  // Use React Query for efficient data fetching with automatic pagination
+  const {
+    transactions,
+    totalCount,
+    isLoading: loading,
+    isError,
+    error: queryError,
+    refetch,
+  } = useAllTransactions({
+    userId,
+    enabled: !!userId,
+  })
 
-  // Load transactions on mount or when userId changes
-  useEffect(() => {
-    if (userId) {
-      loadTransactions()
-    }
-  }, [userId, loadTransactions])
+  // Use React Query mutations for create/update/delete
+  const mutations = useTransactionMutations(userId)
 
-  const addTransaction = useCallback(async (formData: TransactionFormData) => {
-    try {
-      setLoading(true)
-      setError(null)
-      
+  const error = isError && queryError ? queryError.message : null
+
+  const addTransaction = useCallback(
+    async (formData: TransactionFormData) => {
       const transactionData: TransactionInsert = {
         user_id: userId,
         ...formData,
       }
-      
-      const newTransaction = await createTransaction(transactionData)
-      setTransactions(prev => [newTransaction, ...prev])
-      toast.success('Transaction added successfully')
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to add transaction'
-      setError(errorMessage)
-      toast.error(errorMessage)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [userId])
 
-  const editTransaction = useCallback(async (id: string, formData: Partial<TransactionFormData>) => {
-    try {
-      setLoading(true)
-      setError(null)
-      
+      try {
+        await mutations.create(transactionData)
+      } catch (err) {
+        throw err
+      }
+    },
+    [userId, mutations]
+  )
+
+  const editTransaction = useCallback(
+    async (id: string, formData: Partial<TransactionFormData>) => {
       const updateData: TransactionUpdate = {
         ...formData,
       }
-      
-      const updatedTransaction = await updateTransaction(id, updateData)
-      
-      setTransactions(prev => prev.map(transaction => 
-        transaction.id === id ? updatedTransaction : transaction
-      ))
-      
-      toast.success('Transaction updated successfully')
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update transaction'
-      setError(errorMessage)
-      toast.error(errorMessage)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [])
 
-  const removeTransaction = useCallback(async (id: string) => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      await deleteTransaction(id)
-      setTransactions(prev => prev.filter(transaction => transaction.id !== id))
-      toast.success('Transaction deleted successfully')
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete transaction'
-      setError(errorMessage)
-      toast.error(errorMessage)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+      try {
+        await mutations.update({ id, data: updateData })
+      } catch (err) {
+        throw err
+      }
+    },
+    [mutations]
+  )
 
-  const getTransactionsByDateRangeHandler = useCallback(async (startDate: string, endDate: string) => {
-    try {
-      setError(null)
-      return await getTransactionsByDateRange(userId, startDate, endDate)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get transactions by date range'
-      setError(errorMessage)
-      toast.error(errorMessage)
-      throw err
-    }
-  }, [userId])
+  const removeTransaction = useCallback(
+    async (id: string) => {
+      try {
+        await mutations.delete(id)
+      } catch (err) {
+        throw err
+      }
+    },
+    [mutations]
+  )
+
+  const getTransactionsByDateRangeHandler = useCallback(
+    async (startDate: string, endDate: string) => {
+      try {
+        return await getTransactionsByDateRange(userId, startDate, endDate)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to get transactions by date range'
+        toast.error(errorMessage)
+        throw err
+      }
+    },
+    [userId]
+  )
 
   const refreshTransactions = useCallback(async () => {
     try {
-      setLoading(true)
-      setError(null)
-      const data = await getUserTransactions(userId)
-      setTransactions(data)
+      await refetch()
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to refresh transactions'
-      setError(errorMessage)
       toast.error(errorMessage)
-    } finally {
-      setLoading(false)
     }
-  }, [userId])
+  }, [refetch])
 
   const value: TransactionContextType = {
     transactions,

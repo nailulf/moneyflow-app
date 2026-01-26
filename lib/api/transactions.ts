@@ -1,59 +1,27 @@
 import { Transaction, TransactionInsert, TransactionUpdate } from '@/types/database'
 
-// Request deduplication cache
-const requestCache = new Map<string, Promise<Transaction[]>>()
-const dataCache = new Map<string, { data: Transaction[], timestamp: number }>()
-const CACHE_DURATION = 30000 // 30 seconds
-
 /**
- * Fetch all transactions for a user with deduplication and caching
+ * Fetch all transactions for a user
+ * @deprecated Use useTransactionsQuery or useAllTransactions hook instead for better caching and performance
  */
 export async function getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
-  const cacheKey = `transactions-${userId}-${limit || 'all'}`
-  
-  // Check data cache first
-  const cached = dataCache.get(cacheKey)
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.data
-  }
-  
-  // Check if request is already in progress
-  if (requestCache.has(cacheKey)) {
-    return requestCache.get(cacheKey)!
-  }
-  
-  // Create new request
-  const requestPromise = (async () => {
-    try {
-      // Use absolute URL to avoid "Invalid URL" errors in server context
-      const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3000'
-      // Set a high limit to get more transactions (default to 1000 if no limit specified)
-      const limitParam = limit ? `&limit=${limit}` : '&limit=1000'
-      const response = await fetch(`${baseUrl}/api/transactions?userId=${userId}${limitParam}`)
-      
-      if (!response.ok) {
-        const error = await response.json()
-        console.error('Error fetching transactions:', error)
-        throw new Error('Failed to fetch transactions')
-      }
+  const params = new URLSearchParams({
+    userId,
+    limit: (limit || 1000).toString(),
+    sortBy: 'date',
+    sortOrder: 'desc',
+  })
 
-      const result = await response.json()
-      const data = result.transactions || []
-      
-      // Cache the result
-      dataCache.set(cacheKey, { data, timestamp: Date.now() })
-      
-      return data
-    } finally {
-      // Remove from request cache when done
-      requestCache.delete(cacheKey)
-    }
-  })()
-  
-  // Store the promise to prevent duplicate requests
-  requestCache.set(cacheKey, requestPromise)
-  
-  return requestPromise
+  const response = await fetch(`/api/transactions?${params}`)
+
+  if (!response.ok) {
+    const error = await response.json()
+    console.error('Error fetching transactions:', error)
+    throw new Error('Failed to fetch transactions')
+  }
+
+  const result = await response.json()
+  return result.transactions || []
 }
 
 /**

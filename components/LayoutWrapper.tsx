@@ -13,6 +13,8 @@ import { usePathname } from 'next/navigation'
 import { AccountProvider } from '@/contexts/AccountContext'
 import { CategoryProvider } from '@/contexts/CategoryContext'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { QueryProvider } from '@/lib/providers/query-provider'
+import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { Loader2 } from 'lucide-react'
 
 interface LayoutWrapperProps {
@@ -95,8 +97,12 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
 
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
-    <AuthProvider>
-      <AuthenticatedLayout>{children}</AuthenticatedLayout>
-    </AuthProvider>
+    <QueryProvider>
+      <AuthProvider>
+        <AnalyticsProvider>
+          <AuthenticatedLayout>{children}</AuthenticatedLayout>
+        </AnalyticsProvider>
+      </AuthProvider>
+    </QueryProvider>
   )
 }

@@ -1,5 +1,6 @@
 import './globals.css'
 import LayoutWrapper from '@/components/LayoutWrapper'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 export const metadata = {
   title: 'MoneyFlow - Personal Finance Tracker',
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <ErrorBoundary>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </ErrorBoundary>
       </body>
     </html>
   )
