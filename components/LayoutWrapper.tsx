@@ -14,6 +14,7 @@ import { AccountProvider } from '@/contexts/AccountContext'
 import { CategoryProvider } from '@/contexts/CategoryContext'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { QueryProvider } from '@/lib/providers/query-provider'
+import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { Loader2 } from 'lucide-react'
 
 interface LayoutWrapperProps {
@@ -98,7 +99,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
     <QueryProvider>
       <AuthProvider>
-        <AuthenticatedLayout>{children}</AuthenticatedLayout>
+        <AnalyticsProvider>
+          <AuthenticatedLayout>{children}</AuthenticatedLayout>
+        </AnalyticsProvider>
       </AuthProvider>
     </QueryProvider>
   )
