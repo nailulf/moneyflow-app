@@ -1,6 +1,7 @@
 import './globals.css'
 import LayoutWrapper from '@/components/LayoutWrapper'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata = {
   title: 'MoneyFlow - Personal Finance Tracker',
@@ -18,6 +19,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <LayoutWrapper>{children}</LayoutWrapper>
         </ErrorBoundary>
+        <SpeedInsights />
       </body>
     </html>
   )
