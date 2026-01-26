@@ -110,7 +110,7 @@ export default function CashFlowPage() {
           </div>
 
           {/* Metrics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-0">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">

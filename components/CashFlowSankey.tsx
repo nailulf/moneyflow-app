@@ -149,7 +149,7 @@ export function CashFlowSankey({ transactions, dateRange, getCategoryName }: Cas
       <CardContent className="flex-1 min-h-0 p-5">
         <ResponsiveSankey
           data={data}
-          margin={{ top: 10, right: 160, bottom: 10, left: 160 }}
+          margin={{ top: 10, right: 30, bottom: 10, left: 30 }}
         align="justify"
         colors={node => node.nodeColor || '#888888'}
         nodeOpacity={1}
@@ -165,7 +165,7 @@ export function CashFlowSankey({ transactions, dateRange, getCategoryName }: Cas
         linkHoverOthersOpacity={0.1}
         linkContract={3}
         enableLinkGradient={true}
-        labelPosition="outside"
+        labelPosition="inside"
         labelOrientation="horizontal"
         labelPadding={16}
         labelTextColor={{
