@@ -371,6 +371,114 @@ export interface Database {
           updated_at?: string
         }
       }
+      user_onboarding: {
+        Row: {
+          id: string
+          user_id: string
+          current_phase: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+          current_step: number
+          is_completed: boolean
+          is_skipped: boolean
+          completed_at: string | null
+          skipped_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+          current_step?: number
+          is_completed?: boolean
+          is_skipped?: boolean
+          completed_at?: string | null
+          skipped_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+          current_step?: number
+          is_completed?: boolean
+          is_skipped?: boolean
+          completed_at?: string | null
+          skipped_at?: string | null
+          updated_at?: string
+        }
+      }
+      onboarding_events: {
+        Row: {
+          id: string
+          user_id: string
+          event_type: 'phase_started' | 'phase_completed' | 'step_completed' | 'skipped' | 'resumed' | 'completed'
+          phase: string | null
+          step: number | null
+          metadata: Record<string, unknown>
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          event_type: 'phase_started' | 'phase_completed' | 'step_completed' | 'skipped' | 'resumed' | 'completed'
+          phase?: string | null
+          step?: number | null
+          metadata?: Record<string, unknown>
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          event_type?: 'phase_started' | 'phase_completed' | 'step_completed' | 'skipped' | 'resumed' | 'completed'
+          phase?: string | null
+          step?: number | null
+          metadata?: Record<string, unknown>
+        }
+      }
+      budget_templates: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          allocations: {
+            needs: number
+            wants: number
+            savings: number
+          }
+          category_mappings: Record<string, string[]>
+          is_active: boolean
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          allocations: {
+            needs: number
+            wants: number
+            savings: number
+          }
+          category_mappings?: Record<string, string[]>
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          allocations?: {
+            needs: number
+            wants: number
+            savings: number
+          }
+          category_mappings?: Record<string, string[]>
+          is_active?: boolean
+          sort_order?: number
+        }
+      }
     }
   }
 }
@@ -410,3 +518,19 @@ export type AccountUpdate = Database['public']['Tables']['accounts']['Update']
 export type StatementDB = Database['public']['Tables']['statements']['Row']
 export type StatementInsert = Database['public']['Tables']['statements']['Insert']
 export type StatementUpdate = Database['public']['Tables']['statements']['Update']
+
+export type UserOnboardingDB = Database['public']['Tables']['user_onboarding']['Row']
+export type UserOnboardingInsert = Database['public']['Tables']['user_onboarding']['Insert']
+export type UserOnboardingUpdate = Database['public']['Tables']['user_onboarding']['Update']
+
+export type OnboardingEventDB = Database['public']['Tables']['onboarding_events']['Row']
+export type OnboardingEventInsert = Database['public']['Tables']['onboarding_events']['Insert']
+export type OnboardingEventUpdate = Database['public']['Tables']['onboarding_events']['Update']
+
+export type BudgetTemplateDB = Database['public']['Tables']['budget_templates']['Row']
+export type BudgetTemplateInsert = Database['public']['Tables']['budget_templates']['Insert']
+export type BudgetTemplateUpdate = Database['public']['Tables']['budget_templates']['Update']
+
+// Onboarding phase type for convenience
+export type OnboardingPhase = 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+export type OnboardingEventType = 'phase_started' | 'phase_completed' | 'step_completed' | 'skipped' | 'resumed' | 'completed'

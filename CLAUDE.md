@@ -49,7 +49,7 @@ lib/                   # Core utilities and logic
 ├── supabase/         # Supabase client configurations
 │   ├── client.ts     # Browser client
 │   ├── server.ts     # Server component client
-│   └── middleware.ts # Middleware client
+│   └── session.ts    # Session management
 ├── api/              # API service layer (transactions, budgets, etc.)
 ├── bank-parsers/     # Bank statement parser types
 └── [utilities].ts    # Various utility functions
@@ -68,7 +68,7 @@ supabase/migrations/ # Database migration files
 **Supabase Client Creation:**
 - Browser components: Use `lib/supabase/client.ts` → `createClient()`
 - Server components: Use `lib/supabase/server.ts` → `createClient()` (async)
-- Middleware: Use `lib/supabase/middleware.ts`
+- Session Management: Use `lib/supabase/session.ts`
 
 All Supabase clients are typed with `Database` type from `types/database.ts`.
 

@@ -15,9 +15,9 @@ class AmplitudeService {
   init(config: AmplitudeConfig) {
     if (this.initialized) return;
     
-    // Don't initialize if no API key is provided
-    if (!config.apiKey) {
-      console.warn('Amplitude API key not found. Analytics disabled.');
+    // Don't initialize if no API key is provided or if it's a placeholder
+    if (!config.apiKey || config.apiKey === 'your-api-key' || config.apiKey.includes('INSERT_KEY')) {
+      console.warn('Amplitude API key not found or invalid. Analytics disabled.');
       return;
     }
 
@@ -36,7 +36,8 @@ class AmplitudeService {
       // Disable remote config fetch in development to prevent blocked request errors
       // @ts-ignore - fetchRemoteConfig might not be in the type definition yet but is supported
       fetchRemoteConfig: config.environment === 'production',
-      logLevel: config.debug ? amplitude.Types.LogLevel.Warn : amplitude.Types.LogLevel.None,
+      // Suppress logs in development to avoid "Failed to fetch" errors from ad blockers
+      logLevel: config.environment === 'production' ? amplitude.Types.LogLevel.Warn : amplitude.Types.LogLevel.None,
     });
 
     // Add session replay for production
