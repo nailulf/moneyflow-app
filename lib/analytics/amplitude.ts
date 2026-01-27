@@ -40,10 +40,10 @@ class AmplitudeService {
       logLevel: config.environment === 'production' ? amplitude.Types.LogLevel.Warn : amplitude.Types.LogLevel.None,
     });
 
-    // Add session replay for production
-    if (config.enableSessionReplay && config.environment === 'production') {
+    // Add session replay if enabled
+    if (config.enableSessionReplay) {
       amplitude.add(sessionReplayPlugin({
-        sampleRate: 0.1 // 10% of sessions
+        sampleRate: config.environment === 'production' ? 0.1 : 1.0 // 10% in prod, 100% in others for testing
       }));
     }
 

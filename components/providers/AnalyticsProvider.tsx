@@ -12,7 +12,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
     Analytics.init({
       apiKey: process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY || '',
       environment: (process.env.NEXT_PUBLIC_ENVIRONMENT as any) || 'development',
-      enableSessionReplay: process.env.NEXT_PUBLIC_ENVIRONMENT === 'production',
+      enableSessionReplay: process.env.NEXT_PUBLIC_ENABLE_SESSION_REPLAY === 'true' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'production',
       debug: process.env.NEXT_PUBLIC_ENVIRONMENT === 'development'
     });
   }, []);
