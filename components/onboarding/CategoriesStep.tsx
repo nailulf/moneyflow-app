@@ -56,7 +56,6 @@ export function CategoriesStep() {
 
   const handleCustomize = () => {
     // Open category manager or navigate to settings
-    // For MVP, we'll just continue and let them customize later
     router.push('/settings/categories')
   }
 

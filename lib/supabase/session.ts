@@ -11,8 +11,9 @@ const publicRoutes = [
   '/auth'
 ]
 
-// Routes that are part of the onboarding flow
-const onboardingRoutes = [
+// Onboarding is now handled via modal on the dashboard
+// These routes are kept for backwards compatibility but redirect to /
+const legacyOnboardingRoutes = [
   '/welcome',
   '/setup',
   '/complete'
@@ -56,7 +57,7 @@ export async function updateSession(request: NextRequest) {
 
   // Check if route is public (doesn't require auth)
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
-  const isOnboardingRoute = onboardingRoutes.some(route => pathname.startsWith(route))
+  const isLegacyOnboardingRoute = legacyOnboardingRoutes.some(route => pathname.startsWith(route))
   const isApiRoute = pathname.startsWith('/api')
   const isNextRoute = pathname.startsWith('/_next')
   const isStaticFile = pathname.includes('.')
@@ -74,41 +75,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If user is authenticated and accessing the main app (not onboarding routes)
-  // Check onboarding status and redirect if needed
-  if (
-    user &&
-    !isPublicRoute &&
-    !isOnboardingRoute &&
-    !isApiRoute &&
-    !isNextRoute &&
-    !isStaticFile &&
-    pathname === '/' // Only check on dashboard for now to minimize DB calls
-  ) {
-    try {
-      // Check onboarding status
-      const { data: onboarding } = await supabase
-        .from('user_onboarding')
-        .select('is_completed, is_skipped, current_phase')
-        .eq('user_id', user.id)
-        .single()
-
-      // If onboarding exists and is not completed/skipped, redirect to appropriate step
-      if (onboarding && !onboarding.is_completed && !onboarding.is_skipped) {
-        const url = request.nextUrl.clone()
-        if (onboarding.current_phase === 'welcome') {
-          url.pathname = '/welcome'
-        } else if (onboarding.current_phase === 'completed') {
-          url.pathname = '/complete'
-        } else {
-          url.pathname = '/setup'
-        }
-        return NextResponse.redirect(url)
-      }
-    } catch (error) {
-      // If error checking onboarding (e.g., table doesn't exist yet), allow access
-      console.error('Error checking onboarding status:', error)
-    }
+  // Redirect legacy onboarding routes to dashboard
+  // Onboarding is now handled via modal on the dashboard
+  if (user && isLegacyOnboardingRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url)
   }
 
   return response

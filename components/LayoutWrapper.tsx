@@ -12,9 +12,11 @@ import { Separator } from '@/components/ui/separator'
 import { usePathname } from 'next/navigation'
 import { AccountProvider } from '@/contexts/AccountContext'
 import { CategoryProvider } from '@/contexts/CategoryContext'
+import { OnboardingProvider } from '@/contexts/OnboardingContext'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
+import { OnboardingModal } from '@/components/onboarding/OnboardingModal'
 import { Loader2 } from 'lucide-react'
 
 interface LayoutWrapperProps {
@@ -50,8 +52,10 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AccountProvider>
         <CategoryProvider>
-          <AppSidebar />
-          <SidebarInset>
+          <OnboardingProvider>
+            <OnboardingModal />
+            <AppSidebar />
+            <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
@@ -88,6 +92,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </SidebarInset>
+          </OnboardingProvider>
         </CategoryProvider>
       </AccountProvider>
       <Toaster />
