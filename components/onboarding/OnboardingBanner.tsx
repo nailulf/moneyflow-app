@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useOnboardingStatus } from '@/hooks/useOnboardingQuery'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,6 +22,7 @@ const FEATURES = [
 
 export function OnboardingBanner() {
   const { user } = useAuth()
+  const { openModal } = useOnboarding()
   const { data: onboarding, isLoading } = useOnboardingStatus({
     userId: user?.id || '',
     enabled: !!user?.id
@@ -49,7 +50,7 @@ export function OnboardingBanner() {
 
   const handleComplete = () => {
     setIsOpen(false)
-    // Navigation is handled by the Link component
+    openModal()
   }
 
   // Don't render if:
@@ -93,10 +94,8 @@ export function OnboardingBanner() {
         </div>
 
         <div className="flex flex-col gap-2 pt-2">
-          <Button asChild onClick={handleComplete}>
-            <Link href="/welcome">
-              Complete Setup
-            </Link>
+          <Button onClick={handleComplete}>
+            Complete Setup
           </Button>
           <Button variant="ghost" onClick={handleDismiss}>
             Maybe Later

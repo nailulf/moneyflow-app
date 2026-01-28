@@ -6,9 +6,6 @@ import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from
 export default function Home() {
   return (
      <div className="flex flex-col h-full">
-      
-      
-      
       <PageLayout>
         <TopContent>
               <NetWorthOverview />
@@ -28,7 +25,6 @@ export default function Home() {
         </ContentWrapper>
       </PageLayout>
         
-      
       </div>
   )
 }

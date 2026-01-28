@@ -44,6 +44,11 @@ interface OnboardingContextType {
   currentPhase: OnboardingPhase | null
   progress: number // 0-100
 
+  // Modal control
+  isModalOpen: boolean
+  openModal: () => void
+  closeModal: () => void
+
   // Wizard data
   wizardData: WizardData
   setWizardData: (data: Partial<WizardData>) => void
@@ -71,6 +76,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [wizardData, setWizardDataState] = useState<WizardData>({})
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Fetch onboarding status when user changes
   useEffect(() => {
@@ -81,6 +87,22 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       setLoading(false)
     }
   }, [user?.id])
+
+  // Auto-open modal for users who need onboarding
+  useEffect(() => {
+    const userNeedsOnboarding = needsOnboarding(state)
+    if (!loading && userNeedsOnboarding && state?.current_phase !== 'completed') {
+      setIsModalOpen(true)
+    }
+  }, [loading, state])
+
+  const openModal = useCallback(() => {
+    setIsModalOpen(true)
+  }, [])
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false)
+  }, [])
 
   const fetchStatus = useCallback(async () => {
     if (!user?.id) return
@@ -246,6 +268,9 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         needsOnboarding: needsOnboarding(state),
         currentPhase: state?.current_phase ?? null,
         progress,
+        isModalOpen,
+        openModal,
+        closeModal,
         wizardData,
         setWizardData,
         refresh,
