@@ -350,7 +350,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                     </div>
                     <div className="ml-0 space-y-2">
                       {category.accounts
-                        .filter(acc => acc.balance >= 0)
+                        .filter(acc => acc.type !== 'CREDIT_CARD')
                         .map((account, accountIndex) => (
                           <div key={`asset-${index}-${accountIndex}`} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -432,7 +432,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                     </div>
                     <div className="ml-0 space-y-2">
                       {category.accounts
-                        .filter(acc => acc.currentBalance < 0)
+                        .filter(acc => acc.type === 'CREDIT_CARD')
                         .map((account, accountIndex) => (
                           <div key={`liab-${index}-${accountIndex}`} className="flex items-center justify-between">
                             <div className="flex items-center gap-3">

@@ -6,10 +6,11 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Settings, Search, X, Loader2, Trash2 } from 'lucide-react'
+import { Plus, Settings, Search, X, Loader2, Trash2, Pencil, Check } from 'lucide-react'
 import { CategoryGroupDB, CategoryDB } from '@/types/database'
 import { useAuth } from '@/contexts/AuthContext'
 import { SEMANTIC_COLORS } from '@/lib/constants'
+import { useAutoRefresh } from '@/hooks/useDataRefresh'
 
 interface CategoryManagerProps {
   onCategoryUpdated?: () => void
@@ -26,12 +27,13 @@ interface DisplayGroup {
 }
 
 // Internal component that contains all the logic
-function CategoryManagerInternal({ 
+function CategoryManagerInternal({
   onCategoryUpdated,
   className = ''
 }: CategoryManagerProps) {
   const { user } = useAuth()
   const userId = user?.id || ''
+  const { onCategoryChange } = useAutoRefresh(userId)
   
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -44,6 +46,8 @@ function CategoryManagerInternal({
   const [newGroupColor, setNewGroupColor] = useState(SEMANTIC_COLORS[0].value)
   const [deleteGroupId, setDeleteGroupId] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
+  const [editingCategoryName, setEditingCategoryName] = useState('')
   
   // Data states
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroupDB[]>([])
@@ -191,6 +195,7 @@ function CategoryManagerInternal({
       }
       
       await loadData()
+      onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
       setNewCategoryName('')
       setNewCategoryColor(SEMANTIC_COLORS[0].value)
@@ -210,16 +215,61 @@ function CategoryManagerInternal({
       const response = await fetch(`/api/categories?category_id=${categoryId}`, {
         method: 'DELETE',
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete category')
       }
-      
+
       await loadData()
+      onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
     } catch (err) {
       console.error('Failed to delete category:', err)
       setError('Failed to delete category')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Edit category name
+  const handleStartEdit = (category: CategoryDB) => {
+    setEditingCategoryId(category.id)
+    setEditingCategoryName(category.name)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingCategoryId(null)
+    setEditingCategoryName('')
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingCategoryId || !editingCategoryName.trim()) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/categories', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: editingCategoryId,
+          name: editingCategoryName.trim(),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update category')
+      }
+
+      await loadData()
+      onCategoryChange() // Refresh related data across the app
+      onCategoryUpdated?.()
+      setEditingCategoryId(null)
+      setEditingCategoryName('')
+    } catch (err) {
+      console.error('Failed to update category:', err)
+      setError('Failed to update category')
     } finally {
       setIsSubmitting(false)
     }
@@ -252,6 +302,7 @@ function CategoryManagerInternal({
       }
       
       await loadData()
+      onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
       setNewGroupName('')
       setNewGroupType('EXPENSE')
@@ -268,18 +319,19 @@ function CategoryManagerInternal({
   // Delete category group
   const handleDeleteGroup = async () => {
     if (!deleteGroupId) return
-    
+
     setIsSubmitting(true)
     try {
       const response = await fetch(`/api/category-groups?id=${deleteGroupId}`, {
         method: 'DELETE',
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete category group')
       }
-      
+
       await loadData()
+      onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
       setIsDeleteDialogOpen(false)
       setDeleteGroupId(null)
@@ -373,26 +425,85 @@ function CategoryManagerInternal({
                     <div className="space-y-2">
                       {groupCategories.map((category) => (
                         <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                          <div className="flex items-center space-x-3">
-                            <div 
-                              className="w-6 h-6 rounded-full border-2 border-border"
-                              style={{ backgroundColor: category.color }}
-                            />
-                            <span className="font-medium text-sm text-foreground">{category.name}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {category.is_custom && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteCategory(category.id)}
-                                className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                disabled={isSubmitting}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                          {editingCategoryId === category.id ? (
+                            // Edit mode
+                            <>
+                              <div className="flex items-center space-x-3 flex-1">
+                                <div
+                                  className="w-6 h-6 rounded-full border-2 border-border flex-shrink-0"
+                                  style={{ backgroundColor: category.color }}
+                                />
+                                <Input
+                                  value={editingCategoryName}
+                                  onChange={(e) => setEditingCategoryName(e.target.value)}
+                                  className="h-8 text-sm"
+                                  autoFocus
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSaveEdit()
+                                    if (e.key === 'Escape') handleCancelEdit()
+                                  }}
+                                  disabled={isSubmitting}
+                                />
+                              </div>
+                              <div className="flex items-center space-x-1 ml-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleSaveEdit}
+                                  className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                  disabled={isSubmitting || !editingCategoryName.trim()}
+                                >
+                                  {isSubmitting ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Check className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleCancelEdit}
+                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                  disabled={isSubmitting}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </>
+                          ) : (
+                            // View mode
+                            <>
+                              <div className="flex items-center space-x-3">
+                                <div
+                                  className="w-6 h-6 rounded-full border-2 border-border"
+                                  style={{ backgroundColor: category.color }}
+                                />
+                                <span className="font-medium text-sm text-foreground">{category.name}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleStartEdit(category)}
+                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                  disabled={isSubmitting}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                {category.is_custom && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteCategory(category.id)}
+                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    disabled={isSubmitting}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </>
+                          )}
                         </div>
                       ))}
                       

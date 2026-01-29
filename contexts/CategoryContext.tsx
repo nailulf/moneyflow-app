@@ -1,9 +1,11 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, ReactNode, useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getUserCategories } from '@/lib/api/categories'
 import { CategoryDB } from '@/types/database'
 import { useAuth } from '@/contexts/AuthContext'
+import { queryKeys } from '@/hooks/useDataRefresh'
 
 interface CategoryContextType {
   categories: CategoryDB[]
@@ -23,44 +25,39 @@ interface CategoryProviderProps {
 export function CategoryProvider({ children }: CategoryProviderProps) {
   const { user } = useAuth()
   const userId = user?.id
+  const queryClient = useQueryClient()
 
-  const [categories, setCategories] = useState<CategoryDB[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Use React Query for categories with automatic caching and invalidation
+  const {
+    data: categories = [],
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: queryKeys.categories(userId),
+    queryFn: () => getUserCategories(userId!),
+    enabled: !!userId,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  })
 
-  const loadCategories = async () => {
-    if (!userId) return
-    
-    try {
-      setLoading(true)
-      setError(null)
-      const userCategories = await getUserCategories(userId)
-      setCategories(userCategories)
-    } catch (err) {
-      console.error('Error loading categories:', err)
-      setError(err instanceof Error ? err.message : 'Failed to load categories')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load categories') : null
 
-  const refreshCategories = async () => {
-    await loadCategories()
-  }
+  const refreshCategories = useCallback(async () => {
+    // Invalidate and refetch categories
+    await queryClient.invalidateQueries({ queryKey: queryKeys.categories(userId) })
+    await refetch()
+  }, [queryClient, userId, refetch])
 
-  const getCategoryName = (categoryId: string): string => {
+  const getCategoryName = useCallback((categoryId: string): string => {
     const category = categories.find(cat => cat.id === categoryId)
     return category?.name || 'Unknown Category'
-  }
+  }, [categories])
 
-  const getCategoryColor = (categoryId: string): string => {
+  const getCategoryColor = useCallback((categoryId: string): string => {
     const category = categories.find(cat => cat.id === categoryId)
     return category?.color || 'hsl(var(--muted-foreground))'
-  }
-
-  useEffect(() => {
-    loadCategories()
-  }, [userId])
+  }, [categories])
 
   const value: CategoryContextType = {
     categories,
