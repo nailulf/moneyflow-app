@@ -173,13 +173,10 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Calculate current net worth (most recent data point)
-    const currentNetWorth = netWorthData.length > 0 ? netWorthData[netWorthData.length - 1].value : 0
-
     // Get detailed account information with current balances using already fetched transactions
     const accountsWithBalances = accounts.map((account) => {
       const accountTransactions = transactionsByAccount.get(account.id) || []
-      
+
       const currentBalance = calculateAccountBalanceAtDate(
         accountTransactions,
         endDateTime,
@@ -192,6 +189,16 @@ export async function GET(request: NextRequest) {
         currentBalance
       }
     })
+
+    // Calculate current net worth from today's account balances (not last chart data point)
+    // This ensures the net worth matches Assets - Liabilities calculation
+    const currentNetWorth = accountsWithBalances.reduce((total, account) => {
+      if (account.type === 'CREDIT_CARD') {
+        // Credit card balance is debt, subtract from net worth
+        return total - Math.abs(account.currentBalance)
+      }
+      return total + account.currentBalance
+    }, 0)
 
     return NextResponse.json({
       netWorthData,

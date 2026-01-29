@@ -3,6 +3,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Transaction, TransactionInsert, TransactionUpdate } from '@/types/database'
 import { toast } from 'sonner'
+import { queryKeys } from '@/hooks/useDataRefresh'
 
 const PAGE_SIZE = 100 // Load 100 transactions per page
 
@@ -139,8 +140,16 @@ export function useAllTransactions(options: UseTransactionsQueryOptions) {
 export function useTransactionMutations(userId: string) {
   const queryClient = useQueryClient()
 
-  const invalidateTransactions = () => {
-    queryClient.invalidateQueries({ queryKey: ['transactions', userId] })
+  // Invalidate all queries affected by transaction changes
+  const invalidateRelatedQueries = () => {
+    // Invalidate transactions
+    queryClient.invalidateQueries({ queryKey: queryKeys.transactions(userId) })
+    // Invalidate net worth (transactions affect account balances)
+    queryClient.invalidateQueries({ queryKey: queryKeys.netWorth(userId) })
+    // Invalidate budgets (transactions affect spending)
+    queryClient.invalidateQueries({ queryKey: queryKeys.budgets(userId) })
+    // Invalidate accounts (transaction totals may be shown)
+    queryClient.invalidateQueries({ queryKey: queryKeys.accounts(userId) })
   }
 
   const createMutation = useMutation({
@@ -159,7 +168,7 @@ export function useTransactionMutations(userId: string) {
       return response.json()
     },
     onSuccess: () => {
-      invalidateTransactions()
+      invalidateRelatedQueries()
       toast.success('Transaction added successfully')
     },
     onError: (error: Error) => {
@@ -183,7 +192,7 @@ export function useTransactionMutations(userId: string) {
       return response.json()
     },
     onSuccess: () => {
-      invalidateTransactions()
+      invalidateRelatedQueries()
       toast.success('Transaction updated successfully')
     },
     onError: (error: Error) => {
@@ -203,7 +212,7 @@ export function useTransactionMutations(userId: string) {
       }
     },
     onSuccess: () => {
-      invalidateTransactions()
+      invalidateRelatedQueries()
       toast.success('Transaction deleted successfully')
     },
     onError: (error: Error) => {

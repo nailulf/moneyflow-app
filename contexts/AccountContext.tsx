@@ -1,8 +1,10 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { createContext, useContext, useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { AccountDB } from '@/types/database'
 import { useAuth } from '@/contexts/AuthContext'
+import { queryKeys } from '@/hooks/useDataRefresh'
 
 export interface AccountWithHistory extends AccountDB {
   historicalBalance?: number
@@ -26,119 +28,113 @@ interface AccountProviderProps {
   children: React.ReactNode
 }
 
+// Fetch function for accounts
+async function fetchAccounts(userId: string): Promise<AccountWithHistory[]> {
+  const response = await fetch(`/api/accounts?userId=${userId}&includeHistory=true`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch accounts')
+  }
+
+  const data = await response.json()
+  return Array.isArray(data) ? data.map((acc: AccountWithHistory) => ({
+    ...acc,
+    currentBalance: acc.historicalBalance ?? acc.balance
+  })) : []
+}
+
 export function AccountProvider({ children }: AccountProviderProps) {
   const { user } = useAuth()
   const userId = user?.id
+  const queryClient = useQueryClient()
 
-  const [accounts, setAccounts] = useState<AccountWithHistory[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Use React Query for accounts with automatic caching and invalidation
+  const {
+    data: accounts = [],
+    isLoading: loading,
+    error: queryError,
+    refetch,
+  } = useQuery({
+    queryKey: queryKeys.accounts(userId),
+    queryFn: () => fetchAccounts(userId!),
+    enabled: !!userId,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+  })
 
-  const fetchAccounts = useCallback(async () => {
-    if (!userId) return
+  const error = queryError ? (queryError instanceof Error ? queryError.message : 'Failed to load accounts') : null
 
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const response = await fetch(`/api/accounts?userId=${userId}&includeHistory=true`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch accounts')
-      }
-      
-      const data = await response.json()
-      const mappedData = Array.isArray(data) ? data.map(acc => ({
-        ...acc,
-        currentBalance: acc.historicalBalance ?? acc.balance
-      })) : []
-      setAccounts(mappedData)
-    } catch (err) {
-      console.error('Error fetching accounts:', err)
-      setError('Failed to load accounts')
-      setAccounts([])
-    } finally {
-      setLoading(false)
-    }
-  }, [userId])
+  // Invalidate related queries when accounts change
+  const invalidateRelatedQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.accounts(userId) })
+    queryClient.invalidateQueries({ queryKey: queryKeys.netWorth(userId) })
+    queryClient.invalidateQueries({ queryKey: queryKeys.transactions(userId) })
+  }, [queryClient, userId])
+
+  // Create account mutation
+  const createMutation = useMutation({
+    mutationFn: async (accountData: Omit<AccountDB, 'id' | 'created_at' | 'updated_at'>) => {
+      const response = await fetch('/api/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(accountData),
+      })
+      if (!response.ok) throw new Error('Failed to create account')
+      return response.json()
+    },
+    onSuccess: () => {
+      invalidateRelatedQueries()
+    },
+  })
+
+  // Update account mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...accountData }: { id: string } & Partial<AccountDB>) => {
+      const response = await fetch('/api/accounts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...accountData }),
+      })
+      if (!response.ok) throw new Error('Failed to update account')
+      return response.json()
+    },
+    onSuccess: () => {
+      invalidateRelatedQueries()
+    },
+  })
+
+  // Delete account mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/accounts?accountId=${id}`, {
+        method: 'DELETE',
+      })
+      if (!response.ok) throw new Error('Failed to delete account')
+    },
+    onSuccess: () => {
+      invalidateRelatedQueries()
+    },
+  })
 
   const refreshAccounts = useCallback(async () => {
-    await fetchAccounts()
-  }, [fetchAccounts])
+    await queryClient.invalidateQueries({ queryKey: queryKeys.accounts(userId) })
+    await refetch()
+  }, [queryClient, userId, refetch])
 
   const getDefaultAccount = useCallback(() => {
     return accounts.find(account => account.is_default && account.is_active) || null
   }, [accounts])
 
   const createAccount = useCallback(async (accountData: Omit<AccountDB, 'id' | 'created_at' | 'updated_at'>) => {
-    try {
-      const response = await fetch('/api/accounts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(accountData),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to create account')
-      }
-
-      const newAccount = await response.json()
-      setAccounts(prev => [...prev, newAccount])
-      return newAccount
-    } catch (err) {
-      console.error('Error creating account:', err)
-      throw err
-    }
-  }, [])
+    return createMutation.mutateAsync(accountData)
+  }, [createMutation])
 
   const updateAccount = useCallback(async (id: string, accountData: Partial<AccountDB>) => {
-    try {
-      const response = await fetch('/api/accounts', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id, ...accountData }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to update account')
-      }
-
-      const updatedAccount = await response.json()
-      setAccounts(prev => prev.map(account => 
-        account.id === id ? updatedAccount : account
-      ))
-      return updatedAccount
-    } catch (err) {
-      console.error('Error updating account:', err)
-      throw err
-    }
-  }, [])
+    return updateMutation.mutateAsync({ id, ...accountData })
+  }, [updateMutation])
 
   const deleteAccount = useCallback(async (id: string) => {
-    try {
-      const response = await fetch(`/api/accounts?accountId=${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete account')
-      }
-
-      setAccounts(prev => prev.filter(account => account.id !== id))
-    } catch (err) {
-      console.error('Error deleting account:', err)
-      throw err
-    }
-  }, [])
-
-  useEffect(() => {
-    if (userId) {
-      fetchAccounts()
-    }
-  }, [userId, fetchAccounts])
+    await deleteMutation.mutateAsync(id)
+  }, [deleteMutation])
 
   const value: AccountContextType = {
     accounts,

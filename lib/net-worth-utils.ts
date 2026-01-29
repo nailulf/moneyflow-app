@@ -149,8 +149,8 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
     categories.push({
       name: 'Credit Cards',
       accounts: accountGroups.CREDIT_CARD,
-      total: -total, // Show as negative since it's debt
-      percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
+      total: -Math.abs(total), // Always negative since it's debt (handles both +/- stored values)
+      percentage: totalNetWorth > 0 ? (Math.abs(total) / totalNetWorth) * 100 : 0,
       color: 'hsl(var(--destructive))'
     })
   }
