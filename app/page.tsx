@@ -2,10 +2,12 @@
 
 import NetWorthOverview from '@/components/NetWorthOverview'
 import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from '@/components/PageLayout'
+import { OnboardingBanner } from '@/components/onboarding'
 
 export default function Home() {
   return (
      <div className="flex flex-col h-full">
+      <OnboardingBanner />
       <PageLayout>
         <TopContent>
               <NetWorthOverview />
