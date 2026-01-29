@@ -105,7 +105,7 @@ export function AccountProvider({ children }: AccountProviderProps) {
   // Delete account mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/accounts?accountId=${id}`, {
+      const response = await fetch(`/api/accounts?id=${id}`, {
         method: 'DELETE',
       })
       if (!response.ok) throw new Error('Failed to delete account')

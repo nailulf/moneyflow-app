@@ -6,11 +6,11 @@ import {
   Home,
   DollarSign,
   PieChart,
-  TrendingUp,
+  // TrendingUp,  // Hidden: Invest
   Lightbulb,
-  Building,
-  Landmark,
-  Scale,
+  // Building,    // Hidden: Estate Planning
+  // Landmark,    // Hidden: Equity
+  // Scale,       // Hidden: Tax
   GalleryVerticalEnd,
 } from "lucide-react"
 
@@ -51,30 +51,15 @@ const data = {
       icon: PieChart,
     },
     {
-      title: "Invest",
-      url: "/invest",
-      icon: TrendingUp,
-    },
-    {
       title: "Advice",
       url: "/advice",
       icon: Lightbulb,
     },
-    {
-      title: "Estate Planning",
-      url: "/estate-planning",
-      icon: Building,
-    },
-    {
-      title: "Equity",
-      url: "/equity",
-      icon: Landmark,
-    },
-    {
-      title: "Tax",
-      url: "/tax",
-      icon: Scale,
-    },
+    // Hidden until features are ready:
+    // { title: "Invest", url: "/invest", icon: TrendingUp },
+    // { title: "Estate Planning", url: "/estate-planning", icon: Building },
+    // { title: "Equity", url: "/equity", icon: Landmark },
+    // { title: "Tax", url: "/tax", icon: Scale },
   ],
 }
 
