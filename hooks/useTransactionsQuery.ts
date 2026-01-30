@@ -4,6 +4,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { Transaction, TransactionInsert, TransactionUpdate } from '@/types/database'
 import { toast } from 'sonner'
 import { queryKeys } from '@/hooks/useDataRefresh'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 const PAGE_SIZE = 100 // Load 100 transactions per page
 
@@ -167,9 +168,19 @@ export function useTransactionMutations(userId: string) {
 
       return response.json()
     },
-    onSuccess: () => {
+    onSuccess: (transaction: Transaction) => {
       invalidateRelatedQueries()
       toast.success('Transaction added successfully')
+      Analytics.track('transaction_created', {
+        transaction_id: transaction.id,
+        amount: transaction.amount,
+        category_id: transaction.category_id,
+        transaction_type: transaction.type,
+        account_id: transaction.account_id,
+        has_merchant: !!transaction.merchant,
+        source: 'manual',
+        timestamp: new Date().toISOString()
+      })
     },
     onError: (error: Error) => {
       toast.error(error.message)
@@ -191,9 +202,15 @@ export function useTransactionMutations(userId: string) {
 
       return response.json()
     },
-    onSuccess: () => {
+    onSuccess: (transaction: Transaction, variables) => {
       invalidateRelatedQueries()
       toast.success('Transaction updated successfully')
+      Analytics.track('transaction_updated', {
+        transaction_id: variables.id,
+        fields_changed: Object.keys(variables.data),
+        new_category_id: variables.data.category_id,
+        timestamp: new Date().toISOString()
+      })
     },
     onError: (error: Error) => {
       toast.error(error.message)
@@ -210,10 +227,16 @@ export function useTransactionMutations(userId: string) {
         const error = await response.json()
         throw new Error(error.message || 'Failed to delete transaction')
       }
+
+      return id
     },
-    onSuccess: () => {
+    onSuccess: (deletedId: string) => {
       invalidateRelatedQueries()
       toast.success('Transaction deleted successfully')
+      Analytics.track('transaction_deleted', {
+        transaction_id: deletedId,
+        timestamp: new Date().toISOString()
+      })
     },
     onError: (error: Error) => {
       toast.error(error.message)

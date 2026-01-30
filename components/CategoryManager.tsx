@@ -11,6 +11,8 @@ import { CategoryGroupDB, CategoryDB } from '@/types/database'
 import { useAuth } from '@/contexts/AuthContext'
 import { SEMANTIC_COLORS } from '@/lib/constants'
 import { useAutoRefresh } from '@/hooks/useDataRefresh'
+import { useCategoryTracking } from '@/hooks/useCategoryTracking'
+import { useNavigationTracking } from '@/hooks/useNavigationTracking'
 
 interface CategoryManagerProps {
   onCategoryUpdated?: () => void
@@ -34,6 +36,8 @@ function CategoryManagerInternal({
   const { user } = useAuth()
   const userId = user?.id || ''
   const { onCategoryChange } = useAutoRefresh(userId)
+  const { trackCategoryCreated, trackCategoryUpdated, trackCategoryDeleted } = useCategoryTracking()
+  const { trackModalOpened, trackModalClosed } = useNavigationTracking()
   
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -189,11 +193,13 @@ function CategoryManagerInternal({
         },
         body: JSON.stringify(categoryData),
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to create category')
       }
-      
+
+      const newCategory = await response.json()
+      trackCategoryCreated(newCategory, 'settings')
       await loadData()
       onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
@@ -210,6 +216,7 @@ function CategoryManagerInternal({
 
   // Delete category
   const handleDeleteCategory = async (categoryId: string) => {
+    const categoryToDelete = categories.find(c => c.id === categoryId)
     setIsSubmitting(true)
     try {
       const response = await fetch(`/api/categories?category_id=${categoryId}`, {
@@ -220,6 +227,13 @@ function CategoryManagerInternal({
         throw new Error('Failed to delete category')
       }
 
+      if (categoryToDelete) {
+        trackCategoryDeleted({
+          id: categoryToDelete.id,
+          name: categoryToDelete.name,
+          group_type: categoryToDelete.group_type
+        })
+      }
       await loadData()
       onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
@@ -245,6 +259,7 @@ function CategoryManagerInternal({
   const handleSaveEdit = async () => {
     if (!editingCategoryId || !editingCategoryName.trim()) return
 
+    const originalCategory = categories.find(c => c.id === editingCategoryId)
     setIsSubmitting(true)
     try {
       const response = await fetch('/api/categories', {
@@ -262,6 +277,14 @@ function CategoryManagerInternal({
         throw new Error('Failed to update category')
       }
 
+      if (originalCategory) {
+        trackCategoryUpdated(
+          editingCategoryId,
+          originalCategory.name,
+          editingCategoryName.trim(),
+          originalCategory.group_type
+        )
+      }
       await loadData()
       onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
@@ -300,7 +323,8 @@ function CategoryManagerInternal({
       if (!response.ok) {
         throw new Error('Failed to create category group')
       }
-      
+
+      trackModalClosed('new_category_group', 'submitted')
       await loadData()
       onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
@@ -330,6 +354,7 @@ function CategoryManagerInternal({
         throw new Error('Failed to delete category group')
       }
 
+      trackModalClosed('delete_category_group', 'submitted')
       await loadData()
       onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
@@ -346,6 +371,12 @@ function CategoryManagerInternal({
   const openDeleteDialog = (groupId: string) => {
     setDeleteGroupId(groupId)
     setIsDeleteDialogOpen(true)
+    trackModalOpened('delete_category_group', 'group_header')
+  }
+
+  const openNewGroupDialog = () => {
+    setIsNewGroupDialogOpen(true)
+    trackModalOpened('new_category_group', 'add_button')
   }
 
   return (
@@ -580,11 +611,12 @@ function CategoryManagerInternal({
               <div className="pt-4 border-t">
                 <Dialog open={isNewGroupDialogOpen} onOpenChange={setIsNewGroupDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="w-full text-xs px-3 py-2 h-10"
                       disabled={isSubmitting}
+                      onClick={openNewGroupDialog}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       NEW GROUP
