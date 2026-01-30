@@ -11,8 +11,7 @@ import { CategoryGroupDB, CategoryDB } from '@/types/database'
 import { useAuth } from '@/contexts/AuthContext'
 import { SEMANTIC_COLORS } from '@/lib/constants'
 import { useAutoRefresh } from '@/hooks/useDataRefresh'
-import { useCategoryTracking } from '@/hooks/useCategoryTracking'
-import { useNavigationTracking } from '@/hooks/useNavigationTracking'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 interface CategoryManagerProps {
   onCategoryUpdated?: () => void
@@ -36,8 +35,6 @@ function CategoryManagerInternal({
   const { user } = useAuth()
   const userId = user?.id || ''
   const { onCategoryChange } = useAutoRefresh(userId)
-  const { trackCategoryCreated, trackCategoryUpdated, trackCategoryDeleted } = useCategoryTracking()
-  const { trackModalOpened, trackModalClosed } = useNavigationTracking()
   
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -199,7 +196,16 @@ function CategoryManagerInternal({
       }
 
       const newCategory = await response.json()
-      trackCategoryCreated(newCategory, 'settings')
+
+      // Track category creation
+      Analytics.track('Category Created', {
+        category_id: newCategory.id,
+        category_name: newCategory.name,
+        category_color: newCategory.color,
+        group_type: newCategory.group_type,
+        source: 'settings'
+      })
+
       await loadData()
       onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
@@ -209,6 +215,12 @@ function CategoryManagerInternal({
     } catch (err) {
       console.error('Failed to add category:', err)
       setError('Failed to create category')
+
+      // Track category creation failure
+      Analytics.track('Category Creation Failed', {
+        category_name: newCategoryName.trim(),
+        error_message: err instanceof Error ? err.message : 'Unknown error'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -228,9 +240,10 @@ function CategoryManagerInternal({
       }
 
       if (categoryToDelete) {
-        trackCategoryDeleted({
-          id: categoryToDelete.id,
-          name: categoryToDelete.name,
+        // Track category deletion
+        Analytics.track('Category Deleted', {
+          category_id: categoryToDelete.id,
+          category_name: categoryToDelete.name,
           group_type: categoryToDelete.group_type
         })
       }
@@ -240,6 +253,12 @@ function CategoryManagerInternal({
     } catch (err) {
       console.error('Failed to delete category:', err)
       setError('Failed to delete category')
+
+      // Track category deletion failure
+      Analytics.track('Category Deletion Failed', {
+        category_id: categoryId,
+        error_message: err instanceof Error ? err.message : 'Unknown error'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -278,12 +297,13 @@ function CategoryManagerInternal({
       }
 
       if (originalCategory) {
-        trackCategoryUpdated(
-          editingCategoryId,
-          originalCategory.name,
-          editingCategoryName.trim(),
-          originalCategory.group_type
-        )
+        // Track category update
+        Analytics.track('Category Updated', {
+          category_id: editingCategoryId,
+          old_name: originalCategory.name,
+          new_name: editingCategoryName.trim(),
+          group_type: originalCategory.group_type
+        })
       }
       await loadData()
       onCategoryChange() // Refresh related data across the app
@@ -293,6 +313,12 @@ function CategoryManagerInternal({
     } catch (err) {
       console.error('Failed to update category:', err)
       setError('Failed to update category')
+
+      // Track category update failure
+      Analytics.track('Category Update Failed', {
+        category_id: editingCategoryId,
+        error_message: err instanceof Error ? err.message : 'Unknown error'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -324,7 +350,13 @@ function CategoryManagerInternal({
         throw new Error('Failed to create category group')
       }
 
-      trackModalClosed('new_category_group', 'submitted')
+      // Track category group creation
+      Analytics.track('Category Group Created', {
+        group_name: newGroupName.trim(),
+        group_type: newGroupType,
+        group_color: newGroupColor
+      })
+
       await loadData()
       onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
@@ -335,6 +367,13 @@ function CategoryManagerInternal({
     } catch (err) {
       console.error('Failed to add group:', err)
       setError('Failed to create category group')
+
+      // Track category group creation failure
+      Analytics.track('Category Group Creation Failed', {
+        group_name: newGroupName.trim(),
+        group_type: newGroupType,
+        error_message: err instanceof Error ? err.message : 'Unknown error'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -354,7 +393,14 @@ function CategoryManagerInternal({
         throw new Error('Failed to delete category group')
       }
 
-      trackModalClosed('delete_category_group', 'submitted')
+      const deletedGroup = categoryGroups.find(g => g.id === deleteGroupId)
+      // Track category group deletion
+      Analytics.track('Category Group Deleted', {
+        group_id: deleteGroupId,
+        group_name: deletedGroup?.name,
+        group_type: deletedGroup?.type
+      })
+
       await loadData()
       onCategoryChange() // Refresh related data across the app
       onCategoryUpdated?.()
@@ -363,20 +409,37 @@ function CategoryManagerInternal({
     } catch (err) {
       console.error('Failed to delete group:', err)
       setError('Failed to delete category group')
+
+      // Track category group deletion failure
+      Analytics.track('Category Group Deletion Failed', {
+        group_id: deleteGroupId,
+        error_message: err instanceof Error ? err.message : 'Unknown error'
+      })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const openDeleteDialog = (groupId: string) => {
+    const group = categoryGroups.find(g => g.id === groupId)
     setDeleteGroupId(groupId)
     setIsDeleteDialogOpen(true)
-    trackModalOpened('delete_category_group', 'group_header')
+
+    // Track delete group dialog opened
+    Analytics.track('Delete Category Group Dialog Opened', {
+      group_id: groupId,
+      group_name: group?.name,
+      trigger: 'group_header'
+    })
   }
 
   const openNewGroupDialog = () => {
     setIsNewGroupDialogOpen(true)
-    trackModalOpened('new_category_group', 'add_button')
+
+    // Track add group form opened
+    Analytics.track('Add Category Group Form Opened', {
+      trigger: 'add_button'
+    })
   }
 
   return (

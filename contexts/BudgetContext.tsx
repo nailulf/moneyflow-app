@@ -7,6 +7,7 @@ import { BudgetDB, BudgetInsert, BudgetUpdate, BudgetCategoryDB, BudgetCategoryI
 import { BudgetItem } from '@/types/app'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 // Budget interfaces for the context
 interface BudgetCategory {
@@ -250,33 +251,49 @@ export function BudgetProvider({
   }, [selectedBudget])
 
   const deleteBudgetHandler = useCallback(async (budgetId: string): Promise<void> => {
+    const budgetToDelete = budgets.find(b => b.id === budgetId)
     try {
       setLoading(true)
       setError(null)
-      
+
       await deleteBudget(budgetId)
-      
+
+      // Track budget deletion
+      Analytics.track('Budget Deleted', {
+        budget_id: budgetId,
+        budget_name: budgetToDelete?.name,
+        budget_period: budgetToDelete?.period,
+        total_amount: budgetToDelete?.total_amount
+      })
+
       // Remove from budgets list
       setBudgets(prev => {
         const filtered = prev.filter(budget => budget.id !== budgetId)
-        
+
         // Clear selected budget if it's the one being deleted
         if (selectedBudget?.id === budgetId) {
           setSelectedBudget(filtered[0] || null)
         }
-        
+
         return filtered
       })
-      
+
       toast.success('Budget deleted successfully')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete budget'
       setError(errorMessage)
+
+      // Track budget deletion failure
+      Analytics.track('Budget Deletion Failed', {
+        budget_id: budgetId,
+        error_message: errorMessage
+      })
+
       toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
-  }, [selectedBudget])
+  }, [selectedBudget, budgets])
 
   const selectBudget = useCallback((budget: Budget | null) => {
     setSelectedBudget(budget)

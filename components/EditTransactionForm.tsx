@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { toast } from 'sonner'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 interface EditTransactionFormProps {
   transaction: Transaction | null
@@ -88,6 +89,12 @@ export function EditTransactionForm({
       setValue('is_recurring', transaction.is_recurring || false)
       setValue('recurring_frequency', transaction.recurring_frequency || 'monthly')
       setValue('recurring_end_date', transaction.recurring_end_date ? transaction.recurring_end_date.split('T')[0] : null)
+
+      // Track form opened
+      Analytics.track('Edit Transaction Form Opened', {
+        transaction_id: transaction.id,
+        transaction_type: transaction.type
+      })
     }
   }, [transaction, open, setValue])
 
@@ -96,7 +103,25 @@ export function EditTransactionForm({
 
   const onSubmit = async (data: TransactionFormData) => {
     if (!transaction) return
-    
+
+    // Determine which fields changed
+    const changedFields: string[] = []
+    if (transaction.description !== data.description) changedFields.push('description')
+    if (transaction.amount !== data.amount) changedFields.push('amount')
+    if (transaction.type !== data.type) changedFields.push('type')
+    if (transaction.category_id !== data.category_id) changedFields.push('category')
+    if (transaction.account_id !== (data.account_id || null)) changedFields.push('account')
+    if (transaction.merchant !== data.merchant) changedFields.push('merchant')
+    if (transaction.is_recurring !== data.is_recurring) changedFields.push('recurring')
+
+    // Track form submission
+    Analytics.track('Edit Transaction Submitted', {
+      transaction_id: transaction.id,
+      fields_changed: changedFields,
+      changed_type: transaction.type !== data.type,
+      changed_category: transaction.category_id !== data.category_id
+    })
+
     setIsSubmitting(true)
     try {
       if (onTransactionUpdated) {
@@ -107,10 +132,25 @@ export function EditTransactionForm({
         }
         await onTransactionUpdated(transaction.id, transformedData)
       }
+
+      // Track successful update
+      Analytics.track('Transaction Updated', {
+        transaction_id: transaction.id,
+        fields_changed: changedFields,
+        new_type: data.type,
+        new_category_id: data.category_id
+      })
+
       toast.success('Transaction updated successfully!')
       onOpenChange(false)
       reset() // Clear form state after successful update
-    } catch {
+    } catch (error) {
+      // Track failed update
+      Analytics.track('Transaction Update Failed', {
+        transaction_id: transaction.id,
+        error_message: error instanceof Error ? error.message : 'Unknown error'
+      })
+
       toast.error('Failed to update transaction')
     } finally {
       setIsSubmitting(false)
