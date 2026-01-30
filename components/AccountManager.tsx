@@ -10,27 +10,31 @@ import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatCurrency } from '@/lib/data-utils'
+import { useAccountTracking } from '@/hooks/useAccountTracking'
+import { useNavigationTracking } from '@/hooks/useNavigationTracking'
 
 interface AccountManagerProps {
   onAccountUpdated?: () => void
   className?: string
 }
 
-function AccountManagerInternal({ 
+function AccountManagerInternal({
   onAccountUpdated,
   className = ''
 }: AccountManagerProps) {
   const { user } = useAuth()
   const userId = user?.id || ''
-  const { 
-    accounts, 
-    loading, 
-    error, 
-    refreshAccounts, 
-    createAccount, 
-    updateAccount, 
-    deleteAccount 
+  const {
+    accounts,
+    loading,
+    error,
+    refreshAccounts,
+    createAccount,
+    updateAccount,
+    deleteAccount
   } = useAccounts()
+  const { trackAccountCreated, trackAccountUpdated, trackAccountDeleted } = useAccountTracking()
+  const { trackModalOpened, trackModalClosed } = useNavigationTracking()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -72,10 +76,12 @@ function AccountManagerInternal({
         is_default: false,
         description: null
       }
-      
-      await createAccount(accountData)
+
+      const newAccount = await createAccount(accountData)
+      trackAccountCreated(newAccount, 'settings')
+      trackModalClosed('new_account', 'submitted')
       onAccountUpdated?.()
-      
+
       // Reset form
       setNewAccountName('')
       setNewAccountType('bank')
@@ -94,10 +100,16 @@ function AccountManagerInternal({
 
     setIsSubmitting(true)
     try {
+      const fieldsChanged: string[] = []
+      if (selectedAccount?.name !== editAccountName.trim()) fieldsChanged.push('name')
+      if (selectedAccount?.type.toLowerCase() !== editAccountType) fieldsChanged.push('type')
+
       await updateAccount(selectedAccountId, {
         name: editAccountName.trim(),
         type: editAccountType.toUpperCase() as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
       })
+      trackAccountUpdated(selectedAccountId, fieldsChanged, editAccountType.toUpperCase())
+      trackModalClosed('edit_account', 'submitted')
       onAccountUpdated?.()
       setIsEditAccountDialogOpen(false)
       setSelectedAccountId(null)
@@ -110,11 +122,18 @@ function AccountManagerInternal({
 
   // Handle deleting account
   const handleDeleteAccount = async () => {
-    if (!selectedAccountId) return
+    if (!selectedAccountId || !selectedAccount) return
 
     setIsSubmitting(true)
     try {
+      const accountInfo = {
+        id: selectedAccount.id,
+        type: selectedAccount.type,
+        name: selectedAccount.name
+      }
       await deleteAccount(selectedAccountId)
+      trackAccountDeleted(accountInfo)
+      trackModalClosed('delete_account', 'submitted')
       onAccountUpdated?.()
       setIsDeleteDialogOpen(false)
       setSelectedAccountId(null)
@@ -131,12 +150,20 @@ function AccountManagerInternal({
     setEditAccountName(account.name)
     setEditAccountType(account.type.toLowerCase())
     setIsEditAccountDialogOpen(true)
+    trackModalOpened('edit_account', 'account_list')
   }
 
   // Open delete dialog
   const openDeleteDialog = (accountId: string) => {
     setSelectedAccountId(accountId)
     setIsDeleteDialogOpen(true)
+    trackModalOpened('delete_account', 'account_list')
+  }
+
+  // Open new account dialog
+  const openNewAccountDialog = () => {
+    setIsNewAccountDialogOpen(true)
+    trackModalOpened('new_account', 'add_button')
   }
 
 
@@ -186,8 +213,8 @@ function AccountManagerInternal({
             </div>
 
             {/* Add New Account Button */}
-            <Button 
-              onClick={() => setIsNewAccountDialogOpen(true)}
+            <Button
+              onClick={openNewAccountDialog}
               className="w-full"
               disabled={isSubmitting}
             >

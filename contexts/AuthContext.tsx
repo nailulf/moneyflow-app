@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 interface AuthContextType {
   user: User | null
@@ -35,10 +36,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session)
         setUser(session?.user ?? null)
         setLoading(false)
+
+        if (event === 'SIGNED_IN' && session?.user) {
+          Analytics.track('user_logged_in', {
+            auth_method: session.user.app_metadata?.provider || 'email',
+            timestamp: new Date().toISOString()
+          })
+        }
+
         if (event === 'SIGNED_OUT') {
-            setUser(null)
-            setSession(null)
-            router.push('/login')
+          setUser(null)
+          setSession(null)
+          router.push('/login')
         }
       }
     )
@@ -47,6 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router, supabase.auth])
 
   const signOut = async () => {
+    // Track logout event before resetting
+    Analytics.track('user_logged_out', {
+      timestamp: new Date().toISOString()
+    })
+    // Reset analytics to clear user data
+    Analytics.reset()
     await supabase.auth.signOut()
     router.push('/login')
   }

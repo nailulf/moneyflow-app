@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { useAuth } from './AuthContext'
+import { Analytics } from '@/lib/analytics/amplitude'
 import type {
   UserOnboardingDB,
   OnboardingPhase,
@@ -93,6 +94,13 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     const userNeedsOnboarding = needsOnboarding(state)
     if (!loading && userNeedsOnboarding && state?.current_phase !== 'completed') {
       setIsModalOpen(true)
+      // Track onboarding started when modal auto-opens
+      if (state?.current_phase === 'welcome') {
+        Analytics.track('onboarding_started', {
+          timestamp: new Date().toISOString()
+        })
+        Analytics.setUserProperties({ onboarding_started_at: new Date().toISOString() })
+      }
     }
   }, [loading, state])
 
@@ -145,10 +153,21 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       })
       setState(updated)
 
-      // Log phase transition
+      // Log phase transition to DB
       await logOnboardingEvent(user.id, 'phase_started', {
         phase: next,
         metadata: { previous_phase: state.current_phase }
+      })
+
+      // Also track to Amplitude
+      Analytics.track('onboarding_phase_completed', {
+        phase: state.current_phase,
+        timestamp: new Date().toISOString()
+      })
+      Analytics.track('onboarding_phase_started', {
+        phase: next,
+        previous_phase: state.current_phase,
+        timestamp: new Date().toISOString()
       })
     } catch (err) {
       console.error('Error advancing phase:', err)
@@ -210,6 +229,17 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       setLoading(true)
       const result = await skipOnboarding(user.id, reason)
       setState(result.onboarding)
+
+      // Track skip to Amplitude
+      Analytics.track('onboarding_skipped', {
+        phase: state?.current_phase,
+        reason,
+        timestamp: new Date().toISOString()
+      })
+      Analytics.setUserProperties({
+        onboarding_skipped: true,
+        onboarding_skipped_at: new Date().toISOString()
+      })
     } catch (err) {
       console.error('Error skipping onboarding:', err)
       setError('Failed to skip onboarding')
@@ -217,7 +247,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     } finally {
       setLoading(false)
     }
-  }, [user?.id])
+  }, [user?.id, state])
 
   const complete = useCallback(async () => {
     if (!user?.id) throw new Error('User not authenticated')
@@ -226,6 +256,20 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       setLoading(true)
       const result = await completeOnboarding(user.id, { wizardData })
       setState(result.onboarding)
+
+      // Track completion to Amplitude
+      Analytics.track('onboarding_completed', {
+        accounts_created: result.summary.accountsCreated,
+        categories_count: result.summary.categoriesCount,
+        budgets_created: result.summary.budgetsCreated,
+        duration_seconds: result.summary.durationSeconds,
+        timestamp: new Date().toISOString()
+      })
+      Analytics.setUserProperties({
+        onboarding_completed: true,
+        onboarding_completed_at: new Date().toISOString()
+      })
+
       return result.summary
     } catch (err) {
       console.error('Error completing onboarding:', err)
@@ -243,10 +287,19 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     if (!user?.id || !state) return
 
     try {
+      // Log to database
       await logOnboardingEvent(user.id, eventType, {
         phase: state.current_phase,
         step: state.current_step,
         metadata
+      })
+
+      // Also track to Amplitude
+      Analytics.track(`onboarding_${eventType}`, {
+        phase: state.current_phase,
+        step: state.current_step,
+        ...metadata,
+        timestamp: new Date().toISOString()
       })
     } catch (err) {
       // Don't throw - event logging shouldn't block the UI

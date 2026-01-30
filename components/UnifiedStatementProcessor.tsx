@@ -46,6 +46,7 @@ import { useCategories } from '@/contexts/CategoryContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { ParsedTransaction } from '@/lib/bank-parsers/types'
 import { cn } from '@/lib/utils'
+import { useStatementTracking } from '@/hooks/useStatementTracking'
 
 interface UnifiedStatementProcessorProps {
   onSuccess?: () => void
@@ -84,6 +85,7 @@ export function UnifiedStatementProcessor({
   // Contexts
   const { accounts } = useAccounts()
   const { categories } = useCategories()
+  const { trackUploadStarted, trackProcessingCompleted, trackProcessingFailed, trackTransactionsImported } = useStatementTracking()
   
   const formatCurrency = (amount: number, currencyCode: string = 'IDR') => {
     try {
@@ -136,6 +138,20 @@ export function UnifiedStatementProcessor({
     setIsUploading(true)
     setUploadProgress(10)
 
+    const startTime = Date.now()
+    const sessionId = `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const selectedAccount = accounts.find(a => a.id === selectedAccountId)
+
+    // Track upload started
+    trackUploadStarted(
+      selectedFile.type || 'application/pdf',
+      selectedFile.size,
+      {
+        accountName: selectedAccount?.name,
+        accountType: selectedAccount?.type || 'unknown'
+      }
+    )
+
     const formData = new FormData()
     formData.append('file', selectedFile)
     formData.append('useAI', useAI.toString())
@@ -179,22 +195,41 @@ export function UnifiedStatementProcessor({
       if (data.success && data.preview) {
         setTransactions(data.preview.transactions)
         setStatementMetadata(data.preview.statement)
-        
+
         // Extract currency from summary, first transaction, or default to IDR
-        const detectedCurrency = data.preview.summary?.currency || 
-                               data.preview.transactions[0]?.currency || 
+        const detectedCurrency = data.preview.summary?.currency ||
+                               data.preview.transactions[0]?.currency ||
                                'IDR';
         setSelectedCurrency(detectedCurrency);
-        
+
         // Select all by default
         const allIds = new Set<number>(data.preview.transactions.map((_: any, i: number) => i))
         setSelectedIds(allIds)
-        
+
+        // Track successful processing
+        trackProcessingCompleted(sessionId, {
+          bankDetected: data.preview.statement?.bank_name,
+          bankMatchesSelected: true,
+          confidenceScore: data.preview.summary?.confidence || 1,
+          transactionsExtracted: data.preview.transactions.length,
+          duplicatesFound: data.preview.summary?.duplicatesFound || 0,
+          processingTime: Date.now() - startTime,
+          fileType: selectedFile.type || 'application/pdf'
+        })
+
         toast.success('Statement processed successfully')
         setViewState('REVIEW')
       }
     } catch (error) {
       console.error('Upload error:', error)
+
+      // Track failed processing
+      trackProcessingFailed(sessionId, {
+        errorType: 'upload_error',
+        errorMessage: error instanceof Error ? error.message : 'Upload failed',
+        fileType: selectedFile.type || 'application/pdf'
+      })
+
       toast.error(error instanceof Error ? error.message : 'Upload failed')
       setUploadProgress(0)
     } finally {
@@ -347,8 +382,20 @@ export function UnifiedStatementProcessor({
         throw new Error(result.error || result.details || 'Failed to import transactions')
       }
 
-      toast.success(`Successfully imported ${result.count || result.length || 0} transactions`)
-      
+      const importedCount = result.count || result.length || 0
+      const selectedAccount = accounts.find(a => a.id === selectedAccountId)
+
+      // Track successful import
+      trackTransactionsImported(`import-${Date.now()}`, {
+        importedCount,
+        accountId: selectedAccountId,
+        accountName: selectedAccount?.name || 'Unknown',
+        bankName: statementMetadata?.bank_name,
+        totalAmount: transactionsToImport.reduce((sum, t) => sum + Math.abs(t.amount), 0)
+      })
+
+      toast.success(`Successfully imported ${importedCount} transactions`)
+
       if (onSuccess) onSuccess()
       
       // Reset state if not unmounted
