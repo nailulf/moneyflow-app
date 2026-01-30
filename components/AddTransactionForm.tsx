@@ -15,6 +15,7 @@ import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
 import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 
 interface AddTransactionFormProps {
@@ -118,6 +119,17 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
 
   const onSubmit = async (data: TransactionFormData) => {
     setIsSubmitting(true)
+
+    // Track form submission attempt
+    Analytics.track('Add Transaction Submitted', {
+      transaction_type: data.type,
+      has_category: !!data.category_id,
+      has_account: !!data.account_id,
+      has_merchant: !!data.merchant,
+      is_recurring: data.is_recurring,
+      recurring_frequency: data.is_recurring ? data.recurring_frequency : null
+    })
+
     try {
       // Transform empty account_id to null to match database schema
       const transformedData = {
@@ -141,10 +153,23 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
         throw new Error(errorData.error || errorData.details || errorData.message || 'Failed to create transaction')
       }
 
+      const createdTransaction = await response.json()
+
+      // Track successful creation
+      Analytics.track('Transaction Created', {
+        transaction_id: createdTransaction.id,
+        transaction_type: data.type,
+        amount: Number(data.amount),
+        category_id: data.category_id,
+        account_id: data.account_id || null,
+        is_recurring: data.is_recurring,
+        source: 'manual_form'
+      })
+
       onSuccess?.()
       setOpen(false)
       toast.success('Transaction created successfully')
-      
+
       // Reset form to default values
       reset({
         date: new Date().toISOString().split('T')[0],
@@ -161,6 +186,13 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
       })
     } catch (error) {
       console.error('Error creating transaction:', error)
+
+      // Track failed creation
+      Analytics.track('Transaction Creation Failed', {
+        transaction_type: data.type,
+        error_message: error instanceof Error ? error.message : 'Unknown error'
+      })
+
       toast.error(error instanceof Error ? error.message : 'Failed to create transaction')
     } finally {
       setIsSubmitting(false)
@@ -180,6 +212,12 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
         const suppressed = suppressCloseUntil > Date.now()
         if (!next && (isAnySelectOpen || suppressed)) return
         setOpen(next)
+        // Track form opened/closed
+        if (next) {
+          Analytics.track('Add Transaction Form Opened', {
+            trigger: 'button_click'
+          })
+        }
       }}
     >
       <SheetTrigger asChild>

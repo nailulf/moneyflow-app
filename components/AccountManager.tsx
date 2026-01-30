@@ -10,8 +10,7 @@ import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatCurrency } from '@/lib/data-utils'
-import { useAccountTracking } from '@/hooks/useAccountTracking'
-import { useNavigationTracking } from '@/hooks/useNavigationTracking'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 interface AccountManagerProps {
   onAccountUpdated?: () => void
@@ -33,8 +32,6 @@ function AccountManagerInternal({
     updateAccount,
     deleteAccount
   } = useAccounts()
-  const { trackAccountCreated, trackAccountUpdated, trackAccountDeleted } = useAccountTracking()
-  const { trackModalOpened, trackModalClosed } = useNavigationTracking()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -78,8 +75,16 @@ function AccountManagerInternal({
       }
 
       const newAccount = await createAccount(accountData)
-      trackAccountCreated(newAccount, 'settings')
-      trackModalClosed('new_account', 'submitted')
+
+      // Track account creation
+      Analytics.track('Account Created', {
+        account_id: newAccount.id,
+        account_type: newAccount.type,
+        account_name: newAccount.name,
+        initial_balance: newAccount.balance,
+        source: 'settings'
+      })
+
       onAccountUpdated?.()
 
       // Reset form
@@ -89,6 +94,12 @@ function AccountManagerInternal({
       setIsNewAccountDialogOpen(false)
     } catch (err) {
       console.error('Failed to add account:', err)
+
+      // Track account creation failure
+      Analytics.track('Account Creation Failed', {
+        account_type: newAccountType.toUpperCase(),
+        error_message: err instanceof Error ? err.message : 'Unknown error'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -108,13 +119,26 @@ function AccountManagerInternal({
         name: editAccountName.trim(),
         type: editAccountType.toUpperCase() as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
       })
-      trackAccountUpdated(selectedAccountId, fieldsChanged, editAccountType.toUpperCase())
-      trackModalClosed('edit_account', 'submitted')
+
+      // Track account update
+      Analytics.track('Account Updated', {
+        account_id: selectedAccountId,
+        fields_changed: fieldsChanged,
+        new_type: editAccountType.toUpperCase(),
+        new_name: editAccountName.trim()
+      })
+
       onAccountUpdated?.()
       setIsEditAccountDialogOpen(false)
       setSelectedAccountId(null)
     } catch (err) {
       console.error('Failed to update account:', err)
+
+      // Track account update failure
+      Analytics.track('Account Update Failed', {
+        account_id: selectedAccountId,
+        error_message: err instanceof Error ? err.message : 'Unknown error'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -132,13 +156,26 @@ function AccountManagerInternal({
         name: selectedAccount.name
       }
       await deleteAccount(selectedAccountId)
-      trackAccountDeleted(accountInfo)
-      trackModalClosed('delete_account', 'submitted')
+
+      // Track account deletion
+      Analytics.track('Account Deleted', {
+        account_id: accountInfo.id,
+        account_type: accountInfo.type,
+        account_name: accountInfo.name
+      })
+
       onAccountUpdated?.()
       setIsDeleteDialogOpen(false)
       setSelectedAccountId(null)
     } catch (err) {
       console.error('Failed to delete account:', err)
+
+      // Track account deletion failure
+      Analytics.track('Account Deletion Failed', {
+        account_id: selectedAccountId,
+        account_type: selectedAccount?.type,
+        error_message: err instanceof Error ? err.message : 'Unknown error'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -150,20 +187,37 @@ function AccountManagerInternal({
     setEditAccountName(account.name)
     setEditAccountType(account.type.toLowerCase())
     setIsEditAccountDialogOpen(true)
-    trackModalOpened('edit_account', 'account_list')
+
+    // Track edit dialog opened
+    Analytics.track('Edit Account Form Opened', {
+      account_id: account.id,
+      account_type: account.type,
+      trigger: 'account_list'
+    })
   }
 
   // Open delete dialog
   const openDeleteDialog = (accountId: string) => {
+    const account = accounts.find(a => a.id === accountId)
     setSelectedAccountId(accountId)
     setIsDeleteDialogOpen(true)
-    trackModalOpened('delete_account', 'account_list')
+
+    // Track delete dialog opened
+    Analytics.track('Delete Account Dialog Opened', {
+      account_id: accountId,
+      account_type: account?.type,
+      trigger: 'account_list'
+    })
   }
 
   // Open new account dialog
   const openNewAccountDialog = () => {
     setIsNewAccountDialogOpen(true)
-    trackModalOpened('new_account', 'add_button')
+
+    // Track add account form opened
+    Analytics.track('Add Account Form Opened', {
+      trigger: 'add_button'
+    })
   }
 
 

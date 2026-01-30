@@ -16,6 +16,7 @@ import { useBudgets } from '@/contexts/BudgetContext'
 import { toast } from 'sonner'
 import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
 import { fromExistingBudgetData, toDatabase } from '@/lib/budget-allocation'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 interface BudgetCategory {
   id: string
@@ -78,6 +79,15 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
   // Initialize form data when budgetData changes
   useEffect(() => {
     if (budgetData && budgetData.totalAmount > 0) {
+      // Track edit form opened
+      Analytics.track('Edit Budget Form Opened', {
+        budget_id: budgetData.id,
+        budget_name: budgetData.name,
+        total_amount: budgetData.totalAmount,
+        period: budgetData.period,
+        categories_count: budgetData.categories.length
+      })
+
       // Initialize budget allocation with existing data first
       const allocationCategories = budgetData.categories
         .filter(cat => cat.category !== 'Others') // Exclude Others as it's auto-managed
@@ -88,7 +98,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
           allocated_amount: cat.budgetAmount,
           spent_amount: cat.spentAmount
         }))
-      
+
       budgetAllocation.loadFromExistingBudget(
         budgetData.totalAmount,
         allocationCategories
@@ -229,10 +239,28 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
       }
       
       await onSave(updatedBudget)
+
+      // Track successful budget update
+      Analytics.track('Budget Updated', {
+        budget_id: editForm.id,
+        budget_name: editForm.name,
+        total_amount: editForm.totalAmount,
+        period: editForm.period,
+        categories_count: updatedBudget.categories.length
+      })
+
       toast.success('Budget updated successfully')
       onClose()
     } catch (error) {
       console.error('Error saving budget:', error)
+
+      // Track budget update failure
+      Analytics.track('Budget Update Failed', {
+        budget_id: editForm.id,
+        budget_name: editForm.name,
+        error_message: error instanceof Error ? error.message : 'Unknown error'
+      })
+
       toast.error('Failed to save budget. Please try again.')
       // Re-enable form for retry
       setIsLoading(false)

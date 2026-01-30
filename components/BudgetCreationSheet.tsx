@@ -14,6 +14,7 @@ import { formatCurrency, DEFAULT_CURRENCY } from '@/lib/data-utils'
 import { preferences } from '@/lib/api/user-preferences'
 import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
 import { useAuth } from '@/contexts/AuthContext'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 interface BudgetCategory {
   category_id: string
@@ -103,10 +104,10 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
       setBudgetCategories([])
       setSelectedCategoryId('')
       setCategoryAmount('')
-      
+
       // Initialize allocation hook
       budgetAllocation.initializeAllocation(0, DEFAULT_CURRENCY)
-      
+
       // Load user's preferred currency
       if (userId) {
         preferences.getCurrency(userId).then(userCurrency => {
@@ -117,6 +118,11 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
       } else {
         setCurrency(DEFAULT_CURRENCY)
       }
+
+      // Track budget creation form opened
+      Analytics.track('Create Budget Form Opened', {
+        trigger: 'budget_manager'
+      })
     }
     // Removed budgetAllocation from dependencies to prevent infinite loop
   }, [isOpen, userId])
@@ -237,11 +243,32 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
       }
 
       const { budget } = await response.json()
+
+      // Track successful budget creation
+      Analytics.track('Budget Created', {
+        budget_id: budget.id,
+        budget_name: budgetName,
+        total_amount: parseFloat(totalAmount),
+        period: period,
+        year: year,
+        month: period === 'monthly' ? month : null,
+        currency: currency,
+        categories_count: budgetCategories.length
+      })
+
       toast.success('Budget created successfully!')
       onBudgetCreated(budget)
       onClose()
     } catch (error) {
       console.error('Error creating budget:', error)
+
+      // Track budget creation failure
+      Analytics.track('Budget Creation Failed', {
+        budget_name: budgetName,
+        period: period,
+        error_message: error instanceof Error ? error.message : 'Unknown error'
+      })
+
       toast.error(error instanceof Error ? error.message : 'Failed to create budget')
     } finally {
       setIsLoading(false)
