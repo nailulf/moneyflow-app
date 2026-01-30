@@ -2,8 +2,8 @@ name: Process Recurring Transactions
 
 on:
   schedule:
-    # Run daily at 00:00 UTC (midnight)
-    - cron: "*/5 * * * *"
+    # Run daily at 02:00 UTC (2 AM)
+    - cron: "0 2 * * *"
   workflow_dispatch: # Allows manual triggering from GitHub UI
 
 jobs:
