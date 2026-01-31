@@ -427,7 +427,13 @@ export function EditTransactionForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                Analytics.track('Edit Transaction Cancelled', {
+                  transaction_id: transaction?.id,
+                  transaction_type: transaction?.type
+                })
+                onOpenChange(false)
+              }}
               className="flex-1"
             >
               Cancel

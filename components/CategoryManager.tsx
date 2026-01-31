@@ -266,11 +266,19 @@ function CategoryManagerInternal({
 
   // Edit category name
   const handleStartEdit = (category: CategoryDB) => {
+    Analytics.track('Category Edit Started', {
+      category_id: category.id,
+      category_name: category.name,
+      group_type: category.group_type
+    })
     setEditingCategoryId(category.id)
     setEditingCategoryName(category.name)
   }
 
   const handleCancelEdit = () => {
+    Analytics.track('Category Edit Cancelled', {
+      category_id: editingCategoryId
+    })
     setEditingCategoryId(null)
     setEditingCategoryName('')
   }

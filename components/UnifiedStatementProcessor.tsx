@@ -47,6 +47,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { ParsedTransaction } from '@/lib/bank-parsers/types'
 import { cn } from '@/lib/utils'
 import { useStatementTracking } from '@/hooks/useStatementTracking'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 interface UnifiedStatementProcessorProps {
   onSuccess?: () => void
@@ -284,6 +285,11 @@ export function UnifiedStatementProcessor({
   const handleAutoCategorize = async () => {
     if (filteredTransactions.length === 0) return
 
+    Analytics.track('Auto Categorize Clicked', {
+      transactions_count: filteredTransactions.length,
+      categories_count: categories.length
+    })
+
     setIsCategorizing(true)
     try {
       // Prepare payload for AI categorization API
@@ -297,16 +303,16 @@ export function UnifiedStatementProcessor({
         categories: categories.map(c => ({ id: c.id, name: c.name }))
       }
 
-      const res = await fetch('/api/ai/categorize', { 
-        method: 'POST', 
+      const res = await fetch('/api/ai/categorize', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload) 
+        body: JSON.stringify(payload)
       })
 
       if (!res.ok) throw new Error('Categorization failed')
 
       const { assignments } = await res.json()
-      
+
       setTransactions(prev => {
         const newTrans = [...prev]
         assignments.forEach((assignment: any) => {
@@ -322,9 +328,18 @@ export function UnifiedStatementProcessor({
         return newTrans
       })
 
+      Analytics.track('Auto Categorize Completed', {
+        transactions_categorized: assignments.length,
+        total_transactions: filteredTransactions.length
+      })
+
       toast.success(`Categorized ${assignments.length} transactions`)
     } catch (error) {
       console.error('Auto-categorize error:', error)
+      Analytics.track('Auto Categorize Failed', {
+        error_message: error instanceof Error ? error.message : 'Unknown error',
+        transactions_count: filteredTransactions.length
+      })
       toast.error('Failed to auto-categorize')
     } finally {
       setIsCategorizing(false)
@@ -433,14 +448,19 @@ export function UnifiedStatementProcessor({
 
   const renderUploadState = () => (
     <div className="space-y-6 p-4">
-      <div 
+      <div
         className={cn(
           "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
           selectedFile ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
         )}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => {
+          Analytics.track('Statement Upload Area Clicked', {
+            has_existing_file: !!selectedFile
+          })
+          fileInputRef.current?.click()
+        }}
       >
         <input 
           type="file" 
@@ -826,7 +846,13 @@ export function UnifiedStatementProcessor({
                   )}
               </div>
               <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setShowExitConfirmation(true)}>
+                  <Button variant="outline" onClick={() => {
+                    Analytics.track('Statement Import Cancel Clicked', {
+                      transactions_count: transactions.length,
+                      selected_count: selectedIds.size
+                    })
+                    setShowExitConfirmation(true)
+                  }}>
                     Cancel
                   </Button>
                   <Button onClick={handleConfirmImport} disabled={isImporting || selectedIds.size === 0}>
@@ -848,8 +874,16 @@ export function UnifiedStatementProcessor({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => {
+            Analytics.track('Statement Import Discard Cancelled', {
+              transactions_count: transactions.length
+            })
+          }}>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={() => {
+            Analytics.track('Statement Import Discarded', {
+              transactions_count: transactions.length,
+              selected_count: selectedIds.size
+            })
             setViewState('UPLOAD')
             setShowExitConfirmation(false)
           }}>

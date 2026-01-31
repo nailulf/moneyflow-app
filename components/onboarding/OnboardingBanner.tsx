@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Sparkles, Wallet, PieChart, TrendingUp } from 'lucide-react'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 const FEATURES = [
   { icon: Wallet, text: 'Track expenses across all accounts' },
@@ -42,6 +43,10 @@ export function OnboardingBanner() {
   }, [user?.id, onboarding])
 
   const handleDismiss = () => {
+    Analytics.track('Onboarding Banner Dismissed', {
+      action: 'maybe_later',
+      current_phase: onboarding?.current_phase
+    })
     if (user?.id) {
       localStorage.setItem(`onboarding_popup_dismissed_${user.id}`, 'true')
     }
@@ -49,6 +54,9 @@ export function OnboardingBanner() {
   }
 
   const handleComplete = () => {
+    Analytics.track('Onboarding Banner Complete Setup Clicked', {
+      current_phase: onboarding?.current_phase
+    })
     setIsOpen(false)
     openModal()
   }

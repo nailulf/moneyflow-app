@@ -27,6 +27,7 @@ import {
   ArrowRight,
   Loader2
 } from 'lucide-react'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 const ACCOUNT_TYPES = [
   { value: 'BANK', label: 'Bank Account', icon: Banknote, description: 'Checking or savings account' },
@@ -59,6 +60,12 @@ export function AccountSetupStep() {
       return
     }
 
+    Analytics.track('Onboarding Create Account Clicked', {
+      account_type: accountType,
+      has_balance: !!balance && parseFloat(balance) > 0,
+      step: 'account_setup'
+    })
+
     setIsSubmitting(true)
     setError(null)
 
@@ -76,6 +83,12 @@ export function AccountSetupStep() {
 
       await createAccount(accountData)
 
+      Analytics.track('Onboarding Account Created', {
+        account_type: accountType,
+        has_balance: !!balance && parseFloat(balance) > 0,
+        step: 'account_setup'
+      })
+
       // Store in wizard data
       setWizardData({ account: accountData })
 
@@ -83,6 +96,11 @@ export function AccountSetupStep() {
       await nextPhase()
     } catch (err) {
       console.error('Error creating account:', err)
+      Analytics.track('Onboarding Account Creation Failed', {
+        account_type: accountType,
+        error_message: err instanceof Error ? err.message : 'Unknown error',
+        step: 'account_setup'
+      })
       setError('Failed to create account. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -90,11 +108,19 @@ export function AccountSetupStep() {
   }
 
   const handleSkipAccount = async () => {
+    Analytics.track('Onboarding Skip Step Clicked', {
+      step: 'account_setup',
+      action: 'skip_this_step'
+    })
     // Move to next step without creating account
     await nextPhase()
   }
 
   const handleSkipOnboarding = async () => {
+    Analytics.track('Onboarding Skip Entirely Clicked', {
+      step: 'account_setup',
+      action: 'skip_setup_entirely'
+    })
     await skip('Skipped from account setup')
     router.push('/')
   }
