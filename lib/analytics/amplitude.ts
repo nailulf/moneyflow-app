@@ -7,11 +7,13 @@ interface AmplitudeConfig {
   environment: 'development' | 'staging' | 'production';
   enableSessionReplay?: boolean;
   debug?: boolean;
+  enableDebugLogging?: boolean;
 }
 
 class AmplitudeService {
   private initialized = false;
-  
+  private debugMode = false;
+
   init(config: AmplitudeConfig) {
     if (this.initialized) return;
     
@@ -26,7 +28,9 @@ class AmplitudeService {
         sessions: true,
         pageViews: true,
         formInteractions: true,
-        fileDownloads: true
+        fileDownloads: true,
+        // Visual Labeling: auto-track clicks on elements with data-amp-track-label
+        elementInteractions: true
       },
       minIdLength: 1,
       sessionTimeout: 30 * 60 * 1000, // 30 minutes
@@ -36,9 +40,16 @@ class AmplitudeService {
       // Disable remote config fetch in development to prevent blocked request errors
       // @ts-ignore - fetchRemoteConfig might not be in the type definition yet but is supported
       fetchRemoteConfig: config.environment === 'production',
-      // Suppress logs in development to avoid "Failed to fetch" errors from ad blockers
-      logLevel: config.environment === 'production' ? amplitude.Types.LogLevel.Warn : amplitude.Types.LogLevel.None,
+      // Enable debug logging if requested, otherwise suppress in dev to avoid "Failed to fetch" errors
+      logLevel: config.enableDebugLogging
+        ? amplitude.Types.LogLevel.Debug
+        : (config.environment === 'production' ? amplitude.Types.LogLevel.Warn : amplitude.Types.LogLevel.None),
     });
+
+    if (config.enableDebugLogging) {
+      this.debugMode = true;
+      console.log('[Amplitude] Initialized with debug logging enabled');
+    }
 
     // Add session replay if enabled
     if (config.enableSessionReplay) {
@@ -67,6 +78,11 @@ class AmplitudeService {
   // Track event
   track(eventName: string, eventProperties?: Record<string, any>) {
     if (!this.initialized) return;
+
+    if (this.debugMode) {
+      console.log('[Amplitude] Track:', eventName, eventProperties || {});
+    }
+
     amplitude.track(eventName, eventProperties);
   }
 
