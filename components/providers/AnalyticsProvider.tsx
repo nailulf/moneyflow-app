@@ -22,18 +22,25 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (user) {
-      // Identify user
-      Analytics.identify(user.id, {
-        email: user.email,
-        created_at: user.created_at,
-        // Add more user properties as needed
-      });
-    } else {
-      // Reset on logout
-      // We check if we are actually logged out to avoid resetting on initial load
-      // But since useAuth handles loading state, if user is null and not loading (handled by parent), it means we are logged out
-      // However, this provider might be used where loading state isn't explicitly checked before rendering
-      // Safe to call reset if we want to ensure no user data is mixed
+      // Build user properties, only including defined values
+      const userProperties: Record<string, any> = {};
+
+      if (user.email) {
+        userProperties.email = user.email;
+      }
+      if (user.created_at) {
+        userProperties.created_at = user.created_at;
+      }
+      // Add user metadata if available
+      if (user.user_metadata?.full_name) {
+        userProperties.name = user.user_metadata.full_name;
+      }
+      if (user.app_metadata?.provider) {
+        userProperties.auth_provider = user.app_metadata.provider;
+      }
+
+      // Identify user with available properties
+      Analytics.identify(user.id, userProperties);
     }
   }, [user]);
 
