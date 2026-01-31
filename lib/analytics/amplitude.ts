@@ -13,14 +13,65 @@ interface AmplitudeConfig {
 class AmplitudeService {
   private initialized = false;
   private debugMode = false;
+  private pendingIdentify: { userId: string; userProperties?: Record<string, any> } | null = null;
 
   init(config: AmplitudeConfig) {
     if (this.initialized) return;
-    
+
     // Don't initialize if no API key is provided or if it's a placeholder
     if (!config.apiKey || config.apiKey === 'your-api-key' || config.apiKey.includes('INSERT_KEY')) {
       console.warn('Amplitude API key not found or invalid. Analytics disabled.');
       return;
+    }
+
+    if (config.enableDebugLogging) {
+      this.debugMode = true;
+      console.log('[Amplitude] Initializing...');
+    }
+
+    // IMPORTANT: Add session replay plugin BEFORE amplitude.init() per Amplitude docs
+    // https://amplitude.com/docs/session-replay/session-replay-plugin#before-you-begin
+    if (config.enableSessionReplay) {
+      const sessionReplay = sessionReplayPlugin({
+        // Sample rate: 10% in production, 100% in development for testing
+        sampleRate: config.environment === 'production' ? 0.1 : 1.0,
+        // Privacy configuration - mask sensitive financial data
+        privacyConfig: {
+          // Mask all input fields by default (balances, amounts, etc.)
+          maskSelector: [
+            'input[type="number"]',
+            'input[type="text"]',
+            'input[type="email"]',
+            'input[type="password"]',
+            '[data-sensitive]',
+            '.balance-amount',
+            '.transaction-amount',
+            '.account-number',
+          ],
+          // Block elements that should not be recorded at all
+          blockSelector: [
+            '[data-block-replay]',
+            '.credit-card-number',
+          ],
+        },
+        // Enable debug mode in development to troubleshoot
+        debugMode: config.enableDebugLogging,
+        // Use web worker for better performance (moves compression off main thread)
+        useWebWorker: true,
+        // Use IndexedDB for storage (more reliable)
+        storeType: 'idb',
+        // Defer compression to browser idle periods
+        performanceConfig: {
+          enabled: true,
+        },
+        // Inline stylesheets to prevent broken replays
+        shouldInlineStylesheet: true,
+      });
+      amplitude.add(sessionReplay);
+
+      if (this.debugMode) {
+        console.log('[Amplitude] Session Replay plugin added');
+      }
     }
 
     amplitude.init(config.apiKey, {
@@ -35,6 +86,9 @@ class AmplitudeService {
       autocapture: {
         elementInteractions: true,
       },
+      // Use proxy endpoint to bypass ad blockers and tracking protection (ARC, Brave, etc.)
+      // This routes requests through our own domain instead of directly to api.amplitude.com
+      serverUrl: typeof window !== 'undefined' ? `${window.location.origin}/api/analytics` : undefined,
       minIdLength: 1,
       sessionTimeout: 30 * 60 * 1000, // 30 minutes
       trackingOptions: {
@@ -49,37 +103,53 @@ class AmplitudeService {
         : (config.environment === 'production' ? amplitude.Types.LogLevel.Warn : amplitude.Types.LogLevel.None),
     });
 
-    if (config.enableDebugLogging) {
-      this.debugMode = true;
+    if (this.debugMode) {
       console.log('[Amplitude] Initialized with debug logging enabled');
     }
 
-    // Add session replay if enabled
-    if (config.enableSessionReplay) {
-      amplitude.add(sessionReplayPlugin({
-        sampleRate: config.environment === 'production' ? 0.1 : 1.0 // 10% in prod, 100% in others for testing
-      }));
-    }
-
     this.initialized = true;
+
+    // Process any pending identify call that came in before init completed
+    if (this.pendingIdentify) {
+      if (this.debugMode) {
+        console.log('[Amplitude] Processing pending identify:', this.pendingIdentify);
+      }
+      this.doIdentify(this.pendingIdentify.userId, this.pendingIdentify.userProperties);
+      this.pendingIdentify = null;
+    }
   }
 
-  // Identify user
-  identify(userId: string, userProperties?: Record<string, any>) {
-    if (!this.initialized) return;
-
-    if (this.debugMode) {
-      console.log('[Amplitude] Identify:', { userId, userProperties });
-    }
-
+  // Internal identify implementation
+  private doIdentify(userId: string, userProperties?: Record<string, any>) {
     amplitude.setUserId(userId);
     if (userProperties) {
       const identify = new amplitude.Identify();
       Object.entries(userProperties).forEach(([key, value]) => {
-        identify.set(key, value);
+        // Only set properties that have a value
+        if (value !== undefined && value !== null) {
+          identify.set(key, value);
+        }
       });
       amplitude.identify(identify);
     }
+  }
+
+  // Identify user - queues if not yet initialized
+  identify(userId: string, userProperties?: Record<string, any>) {
+    if (this.debugMode) {
+      console.log('[Amplitude] Identify called:', { userId, userProperties, initialized: this.initialized });
+    }
+
+    // If not initialized, queue the identify call
+    if (!this.initialized) {
+      if (this.debugMode) {
+        console.log('[Amplitude] Queuing identify call (not yet initialized)');
+      }
+      this.pendingIdentify = { userId, userProperties };
+      return;
+    }
+
+    this.doIdentify(userId, userProperties);
   }
 
   // Track event
@@ -107,7 +177,9 @@ class AmplitudeService {
     if (!this.initialized) return;
     const identify = new amplitude.Identify();
     Object.entries(properties).forEach(([key, value]) => {
-      identify.set(key, value);
+      if (value !== undefined && value !== null) {
+        identify.set(key, value);
+      }
     });
     amplitude.identify(identify);
   }
