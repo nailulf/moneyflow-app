@@ -30,6 +30,11 @@ class AmplitudeService {
         formInteractions: true,
         fileDownloads: true
       },
+      // Enable Visual Labeling - autocapture element interactions
+      // This allows creating labeled events from clicks in Amplitude dashboard
+      autocapture: {
+        elementInteractions: true,
+      },
       minIdLength: 1,
       sessionTimeout: 30 * 60 * 1000, // 30 minutes
       trackingOptions: {
@@ -62,7 +67,11 @@ class AmplitudeService {
   // Identify user
   identify(userId: string, userProperties?: Record<string, any>) {
     if (!this.initialized) return;
-    
+
+    if (this.debugMode) {
+      console.log('[Amplitude] Identify:', { userId, userProperties });
+    }
+
     amplitude.setUserId(userId);
     if (userProperties) {
       const identify = new amplitude.Identify();

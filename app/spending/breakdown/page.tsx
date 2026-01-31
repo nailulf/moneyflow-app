@@ -28,8 +28,6 @@ const Progress = ({ value = 0, className = '' }: { value?: number; className?: s
 import { TrendingUp, TrendingDown, Plus, Target, Calendar } from 'lucide-react'
 import { CategoryManager } from '@/components/CategoryManager'
 import { AccountManager } from '@/components/AccountManager'
-import { AccountProvider } from '@/contexts/AccountContext'
-import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
