@@ -268,6 +268,11 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
   }
 
   const handleCancel = () => {
+    Analytics.track('Edit Budget Cancelled', {
+      budget_id: budgetData?.id,
+      budget_name: budgetData?.name
+    })
+
     if (budgetData) {
       setEditForm({
         id: budgetData.id,
@@ -360,10 +365,18 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
       }
     })
     setEditForm(prev => ({ ...prev, categories: syncedCategories }))
-    
+
+    Analytics.track('Budget Edit Category Added', {
+      budget_id: editForm.id,
+      budget_name: editForm.name,
+      category_id: categoryToAdd.id,
+      category_name: categoryToAdd.name,
+      total_categories: syncedCategories.length
+    })
+
     // Clear selection after successful add
     setSelectedAddCategoryId('')
-    
+
     // Clear categories error if any
     if (errors.categories) {
       setErrors(prev => {
@@ -377,14 +390,22 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
   const removeCategory = (index: number) => {
     const category = editForm.categories[index]
     if (!category) return
-    
+
     // Use allocation hook to remove category
     const success = budgetAllocation.removeCategory(category.id)
     if (!success) {
       toast.error('Cannot remove category')
       return
     }
-    
+
+    Analytics.track('Budget Edit Category Removed', {
+      budget_id: editForm.id,
+      budget_name: editForm.name,
+      category_id: category.id,
+      category_name: category.category,
+      allocated_amount: category.budgetAmount
+    })
+
     // Sync with form state using complete allocation to get updated Others category
     const completeAllocation = budgetAllocation.completeAllocation
     const syncedCategories = completeAllocation.map(cat => {

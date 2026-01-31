@@ -28,6 +28,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAuth } from '@/contexts/AuthContext'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 export function NavUser({
   user,
@@ -80,28 +81,33 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => Analytics.track('Upgrade To Pro Clicked', { trigger: 'user_menu' })}>
                 <Sparkles />
                 Upgrade to Pro
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => Analytics.track('Account Settings Clicked', { trigger: 'user_menu' })}>
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => Analytics.track('Billing Clicked', { trigger: 'user_menu' })}>
                 <CreditCard />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => Analytics.track('Notifications Clicked', { trigger: 'user_menu' })}>
                 <Bell />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut()}>
+            <DropdownMenuItem onClick={() => {
+              Analytics.track('Logout Clicked', {
+                trigger: 'user_menu'
+              })
+              signOut()
+            }}>
               <LogOut />
               Log out
             </DropdownMenuItem>

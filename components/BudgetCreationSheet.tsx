@@ -105,8 +105,9 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
       setSelectedCategoryId('')
       setCategoryAmount('')
 
-      // Initialize allocation hook
-      budgetAllocation.initializeAllocation(0, DEFAULT_CURRENCY)
+      // Reset allocation hook with a minimal valid amount
+      // It will be updated when user enters the actual total amount
+      budgetAllocation.initializeAllocation(1, DEFAULT_CURRENCY)
 
       // Load user's preferred currency
       if (userId) {
@@ -127,14 +128,17 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
     // Removed budgetAllocation from dependencies to prevent infinite loop
   }, [isOpen, userId])
 
-  // Update allocation hook when total amount changes
+  // Initialize allocation when entering step 2 or when total amount changes in step 2
   useEffect(() => {
     const amount = parseFloat(totalAmount) || 0
-    if (amount > 0) {
-      budgetAllocation.updateTotalAmount(amount)
+    if (amount > 0 && step === 2) {
+      // Ensure allocation is properly initialized with the correct total amount
+      // This handles cases where the state wasn't updated in time during transition
+      if (budgetAllocation.allocationState.totalAmount !== amount) {
+        budgetAllocation.initializeAllocation(amount, currency)
+      }
     }
-    // Removed budgetAllocation from dependencies to prevent infinite loop
-  }, [totalAmount])
+  }, [step, totalAmount, currency, budgetAllocation.allocationState.totalAmount])
 
   const handleAddCategory = () => {
     if (!selectedCategoryId || !categoryAmount) {
@@ -154,6 +158,35 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
       return
     }
 
+    const budgetTotal = parseFloat(totalAmount) || 0
+
+    // Calculate current allocated total from local state (more reliable than hook state during transitions)
+    const currentAllocated = budgetCategories.reduce((sum, bc) => sum + bc.allocated_amount, 0)
+    const availableAmount = budgetTotal - currentAllocated
+
+    // Validate against local state to avoid stale closure issues
+    if (amount > availableAmount) {
+      toast.error(`Amount exceeds available budget. Available: ${availableAmount.toFixed(2)}`)
+      return
+    }
+
+    // Check if category already exists in local state
+    if (budgetCategories.some(bc => bc.category_id === selectedCategoryId)) {
+      toast.error('Category already added to this budget')
+      return
+    }
+
+    // Ensure allocation state is in sync before adding
+    if (budgetAllocation.allocationState.totalAmount !== budgetTotal) {
+      budgetAllocation.initializeAllocation(budgetTotal, currency)
+      // Re-add all existing categories to sync the hook state
+      budgetCategories.forEach(bc => {
+        if (bc.category) {
+          budgetAllocation.addCategory(bc.category_id, bc.category.name, bc.category.color, bc.allocated_amount)
+        }
+      })
+    }
+
     // Use allocation hook to add category
     const success = budgetAllocation.addCategory(
       selectedCategoryId,
@@ -163,65 +196,125 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
     )
 
     if (!success) {
-      toast.error('Failed to add category. Check if it already exists or exceeds budget.')
-      return
+      // If hook fails but our local validation passed, add anyway with warning
+      console.warn('Budget allocation hook failed, but local validation passed. Proceeding with local state.')
     }
 
-    // Update local state for UI
+    // Update local state for UI (this is the source of truth)
     setBudgetCategories(prev => [...prev, {
       category_id: selectedCategoryId,
       allocated_amount: amount,
       category
     }])
-    
+
+    Analytics.track('Budget Category Added', {
+      budget_name: budgetName,
+      category_id: selectedCategoryId,
+      category_name: category.name,
+      allocated_amount: amount,
+      total_categories: budgetCategories.length + 1
+    })
+
     setSelectedCategoryId('')
     setCategoryAmount('')
+    toast.success(`Added ${category.name} with ${amount} allocation`)
   }
 
   const handleRemoveCategory = (categoryId: string) => {
-    // Use allocation hook to remove category
-    const success = budgetAllocation.removeCategory(categoryId)
-    
-    if (!success) {
-      toast.error('Failed to remove category')
-      return
-    }
-    
-    // Update local state for UI
+    const categoryToRemove = budgetCategories.find(bc => bc.category_id === categoryId)
+
+    Analytics.track('Budget Category Removed', {
+      budget_name: budgetName,
+      category_id: categoryId,
+      category_name: categoryToRemove?.category?.name,
+      allocated_amount: categoryToRemove?.allocated_amount,
+      remaining_categories: budgetCategories.length - 1
+    })
+
+    // Try to remove from allocation hook (best effort, don't block on failure)
+    budgetAllocation.removeCategory(categoryId)
+
+    // Update local state for UI (this is the source of truth)
     setBudgetCategories(prev => prev.filter(bc => bc.category_id !== categoryId))
+
+    if (categoryToRemove?.category) {
+      toast.success(`Removed ${categoryToRemove.category.name}`)
+    }
   }
 
   const getTotalAllocated = () => {
-    return budgetAllocation.totalAllocated
+    return budgetCategories.reduce((sum, bc) => sum + bc.allocated_amount, 0)
   }
 
   const getRemainingAmount = () => {
-    return budgetAllocation.remainingAmount
+    const budgetTotal = parseFloat(totalAmount) || 0
+    return budgetTotal - getTotalAllocated()
   }
 
   const canProceedToStep2 = () => {
     return budgetName.trim() && totalAmount && parseFloat(totalAmount) > 0
   }
 
+  // Handle transition from step 1 to step 2
+  const handleProceedToStep2 = () => {
+    const amount = parseFloat(totalAmount) || 0
+
+    Analytics.track('Budget Creation Next Step Clicked', {
+      budget_name: budgetName,
+      total_amount: amount,
+      period: period,
+      currency: currency
+    })
+
+    if (amount > 0) {
+      // Initialize allocation with the correct total amount before proceeding
+      budgetAllocation.initializeAllocation(amount, currency)
+    }
+    setStep(2)
+  }
+
   const canCreateBudget = () => {
-    return budgetAllocation.isValid && budgetCategories.length > 0
+    if (budgetCategories.length === 0) return false
+    const budgetTotal = parseFloat(totalAmount) || 0
+    const totalAllocated = budgetCategories.reduce((sum, bc) => sum + bc.allocated_amount, 0)
+    return totalAllocated <= budgetTotal
   }
 
   const handleCreateBudget = async () => {
-    if (!canCreateBudget()) {
-      toast.error('Please ensure all allocations are within the total budget')
+    if (budgetCategories.length === 0) {
+      toast.error('Please add at least one category allocation')
+      return
+    }
+
+    const budgetTotal = parseFloat(totalAmount) || 0
+    const totalAllocated = budgetCategories.reduce((sum, bc) => sum + bc.allocated_amount, 0)
+
+    if (totalAllocated > budgetTotal) {
+      toast.error('Total allocations exceed budget amount')
       return
     }
 
     setIsLoading(true)
     try {
-      // Use allocation hook to get properly formatted data
-      const allocationData = budgetAllocation.toDatabaseFormat()
-      
+      // Build allocation data directly from local state (source of truth)
+      const allocationData = budgetCategories.map(bc => ({
+        category_id: bc.category_id,
+        allocated_amount: bc.allocated_amount
+      }))
+
+      // Add "Others" category for remaining amount if any
+      const remainingAmount = budgetTotal - totalAllocated
+      if (remainingAmount > 0) {
+        allocationData.push({
+          category_id: 'others-category',
+          allocated_amount: Math.round(remainingAmount * 100) / 100
+        })
+      }
+
       const budgetData = {
         userId, // Add userId to the payload
         name: budgetName,
-        total_amount: parseFloat(totalAmount),
+        total_amount: budgetTotal,
         period,
         year,
         month: period === 'monthly' ? month : null,
@@ -376,8 +469,8 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
             </div>
 
             <div className="flex justify-end">
-              <Button 
-                onClick={() => setStep(2)} 
+              <Button
+                onClick={handleProceedToStep2}
                 disabled={!canProceedToStep2()}
                 className="flex items-center gap-2"
               >
@@ -417,19 +510,14 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
               </CardContent>
             </Card>
 
-            {!budgetAllocation.isValid && budgetAllocation.validation.errors.length > 0 && (
+            {getRemainingAmount() < 0 && (
               <Card className="border-destructive/20 bg-destructive/10">
                 <CardContent className="pt-4">
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-destructive">Validation Errors:</p>
-                    <ul className="text-sm text-destructive space-y-1">
-                      {budgetAllocation.validation.errors.map((error, index) => (
-                        <li key={`error-${index}-${error.slice(0, 20)}`} className="flex items-start gap-2">
-                          <span className="text-destructive">•</span>
-                          {error}
-                        </li>
-                      ))}
-                    </ul>
+                    <p className="text-sm font-medium text-destructive">Validation Error:</p>
+                    <p className="text-sm text-destructive">
+                      Total allocations exceed budget by {formatCurrency(Math.abs(getRemainingAmount()), currency)}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -499,7 +587,13 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
             )}
 
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(1)}>
+              <Button variant="outline" onClick={() => {
+                Analytics.track('Budget Creation Back Clicked', {
+                  budget_name: budgetName,
+                  categories_count: budgetCategories.length
+                })
+                setStep(1)
+              }}>
                 Back
               </Button>
               <Button 

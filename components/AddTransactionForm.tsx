@@ -499,7 +499,12 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      Analytics.track('Add Transaction Cancelled', {
+                        trigger: 'cancel_button'
+                      })
+                      setOpen(false)
+                    }}
                     className="flex-1"
                   >
                     Cancel
