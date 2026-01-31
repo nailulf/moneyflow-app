@@ -28,9 +28,7 @@ class AmplitudeService {
         sessions: true,
         pageViews: true,
         formInteractions: true,
-        fileDownloads: true,
-        // Visual Labeling: auto-track clicks on elements with data-amp-track-label
-        elementInteractions: true
+        fileDownloads: true
       },
       minIdLength: 1,
       sessionTimeout: 30 * 60 * 1000, // 30 minutes
