@@ -26,6 +26,7 @@ interface UseTransactionsQueryOptions {
   startDate?: string
   endDate?: string
   categoryId?: string
+  accountId?: string
 }
 
 /**
@@ -38,6 +39,7 @@ async function fetchTransactionsPage(
     startDate?: string
     endDate?: string
     categoryId?: string
+    accountId?: string
   }
 ): Promise<TransactionPage> {
   const params = new URLSearchParams({
@@ -51,6 +53,7 @@ async function fetchTransactionsPage(
   if (options?.startDate) params.append('startDate', options.startDate)
   if (options?.endDate) params.append('endDate', options.endDate)
   if (options?.categoryId) params.append('categoryId', options.categoryId)
+  if (options?.accountId) params.append('accountId', options.accountId)
 
   const response = await fetch(`/api/transactions?${params}`)
 
@@ -72,12 +75,12 @@ async function fetchTransactionsPage(
  * - Invalidates cache on mutations
  */
 export function useTransactionsQuery(options: UseTransactionsQueryOptions) {
-  const { userId, enabled = true, startDate, endDate, categoryId } = options
+  const { userId, enabled = true, startDate, endDate, categoryId, accountId } = options
 
   const query = useInfiniteQuery({
-    queryKey: ['transactions', userId, { startDate, endDate, categoryId }],
+    queryKey: ['transactions', userId, { startDate, endDate, categoryId, accountId }],
     queryFn: ({ pageParam = 1 }) =>
-      fetchTransactionsPage(userId, pageParam, { startDate, endDate, categoryId }),
+      fetchTransactionsPage(userId, pageParam, { startDate, endDate, categoryId, accountId }),
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasNextPage ? lastPage.pagination.page + 1 : undefined,
     initialPageParam: 1,

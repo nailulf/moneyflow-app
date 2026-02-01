@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const categoryId = searchParams.get('categoryId')
+    const accountId = searchParams.get('accountId')
     const merchant = searchParams.get('merchant')
     const search = searchParams.get('search')
     const page = parseInt(searchParams.get('page') || '1')
@@ -55,6 +56,9 @@ export async function GET(request: NextRequest) {
     }
     if (categoryId) {
       query = query.eq('category_id', categoryId)
+    }
+    if (accountId) {
+      query = query.eq('account_id', accountId)
     }
     if (merchant) {
       query = query.ilike('merchant', `%${merchant}%`)

@@ -11,7 +11,11 @@ module.exports = {
         jsx: 'react-jsx'
       }
     }],
+    '^.+\\.(js|jsx)$': ['babel-jest', { presets: ['next/babel'] }]
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(isows|@supabase)/)'
+  ],
   testMatch: [
     '**/__tests__/**/*.test.ts',
     '**/__tests__/**/*.test.tsx',
