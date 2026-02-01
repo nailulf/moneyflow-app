@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Plus, CreditCard, Search, X, Loader2, Trash2, Edit } from 'lucide-react'
+import { Plus, CreditCard, Search, X, Loader2, Trash2, Edit, ExternalLink } from 'lucide-react'
 import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -21,6 +22,7 @@ function AccountManagerInternal({
   onAccountUpdated,
   className = ''
 }: AccountManagerProps) {
+  const router = useRouter()
   const { user } = useAuth()
   const userId = user?.id || ''
   const {
@@ -304,13 +306,23 @@ function AccountManagerInternal({
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push(`/spending/accounts/${account.id}`)}
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                        title="View Details"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => openEditDialog(account)}
                         className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                         disabled={isSubmitting}
+                        title="Edit Account"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -321,6 +333,7 @@ function AccountManagerInternal({
                           onClick={() => openDeleteDialog(account.id)}
                           className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
                           disabled={isSubmitting}
+                          title="Delete Account"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

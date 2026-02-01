@@ -49,6 +49,13 @@ export function DashboardNavigation() {
   return <TopNavigation/>
 }
 
+export function AccountNavigation({ actionButton }: { actionButton?: React.ReactNode }) {
+  const subMenus = [
+    { label: "Overview", href: "/accounts" }
+  ]
+  return <TopNavigation subMenus={subMenus} actionButton={actionButton} />
+}
+
 export function SpendingNavigation({ actionButton }: { actionButton?: React.ReactNode }) {
   const subMenus = [
     { label: "Overview", href: "/spending" },

@@ -68,6 +68,8 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
                 {
                   pathname === '/spending' ? 'Spending' :
                   pathname.startsWith('/spending') ? 'Spending' :
+                  pathname === '/accounts' ? 'Accounts' :
+                  pathname.startsWith('/accounts') ? 'Accounts' :
                   pathname === '/portfolio' ? 'Portfolio' :
                   pathname.startsWith('/portfolio') ? 'Portfolio' :
                   pathname === '/invest' ? 'Invest' :

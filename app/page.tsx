@@ -3,6 +3,7 @@
 import NetWorthOverview from '@/components/NetWorthOverview'
 import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { OnboardingBanner } from '@/components/onboarding'
+import { FinancialGoalsSection } from '@/components/goals'
 
 export default function Home() {
   return (
@@ -14,11 +15,11 @@ export default function Home() {
           </TopContent>
         <ContentWrapper>
         <MainContent>
-          <div className="space-y-4">
-            {/* Main content will go here */}
+          <div className="space-y-6">
+            <FinancialGoalsSection />
           </div>
         </MainContent>
-        
+
         <SideContent>
           <div className="space-y-4">
             {/* Side content will go here */}
@@ -26,7 +27,7 @@ export default function Home() {
         </SideContent>
         </ContentWrapper>
       </PageLayout>
-        
+
       </div>
   )
 }

@@ -479,6 +479,40 @@ export interface Database {
           sort_order?: number
         }
       }
+      financial_goals: {
+        Row: {
+          id: string
+          account_id: string
+          name: string
+          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+          target_amount: number
+          target_date: string
+          status: 'active' | 'completed' | 'cancelled'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          account_id: string
+          name: string
+          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+          target_amount: number
+          target_date: string
+          status?: 'active' | 'completed' | 'cancelled'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          account_id?: string
+          name?: string
+          goal_type?: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+          target_amount?: number
+          target_date?: string
+          status?: 'active' | 'completed' | 'cancelled'
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -530,6 +564,14 @@ export type OnboardingEventUpdate = Database['public']['Tables']['onboarding_eve
 export type BudgetTemplateDB = Database['public']['Tables']['budget_templates']['Row']
 export type BudgetTemplateInsert = Database['public']['Tables']['budget_templates']['Insert']
 export type BudgetTemplateUpdate = Database['public']['Tables']['budget_templates']['Update']
+
+export type FinancialGoalDB = Database['public']['Tables']['financial_goals']['Row']
+export type FinancialGoalInsert = Database['public']['Tables']['financial_goals']['Insert']
+export type FinancialGoalUpdate = Database['public']['Tables']['financial_goals']['Update']
+
+// Goal type for convenience
+export type GoalType = 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+export type GoalStatus = 'active' | 'completed' | 'cancelled'
 
 // Onboarding phase type for convenience
 export type OnboardingPhase = 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'

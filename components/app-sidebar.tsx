@@ -12,6 +12,7 @@ import {
   // Landmark,    // Hidden: Equity
   // Scale,       // Hidden: Tax
   GalleryVerticalEnd,
+  Wallet,
 } from "lucide-react"
 
 import { NavMain } from "./nav-main"
@@ -39,6 +40,11 @@ const data = {
       url: "/",
       icon: Home,
       isActive: true,
+    },
+    {
+      title: "Accounts",
+      url: "/accounts",
+      icon: Wallet,
     },
     {
       title: "Spending",

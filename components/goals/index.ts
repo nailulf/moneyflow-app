@@ -1,0 +1,6 @@
+export { GoalCard } from './GoalCard'
+export { AddGoalModal } from './AddGoalModal'
+export { EditGoalModal } from './EditGoalModal'
+export { GoalSection } from './GoalSection'
+export { SavingPlansWidget } from './SavingPlansWidget'
+export { FinancialGoalsSection } from './FinancialGoalsSection'
