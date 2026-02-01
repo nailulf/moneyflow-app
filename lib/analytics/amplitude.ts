@@ -14,6 +14,8 @@ class AmplitudeService {
   private initialized = false;
   private debugMode = false;
   private pendingIdentify: { userId: string; userProperties?: Record<string, any> } | null = null;
+  private sessionReplayInstance: ReturnType<typeof sessionReplayPlugin> | null = null;
+  private sessionReplayEnabled = false;
 
   init(config: AmplitudeConfig) {
     if (this.initialized) return;
@@ -29,12 +31,72 @@ class AmplitudeService {
       console.log('[Amplitude] Initializing...');
     }
 
-    // IMPORTANT: Add session replay plugin BEFORE amplitude.init() per Amplitude docs
-    // https://amplitude.com/docs/session-replay/session-replay-plugin#before-you-begin
+    // Get the proxy URL - must be the SAME for both SDK and session replay to share device ID
+    const proxyServerUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/api/analytics`
+      : undefined;
+
+    if (this.debugMode) {
+      console.log('[Amplitude] Initializing SDK with serverUrl:', proxyServerUrl);
+    }
+
+    // Initialize SDK FIRST to establish the device ID
+    amplitude.init(config.apiKey, {
+      defaultTracking: {
+        sessions: true,
+        pageViews: true,
+        formInteractions: true,
+        fileDownloads: true
+      },
+      // Enable Visual Labeling - autocapture element interactions
+      // This allows creating labeled events from clicks in Amplitude dashboard
+      autocapture: {
+        elementInteractions: true,
+      },
+      // Use proxy endpoint to bypass ad blockers and tracking protection (ARC, Brave, etc.)
+      // This routes requests through our own domain instead of directly to api.amplitude.com
+      // CRITICAL: Must be the SAME URL as session replay plugin to share device ID
+      serverUrl: proxyServerUrl,
+      minIdLength: 1,
+      sessionTimeout: 30 * 60 * 1000, // 30 minutes
+      trackingOptions: {
+        ipAddress: false, // GDPR compliance
+      },
+      // Disable remote config fetch in development to prevent blocked request errors
+      // @ts-ignore - fetchRemoteConfig might not be in the type definition yet but is supported
+      fetchRemoteConfig: config.environment === 'production',
+      // Enable debug logging if requested, otherwise suppress in dev to avoid "Failed to fetch" errors
+      logLevel: config.enableDebugLogging
+        ? amplitude.Types.LogLevel.Debug
+        : (config.environment === 'production' ? amplitude.Types.LogLevel.Warn : amplitude.Types.LogLevel.None),
+    });
+
+    if (this.debugMode) {
+      console.log('[Amplitude] Initialized with debug logging enabled');
+    }
+
+    this.initialized = true;
+
+    // Add session replay plugin AFTER init to ensure device ID is shared
+    // Get the device ID from the initialized SDK and pass it to session replay
     if (config.enableSessionReplay) {
-      const sessionReplay = sessionReplayPlugin({
+      const deviceId = amplitude.getDeviceId();
+      const sessionId = amplitude.getSessionId();
+
+      if (this.debugMode) {
+        console.log('[Amplitude] Setting up Session Replay with deviceId:', deviceId, 'sessionId:', sessionId);
+      }
+
+      this.sessionReplayInstance = sessionReplayPlugin({
         // Sample rate: 10% in production, 100% in development for testing
         sampleRate: config.environment === 'production' ? 0.1 : 1.0,
+        // CRITICAL: Use the SAME serverUrl as the main SDK
+        // The proxy at /api/analytics routes session replay data to the correct endpoint
+        // @ts-ignore - serverUrl is supported but may not be in types
+        serverUrl: proxyServerUrl,
+        // Explicitly pass the device ID from the initialized SDK to ensure consistency
+        // @ts-ignore - deviceId might not be in types but is supported
+        deviceId: deviceId,
         // Privacy configuration - mask sensitive financial data
         privacyConfig: {
           // Mask all input fields by default (balances, amounts, etc.)
@@ -58,8 +120,6 @@ class AmplitudeService {
         debugMode: config.enableDebugLogging,
         // Use web worker for better performance (moves compression off main thread)
         useWebWorker: true,
-        // Use IndexedDB for storage (more reliable)
-        storeType: 'idb',
         // Defer compression to browser idle periods
         performanceConfig: {
           enabled: true,
@@ -67,47 +127,15 @@ class AmplitudeService {
         // Inline stylesheets to prevent broken replays
         shouldInlineStylesheet: true,
       });
-      amplitude.add(sessionReplay);
+
+      // Add session replay plugin
+      amplitude.add(this.sessionReplayInstance);
+      this.sessionReplayEnabled = true;
 
       if (this.debugMode) {
-        console.log('[Amplitude] Session Replay plugin added');
+        console.log('[Amplitude] Session Replay plugin added with serverUrl:', proxyServerUrl);
       }
     }
-
-    amplitude.init(config.apiKey, {
-      defaultTracking: {
-        sessions: true,
-        pageViews: true,
-        formInteractions: true,
-        fileDownloads: true
-      },
-      // Enable Visual Labeling - autocapture element interactions
-      // This allows creating labeled events from clicks in Amplitude dashboard
-      autocapture: {
-        elementInteractions: true,
-      },
-      // Use proxy endpoint to bypass ad blockers and tracking protection (ARC, Brave, etc.)
-      // This routes requests through our own domain instead of directly to api.amplitude.com
-      serverUrl: typeof window !== 'undefined' ? `${window.location.origin}/api/analytics` : undefined,
-      minIdLength: 1,
-      sessionTimeout: 30 * 60 * 1000, // 30 minutes
-      trackingOptions: {
-        ipAddress: false, // GDPR compliance
-      },
-      // Disable remote config fetch in development to prevent blocked request errors
-      // @ts-ignore - fetchRemoteConfig might not be in the type definition yet but is supported
-      fetchRemoteConfig: config.environment === 'production',
-      // Enable debug logging if requested, otherwise suppress in dev to avoid "Failed to fetch" errors
-      logLevel: config.enableDebugLogging
-        ? amplitude.Types.LogLevel.Debug
-        : (config.environment === 'production' ? amplitude.Types.LogLevel.Warn : amplitude.Types.LogLevel.None),
-    });
-
-    if (this.debugMode) {
-      console.log('[Amplitude] Initialized with debug logging enabled');
-    }
-
-    this.initialized = true;
 
     // Process any pending identify call that came in before init completed
     if (this.pendingIdentify) {
@@ -195,6 +223,52 @@ class AmplitudeService {
   reset() {
     if (!this.initialized) return;
     amplitude.reset();
+  }
+
+  // Stop session replay recording (use on sensitive pages)
+  async stopSessionReplay(): Promise<void> {
+    if (!this.initialized || !this.sessionReplayInstance || !this.sessionReplayEnabled) {
+      return;
+    }
+
+    const pluginName = this.sessionReplayInstance.name;
+    if (!pluginName) {
+      return;
+    }
+
+    if (this.debugMode) {
+      console.log('[Amplitude] Stopping Session Replay...');
+    }
+
+    await amplitude.remove(pluginName).promise;
+    this.sessionReplayEnabled = false;
+
+    if (this.debugMode) {
+      console.log('[Amplitude] Session Replay stopped');
+    }
+  }
+
+  // Resume session replay recording
+  async startSessionReplay(): Promise<void> {
+    if (!this.initialized || !this.sessionReplayInstance || this.sessionReplayEnabled) {
+      return;
+    }
+
+    if (this.debugMode) {
+      console.log('[Amplitude] Starting Session Replay...');
+    }
+
+    await amplitude.add(this.sessionReplayInstance).promise;
+    this.sessionReplayEnabled = true;
+
+    if (this.debugMode) {
+      console.log('[Amplitude] Session Replay started');
+    }
+  }
+
+  // Check if session replay is currently recording
+  isSessionReplayActive(): boolean {
+    return this.sessionReplayEnabled;
   }
 }
 

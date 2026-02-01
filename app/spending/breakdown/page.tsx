@@ -31,6 +31,7 @@ import { AccountManager } from '@/components/AccountManager'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
+
 // Real budget data interfaces
 interface Budget {
   id: string
