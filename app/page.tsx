@@ -10,21 +10,15 @@ export default function Home() {
      <div className="flex flex-col h-full">
       <OnboardingBanner />
       <PageLayout>
-        <TopContent>
-              <NetWorthOverview />
-          </TopContent>
         <ContentWrapper>
-        <MainContent>
-          <div className="space-y-6">
-            <FinancialGoalsSection />
-          </div>
-        </MainContent>
-
-        <SideContent>
-          <div className="space-y-4">
-            {/* Side content will go here */}
-          </div>
-        </SideContent>
+          <MainContent>
+            <NetWorthOverview />
+          </MainContent>
+          <SideContent>
+              <div className="space-y-4">
+                <FinancialGoalsSection />
+              </div>
+            </SideContent>
         </ContentWrapper>
       </PageLayout>
 
