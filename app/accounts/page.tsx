@@ -216,7 +216,7 @@ function AccountsPageContent() {
 
       {/* Account Detail Modal */}
       <Dialog open={!!selectedAccountId} onOpenChange={(open) => !open && setSelectedAccountId(null)}>
-        <DialogContent className="sm:max-w-[90vw] w-[90vw] h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[80vw] w-[80vw] h-[80vh] overflow-y-auto">
           {selectedAccountId && (
             <AccountDetailView 
               accountId={selectedAccountId} 
