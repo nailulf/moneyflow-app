@@ -76,6 +76,26 @@ module.exports = {
   				'accent-foreground': '#205781'
   			}
   		},
+  		fontSize: {
+  			'4xl': 'var(--font-size-4xl)',
+  			'3xl': 'var(--font-size-3xl)',
+  			'2xl': 'var(--font-size-2xl)',
+  			xl: 'var(--font-size-xl)',
+  			lg: 'var(--font-size-lg)',
+  			md: 'var(--font-size-md)',
+  			sm: 'var(--font-size-sm)',
+  			xs: 'var(--font-size-xs)',
+  		},
+  		lineHeight: {
+  			'title-1': 'var(--leading-title-1)',
+  			'title-2': 'var(--leading-title-2)',
+  			'title-3': 'var(--leading-title-3)',
+  			'title-4': 'var(--leading-title-4)',
+  			'title-5': 'var(--leading-title-5)',
+  			'body-lg': 'var(--leading-body-lg)',
+  			'body-sm': 'var(--leading-body-sm)',
+  			caption: 'var(--leading-caption)',
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

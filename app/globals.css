@@ -5,6 +5,26 @@
 
 @layer base {
   :root {
+    /* Font sizes - mobile first */
+    --font-size-4xl: 2rem;       /* 32px */
+    --font-size-3xl: 1.5rem;     /* 24px */
+    --font-size-2xl: 1.25rem;    /* 20px */
+    --font-size-xl: 1.125rem;    /* 18px */
+    --font-size-lg: 1rem;        /* 16px */
+    --font-size-md: 1rem;        /* 16px */
+    --font-size-sm: 0.875rem;    /* 14px */
+    --font-size-xs: 0.75rem;     /* 12px */
+
+    /* Line heights - mobile first */
+    --leading-title-1: 2.5rem;   /* 40px */
+    --leading-title-2: 2rem;     /* 32px */
+    --leading-title-3: 1.75rem;  /* 28px */
+    --leading-title-4: 1.5rem;   /* 24px */
+    --leading-title-5: 1.5rem;   /* 24px */
+    --leading-body-lg: 1.5rem;   /* 24px */
+    --leading-body-sm: 1.25rem;  /* 20px */
+    --leading-caption: 1.25rem;  /* 20px */
+
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -79,6 +99,58 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+
+  /* =============================================
+     Responsive Breakpoints (mobile-first)
+     - Mobile:  0–639px   (default / :root values)
+     - Tablet:  640–1023px (sm:)
+     - Desktop: 1024px+    (lg:)
+
+     Target devices:
+     - Mobile:  iPhone SE (375px) → iPhone 16 Pro Max (430px)
+     - Tablet:  iPad Mini (744px) → iPad Air/Pro (1024px)
+     - Desktop: Laptops & monitors (1024px+)
+     ============================================= */
+
+  /* Tablet overrides (sm: 640px+) */
+  @media (min-width: 640px) {
+    :root,
+    .dark {
+      --font-size-4xl: 2.5rem;     /* 40px */
+      --font-size-3xl: 1.75rem;    /* 28px */
+      --font-size-2xl: 1.375rem;   /* 22px */
+      --font-size-xl: 1.25rem;     /* 20px */
+      --font-size-lg: 1.0625rem;   /* 17px */
+      /* md, sm, xs stay the same */
+
+      --leading-title-1: 3rem;     /* 48px */
+      --leading-title-2: 2.25rem;  /* 36px */
+      --leading-title-3: 1.875rem; /* 30px */
+      --leading-title-4: 1.625rem; /* 26px */
+      --leading-title-5: 1.625rem; /* 26px */
+      /* body-lg, body-sm, caption stay the same */
+    }
+  }
+
+  /* Desktop overrides (lg: 1024px+) */
+  @media (min-width: 1024px) {
+    :root,
+    .dark {
+      --font-size-4xl: 3rem;       /* 48px */
+      --font-size-3xl: 2rem;       /* 32px */
+      --font-size-2xl: 1.5rem;     /* 24px */
+      --font-size-xl: 1.25rem;     /* 20px */
+      --font-size-lg: 1.125rem;    /* 18px */
+      /* md, sm, xs stay the same */
+
+      --leading-title-1: 3.5rem;   /* 56px */
+      --leading-title-2: 2.5rem;   /* 40px */
+      --leading-title-3: 2rem;     /* 32px */
+      --leading-title-4: 1.75rem;  /* 28px */
+      --leading-title-5: 1.75rem;  /* 28px */
+      /* body-lg, body-sm, caption stay the same */
+    }
   }
 }
 
