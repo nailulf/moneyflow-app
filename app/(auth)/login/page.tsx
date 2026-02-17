@@ -11,10 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { AuthErrorMessage } from '@/components/auth/auth-error-message'
 import { PasswordInput } from '@/components/ui/password-input'
+import { OnboardingResetButton } from '@/components/dev/OnboardingResetButton'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -27,6 +29,7 @@ export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [authError, setAuthError] = useState<any>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const supabase = createClient()
 
   const {
@@ -64,17 +67,51 @@ export default function LoginPage() {
     }
   }
 
+  const [shouldResetOnboarding, setShouldResetOnboarding] = useState(false)
+
   const handleTestUserLogin = async () => {
     setIsLoading(true)
     setAuthError(null)
+    
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email: 'test@moneyflow.com',
         password: 'test123456',
       })
 
       if (error) {
         throw error
+      }
+
+      // Store the user ID for onboarding reset functionality
+      if (user) {
+        setCurrentUserId(user.id)
+        
+        // Reset onboarding if checkbox is checked
+        if (shouldResetOnboarding) {
+          try {
+            const response = await fetch('/api/dev/reset-onboarding', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ userId: user.id }),
+            })
+
+            if (!response.ok) {
+              const error = await response.json()
+              console.warn('Onboarding reset failed:', error)
+              // Continue with login even if reset fails
+            } else {
+              const result = await response.json()
+              console.log('Onboarding reset successful:', result)
+              toast.success('Onboarding reset successfully!')
+            }
+          } catch (resetError: any) {
+            console.error('Error resetting onboarding:', resetError)
+            // Continue with login even if reset fails
+          }
+        }
       }
 
       toast.success('Logged in as Test User')
@@ -150,17 +187,39 @@ export default function LoginPage() {
                 Or continue with
               </span>
             </div>
-            <Button
-              variant="outline"
-              className="w-full h-12 rounded-full bg-transparent border-white/20 text-auth-sidebar-foreground hover:bg-white/10 hover:text-white"
-              onClick={handleTestUserLogin}
-              disabled={isLoading}
-            >
-               {isLoading ? (
+            
+            {/* Developer Tools Section */}
+            <div className="mt-4 p-4 border border-white/20 rounded-lg bg-white/5">
+              <p className="text-sm font-medium text-auth-sidebar-foreground/80 mb-3">
+                🛠️ Developer Tools
+              </p>
+              {/* Onboarding Reset Option */}
+              <div className="flex items-center mb-8 space-x-2 pt-3 mt-3 border-t border-white/10">
+                <Checkbox
+                  id="reset-onboarding"
+                  checked={shouldResetOnboarding}
+                  onCheckedChange={(checked) => setShouldResetOnboarding(checked === true)}
+                  disabled={isLoading}
+                  className="data-[state=checked]:bg-auth-accent data-[state=checked]:border-auth-accent"
+                />
+                <Label htmlFor="reset-onboarding" className="text-sm text-auth-sidebar-foreground/80 cursor-pointer">
+                  Show onboarding flow
+                </Label>
+              </div>
+              
+              {/* Test User Login */}
+              <Button
+                variant="outline"
+                className="w-full h-12 rounded-full bg-transparent border-white/20 text-auth-sidebar-foreground hover:bg-white/10 hover:text-white mb-3"
+                onClick={handleTestUserLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-              Test User Bypass
-            </Button>
+                Test User
+              </Button>
+            </div>
           </>
         )}
       </div>
