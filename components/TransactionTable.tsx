@@ -506,7 +506,7 @@ export function TransactionTable({
                   <Filter className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-auto max-h-[80vh]">
+              <SheetContent side="bottom" className="h-auto max-h-[80vh] w-full">
                 <SheetHeader>
                   <SheetTitle>Filters</SheetTitle>
                 </SheetHeader>

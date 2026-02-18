@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface EditTransactionFormProps {
   transaction: Transaction | null
@@ -27,6 +28,7 @@ export function EditTransactionForm({
   onOpenChange, 
   onTransactionUpdated 
 }: EditTransactionFormProps) {
+  const isMobile = useIsMobile()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isAnySelectOpen, setIsAnySelectOpen] = useState(false)
   const [suppressCloseUntil, setSuppressCloseUntil] = useState(0)
@@ -188,7 +190,10 @@ export function EditTransactionForm({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent
+        side={isMobile ? 'bottom' : 'right'}
+        className={isMobile ? 'max-h-[95dvh] overflow-y-auto rounded-t-2xl' : 'w-[400px] sm:w-[540px]'}
+      >
         <SheetHeader>
           <SheetTitle>Edit Transaction</SheetTitle>
         </SheetHeader>
