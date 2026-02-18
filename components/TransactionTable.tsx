@@ -160,7 +160,7 @@ export function TransactionTable({
           className="w-3 h-3 rounded-full flex-shrink-0" 
           style={{ backgroundColor: color }}
         />
-        <span className="text-sm truncate">{name}</span>
+        <span className="text-sm leading-body-sm truncate">{name}</span>
       </div>
     )
   }
@@ -387,7 +387,7 @@ export function TransactionTable({
     return (
       <Card className="bg-card border border-border shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-foreground">Recent Transactions</CardTitle>
+          <CardTitle className="text-lg leading-title-5 font-semibold text-foreground">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-32 text-muted-foreground">
@@ -406,7 +406,7 @@ export function TransactionTable({
         {/* Header Section */}
         <div className="mb-6">
           <div className="flex justify-between items-center gap-3 mb-4 w-full">
-            <h1 className="text-md font-semibold text-muted-foreground">TRANSACTIONS</h1>
+            <h1 className="text-md leading-body-lg font-semibold text-muted-foreground">TRANSACTIONS</h1>
             <div className="flex items-center">
               <AddTransactionForm onSuccess={() => {
                 transactionContext?.refreshTransactions?.()
@@ -484,7 +484,7 @@ export function TransactionTable({
           </div>
           
           {/* Transaction Summary */}
-           <div className="mt-4 text-sm text-muted-foreground">
+           <div className="mt-4 text-sm leading-body-sm text-muted-foreground">
              <span className="font-medium">Total transactions:</span> {filteredTransactions.length} • 
              <span className="font-medium">Date range:</span> {(() => {
                if (filteredTransactions.length === 0) return 'No transactions';
@@ -506,7 +506,7 @@ export function TransactionTable({
               <TableHeader className="sticky top-0 bg-card z-[5]">
                 <TableRow className="border-b border-border">
                   <TableHead 
-                    className="py-4 px-6 text-left font-medium text-foreground text-sm cursor-pointer hover:bg-muted/50 w-[40%]"
+                    className="py-4 px-6 text-left font-medium text-foreground text-sm leading-body-sm cursor-pointer hover:bg-muted/50 w-[40%]"
                     onClick={() => handleSort('description')}
                   >
                     <div className="flex items-center gap-2">
@@ -517,7 +517,7 @@ export function TransactionTable({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="py-4 px-6 text-left font-medium text-foreground text-sm cursor-pointer hover:bg-muted/50 w-[25%]"
+                    className="py-4 px-6 text-left font-medium text-foreground text-sm leading-body-sm cursor-pointer hover:bg-muted/50 w-[25%]"
                     onClick={() => handleSort('category')}
                   >
                     <div className="flex items-center gap-2">
@@ -528,7 +528,7 @@ export function TransactionTable({
                     </div>
                   </TableHead>
                   <TableHead 
-                    className="py-4 px-6 text-right font-medium text-foreground text-sm cursor-pointer hover:bg-muted/50 w-[20%]"
+                    className="py-4 px-6 text-right font-medium text-foreground text-sm leading-body-sm cursor-pointer hover:bg-muted/50 w-[20%]"
                     onClick={() => handleSort('amount')}
                   >
                     <div className="flex items-center justify-end gap-2">
@@ -538,7 +538,7 @@ export function TransactionTable({
                       )}
                     </div>
                   </TableHead>
-                  <TableHead className="py-4 px-6 text-center font-medium text-foreground text-sm w-[15%]">
+                  <TableHead className="py-4 px-6 text-center font-medium text-foreground text-sm leading-body-sm w-[15%]">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -575,7 +575,7 @@ export function TransactionTable({
                       <React.Fragment key={`date-${dateString}`}>
                         {/* Date Header Row */}
                         <TableRow className="bg-muted/50">
-                          <TableCell colSpan={4} className="py-3 px-6 font-medium text-foreground text-sm">
+                          <TableCell colSpan={4} className="py-3 px-6 font-medium text-foreground text-sm leading-body-sm">
                             {formattedDate}
                           </TableCell>
                         </TableRow>
@@ -585,7 +585,7 @@ export function TransactionTable({
                           <TableRow key={`transaction-${transaction.id}`} className="border-b border-border hover:bg-muted/50">
                             <TableCell className="py-4 px-6 w-[40%]">
                               <div className="space-y-1">
-                                <div className="text-sm font-medium text-foreground">
+                                <div className="text-sm leading-body-sm font-medium text-foreground">
                                   {transaction.merchant || transaction.description || 'No description'}
                                 </div>
                               </div>
@@ -596,13 +596,13 @@ export function TransactionTable({
                                   className="w-3 h-3 rounded-full" 
                                   style={{ backgroundColor: getCategoryColor(transaction.category_id) }}
                                 />
-                                <span className="text-sm text-foreground">
+                                <span className="text-sm leading-body-sm text-foreground">
                                   {getCategoryName(transaction.category_id)}
                                 </span>
                               </div>
                             </TableCell>
                             <TableCell className="py-4 px-6 text-right w-[20%]">
-                              <div className={`text-sm font-medium ${
+                              <div className={`text-sm leading-body-sm font-medium ${
                                 transaction.type === 'INCOME' 
                                   ? 'text-success'
                                   : 'text-foreground'
@@ -670,7 +670,7 @@ export function TransactionTable({
               )}
               
               {displayedCount >= filteredTransactions.length && filteredTransactions.length > 0 && (
-                <div className="text-center py-4 text-muted-foreground text-sm">
+                <div className="text-center py-4 text-muted-foreground text-sm leading-body-sm">
                   All transactions loaded ({filteredTransactions.length} total)
                 </div>
               )}

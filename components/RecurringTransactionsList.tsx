@@ -235,7 +235,7 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
                   <TableCell className="font-medium">
                     <div className="flex flex-col">
                       <span>{transaction.merchant || transaction.description}</span>
-                      <span className="text-xs text-muted-foreground">{transaction.category_id}</span>
+                      <span className="text-xs leading-caption text-muted-foreground">{transaction.category_id}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -249,14 +249,14 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 text-sm leading-body-sm text-muted-foreground">
                       <Calendar className="h-4 w-4" />
                       {getNextScheduledDate(transaction).toLocaleDateString()}
                     </div>
                   </TableCell>
                   <TableCell>
                     {transaction.recurring_end_date ? (
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm leading-body-sm text-muted-foreground">
                         Ends {new Date(transaction.recurring_end_date).toLocaleDateString()}
                       </span>
                     ) : (
@@ -295,7 +295,7 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
 
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm leading-body-sm text-muted-foreground">
             Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, filteredTransactions.length)} of {filteredTransactions.length} entries
           </div>
           <div className="flex items-center space-x-2">
@@ -308,7 +308,7 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
               <ChevronLeft className="h-4 w-4" />
               Previous
             </Button>
-            <div className="text-sm font-medium">
+            <div className="text-sm leading-body-sm font-medium">
               Page {currentPage} of {totalPages}
             </div>
             <Button

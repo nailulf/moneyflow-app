@@ -201,24 +201,24 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
                 className="w-3 h-3 rounded-sm" 
                 style={{ backgroundColor: chartConfig.income.color }}
               />
-              <span className="text-sm text-muted-foreground">Income:</span>
-              <span className="text-sm font-medium">{formatCurrency(income)}</span>
+              <span className="text-sm leading-body-sm text-muted-foreground">Income:</span>
+              <span className="text-sm leading-body-sm font-medium">{formatCurrency(income)}</span>
             </div>
             <div className="flex items-center gap-2">
               <div 
                 className="w-3 h-3 rounded-sm" 
                 style={{ backgroundColor: chartConfig.spending.color }}
               />
-              <span className="text-sm text-muted-foreground">Spending:</span>
-              <span className="text-sm font-medium">{formatCurrency(spending)}</span>
+              <span className="text-sm leading-body-sm text-muted-foreground">Spending:</span>
+              <span className="text-sm leading-body-sm font-medium">{formatCurrency(spending)}</span>
             </div>
             <div className="flex items-center gap-2">
               <div 
                 className="w-3 h-3 rounded-sm" 
                 style={{ backgroundColor: chartConfig.netCashFlow.color }}
               />
-              <span className="text-sm text-muted-foreground">Net Cash Flow:</span>
-              <span className={`text-sm font-medium ${
+              <span className="text-sm leading-body-sm text-muted-foreground">Net Cash Flow:</span>
+              <span className={`text-sm leading-body-sm font-medium ${
                 netCashFlow >= 0 ? 'text-success' : 'text-destructive'
               }`}>
                 {formatCurrency(netCashFlow)}
@@ -244,7 +244,7 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
                 <>
                   Showing {chartData.length} months 
                   {allChartData.length > displayCount && (
-                    <span className="text-xs text-muted-foreground ml-1">
+                    <span className="text-xs leading-caption text-muted-foreground ml-1">
                       ({currentMonthIndex + 1}-{currentMonthIndex + chartData.length} of {allChartData.length})
                     </span>
                   )}
@@ -280,8 +280,8 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
         {allChartData.length === 0 ? (
           <div className="h-[30vh] min-h-[200px] flex items-center justify-center text-muted-foreground">
             <div className="text-center">
-              <p className="text-lg font-medium">No transaction data available</p>
-              <p className="text-sm mt-2">Add some transactions to see your spending vs income analysis</p>
+              <p className="text-lg leading-title-5 font-medium">No transaction data available</p>
+              <p className="text-sm leading-body-sm mt-2">Add some transactions to see your spending vs income analysis</p>
             </div>
           </div>
         ) : (

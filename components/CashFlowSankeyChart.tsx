@@ -263,16 +263,16 @@ export default function CashFlowSankeyChart({ transactions, categories, dateRang
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">Cash Flow Analysis</CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <CardTitle className="text-xl leading-title-4 font-semibold">Cash Flow Analysis</CardTitle>
+          <p className="text-sm leading-body-sm text-muted-foreground">
             Visualize your income distribution across expense and transfer categories with clear hierarchical breakdown
           </p>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-muted-foreground">
             <div className="text-center">
-              <p className="text-lg font-medium mb-2">No data available</p>
-              <p className="text-sm">
+              <p className="text-lg leading-title-5 font-medium mb-2">No data available</p>
+              <p className="text-sm leading-body-sm">
                 Add some transactions to see your cash flow visualization
               </p>
             </div>
@@ -285,8 +285,8 @@ export default function CashFlowSankeyChart({ transactions, categories, dateRang
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold">Cash Flow Analysis</CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <CardTitle className="text-xl leading-title-4 font-semibold">Cash Flow Analysis</CardTitle>
+        <p className="text-sm leading-body-sm text-muted-foreground">
           Track your income flow through expenses, categories and merchants
         </p>
       </CardHeader>

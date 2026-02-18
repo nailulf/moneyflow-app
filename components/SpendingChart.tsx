@@ -54,7 +54,7 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-foreground">Spending Breakdown</CardTitle>
+          <CardTitle className="text-lg leading-title-5 font-semibold text-foreground">Spending Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -74,7 +74,7 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-foreground">Spending</CardTitle>
+        <CardTitle className="text-lg leading-title-5 font-semibold text-foreground">Spending</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer

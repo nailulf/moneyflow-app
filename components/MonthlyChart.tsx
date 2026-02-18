@@ -40,7 +40,7 @@ export function MonthlyChart({ transactions, type, title, displayMonths = 6 }: M
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-foreground">{title}</CardTitle>
+          <CardTitle className="text-lg leading-title-5 font-semibold text-foreground">{title}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -54,7 +54,7 @@ export function MonthlyChart({ transactions, type, title, displayMonths = 6 }: M
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-foreground">{title}</CardTitle>
+        <CardTitle className="text-lg leading-title-5 font-semibold text-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-80 w-full">

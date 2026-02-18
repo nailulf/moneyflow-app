@@ -173,16 +173,16 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                 </div>
               ) : netWorthData ? (
                 <>
-                  <CardTitle className="text-2xl">{formatCurrency(netWorthData.currentNetWorth)}</CardTitle>
-                  <div className={cn("flex items-center text-sm", isPositiveChange ? "text-success" : "text-destructive")}>
+                  <CardTitle className="text-2xl leading-title-3">{formatCurrency(netWorthData.currentNetWorth)}</CardTitle>
+                  <div className={cn("flex items-center text-sm leading-body-sm", isPositiveChange ? "text-success" : "text-destructive")}>
                     {isPositiveChange ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
                     {formatCurrency(Math.abs(netWorthChange.amount))} ({Math.abs(netWorthChange.percentage).toFixed(1)}%)
                   </div>
                 </>
               ) : (
                 <div className="space-y-2">
-                  <CardTitle className="text-2xl text-muted-foreground">No data</CardTitle>
-                  <div className="text-sm text-muted-foreground">Unable to load net worth data</div>
+                  <CardTitle className="text-2xl leading-title-3 text-muted-foreground">No data</CardTitle>
+                  <div className="text-sm leading-body-sm text-muted-foreground">Unable to load net worth data</div>
                 </div>
               )}
             </div>
@@ -257,7 +257,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">All</div>
+            <div className="text-sm leading-body-sm text-muted-foreground">All</div>
             {(loading || accountsLoading || isPending) ? (
               <div className="space-y-2">
                 <Skeleton className="h-8 w-32" />
@@ -265,8 +265,8 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
               </div>
             ) : (
               <>
-                <div className="text-2xl font-bold">{formatCurrency(assetsTotal - liabilitiesTotal)}</div>
-                <div className={cn("flex items-center text-sm", isPositiveChange ? "text-success" : "text-destructive")}>
+                <div className="text-2xl leading-title-3 font-bold">{formatCurrency(assetsTotal - liabilitiesTotal)}</div>
+                <div className={cn("flex items-center text-sm leading-body-sm", isPositiveChange ? "text-success" : "text-destructive")}>
                   {isPositiveChange ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
                   {formatCurrency(Math.abs(netWorthChange.amount))} ({Math.abs(netWorthChange.percentage).toFixed(1)}%)
                 </div>
@@ -277,22 +277,22 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
         
         <Card>
           <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Assets</div>
+            <div className="text-sm leading-body-sm text-muted-foreground">Assets</div>
             {(loading || accountsLoading || isPending) ? (
               <Skeleton className="h-8 w-32" />
             ) : (
-              <div className="text-2xl font-bold text-success">{formatCurrency(assetsTotal)}</div>
+              <div className="text-2xl leading-title-3 font-bold text-success">{formatCurrency(assetsTotal)}</div>
             )}
           </CardContent>
         </Card>
         
         <Card>
           <CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Liabilities</div>
+            <div className="text-sm leading-body-sm text-muted-foreground">Liabilities</div>
             {(loading || accountsLoading || isPending) ? (
               <Skeleton className="h-8 w-32" />
             ) : (
-              <div className="text-2xl font-bold text-destructive">{formatCurrency(liabilitiesTotal)}</div>
+              <div className="text-2xl leading-title-3 font-bold text-destructive">{formatCurrency(liabilitiesTotal)}</div>
             )}
           </CardContent>
         </Card>
@@ -304,8 +304,8 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span className="text-lg font-bold">Assets</span>
-              <span className="text-lg font-bold">
+              <span className="text-lg leading-title-5 font-bold">Assets</span>
+              <span className="text-lg leading-title-5 font-bold">
                 {(loading || accountsLoading || isPending) ? (
                   <Skeleton className="h-6 w-20" />
                 ) : (
@@ -343,10 +343,10 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                 {assetCategories.map((category, index) => (
                   <div key={`asset-cat-${index}`} className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">
+                      <span className="text-sm leading-body-sm font-semibold">
                         {category.name} ({Math.round(category.percentage)}%)
                       </span>
-                      <span className="text-sm text-foreground">{formatCurrency(category.total)}</span>
+                      <span className="text-sm leading-body-sm text-foreground">{formatCurrency(category.total)}</span>
                     </div>
                     <div className="ml-0 space-y-2">
                       {category.accounts
@@ -358,14 +358,14 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                                 {getAccountIcon(account.type, account.name)}
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-sm font-medium">{account.name}</span>
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-sm leading-body-sm font-medium">{account.name}</span>
+                                <span className="text-xs leading-caption text-muted-foreground">
                                   Added {account.created_at ? formatDistanceToNow(new Date(account.created_at), { addSuffix: true }) : 'recently'}
                                 </span>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="text-sm">{formatCurrency(account.currentBalance)}</span>
+                              <span className="text-sm leading-body-sm">{formatCurrency(account.currentBalance)}</span>
                             </div>
                           </div>
                         ))}
@@ -373,7 +373,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                   </div>
                 ))}
                 {assetCategories.length === 0 && (
-                  <div className="text-sm text-muted-foreground">No assets</div>
+                  <div className="text-sm leading-body-sm text-muted-foreground">No assets</div>
                 )}
               </>
             )}
@@ -384,8 +384,8 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span className="text-lg font-bold">Liabilities</span>
-              <span className="text-lg font-bold text-destructive">
+              <span className="text-lg leading-title-5 font-bold">Liabilities</span>
+              <span className="text-lg leading-title-5 font-bold text-destructive">
                 {(loading || accountsLoading || isPending) ? (
                   <Skeleton className="h-6 w-20" />
                 ) : (
@@ -423,10 +423,10 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                 {liabilityCategories.map((category, index) => (
                   <div key={`liab-cat-${index}`} className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">
+                      <span className="text-sm leading-body-sm font-semibold">
                         {category.name}
                       </span>
-                      <span className="text-sm text-foreground">
+                      <span className="text-sm leading-body-sm text-foreground">
                         {formatCurrency(Math.abs(category.total))}
                       </span>
                     </div>
@@ -440,14 +440,14 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                                 {getAccountIcon(account.type, account.name)}
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-sm font-medium">{account.name}</span>
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-sm leading-body-sm font-medium">{account.name}</span>
+                                <span className="text-xs leading-caption text-muted-foreground">
                                   Added {account.created_at ? formatDistanceToNow(new Date(account.created_at), { addSuffix: true }) : 'recently'}
                                 </span>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="text-sm">{formatCurrency(Math.abs(account.currentBalance))}</span>
+                              <span className="text-sm leading-body-sm">{formatCurrency(Math.abs(account.currentBalance))}</span>
                             </div>
                           </div>
                         ))}
@@ -455,7 +455,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                   </div>
                 ))}
                 {liabilityCategories.length === 0 && (
-                  <div className="text-sm text-muted-foreground">No liabilities</div>
+                  <div className="text-sm leading-body-sm text-muted-foreground">No liabilities</div>
                 )}
               </>
             )}
