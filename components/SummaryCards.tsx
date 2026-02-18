@@ -67,19 +67,19 @@ export function SummaryCards({ transactions = [] }: SummaryCardsProps) {
           <Card key={card.title} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-base">{card.icon}</span>
-                <span className="text-sm font-medium text-muted-foreground">
+                <span className="text-md">{card.icon}</span>
+                <span className="text-sm leading-body-sm font-medium text-muted-foreground">
                   {card.title}
                 </span>
               </div>
               <div className="space-y-1">
-                <div className="text-xl font-bold text-foreground">
+                <div className="text-xl leading-title-4 font-bold text-foreground">
                   {card.value}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs leading-caption text-muted-foreground">
                   {card.subtitle}
                 </div>
-                <div className={`text-xs font-medium ${card.changeColor}`}>
+                <div className={`text-xs leading-caption font-medium ${card.changeColor}`}>
                   {card.change}
                 </div>
               </div>

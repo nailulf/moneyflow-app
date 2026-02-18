@@ -455,7 +455,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
           {/* Budget Basic Info */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Budget Details</CardTitle>
+              <CardTitle className="text-lg leading-title-5">Budget Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -490,7 +490,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                   maxLength={50}
                 />
                 {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name}</p>
+                  <p className="text-sm leading-body-sm text-destructive">{errors.name}</p>
                 )}
               </div>
 
@@ -557,25 +557,25 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                     step="0.01"
                   />
                   {errors.totalAmount && (
-                    <p className="text-sm text-destructive">{errors.totalAmount}</p>
+                    <p className="text-sm leading-body-sm text-destructive">{errors.totalAmount}</p>
                   )}
                 </div>
               </div>
 
               {/* Budget Summary */}
               <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm leading-body-sm">
                   <span>Total Budget:</span>
                   <span className="font-medium">{formatCurrency(editForm.totalAmount)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm leading-body-sm">
                   <span>Total Allocated:</span>
                   <span className={`font-medium ${isOverAllocated ? 'text-destructive' : 'text-foreground'}`}>
                     {formatCurrency(totalAllocated)}
                   </span>
                 </div>
                 <Separator />
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm leading-body-sm">
                   <span>Remaining:</span>
                   <span className={`font-medium ${isOverAllocated ? 'text-destructive' : 'text-success'}`}>
                     {formatCurrency(remainingBudget)}
@@ -599,7 +599,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
           <Card>
             <CardHeader>
               <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                <CardTitle className="text-lg">Category Allocations</CardTitle>
+                <CardTitle className="text-lg leading-title-5">Category Allocations</CardTitle>
                 <div className="flex w-full sm:w-auto items-center space-x-2">
                   <Select
                     value={selectedAddCategoryId}
@@ -638,14 +638,14 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                 </div>
               </div>
               {errors.categories && (
-                <p className="text-sm text-destructive">{errors.categories}</p>
+                <p className="text-sm leading-body-sm text-destructive">{errors.categories}</p>
               )}
             </CardHeader>
             <CardContent className="space-y-4">
               {editForm.categories.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>No categories added yet</p>
-                  <p className="text-sm">Click "Add Category" to get started</p>
+                  <p className="text-sm leading-body-sm">Click "Add Category" to get started</p>
                 </div>
               ) : (
                 editForm.categories.map((category, index) => (
@@ -718,10 +718,10 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                         title={category.category === 'Others' ? 'Others category is automatically calculated' : ''}
                       />
                       {errors[`category-${index}`] && (
-                        <p className="text-sm text-destructive">{errors[`category-${index}`]}</p>
+                        <p className="text-sm leading-body-sm text-destructive">{errors[`category-${index}`]}</p>
                       )}
                       {category.category === 'Others' && (
-                        <p className="text-xs text-muted-foreground">This amount is automatically calculated from unallocated budget</p>
+                        <p className="text-xs leading-caption text-muted-foreground">This amount is automatically calculated from unallocated budget</p>
                       )}
                     </div>
                   </div>

@@ -474,13 +474,13 @@ export function UnifiedStatementProcessor({
           <div className="flex flex-col items-center gap-2">
             <FileText className="h-10 w-10 text-primary" />
             <p className="font-medium">{selectedFile.name}</p>
-            <p className="text-sm text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+            <p className="text-sm leading-body-sm text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
             <Upload className="h-10 w-10 text-muted-foreground" />
             <p className="font-medium">Drop your PDF statement here</p>
-            <p className="text-sm text-muted-foreground">or click to browse</p>
+            <p className="text-sm leading-body-sm text-muted-foreground">or click to browse</p>
           </div>
         )}
       </div>
@@ -514,7 +514,7 @@ export function UnifiedStatementProcessor({
         {isUploading && (
           <div className="space-y-2">
             <Progress value={uploadProgress} />
-            <p className="text-xs text-center text-muted-foreground">Processing statement...</p>
+            <p className="text-xs leading-caption text-center text-muted-foreground">Processing statement...</p>
           </div>
         )}
 
@@ -635,8 +635,8 @@ export function UnifiedStatementProcessor({
           {filteredTransactions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground min-w-[1000px]">
               <AlertCircle className="h-12 w-12 mb-4 text-muted-foreground/50" />
-              <p className="text-lg font-medium">No transactions found</p>
-              <p className="text-sm">
+              <p className="text-lg leading-title-5 font-medium">No transactions found</p>
+              <p className="text-sm leading-body-sm">
                 {transactions.length === 0 
                   ? "We couldn't extract any transactions from the uploaded file." 
                   : "Try adjusting your filters to see more results."}
@@ -818,7 +818,7 @@ export function UnifiedStatementProcessor({
                          />
                          <span 
                             data-testid="amount-display"
-                            className={cn("text-xs font-medium", t.amount > 0 ? "text-success" : "text-destructive")}
+                            className={cn("text-xs leading-caption font-medium", t.amount > 0 ? "text-success" : "text-destructive")}
                          >
                             {formatCurrency(t.amount, t.currency)}
                          </span>
@@ -833,7 +833,7 @@ export function UnifiedStatementProcessor({
 
         <DialogFooter className="p-4 border-t bg-muted/10 shrink-0">
             <div className="flex justify-between w-full items-center">
-              <div className="text-sm text-muted-foreground flex gap-4">
+              <div className="text-sm leading-body-sm text-muted-foreground flex gap-4">
                   <span>Selected: {selectedIds.size}</span>
                   {selectedIds.size > 0 && (
                       <span>

@@ -118,7 +118,7 @@ export default function TransactionConfirmation({
                   <FileText className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-semibold">{summary.totalTransactions}</div>
-                    <div className="text-sm text-muted-foreground">Transactions</div>
+                    <div className="text-sm leading-body-sm text-muted-foreground">Transactions</div>
                   </div>
                 </div>
               </Card>
@@ -129,7 +129,7 @@ export default function TransactionConfirmation({
                     <div className="font-semibold text-success">
                       {formatCurrency(summary.totalCredits)}
                     </div>
-                    <div className="text-sm text-muted-foreground">Credits ({summary.creditCount})</div>
+                    <div className="text-sm leading-body-sm text-muted-foreground">Credits ({summary.creditCount})</div>
                   </div>
                 </div>
               </Card>
@@ -140,7 +140,7 @@ export default function TransactionConfirmation({
                     <div className="font-semibold text-destructive">
                       {formatCurrency(summary.totalDebits)}
                     </div>
-                    <div className="text-sm text-muted-foreground">Debits ({summary.debitCount})</div>
+                    <div className="text-sm leading-body-sm text-muted-foreground">Debits ({summary.debitCount})</div>
                   </div>
                 </div>
               </Card>
@@ -151,7 +151,7 @@ export default function TransactionConfirmation({
                     <div className={`font-semibold ${summary.totalAmount >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {formatCurrency(summary.totalAmount)}
                     </div>
-                    <div className="text-sm text-muted-foreground">Net Amount</div>
+                    <div className="text-sm leading-body-sm text-muted-foreground">Net Amount</div>
                   </div>
                 </div>
               </Card>
@@ -163,7 +163,7 @@ export default function TransactionConfirmation({
                 <Calendar className="h-5 w-5 text-primary" />
                 <span className="font-semibold">Import Details</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm leading-body-sm">
                 <div>
                   <span className="text-muted-foreground">Target Account:</span>
                   <span className="ml-2 font-medium">{accountName || accountId}</span>
@@ -184,7 +184,7 @@ export default function TransactionConfirmation({
                 <div className="space-y-2">
                   {summary.topCategories.map(([category, count]) => (
                     <div key={category} className="flex items-center justify-between">
-                      <span className="text-sm">{category}</span>
+                      <span className="text-sm leading-body-sm">{category}</span>
                       <Badge variant="outline">{count} transactions</Badge>
                     </div>
                   ))}
@@ -195,7 +195,7 @@ export default function TransactionConfirmation({
             {/* Transaction Preview */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold">Transaction Preview</h3>
+                <h3 className="text-lg leading-title-5 font-semibold">Transaction Preview</h3>
                 {transactions.length > 10 && (
                   <Button
                     variant="outline"
@@ -246,7 +246,7 @@ export default function TransactionConfirmation({
                 </Table>
                 
                 {totalPages > 1 && (
-                  <div className="p-3 text-center text-sm text-muted-foreground border-t">
+                  <div className="p-3 text-center text-sm leading-body-sm text-muted-foreground border-t">
                     Showing {paginatedTransactions.length} of {transactions.length} transactions
                     <div className="flex justify-center gap-2 mt-2">
                       <Button 
@@ -280,11 +280,11 @@ export default function TransactionConfirmation({
               <AlertDescription>
                 <div className="space-y-2">
                   <div className="font-semibold">Ready to Import</div>
-                  <div className="text-sm">
+                  <div className="text-sm leading-body-sm">
                     You are about to import {summary.totalTransactions} transactions 
                     into {accountName || 'the selected account'}. This action cannot be undone.
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm leading-body-sm text-muted-foreground">
                     Please review the transaction details above and click "Import Transactions" to proceed.
                   </div>
                 </div>

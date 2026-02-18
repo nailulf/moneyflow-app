@@ -245,20 +245,20 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                   style={{ backgroundColor: item.color }}
                 />
                 <div>
-                  <span className="font-medium text-sm">{item.category}</span>
+                  <span className="font-medium text-sm leading-body-sm">{item.category}</span>
                   {type === 'budget' && (
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-xs leading-caption text-muted-foreground">
                       {formatCurrency(amount)} of {formatCurrency(budgetAmount || 0)}
                     </div>
                   )}
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-semibold text-sm">
+                <div className="font-semibold text-sm leading-body-sm">
                   {formatCurrency(amount)}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs leading-caption text-muted-foreground">
                     {percentage.toFixed(1)}%
                   </span>
                   {type === 'budget' && (
@@ -283,9 +283,9 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold">Cash Flow Breakdown</CardTitle>
+          <CardTitle className="text-xl leading-title-4 font-semibold">Cash Flow Breakdown</CardTitle>
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground">View by</span>
+            <span className="text-sm leading-body-sm text-muted-foreground">View by</span>
             <Select value={viewBy} onValueChange={(value: 'category' | 'amount') => setViewBy(value)}>
               <SelectTrigger className="w-32">
                 <SelectValue />
@@ -319,15 +319,15 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Expenses</h3>
-                  <p className="text-sm text-muted-foreground">Total spending this month: {formatCurrency(totalExpenses)}</p>
+                  <h3 className="text-lg leading-title-5 font-semibold mb-2">Expenses</h3>
+                  <p className="text-sm leading-body-sm text-muted-foreground">Total spending this month: {formatCurrency(totalExpenses)}</p>
                 </div>
                 {renderPieChart(expenseData, 'amount', 'category')}
               </div>
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Expenses Breakdown</h3>
-                  <p className="text-sm text-muted-foreground">{expenseData.length} expense categories</p>
+                  <h3 className="text-lg leading-title-5 font-semibold mb-2">Expenses Breakdown</h3>
+                  <p className="text-sm leading-body-sm text-muted-foreground">{expenseData.length} expense categories</p>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {renderCategoryList(expenseData, 'expense')}
@@ -341,8 +341,8 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
               {/* Budget Selection */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Budget Overview</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="text-lg leading-title-5 font-semibold mb-2">Budget Overview</h3>
+                  <p className="text-sm leading-body-sm text-muted-foreground">
                     {budgetLoading ? 'Loading budgets...' : 
                      budgetError ? `Error: ${budgetError}` :
                      budgetItemsLoading ? 'Loading budget items...' :
@@ -416,10 +416,10 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <div className="text-2xl font-bold text-foreground">
+                        <div className="text-2xl leading-title-3 font-bold text-foreground">
                           {totalBudget > 0 ? Math.round((actualTotalSpent / totalBudget) * 100) : 0}%
                         </div>
-                        <div className="text-sm text-muted-foreground">of budget used</div>
+                        <div className="text-sm leading-body-sm text-muted-foreground">of budget used</div>
                       </div>
                     </div>
                     
@@ -432,7 +432,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                         >
                           {totalSpent > totalBudget ? 'Over Budget' : totalSpent > totalBudget * 0.8 ? 'Near Limit' : 'On Track'}
                         </Badge>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm leading-body-sm text-muted-foreground">
                           {formatCurrency(Math.abs(totalBudget - totalSpent))} {totalSpent > totalBudget ? 'over' : 'remaining'}
                         </span>
                       </div>
@@ -444,7 +444,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                       className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
                       disabled={!selectedBudget}
                     >
-                      <span className="text-sm font-medium underline">EDIT BUDGET</span>
+                      <span className="text-sm leading-body-sm font-medium underline">EDIT BUDGET</span>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
@@ -454,7 +454,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                   {/* View By Dropdown */}
                   <div className="flex justify-end">
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-muted-foreground">View by</span>
+                      <span className="text-sm leading-body-sm text-muted-foreground">View by</span>
                       <Select value="category" onValueChange={() => {}}>
                         <SelectTrigger className="w-48">
                           <SelectValue />
@@ -468,7 +468,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
 
                   {/* Budget Table */}
                   <div className="space-y-4">
-                    <div className="grid grid-cols-4 gap-4 text-sm font-medium text-muted-foreground border-b pb-2">
+                    <div className="grid grid-cols-4 gap-4 text-sm leading-body-sm font-medium text-muted-foreground border-b pb-2">
                       <div>Category</div>
                       <div className="text-center">Spent</div>
                       <div className="text-center">Budget</div>
@@ -488,7 +488,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                               style={{ backgroundColor: item.color }}
                             />
                             <div>
-                              <div className="font-medium text-sm">{item.category}</div>
+                              <div className="font-medium text-sm leading-body-sm">{item.category}</div>
                               <div className="w-full bg-secondary rounded-full h-2 mt-1">
                                 <div 
                                   className={`h-2 rounded-full transition-all duration-300 ${
@@ -506,7 +506,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                             <div className="font-semibold text-foreground">
                               {formatCurrency(item.spentAmount)}
                             </div>
-                            <div className="text-xs text-muted-foreground">
+                            <div className="text-xs leading-caption text-muted-foreground">
                               vs {formatCurrency(item.budgetAmount)} budgeted
                             </div>
                           </div>
@@ -516,7 +516,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                             <div className="font-semibold text-foreground">
                               {formatCurrency(item.budgetAmount)}
                             </div>
-                            <div className="text-xs text-muted-foreground mt-1">
+                            <div className="text-xs leading-caption text-muted-foreground mt-1">
                               Target
                             </div>
                           </div>
@@ -528,7 +528,7 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
                             }`}>
                               {formatCurrency(Math.abs(available))}
                             </div>
-                            <div className={`text-xs mt-1 ${
+                            <div className={`text-xs leading-caption mt-1 ${
                               available < 0 ? 'text-destructive' : 'text-success'
                             }`}>
                               {available < 0 ? 'Over' : 'Remaining'}
@@ -547,15 +547,15 @@ export function CashFlowBreakdown({ transactions }: CashFlowBreakdownProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Income Sources</h3>
-                  <p className="text-sm text-muted-foreground">Total income this month: {formatCurrency(totalIncome)}</p>
+                  <h3 className="text-lg leading-title-5 font-semibold mb-2">Income Sources</h3>
+                  <p className="text-sm leading-body-sm text-muted-foreground">Total income this month: {formatCurrency(totalIncome)}</p>
                 </div>
                 {renderPieChart(incomeData, 'amount', 'category')}
               </div>
               <div>
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold mb-2">Income Breakdown</h3>
-                  <p className="text-sm text-muted-foreground">{incomeData.length} income sources</p>
+                  <h3 className="text-lg leading-title-5 font-semibold mb-2">Income Breakdown</h3>
+                  <p className="text-sm leading-body-sm text-muted-foreground">{incomeData.length} income sources</p>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
                   {renderCategoryList(incomeData, 'income')}

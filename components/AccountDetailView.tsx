@@ -208,11 +208,11 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
           <Icon className="w-8 h-8 text-muted-foreground" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold">{account.name}</h2>
+          <h2 className="text-2xl leading-title-3 font-bold">{account.name}</h2>
           <p className="text-muted-foreground capitalize">
             {account.type.toLowerCase().replace('_', ' ')}
             {account.is_default && (
-              <span className="ml-2 px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
+              <span className="ml-2 px-2 py-0.5 text-xs leading-caption bg-primary/10 text-primary rounded-full">
                 Default
               </span>
             )}
@@ -271,7 +271,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                 {/* Account Info */}
                 <Card className="mt-6">
                   <CardHeader>
-                    <CardTitle className="text-lg">Account Details</CardTitle>
+                    <CardTitle className="text-lg leading-title-5">Account Details</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <dl className="space-y-3">
@@ -407,7 +407,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                     Amount
                   </Label>
                   <div className="col-span-3 space-y-3">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm leading-body-sm text-muted-foreground">
                       Currency changed from {originalCurrency} to {editCurrency}. How would you like to handle the balance?
                     </p>
                     <div className="space-y-2">
@@ -427,7 +427,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                             <div className="w-2 h-2 rounded-full bg-primary" />
                           )}
                         </div>
-                        <span className="text-sm">
+                        <span className="text-sm leading-body-sm">
                           Keep the same numeric value ({editBalance} {editCurrency})
                         </span>
                       </button>
@@ -437,7 +437,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                         className="w-full flex items-center gap-3 p-3 rounded-lg border border-border text-left opacity-50 cursor-not-allowed"
                       >
                         <div className="w-4 h-4 rounded-full border-2 border-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm leading-body-sm text-muted-foreground">
                           Convert amount (coming soon)
                         </span>
                       </button>
