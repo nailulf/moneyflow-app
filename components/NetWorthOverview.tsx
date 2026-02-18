@@ -164,7 +164,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
     <div className="w-full space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               {(loading || accountsLoading || isPending) ? (
                 <div className="space-y-2">
@@ -186,7 +186,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                 </div>
               )}
             </div>
-            
+
             {/* Time Period Selector */}
             <div className="flex space-x-1">
               {timePeriods.map((period) => (
@@ -194,6 +194,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                   key={period.value}
                   variant={selectedPeriod === period.value ? "default" : "outline"}
                   size="sm"
+                  className="h-8 px-2.5 text-xs sm:h-9 sm:px-3 sm:text-sm"
                   onClick={() => setSelectedPeriod(period.value)}
                   disabled={loading || accountsLoading || isPending}
                 >

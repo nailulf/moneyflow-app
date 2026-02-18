@@ -16,15 +16,18 @@ import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
 import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 
 interface AddTransactionFormProps {
   onSuccess?: () => void
+  trigger?: React.ReactNode
 }
 
-export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
+export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormProps) {
   const { user } = useAuth()
   const userId = user?.id || ''
+  const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentDate, setCurrentDate] = useState('')
@@ -221,16 +224,21 @@ export function AddTransactionForm({ onSuccess }: AddTransactionFormProps) {
       }}
     >
       <SheetTrigger asChild>
-        <Button className="gap-2" data-testid="add-transaction-trigger">
-          <Plus className="h-4 w-4" />
-          Add Transaction
-        </Button>
+        {trigger || (
+          <Button className="gap-2" data-testid="add-transaction-trigger">
+            <Plus className="h-4 w-4" />
+            Add Transaction
+          </Button>
+        )}
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent
+        side={isMobile ? 'bottom' : 'right'}
+        className={isMobile ? 'max-h-[95dvh] overflow-y-auto rounded-t-2xl w-full' : 'w-full'}
+      >
         <SheetHeader>
           <SheetTitle>Add New Transaction</SheetTitle>
         </SheetHeader>
-        
+
         <div className="w-full">
           <Tabs defaultValue="manual" className="w-full">
             <TabsList className="grid w-full grid-cols-2">

@@ -17,7 +17,8 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal'
-import { Loader2 } from 'lucide-react'
+import { Loader2, GalleryVerticalEnd } from 'lucide-react'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -54,17 +55,23 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
         <CategoryProvider>
           <OnboardingProvider>
             <OnboardingModal />
-            <AppSidebar />
+            <AppSidebar className="hidden md:flex" />
             <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-            <div className="flex items-center gap-2 px-4">
+            <div className="flex items-center gap-2 px-4 md:hidden">
+              <div className="flex aspect-square size-6 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+                <GalleryVerticalEnd className="size-4" />
+              </div>
+              {/* <span className="truncate font-semibold text-sm">MoneyFlow</span> */}
+            </div>
+            <div className="hidden md:flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator
                 orientation="vertical"
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
             </div>
-            <h1 className="text-xl font-semibold">
+            <h1 className="text-xl font-semibold md:pl-0">
                 {
                   pathname === '/spending' ? 'Spending' :
                   pathname.startsWith('/spending') ? 'Spending' :
@@ -88,12 +95,13 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
               }} />
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0 pb-24 md:pb-4">
             <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
               {children}
             </div>
           </div>
         </SidebarInset>
+        <MobileBottomNav />
           </OnboardingProvider>
         </CategoryProvider>
       </AccountProvider>
