@@ -15,6 +15,7 @@ import { preferences } from '@/lib/api/user-preferences'
 import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface BudgetCategory {
   category_id: string
@@ -72,6 +73,7 @@ const YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR + i)
 
 export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categories }: BudgetCreationModalProps) {
   const { user } = useAuth()
+  const isMobile = useIsMobile()
   const userId = user?.id || ''
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
@@ -374,7 +376,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'h-[95vh] rounded-t-xl w-full' : ''}>
          <SheetHeader>
            <SheetTitle className="flex items-center gap-2">
              <Target className="h-5 w-5" />

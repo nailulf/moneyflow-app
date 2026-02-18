@@ -12,6 +12,7 @@ import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { formatCurrency } from '@/lib/data-utils'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface AccountManagerProps {
   onAccountUpdated?: () => void
@@ -27,6 +28,7 @@ function AccountManagerInternal({
   onOpenChange: controlledOnOpenChange
 }: AccountManagerProps) {
   const router = useRouter()
+  const isMobile = useIsMobile()
   const { user } = useAuth()
   const userId = user?.id || ''
   const {
@@ -238,7 +240,7 @@ function AccountManagerInternal({
           </Button>
         </SheetTrigger>
       )}
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'h-[95vh] rounded-t-xl w-full' : 'w-[400px] sm:w-[540px]'}>
         <SheetHeader>
           <SheetTitle>MANAGE ACCOUNTS</SheetTitle>
           <SheetDescription>

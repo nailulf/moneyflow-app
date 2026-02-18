@@ -5,12 +5,12 @@ import { CashFlowBreakdown } from '@/components/CashFlowBreakdown'
 import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, TopContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { formatCurrency } from '@/lib/data-utils'
 import { useFilteredTransactions } from '@/hooks/useFilteredTransactions'
 import { calculateBudgetProgress, calculateTotalSpent } from '@/lib/budget-utils'
 import { BudgetCreationModal } from '@/components/BudgetCreationSheet'
+import { BudgetFilterBar } from '@/components/BudgetFilterBar'
 import { useCategories } from '@/contexts/CategoryContext'
 import { BudgetProvider, useBudgets } from '@/contexts/BudgetContext'
 // Simple progress component inline
@@ -25,9 +25,7 @@ const Progress = ({ value = 0, className = '' }: { value?: number; className?: s
     </div>
   )
 }
-import { TrendingUp, TrendingDown, Plus, Target, Calendar } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 
 
 // Real budget data interfaces
@@ -142,63 +140,21 @@ export default function BudgetingBreakdownPage() {
       <PageLayout>
         <TopContent>
            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className='mb-4'>
-                <h2 className="text-xl font-semibold tracking-tight mb-2">Budgeting & Breakdown</h2>
-                <p className="text-muted-foreground">Manage your budgets and analyze spending patterns</p>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight mb-1">Budgeting & Breakdown</h2>
+                <p className="text-sm text-muted-foreground">Manage your budgets and analyze spending patterns</p>
               </div>
-              <div className="flex items-center gap-2">
-                {/* Time Range Selector */}
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <Select value={timeRange} onValueChange={(value: 'monthly' | 'yearly') => setTimeRange(value)}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="yearly">Yearly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                    <SelectTrigger className="w-20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(year => (
-                        <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
-                  {timeRange === 'monthly' && (
-                    <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-                      <SelectTrigger className="w-24">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                          <SelectItem key={month} value={month.toString()}>
-                            {new Date(0, month - 1).toLocaleString('default', { month: 'short' })}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-                
-                {selectedBudget && (
-                  <Badge variant="outline" className="flex items-center gap-2">
-                    <Target className="h-3 w-3" />
-                    {selectedBudget.name}
-                  </Badge>
-                )}
-                <Button onClick={() => setIsBudgetModalOpen(true)} className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Create Budget
-                </Button>
-              </div>
+              <BudgetFilterBar
+                timeRange={timeRange}
+                onTimeRangeChange={setTimeRange}
+                selectedYear={selectedYear}
+                onYearChange={setSelectedYear}
+                selectedMonth={selectedMonth}
+                onMonthChange={setSelectedMonth}
+                selectedBudgetName={selectedBudget?.name}
+                onCreateBudget={() => setIsBudgetModalOpen(true)}
+              />
             </div>
             {/* Budget Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

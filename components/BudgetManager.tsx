@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus } from 'lucide-react'
 import { CATEGORIES, CATEGORY_COLORS, CategoryGroupData } from '@/types/app'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 
 interface Budget {
@@ -37,6 +38,7 @@ export function CreateBudget({
   onBudgetCreated,
   className = '' 
 }: CreateBudgetProps) {
+  const isMobile = useIsMobile()
   const [createBudgetOpen, setCreateBudgetOpen] = useState(false)
   const [budgetForm, setBudgetForm] = useState({
     name: '',
@@ -91,14 +93,14 @@ export function CreateBudget({
           Create Budget
         </Button>
       </SheetTrigger>
-        <SheetContent>
+        <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'h-[95vh] rounded-t-xl w-full' : ''}>
           <SheetHeader>
             <SheetTitle>Create New Budget</SheetTitle>
             <SheetDescription>
               Set up a new budget with category allocations
             </SheetDescription>
           </SheetHeader>
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 space-y-4 overflow-y-auto max-h-[calc(85vh-120px)] md:max-h-none pr-1">
             <div className="space-y-2">
               <label className="text-sm font-medium">Budget Name</label>
               <Input 
