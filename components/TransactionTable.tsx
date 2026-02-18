@@ -5,7 +5,7 @@ import { Transaction, CategoryDB } from '@/types/database'
 import { formatCurrency, getTotalBalance, calculateTotalSpending, calculateTotalIncome } from '@/lib/data-utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Edit, Trash2, Search, ArrowUpDown, Filter, Loader2 } from 'lucide-react'
+import { Edit, Trash2, Search, ArrowUpDown, Filter, Loader2, EllipsisVertical, X } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -30,6 +30,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { updateTransaction, deleteTransaction } from '@/lib/api/transactions'
 import { useTransactionManager } from '@/hooks/use-transaction-manager'
 import { EditTransactionForm } from '@/components/EditTransactionForm'
@@ -89,6 +102,7 @@ export function TransactionTable({
   const [isDeleting, setIsDeleting] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
   
   // Lazy loading state
   const [displayedCount, setDisplayedCount] = useState(enableLazyLoading ? pageSize : limit)
@@ -402,7 +416,7 @@ export function TransactionTable({
 
   return (
     <Card className="w-full">
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-6">
         {/* Header Section */}
         <div className="mb-6">
           <div className="flex justify-between items-center gap-3 mb-4 w-full">
@@ -418,19 +432,15 @@ export function TransactionTable({
             </div>
           </div>
           
-          {/* Filter Controls */}
-          <div className="flex items-center justify-between mb-4 w-full gap-6">
-            {/* Left-aligned Filter Group */}
+          {/* Filter Controls - Desktop */}
+          <div className="hidden lg:flex items-center justify-between mb-4 w-full gap-6">
             <div className="flex items-center gap-3">
-              {/* Date Range Filter */}
               <div className="min-w-0 w-40">
                 <DateRangePicker
                   value={dateRange}
                   onChange={setDateRange}
                 />
               </div>
-              
-              {/* Category Filter */}
               <div className="min-w-0 w-40">
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-full text-xs" size="sm">
@@ -441,8 +451,8 @@ export function TransactionTable({
                     {categories.map((category) => (
                       <SelectItem key={`category-${category.id}`} value={category.id}>
                         <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
+                          <div
+                            className="w-3 h-3 rounded-full"
                             style={{ backgroundColor: category.color }}
                           />
                           {category.name}
@@ -452,8 +462,6 @@ export function TransactionTable({
                   </SelectContent>
                 </Select>
               </div>
-              
-              {/* Merchant Filter */}
               <div className="min-w-0 w-40">
                 <Select value={merchantFilter} onValueChange={setMerchantFilter}>
                   <SelectTrigger className="w-full text-xs" size="sm">
@@ -470,8 +478,6 @@ export function TransactionTable({
                 </Select>
               </div>
             </div>
-            
-            {/* Right-aligned Search Bar */}
             <div className="relative min-w-0 w-64">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -482,31 +488,106 @@ export function TransactionTable({
               />
             </div>
           </div>
-          
+
+          {/* Filter Controls - Mobile/Tablet */}
+          <div className="flex lg:hidden items-center gap-2 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-10 bg-muted/50 border-border w-full"
+              />
+            </div>
+            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="h-auto max-h-[80vh]">
+                <SheetHeader>
+                  <SheetTitle>Filters</SheetTitle>
+                </SheetHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <label className="text-sm leading-body-sm font-medium">Date Range</label>
+                    <DateRangePicker
+                      value={dateRange}
+                      onChange={setDateRange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm leading-body-sm font-medium">Category</label>
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All Categories" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={`category-mobile-${category.id}`} value={category.id}>
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: category.color }}
+                              />
+                              {category.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm leading-body-sm font-medium">Merchant</label>
+                    <Select value={merchantFilter} onValueChange={setMerchantFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All Merchants" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Merchants</SelectItem>
+                        {uniqueMerchants.map((merchant) => (
+                          <SelectItem key={`merchant-mobile-${merchant}`} value={merchant}>
+                            {merchant}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
+                    Apply Filters
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
           {/* Transaction Summary */}
-           <div className="mt-4 text-sm leading-body-sm text-muted-foreground">
-             <span className="font-medium">Total transactions:</span> {filteredTransactions.length} • 
+          <div className="hidden sm:block mt-4 text-sm leading-body-sm text-muted-foreground">
+             <span className="font-medium">Total transactions:</span> {filteredTransactions.length} •
              <span className="font-medium">Date range:</span> {(() => {
                if (filteredTransactions.length === 0) return 'No transactions';
                const dates = filteredTransactions.map(t => new Date(t.date)).sort((a, b) => a.getTime() - b.getTime());
                const startDate = dates[0].toLocaleDateString();
                const endDate = dates[dates.length - 1].toLocaleDateString();
                return dates.length === 1 ? startDate : `${startDate} - ${endDate}`;
-             })()} • 
-             <span className="font-medium">Total expenses:</span> <span className="text-destructive">{formatCurrency(calculateTotalSpending(filteredTransactions))}</span> • 
-             <span className="font-medium">Total income:</span> <span className="text-success">{formatCurrency(calculateTotalIncome(filteredTransactions))}</span> • 
+             })()} •
+             <span className="font-medium">Total expenses:</span> <span className="text-destructive">{formatCurrency(calculateTotalSpending(filteredTransactions))}</span> •
+             <span className="font-medium">Total income:</span> <span className="text-success">{formatCurrency(calculateTotalIncome(filteredTransactions))}</span> •
              <span className="font-medium">Balance:</span> <span className={getTotalBalance(filteredTransactions) >= 0 ? 'text-success' : 'text-destructive'}>{formatCurrency(getTotalBalance(filteredTransactions))}</span>
            </div>
         </div>
         
         {/* Table */}
         <div className="bg-card rounded-lg border border-border">
-          <div className="max-h-[900px] overflow-y-auto">
+          <div className="lg:max-h-[900px] lg:overflow-y-auto">
             <Table>
-              <TableHeader className="sticky top-0 bg-card z-[5]">
+              <TableHeader className="hidden sm:table-header-group lg:sticky lg:top-0 bg-card z-[5]">
                 <TableRow className="border-b border-border">
-                  <TableHead 
-                    className="py-4 px-6 text-left font-medium text-foreground text-sm leading-body-sm cursor-pointer hover:bg-muted/50 w-[40%]"
+                  <TableHead
+                    className="py-4 px-4 lg:px-6 text-left font-medium text-foreground text-sm leading-body-sm cursor-pointer hover:bg-muted/50"
                     onClick={() => handleSort('description')}
                   >
                     <div className="flex items-center gap-2">
@@ -516,8 +597,8 @@ export function TransactionTable({
                       )}
                     </div>
                   </TableHead>
-                  <TableHead 
-                    className="py-4 px-6 text-left font-medium text-foreground text-sm leading-body-sm cursor-pointer hover:bg-muted/50 w-[25%]"
+                  <TableHead
+                    className="hidden lg:table-cell py-4 px-4 lg:px-6 text-left font-medium text-foreground text-sm leading-body-sm cursor-pointer hover:bg-muted/50"
                     onClick={() => handleSort('category')}
                   >
                     <div className="flex items-center gap-2">
@@ -527,8 +608,8 @@ export function TransactionTable({
                       )}
                     </div>
                   </TableHead>
-                  <TableHead 
-                    className="py-4 px-6 text-right font-medium text-foreground text-sm leading-body-sm cursor-pointer hover:bg-muted/50 w-[20%]"
+                  <TableHead
+                    className="py-4 px-4 lg:px-6 text-right font-medium text-foreground text-sm leading-body-sm cursor-pointer hover:bg-muted/50"
                     onClick={() => handleSort('amount')}
                   >
                     <div className="flex items-center justify-end gap-2">
@@ -538,15 +619,15 @@ export function TransactionTable({
                       )}
                     </div>
                   </TableHead>
-                  <TableHead className="py-4 px-6 text-center font-medium text-foreground text-sm leading-body-sm w-[15%]">
-                    Actions
+                  <TableHead className="py-4 px-2 lg:px-6 text-center font-medium text-foreground text-sm leading-body-sm w-12 lg:w-auto">
+                    <span className="sr-only">Actions</span>
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
               {displayTransactions.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="py-12 text-center text-muted-foreground">
+                  <TableCell colSpan={10} className="py-12 text-center text-muted-foreground">
                     No transactions found
                   </TableCell>
                 </TableRow>
@@ -575,25 +656,30 @@ export function TransactionTable({
                       <React.Fragment key={`date-${dateString}`}>
                         {/* Date Header Row */}
                         <TableRow className="bg-muted/50">
-                          <TableCell colSpan={4} className="py-3 px-6 font-medium text-foreground text-sm leading-body-sm">
+                          <TableCell colSpan={10} className="py-3 px-4 lg:px-6 font-medium text-foreground text-sm leading-body-sm">
                             {formattedDate}
                           </TableCell>
                         </TableRow>
-                        
+
                         {/* Transactions for this date */}
                         {displayedDayTransactions.map((transaction) => (
                           <TableRow key={`transaction-${transaction.id}`} className="border-b border-border hover:bg-muted/50">
-                            <TableCell className="py-4 px-6 w-[40%]">
-                              <div className="space-y-1">
-                                <div className="text-sm leading-body-sm font-medium text-foreground">
+                            <TableCell className="py-4 px-4 lg:px-6">
+                              <div className="flex items-center gap-3">
+                                {/* Category color dot - visible on mobile/tablet */}
+                                <div
+                                  className="w-5 h-5 rounded-md flex-shrink-0 lg:hidden"
+                                  style={{ backgroundColor: getCategoryColor(transaction.category_id) }}
+                                />
+                                <span className="text-sm leading-body-sm font-medium text-foreground truncate">
                                   {transaction.merchant || transaction.description || 'No description'}
-                                </div>
+                                </span>
                               </div>
                             </TableCell>
-                            <TableCell className="py-4 px-6 w-[25%]">
+                            <TableCell className="hidden lg:table-cell py-4 px-4 lg:px-6">
                               <div className="flex items-center gap-2">
-                                <div 
-                                  className="w-3 h-3 rounded-full" 
+                                <div
+                                  className="w-3 h-3 rounded-full flex-shrink-0"
                                   style={{ backgroundColor: getCategoryColor(transaction.category_id) }}
                                 />
                                 <span className="text-sm leading-body-sm text-foreground">
@@ -601,40 +687,46 @@ export function TransactionTable({
                                 </span>
                               </div>
                             </TableCell>
-                            <TableCell className="py-4 px-6 text-right w-[20%]">
+                            <TableCell className="py-4 px-4 lg:px-6 text-right whitespace-nowrap">
                               <div className={`text-sm leading-body-sm font-medium ${
-                                transaction.type === 'INCOME' 
+                                transaction.type === 'INCOME'
                                   ? 'text-success'
                                   : 'text-foreground'
                               }`}>
                                 {transaction.type === 'INCOME' ? '+' : ''}{formatCurrency(Math.abs(transaction.amount))}
                               </div>
                             </TableCell>
-                            <TableCell className="py-4 px-6 w-[15%]">
-                              <div className="flex items-center justify-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    if (onEditTransaction) {
-                                      onEditTransaction(transaction)
-                                    } else if (enableSelfManagement) {
-                                      setEditingTransaction(transaction)
-                                      setIsEditModalOpen(true)
-                                    }
-                                  }}
-                                  className="h-8 w-8 p-0 hover:bg-muted"
-                                >
-                                  <Edit className="h-4 w-4 text-muted-foreground" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteTransactionClick(transaction)}
-                                  className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4 text-muted-foreground" />
-                                </Button>
+                            <TableCell className="hidden sm:table-cell py-4 px-2 lg:px-6">
+                              <div className="flex items-center justify-center">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                      <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        if (onEditTransaction) {
+                                          onEditTransaction(transaction)
+                                        } else if (enableSelfManagement) {
+                                          setEditingTransaction(transaction)
+                                          setIsEditModalOpen(true)
+                                        }
+                                      }}
+                                    >
+                                      <Edit className="h-4 w-4 mr-2" />
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handleDeleteTransactionClick(transaction)}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
                             </TableCell>
                           </TableRow>

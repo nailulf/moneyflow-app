@@ -16,6 +16,8 @@ import { Analytics } from '@/lib/analytics/amplitude'
 interface CategoryManagerProps {
   onCategoryUpdated?: () => void
   className?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 interface DisplayGroup {
@@ -30,13 +32,18 @@ interface DisplayGroup {
 // Internal component that contains all the logic
 function CategoryManagerInternal({
   onCategoryUpdated,
-  className = ''
+  className = '',
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
 }: CategoryManagerProps) {
   const { user } = useAuth()
   const userId = user?.id || ''
   const { onCategoryChange } = useAutoRefresh(userId)
-  
-  const [isOpen, setIsOpen] = useState(false)
+
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const isOpen = isControlled ? controlledOpen : internalOpen
+  const setIsOpen = isControlled ? (controlledOnOpenChange ?? setInternalOpen) : setInternalOpen
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [newCategoryName, setNewCategoryName] = useState('')
@@ -452,12 +459,14 @@ function CategoryManagerInternal({
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className={className}>
-          <Settings className="h-4 w-4 mr-2" />
-          Manage Categories
-        </Button>
-      </SheetTrigger>
+      {!isControlled && (
+        <SheetTrigger asChild>
+          <Button variant="outline" size="sm" className={className}>
+            <Settings className="h-4 w-4 mr-2" />
+            Manage Categories
+          </Button>
+        </SheetTrigger>
+      )}
       <SheetContent className="w-[400px] sm:w-[540px]">
         <SheetHeader>
           <SheetTitle>MANAGE CATEGORIES</SheetTitle>

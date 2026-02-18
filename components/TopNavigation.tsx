@@ -9,24 +9,23 @@ interface TopNavigationProps {
     label: string
     href: string
   }>
-  actionButton?: React.ReactNode
 }
 
-export function TopNavigation({ subMenus, actionButton }: TopNavigationProps) {
+export function TopNavigation({ subMenus }: TopNavigationProps) {
   const pathname = usePathname()
 
   return (
     <div className="bg-background">
-      <div className="flex h-10 items-center justify-between">
-        <div className="flex items-center space-x-6">
+      <div className="flex h-10 items-center">
+        <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide">
           {subMenus && subMenus.length > 0 && (
-            <nav className="flex items-center space-x-2 px-4">
+            <nav className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4">
               {subMenus.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                    "px-3 py-2 text-sm leading-body-sm font-medium rounded-md transition-colors whitespace-nowrap shrink-0",
                     pathname === item.href
                       ? "bg-muted text-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -38,7 +37,6 @@ export function TopNavigation({ subMenus, actionButton }: TopNavigationProps) {
             </nav>
           )}
         </div>
-        {actionButton && <div>{actionButton}</div>}
       </div>
     </div>
   )
@@ -49,21 +47,21 @@ export function DashboardNavigation() {
   return <TopNavigation/>
 }
 
-export function AccountNavigation({ actionButton }: { actionButton?: React.ReactNode }) {
+export function AccountNavigation() {
   const subMenus = [
     { label: "Overview", href: "/accounts" }
   ]
-  return <TopNavigation subMenus={subMenus} actionButton={actionButton} />
+  return <TopNavigation subMenus={subMenus} />
 }
 
-export function SpendingNavigation({ actionButton }: { actionButton?: React.ReactNode }) {
+export function SpendingNavigation() {
   const subMenus = [
     { label: "Overview", href: "/spending" },
     { label: "Breakdown", href: "/spending/breakdown" },
     { label: "Cash Flow", href: "/spending/cashflow" },
     { label: "Transaction", href: "/spending/transaction" }
   ]
-  return <TopNavigation subMenus={subMenus} actionButton={actionButton} />
+  return <TopNavigation subMenus={subMenus} />
 }
 
 export function PortfolioNavigation() {

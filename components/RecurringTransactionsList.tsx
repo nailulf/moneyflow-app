@@ -6,7 +6,7 @@ import { TransactionFormData } from '@/lib/validations'
 import { formatCurrency } from '@/lib/data-utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Edit, Trash2, Search, ArrowUpDown, Play, Pause, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Edit, Trash2, Search, ArrowUpDown, Play, Pause, Calendar, ChevronLeft, ChevronRight, EllipsisVertical } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -24,6 +24,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { EditTransactionForm } from '@/components/EditTransactionForm'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -190,42 +196,44 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
         </Select>
       </div>
 
-      <div className="border rounded-lg overflow-hidden bg-card shadow-sm">
+      <div className="border rounded-lg overflow-hidden bg-card shadow-sm w-full">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[30%] cursor-pointer hover:bg-muted/50" onClick={() => handleSort('description')}>
+              <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('description')}>
                 <div className="flex items-center gap-1">
                   Transaction Name
                   {sortField === 'description' && <ArrowUpDown className="h-3 w-3" />}
                 </div>
               </TableHead>
-              <TableHead className="w-[15%] cursor-pointer hover:bg-muted/50" onClick={() => handleSort('amount')}>
+              <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('amount')}>
                  <div className="flex items-center gap-1">
                   Amount
                   {sortField === 'amount' && <ArrowUpDown className="h-3 w-3" />}
                 </div>
               </TableHead>
-              <TableHead className="w-[15%] cursor-pointer hover:bg-muted/50" onClick={() => handleSort('frequency')}>
+              <TableHead className="hidden sm:table-cell cursor-pointer hover:bg-muted/50" onClick={() => handleSort('frequency')}>
                 <div className="flex items-center gap-1">
                   Frequency
                   {sortField === 'frequency' && <ArrowUpDown className="h-3 w-3" />}
                 </div>
               </TableHead>
-              <TableHead className="w-[20%] cursor-pointer hover:bg-muted/50" onClick={() => handleSort('next_date')}>
+              <TableHead className="hidden lg:table-cell cursor-pointer hover:bg-muted/50" onClick={() => handleSort('next_date')}>
                 <div className="flex items-center gap-1">
                   Next Scheduled
                   {sortField === 'next_date' && <ArrowUpDown className="h-3 w-3" />}
                 </div>
               </TableHead>
-              <TableHead className="w-[20%]">End Status</TableHead>
-              <TableHead className="w-[10%] text-right">Actions</TableHead>
+              <TableHead className="hidden lg:table-cell">End Status</TableHead>
+              <TableHead className="w-12 lg:w-auto text-right">
+                <span className="sr-only">Actions</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginatedTransactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                   No recurring transactions found
                 </TableCell>
               </TableRow>
@@ -236,6 +244,10 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
                     <div className="flex flex-col">
                       <span>{transaction.merchant || transaction.description}</span>
                       <span className="text-xs leading-caption text-muted-foreground">{transaction.category_id}</span>
+                      {/* Show frequency on mobile */}
+                      <span className="sm:hidden text-xs leading-caption text-muted-foreground capitalize">
+                        {transaction.recurring_frequency || 'monthly'}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -243,18 +255,18 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
                       {formatCurrency(transaction.amount)}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="outline" className="capitalize">
                       {transaction.recurring_frequency || 'monthly'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell">
                     <div className="flex items-center gap-2 text-sm leading-body-sm text-muted-foreground">
                       <Calendar className="h-4 w-4" />
                       {getNextScheduledDate(transaction).toLocaleDateString()}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell">
                     {transaction.recurring_end_date ? (
                       <span className="text-sm leading-body-sm text-muted-foreground">
                         Ends {new Date(transaction.recurring_end_date).toLocaleDateString()}
@@ -266,25 +278,26 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(transaction)}
-                        title="Edit Configuration"
-                      >
-                        <Edit className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(transaction.id)}
-                        title="Stop Recurring"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <EllipsisVertical className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(transaction)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(transaction.id)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Stop Recurring
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))
