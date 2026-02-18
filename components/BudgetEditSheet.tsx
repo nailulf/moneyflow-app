@@ -17,6 +17,7 @@ import { toast } from 'sonner'
 import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
 import { fromExistingBudgetData, toDatabase } from '@/lib/budget-allocation'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface BudgetCategory {
   id: string
@@ -43,6 +44,7 @@ interface BudgetEditSheetProps {
 }
 
 export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetEditSheetProps) {
+  const isMobile = useIsMobile()
   const [editForm, setEditForm] = useState<BudgetEditData>({
     id: '',
     name: '',
@@ -443,7 +445,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'h-[95vh] rounded-t-xl overflow-y-auto w-full' : 'w-full sm:max-w-2xl overflow-y-auto'}>
         <SheetHeader>
           <SheetTitle>Edit Budget</SheetTitle>
           <SheetDescription>
