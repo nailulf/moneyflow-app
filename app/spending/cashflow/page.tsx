@@ -4,9 +4,6 @@ import React, { useState, useMemo } from 'react'
 import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
-import { CategoryManager } from '@/components/CategoryManager'
-import { AccountManager } from '@/components/AccountManager'
-import { AccountProvider } from '@/contexts/AccountContext'
 import { CashFlowSankey } from '@/components/CashFlowSankey'
 import { PeriodPicker } from '@/components/PeriodPicker'
 import { Card, CardContent } from '@/components/ui/card'
@@ -76,14 +73,7 @@ export default function CashFlowPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation actionButton={
-        <div className="flex items-center gap-2">
-          <CategoryManager />
-          <AccountProvider>
-            <AccountManager />
-          </AccountProvider>
-        </div>
-      } />
+      <SpendingNavigation />
       
       <PageLayout>
         <TopContent>

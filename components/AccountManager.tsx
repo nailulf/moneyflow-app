@@ -16,11 +16,15 @@ import { Analytics } from '@/lib/analytics/amplitude'
 interface AccountManagerProps {
   onAccountUpdated?: () => void
   className?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 function AccountManagerInternal({
   onAccountUpdated,
-  className = ''
+  className = '',
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
 }: AccountManagerProps) {
   const router = useRouter()
   const { user } = useAuth()
@@ -225,13 +229,15 @@ function AccountManagerInternal({
 
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className={className}>
-          <CreditCard className="h-4 w-4 mr-2" />
-          Manage Accounts
-        </Button>
-      </SheetTrigger>
+    <Sheet open={controlledOpen} onOpenChange={controlledOnOpenChange}>
+      {controlledOpen === undefined && (
+        <SheetTrigger asChild>
+          <Button variant="outline" size="sm" className={className}>
+            <CreditCard className="h-4 w-4 mr-2" />
+            Manage Accounts
+          </Button>
+        </SheetTrigger>
+      )}
       <SheetContent className="w-[400px] sm:w-[540px]">
         <SheetHeader>
           <SheetTitle>MANAGE ACCOUNTS</SheetTitle>

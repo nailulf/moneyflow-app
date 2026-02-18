@@ -26,8 +26,6 @@ const Progress = ({ value = 0, className = '' }: { value?: number; className?: s
   )
 }
 import { TrendingUp, TrendingDown, Plus, Target, Calendar } from 'lucide-react'
-import { CategoryManager } from '@/components/CategoryManager'
-import { AccountManager } from '@/components/AccountManager'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -139,12 +137,7 @@ export default function BudgetingBreakdownPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation actionButton={
-          <div className="flex items-center gap-2">
-            <CategoryManager />
-            <AccountManager />
-          </div>
-        } />
+      <SpendingNavigation />
       
       <PageLayout>
         <TopContent>

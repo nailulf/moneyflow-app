@@ -5,9 +5,6 @@ import { TransactionTable } from '@/components/TransactionTable'
 import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
-import { CategoryManager } from '@/components/CategoryManager'
-import { AccountManager } from '@/components/AccountManager'
-import { AccountProvider } from '@/contexts/AccountContext'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { RecurringTransactionsList } from '@/components/RecurringTransactionsList'
 
@@ -22,14 +19,7 @@ export default function SpendingTransactionPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation actionButton={
-        <div className="flex items-center gap-2">
-          <CategoryManager />
-          <AccountProvider>
-            <AccountManager />
-          </AccountProvider>
-        </div>
-      } />
+      <SpendingNavigation />
       
       <PageLayout>
         <TopContent>
