@@ -101,6 +101,7 @@ export async function processRecurringTransactions(): Promise<ProcessingResult> 
       // Create new transaction based on the recurring one
       const newTransaction = {
         user_id: transaction.user_id,
+        account_id: transaction.account_id,
         date: now.toISOString().split('T')[0], // Format as YYYY-MM-DD
         description: transaction.description,
         amount: transaction.amount,
