@@ -202,13 +202,13 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
   const canHaveGoal = ['BANK', 'INVESTMENT'].includes(account.type)
 
   const AccountHeader = () => (
-    <div className="flex items-start justify-between mb-6">
-      <div className="flex items-center gap-4">
-        <div className="p-3 rounded-xl bg-muted">
+    <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="p-3 rounded-xl bg-muted shrink-0">
           <Icon className="w-8 h-8 text-muted-foreground" />
         </div>
-        <div>
-          <h2 className="text-2xl leading-title-3 font-bold">{account.name}</h2>
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl leading-title-3 font-bold truncate">{account.name}</h2>
           <p className="text-muted-foreground capitalize">
             {account.type.toLowerCase().replace('_', ' ')}
             {account.is_default && (
@@ -218,17 +218,6 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
             )}
           </p>
         </div>
-      </div>
-      <div className="flex gap-2">
-        <Button variant="outline" size="icon" onClick={handleOpenEditDialog} title="Edit Account">
-          <Edit className="w-4 h-4" />
-        </Button>
-        <Button variant="outline" size="icon" onClick={handleExport} title="Export Transactions">
-          <Download className="w-4 h-4" />
-        </Button>
-        <Button variant="destructive" size="icon" onClick={() => setIsDeleteOpen(true)} title="Delete Account">
-          <Trash2 className="w-4 h-4" />
-        </Button>
       </div>
     </div>
   )
@@ -257,7 +246,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
       </div>
 
       <ContentWrapper>
-          <MainContent className={isModal ? "sm:w-[50vw] sm:max-w-[90vw] p-0" : ""}>
+          <MainContent className={isModal ? "w-full max-w-full p-0 overflow-x-hidden" : "w-full"}>
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="mb-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -321,7 +310,22 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                 </Card>
               </TabsContent>
             </Tabs>
+            <div className="sticky bottom-0 left-0 right-0 z-10 flex gap-3 p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border">
+              <Button variant="outline" onClick={handleOpenEditDialog} className="flex-1">
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+              <Button variant="outline" onClick={handleExport} className="flex-1">
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="destructive" onClick={() => setIsDeleteOpen(true)} className="flex-1">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </div>
           </MainContent>
+          
         </ContentWrapper>
 
         {/* Edit Dialog */}
@@ -487,7 +491,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
 
   if (isModal) {
     return (
-      <div className="flex flex-col h-full overflow-y-auto p-1">
+      <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden p-1">
          {content}
       </div>
     )

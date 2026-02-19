@@ -11,7 +11,9 @@ import { useGoalsSummary } from '@/hooks/useGoalsQuery'
 import { getGoalIcon, isGoalOnTrack, getProgressColor } from '@/lib/goals/calculations'
 import { AccountNavigation } from '@/components/TopNavigation'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { AccountDetailView } from '@/components/AccountDetailView'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   BANK: Building2,
@@ -25,6 +27,7 @@ function AccountsPageContent() {
   const { accounts, loading: accountsLoading } = useAccounts()
   const { data: goalsSummary, isLoading: goalsLoading } = useGoalsSummary()
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
+  const isMobile = useIsMobile()
 
   const loading = accountsLoading || goalsLoading
 
@@ -214,17 +217,31 @@ function AccountsPageContent() {
         </ContentWrapper>
       </PageLayout>
 
-      {/* Account Detail Modal */}
-      <Dialog open={!!selectedAccountId} onOpenChange={(open) => !open && setSelectedAccountId(null)}>
-        <DialogContent className="sm:max-w-[80vw] w-[80vw] h-[80vh] overflow-y-auto">
-          {selectedAccountId && (
-            <AccountDetailView 
-              accountId={selectedAccountId} 
-              isModal={true} 
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Account Detail - Bottom Sheet on mobile, Dialog on desktop */}
+      {isMobile ? (
+        <Sheet open={!!selectedAccountId} onOpenChange={(open) => !open && setSelectedAccountId(null)}>
+          <SheetContent side="bottom" className="h-[95vh] w-full overflow-y-auto rounded-t-2xl px-4 pt-2 pb-6">
+            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+            {selectedAccountId && (
+              <AccountDetailView
+                accountId={selectedAccountId}
+                isModal={true}
+              />
+            )}
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <Dialog open={!!selectedAccountId} onOpenChange={(open) => !open && setSelectedAccountId(null)}>
+          <DialogContent className="sm:max-w-[80vw] w-[80vw] h-[80vh] overflow-y-auto">
+            {selectedAccountId && (
+              <AccountDetailView
+                accountId={selectedAccountId}
+                isModal={true}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
