@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/components/ui/atoms/input'
 
 const meta = {
   title: 'UI/Input',

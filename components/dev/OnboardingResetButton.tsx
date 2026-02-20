@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/atoms/label'
+import { Checkbox } from '@/components/ui/atoms/checkbox'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { isOnboardingResetEnabled } from '@/lib/utils/environment'

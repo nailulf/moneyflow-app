@@ -6,10 +6,10 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/atoms/button'
+import { Card, CardContent } from '@/components/ui/molecules/card'
+import { Progress } from '@/components/ui/atoms/progress'
+import { Checkbox } from '@/components/ui/atoms/checkbox'
 import {
   Select,
   SelectContent,
@@ -19,7 +19,7 @@ import {
   SelectGroup,
   SelectLabel,
   SelectSeparator,
-} from "@/components/ui/select"
+} from "@/components/ui/molecules/select"
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/components/ui/molecules/dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,9 +37,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from "@/components/ui/molecules/alert-dialog"
+import { Input } from '@/components/ui/atoms/input'
+import { Label } from '@/components/ui/atoms/label'
 
 import { useAccounts } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'

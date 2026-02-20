@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/molecules/popover'
+import { Button } from '@/components/ui/atoms/button'
 import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
 import { format, setMonth, setYear } from 'date-fns'
 import { cn } from '@/lib/utils'

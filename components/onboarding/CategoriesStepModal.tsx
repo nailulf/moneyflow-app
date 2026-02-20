@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useCategories } from '@/contexts/CategoryContext'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/atoms/button'
+import { Badge } from '@/components/ui/atoms/badge'
+import { Input } from '@/components/ui/atoms/input'
 import {
   ArrowLeft,
   ArrowRight,

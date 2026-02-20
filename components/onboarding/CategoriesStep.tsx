@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { EducationalCard } from './EducationalCard'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/atoms/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
+import { Badge } from '@/components/ui/atoms/badge'
 import {
   ArrowLeft,
   ArrowRight,

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/atoms/button'
 import { Check, ArrowRight, Loader2 } from 'lucide-react'
 
 export function CompletionView() {

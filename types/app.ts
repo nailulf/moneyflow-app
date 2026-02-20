@@ -1,4 +1,6 @@
 import { Transaction } from './database'
+import type { BudgetSnapshotWithSpending } from '@/lib/api/budget-snapshots'
+import type { BudgetPlanWithCategories } from '@/lib/api/budget-plans'
 
 export const CATEGORIES = [
   'Food & Dining',
@@ -133,4 +135,12 @@ export const CATEGORY_COLORS: Record<Category, string> = {
 }
 export interface CashFlowBreakdownProps {
   transactions: Transaction[]
+  period?: 'monthly' | 'yearly'
+  budgetSnapshot?: BudgetSnapshotWithSpending | null
+  budgetSnapshotLoading?: boolean
+  budgetNoSnapshot?: boolean
+  budgetSnapshotError?: string | null
+  budgetPlan?: BudgetPlanWithCategories | null
+  budgetPlanLoading?: boolean
+  onBudgetPlanSaved?: () => void
 }

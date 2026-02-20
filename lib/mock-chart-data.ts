@@ -1,4 +1,4 @@
-import { ChartConfig } from "@/components/ui/chart";
+import { ChartConfig } from "@/components/ui/organisms/chart";
 
 // Mock data for Stacked Bar Chart
 export const stackedBarChartData = [

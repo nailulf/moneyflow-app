@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/molecules/card'
+import { Button } from '@/components/ui/atoms/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +12,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle
-} from '@/components/ui/alert-dialog'
+} from '@/components/ui/molecules/alert-dialog'
 import { Plus, Edit2, Trash2, Target, Wallet, TrendingUp, Calendar, Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/data-utils'
 import {

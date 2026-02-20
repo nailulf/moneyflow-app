@@ -7,11 +7,11 @@ import { useCategories } from '@/contexts/CategoryContext'
 import { useBudgetTemplates } from '@/hooks/useOnboardingQuery'
 import { useAuth } from '@/contexts/AuthContext'
 import { EducationalCard } from './EducationalCard'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/atoms/button'
+import { Input } from '@/components/ui/atoms/input'
+import { Label } from '@/components/ui/atoms/label'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/molecules/card'
+import { Progress } from '@/components/ui/atoms/progress'
 import { cn } from '@/lib/utils'
 import {
   ArrowLeft,
@@ -86,15 +86,11 @@ export function BudgetSetupStep() {
         }
       })
 
-      // Create the actual budget
-      const now = new Date()
+      // Create the budget plan (timeless — no name, year, or month needed)
       const budgetData = {
         userId: user.id,
-        name: `${now.toLocaleString('default', { month: 'long' })} ${now.getFullYear()} Budget`,
         total_amount: income,
         period: 'monthly' as const,
-        year: now.getFullYear(),
-        month: now.getMonth() + 1,
         currency: 'IDR',
         categories: Object.entries(allocations).map(([categoryId, amount]) => ({
           category_id: categoryId,
@@ -102,8 +98,8 @@ export function BudgetSetupStep() {
         }))
       }
 
-      // Create budget via API
-      const response = await fetch('/api/budgets', {
+      // Create budget plan via API (also auto-creates snapshot for current period)
+      const response = await fetch('/api/budget-plans', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(budgetData)

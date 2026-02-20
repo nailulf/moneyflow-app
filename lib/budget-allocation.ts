@@ -58,10 +58,6 @@ export function initializeBudgetAllocation(
     throw new Error('Total amount cannot be negative')
   }
   
-  if (roundedTotal === 0) {
-    throw new Error('Total amount must be greater than zero')
-  }
-  
   return {
     totalAmount: roundedTotal,
     currency,

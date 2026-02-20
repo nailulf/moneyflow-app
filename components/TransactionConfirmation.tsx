@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Separator } from '@/components/ui/separator'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
+import { Button } from '@/components/ui/atoms/button'
+import { Badge } from '@/components/ui/atoms/badge'
+import { Alert, AlertDescription } from '@/components/ui/molecules/alert'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/molecules/table'
+import { Separator } from '@/components/ui/atoms/separator'
 import { 
   CheckCircle, 
   AlertCircle, 

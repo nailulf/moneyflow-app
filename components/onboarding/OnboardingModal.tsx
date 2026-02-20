@@ -5,7 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogTitle
-} from '@/components/ui/dialog'
+} from '@/components/ui/molecules/dialog'
 import { OnboardingModalContent } from './OnboardingModalContent'
 
 export function OnboardingModal() {

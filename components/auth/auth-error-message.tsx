@@ -1,11 +1,11 @@
 
 'use client'
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/molecules/alert'
 import { AlertCircle, AlertTriangle, Info } from 'lucide-react'
 import { getFriendlyErrorMessage, AuthError } from '@/lib/auth-errors'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/atoms/button'
 
 interface AuthErrorMessageProps {
   error: any;

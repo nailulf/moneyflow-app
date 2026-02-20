@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/molecules/card"
 import {
   ChartConfig,
   ChartContainer,
@@ -18,7 +18,7 @@ import {
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from "@/components/ui/organisms/chart"
 
 export const description = "A stacked bar chart with legend and modern styling"
 

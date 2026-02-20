@@ -4,8 +4,8 @@ import React, { useState, useMemo } from 'react'
 import { Transaction, TransactionUpdate } from '@/types/database'
 import { TransactionFormData } from '@/lib/validations'
 import { formatCurrency } from '@/lib/data-utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/atoms/button'
+import { Input } from '@/components/ui/atoms/input'
 import { Edit, Trash2, Search, ArrowUpDown, Play, Pause, Calendar, ChevronLeft, ChevronRight, EllipsisVertical } from 'lucide-react'
 import {
   Table,
@@ -14,22 +14,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+} from '@/components/ui/molecules/table'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
+} from '@/components/ui/molecules/select'
+import { Badge } from '@/components/ui/atoms/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/ui/molecules/dropdown-menu'
 import { EditTransactionForm } from '@/components/EditTransactionForm'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { useAuth } from '@/contexts/AuthContext'

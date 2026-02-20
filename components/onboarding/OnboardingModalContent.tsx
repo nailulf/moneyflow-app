@@ -7,7 +7,7 @@ import { AccountSetupStepModal } from './AccountSetupStepModal'
 import { CategoriesStepModal } from './CategoriesStepModal'
 import { BudgetSetupStepModal } from './BudgetSetupStepModal'
 import { CompletionView } from './CompletionView'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/atoms/button'
 import type { OnboardingPhase } from '@/types/database'
 
 const ONBOARDING_STEPS = [

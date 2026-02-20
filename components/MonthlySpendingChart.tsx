@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
-import { Bar, BarChart, CartesianGrid, XAxis, ResponsiveContainer } from 'recharts'
+import { Bar, BarChart, CartesianGrid, XAxis, Cell } from 'recharts'
 import { Transaction } from '@/types/database'
 import { formatCurrency } from '@/lib/data-utils'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/molecules/card'
+import { Button } from '@/components/ui/atoms/button'
+import { Skeleton } from '@/components/ui/atoms/skeleton'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   ChartConfig,
@@ -14,8 +14,7 @@ import {
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
+} from '@/components/ui/organisms/chart'
 
 interface TransformedBudget {
   id: string
@@ -36,6 +35,9 @@ interface SpendingVsIncomeChartProps {
   transactions: Transaction[]
   budgets: TransformedBudget[]
   isLoading: boolean
+  selectedYear?: number
+  selectedMonth?: number
+  onMonthClick?: (year: number, month: number) => void
 }
 
 // Function to transform data for the chart
@@ -110,6 +112,8 @@ function transformDataForChart(transactions: Transaction[], budgets: Transformed
     
     return {
       month: monthData.month.slice(0, 3), // Abbreviate month name
+      year: monthData.year,
+      monthNum: monthData.monthNum,
       spending,
       income,
       netCashFlow,
@@ -117,7 +121,7 @@ function transformDataForChart(transactions: Transaction[], budgets: Transformed
   });
 }
 
-export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: SpendingVsIncomeChartProps) {
+export function SpendingVsBudgetChart({ transactions, budgets, isLoading, selectedYear, selectedMonth, onMonthClick }: SpendingVsIncomeChartProps) {
   const allChartData = useMemo(() => {
     return transformDataForChart(transactions, budgets);
   }, [transactions, budgets]);
@@ -194,7 +198,9 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
       
       return (
         <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-          <p className="font-medium text-foreground mb-2">{label}</p>
+          <p className="font-medium text-foreground mb-2">
+            {label} {data.year}
+          </p>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <div 
@@ -242,7 +248,7 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
                 "No transaction data available"
               ) : (
                 <>
-                  Showing {chartData.length} months 
+                  {onMonthClick ? 'Click a month to filter' : `Showing ${chartData.length} months`}
                   {allChartData.length > displayCount && (
                     <span className="text-xs leading-caption text-muted-foreground ml-1">
                       ({currentMonthIndex + 1}-{currentMonthIndex + chartData.length} of {allChartData.length})
@@ -286,7 +292,11 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="h-[30vh] min-h-[200px]">
-            <BarChart accessibilityLayer data={chartData}>
+            <BarChart
+              accessibilityLayer
+              data={chartData}
+              style={onMonthClick ? { cursor: 'pointer' } : undefined}
+            >
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="month"
@@ -302,14 +312,48 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading }: Spen
               <ChartLegend content={<ChartLegendContent />} />
               <Bar
                 dataKey="income"
-                fill={chartConfig.income.color}
                 radius={[4, 4, 0, 0]}
-              />
+                onClick={(data: any) => {
+                  if (onMonthClick && data?.year && data?.monthNum) {
+                    onMonthClick(data.year, data.monthNum)
+                  }
+                }}
+              >
+                {chartData.map((entry, index) => {
+                  const isSelected = selectedYear !== undefined && selectedMonth !== undefined &&
+                    entry.year === selectedYear && entry.monthNum === selectedMonth
+                  return (
+                    <Cell
+                      key={`income-${index}`}
+                      fill={chartConfig.income.color}
+                      opacity={selectedMonth !== undefined ? (isSelected ? 1 : 0.4) : 1}
+                      style={onMonthClick ? { cursor: 'pointer' } : undefined}
+                    />
+                  )
+                })}
+              </Bar>
               <Bar
                 dataKey="spending"
-                fill={chartConfig.spending.color}
                 radius={[4, 4, 0, 0]}
-              />
+                onClick={(data: any) => {
+                  if (onMonthClick && data?.year && data?.monthNum) {
+                    onMonthClick(data.year, data.monthNum)
+                  }
+                }}
+              >
+                {chartData.map((entry, index) => {
+                  const isSelected = selectedYear !== undefined && selectedMonth !== undefined &&
+                    entry.year === selectedYear && entry.monthNum === selectedMonth
+                  return (
+                    <Cell
+                      key={`spending-${index}`}
+                      fill={chartConfig.spending.color}
+                      opacity={selectedMonth !== undefined ? (isSelected ? 1 : 0.4) : 1}
+                      style={onMonthClick ? { cursor: 'pointer' } : undefined}
+                    />
+                  )
+                })}
+              </Bar>
             </BarChart>
           </ChartContainer>
         )}

@@ -6,8 +6,8 @@ import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/component
 import { useTransactions } from '@/contexts/TransactionContext'
 import { CashFlowSankey } from '@/components/CashFlowSankey'
 import { PeriodPicker } from '@/components/PeriodPicker'
-import { Card, CardContent } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent } from '@/components/ui/molecules/card'
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/molecules/tabs"
 import { formatCurrency, calculateTotalIncome, calculateTotalSpending } from '@/lib/data-utils'
 import { startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO, isSameMonth, isSameYear, subMonths, subYears, differenceInDays } from 'date-fns'
 import { useCategories } from '@/contexts/CategoryContext'
