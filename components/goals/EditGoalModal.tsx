@@ -8,17 +8,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/molecules/dialog'
+import { Button } from '@/components/ui/atoms/button'
+import { Input } from '@/components/ui/atoms/input'
+import { Label } from '@/components/ui/atoms/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
+} from '@/components/ui/molecules/select'
 import { Loader2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/data-utils'
 import { formatTargetDate } from '@/lib/goals/calculations'

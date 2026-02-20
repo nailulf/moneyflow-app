@@ -6,7 +6,7 @@ import { startOfDay, endOfDay, isWithinInterval } from 'date-fns'
 import { useTheme } from 'next-themes'
 import { Transaction } from '@/types/database'
 import { formatCurrency } from '@/lib/data-utils'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/molecules/card'
 
 interface CashFlowSankeyProps {
   transactions: Transaction[]

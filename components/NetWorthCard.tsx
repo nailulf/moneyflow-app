@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/molecules/card"
+import { Button } from "@/components/ui/atoms/button"
+import { Badge } from "@/components/ui/atoms/badge"
 import { Plus, TrendingUp, TrendingDown } from "lucide-react"
 import { formatCurrency } from "@/lib/data-utils"
 import {
@@ -17,7 +17,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart"
+} from "@/components/ui/organisms/chart"
 import { mockNetWorthData, mockAssets, type TimePeriod } from "@/lib/mock-data"
 
 const timePeriods: { value: TimePeriod; label: string }[] = [

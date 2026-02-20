@@ -479,6 +479,108 @@ export interface Database {
           sort_order?: number
         }
       }
+      budget_plans: {
+        Row: {
+          id: string
+          user_id: string
+          period: 'monthly' | 'yearly'
+          total_amount: number
+          currency: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          period: 'monthly' | 'yearly'
+          total_amount?: number
+          currency?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          period?: 'monthly' | 'yearly'
+          total_amount?: number
+          currency?: string
+          updated_at?: string
+        }
+      }
+      budget_plan_categories: {
+        Row: {
+          id: string
+          plan_id: string
+          category_id: string
+          allocated_amount: number
+        }
+        Insert: {
+          id?: string
+          plan_id: string
+          category_id: string
+          allocated_amount: number
+        }
+        Update: {
+          id?: string
+          plan_id?: string
+          category_id?: string
+          allocated_amount?: number
+        }
+      }
+      budget_snapshots: {
+        Row: {
+          id: string
+          user_id: string
+          period: 'monthly' | 'yearly'
+          year: number
+          month: number | null
+          total_amount: number
+          currency: string
+          status: 'active' | 'closed'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          period: 'monthly' | 'yearly'
+          year: number
+          month?: number | null
+          total_amount: number
+          currency?: string
+          status?: 'active' | 'closed'
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          period?: 'monthly' | 'yearly'
+          year?: number
+          month?: number | null
+          total_amount?: number
+          currency?: string
+          status?: 'active' | 'closed'
+        }
+      }
+      budget_snapshot_categories: {
+        Row: {
+          id: string
+          snapshot_id: string
+          category_id: string
+          allocated_amount: number
+        }
+        Insert: {
+          id?: string
+          snapshot_id: string
+          category_id: string
+          allocated_amount: number
+        }
+        Update: {
+          id?: string
+          snapshot_id?: string
+          category_id?: string
+          allocated_amount?: number
+        }
+      }
       financial_goals: {
         Row: {
           id: string
@@ -572,6 +674,22 @@ export type FinancialGoalUpdate = Database['public']['Tables']['financial_goals'
 // Goal type for convenience
 export type GoalType = 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
 export type GoalStatus = 'active' | 'completed' | 'cancelled'
+
+export type BudgetPlanDB = Database['public']['Tables']['budget_plans']['Row']
+export type BudgetPlanInsert = Database['public']['Tables']['budget_plans']['Insert']
+export type BudgetPlanUpdate = Database['public']['Tables']['budget_plans']['Update']
+
+export type BudgetPlanCategoryDB = Database['public']['Tables']['budget_plan_categories']['Row']
+export type BudgetPlanCategoryInsert = Database['public']['Tables']['budget_plan_categories']['Insert']
+export type BudgetPlanCategoryUpdate = Database['public']['Tables']['budget_plan_categories']['Update']
+
+export type BudgetSnapshotDB = Database['public']['Tables']['budget_snapshots']['Row']
+export type BudgetSnapshotInsert = Database['public']['Tables']['budget_snapshots']['Insert']
+export type BudgetSnapshotUpdate = Database['public']['Tables']['budget_snapshots']['Update']
+
+export type BudgetSnapshotCategoryDB = Database['public']['Tables']['budget_snapshot_categories']['Row']
+export type BudgetSnapshotCategoryInsert = Database['public']['Tables']['budget_snapshot_categories']['Insert']
+export type BudgetSnapshotCategoryUpdate = Database['public']['Tables']['budget_snapshot_categories']['Update']
 
 // Onboarding phase type for convenience
 export type OnboardingPhase = 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'

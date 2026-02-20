@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useOnboardingStatus } from '@/hooks/useOnboardingQuery'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/atoms/button'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/molecules/dialog'
 import { Sparkles, Wallet, PieChart, TrendingUp } from 'lucide-react'
 import { Analytics } from '@/lib/analytics/amplitude'
 

@@ -3,15 +3,15 @@
 
 import * as React from 'react'
 import { Eye, EyeOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/atoms/button'
+import { Input } from '@/components/ui/atoms/input'
 import { cn } from '@/lib/utils'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/components/ui/molecules/tooltip'
 
 export interface PasswordInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {

@@ -3,7 +3,7 @@
 import { PieChart, Pie, Cell } from 'recharts'
 import { Transaction } from '@/types/database'
 import { getCategoryBreakdown, formatCurrency } from '@/lib/data-utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
 import {
   ChartContainer,
   ChartTooltip,
@@ -11,7 +11,7 @@ import {
   ChartLegend,
   ChartLegendContent,
   type ChartConfig,
-} from '@/components/ui/chart'
+} from '@/components/ui/organisms/chart'
 
 interface SpendingChartProps {
   transactions: Transaction[]

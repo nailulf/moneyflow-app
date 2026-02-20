@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Transaction } from '@/types/database'
 import { getTotalBalance, getMonthlySpending, getMonthlyIncome, formatCurrency } from '@/lib/data-utils'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/molecules/card'
 import { Wallet, TrendingUp, Activity } from 'lucide-react'
 
 

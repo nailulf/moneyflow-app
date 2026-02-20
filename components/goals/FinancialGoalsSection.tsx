@@ -1,8 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
+import { Button } from '@/components/ui/atoms/button'
 import { Target, Loader2, ChevronRight, TrendingUp, Plus } from 'lucide-react'
 import { useGoalsSummary } from '@/hooks/useGoalsQuery'
 import { GoalCard } from './GoalCard'

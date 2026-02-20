@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/atoms/button'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/molecules/tabs'
 import { Settings } from 'lucide-react'
 import { CategoryManager } from './CategoryManager'
 import { AccountManager } from './AccountManager'

@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Transaction, CategoryDB } from '@/types/database'
 import { formatCurrency, getTotalBalance, calculateTotalSpending, calculateTotalIncome } from '@/lib/data-utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/atoms/button'
+import { Input } from '@/components/ui/atoms/input'
 import { Edit, Trash2, Search, ArrowUpDown, Filter, Loader2, EllipsisVertical, X } from 'lucide-react'
 import {
   Table,
@@ -13,15 +13,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+} from '@/components/ui/molecules/table'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/molecules/select'
 import {
   Dialog,
   DialogContent,
@@ -29,20 +29,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/molecules/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/ui/molecules/dropdown-menu'
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet'
+} from '@/components/ui/organisms/sheet'
 import { updateTransaction, deleteTransaction } from '@/lib/api/transactions'
 import { useTransactionManager } from '@/hooks/use-transaction-manager'
 import { EditTransactionForm } from '@/components/EditTransactionForm'

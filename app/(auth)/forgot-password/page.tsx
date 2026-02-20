@@ -7,9 +7,9 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/atoms/button'
+import { Input } from '@/components/ui/atoms/input'
+import { Label } from '@/components/ui/atoms/label'
 import {
   Card,
   CardContent,
@@ -17,7 +17,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from '@/components/ui/molecules/card'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 

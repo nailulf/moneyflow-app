@@ -1,7 +1,7 @@
 'use client'
 
 import { SummaryCards } from '@/components/SummaryCards'
-import SpendingVsBudgetChart from '@/components/SpendingVsBudgetChart'
+import SpendingVsBudgetChart from '@/components/MonthlySpendingChart'
 import { TransactionTable } from '@/components/TransactionTable'
 import { SpendingNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from '@/components/PageLayout'

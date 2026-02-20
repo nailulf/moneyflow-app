@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useMemo, useCallback, useTransition, Suspense } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
+import { Button } from '@/components/ui/atoms/button'
 import { AreaChart, Area, XAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
-import { ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import { ChartTooltip, ChartTooltipContent } from '@/components/ui/organisms/chart'
 import { TrendingUp, TrendingDown, Loader2, Wallet, Banknote, Home, Car, Coins } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { 
@@ -16,7 +16,7 @@ import {
 } from '@/lib/net-worth-utils'
 import { formatCurrency } from '@/lib/data-utils'
 import dynamic from 'next/dynamic'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@/components/ui/atoms/skeleton'
 import { AccountProvider, useAccounts } from '@/contexts/AccountContext'
 import { formatDistanceToNow } from 'date-fns'
 import { useAuth } from '@/contexts/AuthContext'
@@ -31,7 +31,7 @@ const AccountManagerLazy = dynamic(() => import('@/components/AccountManager').t
   ),
 })
 
-const ChartContainerLazy = dynamic(() => import('@/components/ui/chart').then(mod => ({ default: mod.ChartContainer })), {
+const ChartContainerLazy = dynamic(() => import('@/components/ui/organisms/chart').then(mod => ({ default: mod.ChartContainer })), {
   ssr: false,
   loading: () => (
     <div className="h-[300px] w-full">

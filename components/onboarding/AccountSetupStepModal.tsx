@@ -4,16 +4,16 @@ import { useState } from 'react'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/atoms/button'
+import { Input } from '@/components/ui/atoms/input'
+import { Label } from '@/components/ui/atoms/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select'
+} from '@/components/ui/molecules/select'
 import {
   Banknote,
   CreditCard,

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/atoms/button'
+import { Badge } from '@/components/ui/atoms/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/molecules/select'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/organisms/sheet'
 import { Calendar, Filter, Plus, Target } from 'lucide-react'
 import { useIsMobile } from '@/hooks/use-mobile'
 
@@ -16,7 +16,7 @@ interface BudgetFilterBarProps {
   selectedMonth: number
   onMonthChange: (month: number) => void
   selectedBudgetName?: string
-  onCreateBudget: () => void
+  onCreateBudget?: () => void
 }
 
 const YEARS = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i)
@@ -95,6 +95,18 @@ export function BudgetFilterBar({
   const isMobile = useIsMobile()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
+  const ActionButton = () => {
+    if (onCreateBudget) {
+      return (
+        <Button onClick={onCreateBudget} size={isMobile ? 'sm' : 'default'} className="shrink-0">
+          <Plus className="h-4 w-4 mr-1" />
+          {isMobile ? 'Budget' : 'Create Budget'}
+        </Button>
+      )
+    }
+    return null
+  }
+
   if (isMobile) {
     return (
       <div className="flex items-center gap-2">
@@ -107,10 +119,7 @@ export function BudgetFilterBar({
           <Filter className="h-4 w-4" />
         </Button>
 
-        <Button onClick={onCreateBudget} size="sm" className="shrink-0">
-          <Plus className="h-4 w-4 mr-1" />
-          Budget
-        </Button>
+        <ActionButton />
 
         <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <SheetContent side="bottom" className="h-auto rounded-t-xl pb- w-full">
@@ -156,10 +165,7 @@ export function BudgetFilterBar({
         </Badge>
       )}
 
-      <Button onClick={onCreateBudget} className="flex items-center gap-2">
-        <Plus className="h-4 w-4" />
-        Create Budget
-      </Button>
+      <ActionButton />
     </div>
   )
 }

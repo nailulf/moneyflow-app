@@ -1,7 +1,7 @@
 import { PortfolioNavigation } from '@/components/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
+import { Badge } from "@/components/ui/atoms/badge"
 
 interface Holding {
   symbol: string

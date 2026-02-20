@@ -2,18 +2,19 @@
 
 import { AppSidebar } from '@/components/app-sidebar'
 import { NavUser } from '@/components/nav-user'
-import { Toaster } from '@/components/ui/sonner'
+import { Toaster } from '@/components/ui/molecules/sonner'
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from '@/components/ui/sidebar'
-import { Separator } from '@/components/ui/separator'
+} from '@/components/ui/organisms/sidebar'
+import { Separator } from '@/components/ui/atoms/separator'
 import { usePathname } from 'next/navigation'
 import { AccountProvider } from '@/contexts/AccountContext'
 import { CategoryProvider } from '@/contexts/CategoryContext'
 import { OnboardingProvider } from '@/contexts/OnboardingContext'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { TransactionProvider } from '@/contexts/TransactionContext'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { OnboardingModal } from '@/components/onboarding/OnboardingModal'
@@ -51,12 +52,13 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <AccountProvider>
-        <CategoryProvider>
-          <OnboardingProvider>
-            <OnboardingModal />
-            <AppSidebar className="hidden md:flex" />
-            <SidebarInset>
+      <TransactionProvider>
+        <AccountProvider>
+          <CategoryProvider>
+            <OnboardingProvider>
+              <OnboardingModal />
+              <AppSidebar className="hidden md:flex" />
+              <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4 md:hidden">
               <div className="flex aspect-square size-6 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
@@ -102,9 +104,10 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
           </div>
         </SidebarInset>
         <MobileBottomNav />
-          </OnboardingProvider>
-        </CategoryProvider>
-      </AccountProvider>
+            </OnboardingProvider>
+          </CategoryProvider>
+        </AccountProvider>
+      </TransactionProvider>
       <Toaster />
     </SidebarProvider>
   )

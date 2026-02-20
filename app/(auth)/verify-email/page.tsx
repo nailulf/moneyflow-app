@@ -4,7 +4,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/atoms/button'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Loader2, Mail, ArrowRight } from 'lucide-react'
