@@ -1,4 +1,4 @@
-import { PortfolioNavigation } from '@/components/TopNavigation'
+import { PortfolioNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
 

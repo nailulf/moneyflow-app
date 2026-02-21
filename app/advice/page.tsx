@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/atoms/button"
 import { Badge } from "@/components/ui/atoms/badge"
 import { Lightbulb, TrendingUp, Shield, Target } from "lucide-react"
-import { AdviceNavigation } from "@/components/TopNavigation"
+import { AdviceNavigation } from "@/components/features/navigation/TopNavigation"
 import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from "@/components/PageLayout"
 
 export default function AdvicePage() {

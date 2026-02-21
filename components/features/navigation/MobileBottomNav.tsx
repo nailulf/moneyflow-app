@@ -4,7 +4,7 @@ import { Home, DollarSign, Plus, Wallet, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { AddTransactionForm } from '@/components/AddTransactionForm'
+import { AddTransactionForm } from '@/components/features/transaction/AddTransactionForm'
 
 const navItems = [
   { title: 'Home', url: '/', icon: Home },

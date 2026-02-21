@@ -3,7 +3,7 @@
 import { SummaryCards } from '@/components/SummaryCards'
 import SpendingVsBudgetChart from '@/components/MonthlySpendingChart'
 import { TransactionTable } from '@/components/TransactionTable'
-import { SpendingNavigation } from '@/components/TopNavigation'
+import { SpendingNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { useBudgets } from '@/contexts/BudgetContext'

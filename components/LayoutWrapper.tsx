@@ -1,7 +1,7 @@
 'use client'
 
-import { AppSidebar } from '@/components/app-sidebar'
-import { NavUser } from '@/components/nav-user'
+import { AppSidebar } from '@/components/features/navigation/app-sidebar'
+import { NavUser } from '@/components/features/navigation/nav-user'
 import { Toaster } from '@/components/ui/molecules/sonner'
 import {
   SidebarInset,
@@ -19,7 +19,7 @@ import { QueryProvider } from '@/lib/providers/query-provider'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { OnboardingModal } from '@/components/features/onboarding/OnboardingModal'
 import { Loader2, GalleryVerticalEnd } from 'lucide-react'
-import { MobileBottomNav } from '@/components/MobileBottomNav'
+import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'
 
 interface LayoutWrapperProps {
   children: React.ReactNode

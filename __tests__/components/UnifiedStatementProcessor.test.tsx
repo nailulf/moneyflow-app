@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { ParsedTransaction } from '@/lib/bank-parsers/types'
-import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
+import { UnifiedStatementProcessor } from '@/components/features/transaction/UnifiedStatementProcessor'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAuth } from '@/contexts/AuthContext'
