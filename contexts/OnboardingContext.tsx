@@ -22,6 +22,7 @@ import {
   clearOnboardingCache,
   ONBOARDING_PHASES
 } from '@/lib/api/onboarding'
+import { preferences } from '@/lib/api/user-preferences'
 
 /**
  * Wizard data collected during onboarding
@@ -69,6 +70,7 @@ interface OnboardingContextType {
     durationSeconds: number
   }>
   logEvent: (eventType: 'phase_started' | 'phase_completed' | 'step_completed', metadata?: Record<string, unknown>) => Promise<void>
+  // Note: Amplitude events are normalised to onboarding_step_started / onboarding_step_completed
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined)
@@ -174,6 +176,33 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       } else {
         const data = await getOnboardingStatus(user.id)
         setState(data)
+
+        // Sync user_metadata preferences (set during registration) → user_preferences table
+        // This runs fire-and-forget so it doesn't block onboarding load
+        if (data && !data.is_completed) {
+          const meta = user.user_metadata
+          if (meta?.preferred_currency) {
+            preferences.getCurrency(user.id).then(saved => {
+              if (!saved || saved === 'IDR') {
+                preferences.setCurrency(user.id, meta.preferred_currency).catch(() => {})
+              }
+            }).catch(() => {})
+          }
+          if (meta?.country) {
+            preferences.getCountry(user.id).then(saved => {
+              if (!saved || saved === 'Indonesia') {
+                preferences.setCountry(user.id, meta.country).catch(() => {})
+              }
+            }).catch(() => {})
+          }
+          if (meta?.user_goal) {
+            preferences.getUserGoal(user.id).then(saved => {
+              if (!saved) {
+                preferences.setUserGoal(user.id, meta.user_goal).catch(() => {})
+              }
+            }).catch(() => {})
+          }
+        }
       }
     } catch (err) {
       console.error('Error fetching onboarding status:', err)
@@ -235,7 +264,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   const nextPhase = useCallback(async () => {
     if (!user?.id || !state) return
 
-    const currentPhase = state.current_phase === 'welcome' ? 'account_setup' : state.current_phase
+    const currentPhase = state.current_phase
     const next = getNextPhase(currentPhase)
     if (!next) return
 
@@ -262,11 +291,11 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       })
 
       // Also track to Amplitude
-      Analytics.track('onboarding_phase_completed', {
+      Analytics.track('onboarding_step_completed', {
         phase: currentPhase,
         timestamp: new Date().toISOString()
       })
-      Analytics.track('onboarding_phase_started', {
+      Analytics.track('onboarding_step_started', {
         phase: next,
         previous_phase: currentPhase,
         timestamp: new Date().toISOString()
@@ -430,6 +459,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
     if (isPreviewMode) return
 
+    // Map internal event types to standardised Amplitude event names
+    const amplitudeEventMap: Record<string, string> = {
+      phase_started: 'onboarding_step_started',
+      phase_completed: 'onboarding_step_completed',
+      step_completed: 'onboarding_step_completed',
+    }
+    const amplitudeEvent = amplitudeEventMap[eventType] ?? `onboarding_${eventType}`
+
     try {
       // Log to database
       await logOnboardingEvent(user.id, eventType, {
@@ -438,8 +475,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         metadata
       })
 
-      // Also track to Amplitude
-      Analytics.track(`onboarding_${eventType}`, {
+      // Also track to Amplitude with standardised name
+      Analytics.track(amplitudeEvent, {
         phase: state.current_phase,
         step: state.current_step,
         ...metadata,

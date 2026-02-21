@@ -1,8 +1,12 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useOnboarding } from '@/contexts/OnboardingContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { Analytics } from '@/lib/analytics/amplitude'
 import { OnboardingProgressCircle } from './OnboardingProgressCircle'
 import { OnboardingStepItem, StepStatus } from './OnboardingStepItem'
+import { WelcomeScreen } from './WelcomeScreen'
 import { AccountSetupStepModal } from './AccountSetupStepModal'
 import { CategoriesStepModal } from './CategoriesStepModal'
 import { BudgetSetupStepModal } from './BudgetSetupStepModal'
@@ -50,6 +54,31 @@ function getCompletedStepsCount(currentPhase: OnboardingPhase): number {
   return Math.max(0, currentIndex - 1)
 }
 
+function WelcomeView() {
+  const { user } = useAuth()
+  const { nextPhase, skip, closeModal } = useOnboarding()
+
+  useEffect(() => {
+    Analytics.track('onboarding_welcome_viewed', {
+      phase: 'welcome',
+      timestamp: new Date().toISOString()
+    })
+  }, [])
+
+  const handleStart = async () => {
+    await nextPhase()
+  }
+
+  const handleSkip = async () => {
+    await skip('Skipped from welcome screen')
+    closeModal()
+  }
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there'
+
+  return <WelcomeScreen userName={userName} onStart={handleStart} onSkip={handleSkip} />
+}
+
 export function OnboardingModalContent() {
   const { currentPhase, skip, closeModal, loading } = useOnboarding()
 
@@ -58,12 +87,16 @@ export function OnboardingModalContent() {
     closeModal()
   }
 
+  // Welcome phase — show full welcome screen inside the modal
+  if (currentPhase === 'welcome' || currentPhase === null) {
+    return <WelcomeView />
+  }
+
   if (currentPhase === 'completed') {
     return <CompletionView />
   }
 
-  const displayPhase = currentPhase === 'welcome' ? 'account_setup' : currentPhase
-  const completedCount = currentPhase === 'welcome' ? 0 : getCompletedStepsCount(currentPhase!)
+  const completedCount = getCompletedStepsCount(currentPhase)
   const totalSteps = ONBOARDING_STEPS.length
 
   return (
@@ -86,7 +119,7 @@ export function OnboardingModalContent() {
       {/* Steps list with content */}
       <div className="flex-1 overflow-y-auto py-2">
         {ONBOARDING_STEPS.map((step) => {
-          const status = getStepStatus(step.phase, displayPhase!)
+          const status = getStepStatus(step.phase, currentPhase)
           const isCurrent = status === 'current'
 
           return (
