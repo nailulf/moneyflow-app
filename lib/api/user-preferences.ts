@@ -92,7 +92,9 @@ export const PREFERENCE_KEYS = {
   NOTIFICATION_SETTINGS: 'notification_settings',
   BUDGET_ALERTS: 'budget_alerts',
   CATEGORY_GROUPS: 'category_groups',
-  DASHBOARD_LAYOUT: 'dashboard_layout'
+  DASHBOARD_LAYOUT: 'dashboard_layout',
+  COUNTRY: 'country',
+  USER_GOAL: 'user_goal'
 } as const
 
 export type PreferenceKey = typeof PREFERENCE_KEYS[keyof typeof PREFERENCE_KEYS]
@@ -137,5 +139,21 @@ export const preferences = {
 
   async setBudgetAlerts(userId: string, alerts: { enabled: boolean; threshold: number }): Promise<void> {
     await setUserPreference(userId, PREFERENCE_KEYS.BUDGET_ALERTS, alerts)
+  },
+
+  async getCountry(userId: string): Promise<string> {
+    return await getUserPreference(userId, PREFERENCE_KEYS.COUNTRY) || 'Indonesia'
+  },
+
+  async setCountry(userId: string, country: string): Promise<void> {
+    await setUserPreference(userId, PREFERENCE_KEYS.COUNTRY, country)
+  },
+
+  async getUserGoal(userId: string): Promise<string | null> {
+    return await getUserPreference(userId, PREFERENCE_KEYS.USER_GOAL) || null
+  },
+
+  async setUserGoal(userId: string, goal: string): Promise<void> {
+    await setUserPreference(userId, PREFERENCE_KEYS.USER_GOAL, goal)
   }
 }
