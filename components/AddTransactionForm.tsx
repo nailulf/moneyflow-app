@@ -13,7 +13,7 @@ import { Plus, Upload, Edit } from 'lucide-react'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { toast } from 'sonner'
+import { useTransactionMutations } from '@/hooks/useTransactionsQuery'
 import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
 import { Analytics } from '@/lib/analytics/amplitude'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -28,6 +28,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
   const { user } = useAuth()
   const userId = user?.id || ''
   const isMobile = useIsMobile()
+  const mutations = useTransactionMutations(userId)
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentDate, setCurrentDate] = useState('')
@@ -140,38 +141,17 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
         account_id: data.account_id === '' ? null : data.account_id
       }
 
-      const response = await fetch('/api/transactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...transformedData,
-          amount: Number(transformedData.amount),
-          user_id: userId,
-          date: new Date(transformedData.date).toISOString(),
-        }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || errorData.details || errorData.message || 'Failed to create transaction')
-      }
-
-      const createdTransaction = await response.json()
-
-      // Track successful creation
-      Analytics.track('Transaction Created', {
-        transaction_id: createdTransaction.id,
-        transaction_type: data.type,
-        amount: Number(data.amount),
-        category_id: data.category_id,
-        account_id: data.account_id || null,
-        is_recurring: data.is_recurring,
-        source: 'manual_form'
+      // Use the mutations hook — this calls the API and automatically invalidates
+      // the React Query cache so the transaction list refreshes without a manual refetch.
+      await mutations.create({
+        ...transformedData,
+        amount: Number(transformedData.amount),
+        user_id: userId,
+        date: new Date(transformedData.date).toISOString(),
       })
 
       onSuccess?.()
       setOpen(false)
-      toast.success('Transaction created successfully')
 
       // Reset form to default values
       reset({
@@ -190,13 +170,11 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
     } catch (error) {
       console.error('Error creating transaction:', error)
 
-      // Track failed creation
+      // Track failed creation (toast is already shown by the mutation's onError)
       Analytics.track('Transaction Creation Failed', {
         transaction_type: data.type,
         error_message: error instanceof Error ? error.message : 'Unknown error'
       })
-
-      toast.error(error instanceof Error ? error.message : 'Failed to create transaction')
     } finally {
       setIsSubmitting(false)
     }
