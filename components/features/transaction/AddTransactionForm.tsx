@@ -14,7 +14,7 @@ import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTransactionMutations } from '@/hooks/useTransactionsQuery'
-import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
+import { UnifiedStatementProcessor } from '@/components/features/transaction/UnifiedStatementProcessor'
 import { Analytics } from '@/lib/analytics/amplitude'
 import { useIsMobile } from '@/hooks/use-mobile'
 

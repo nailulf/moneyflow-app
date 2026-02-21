@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { AccountNavigation } from '@/components/TopNavigation'
+import { AccountNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
 import { Button } from '@/components/ui/atoms/button'

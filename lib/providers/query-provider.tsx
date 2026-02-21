@@ -1,17 +1,14 @@
 'use client'
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useState, Suspense, lazy } from 'react'
+import dynamic from 'next/dynamic'
+import { useEffect, useState } from 'react'
 
-// Lazy load devtools only in development
-const ReactQueryDevtools =
-  process.env.NODE_ENV === 'development'
-    ? lazy(() =>
-        import('@tanstack/react-query-devtools').then((mod) => ({
-          default: mod.ReactQueryDevtools,
-        }))
-      )
-    : null
+const ReactQueryDevtools = dynamic(
+  () =>
+    import('@tanstack/react-query-devtools').then((mod) => mod.ReactQueryDevtools),
+  { ssr: false }
+)
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -28,13 +25,17 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       })
   )
 
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {ReactQueryDevtools && (
-        <Suspense fallback={null}>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </Suspense>
+      {process.env.NODE_ENV === 'development' && isMounted && (
+        <ReactQueryDevtools initialIsOpen={false} />
       )}
     </QueryClientProvider>
   )

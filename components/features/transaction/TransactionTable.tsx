@@ -44,12 +44,12 @@ import {
   SheetTrigger,
 } from '@/components/ui/organisms/sheet'
 import { useTransactionManager } from '@/hooks/use-transaction-manager'
-import { EditTransactionForm } from '@/components/EditTransactionForm'
+import { EditTransactionForm } from '@/components/features/transaction/EditTransactionForm'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { DateRangePicker, DateRange } from '@/components/DateRangePicker'
-import { AddTransactionForm } from './AddTransactionForm'
+import { AddTransactionForm } from '@/components/features/transaction/AddTransactionForm'
 import { useFilteredTransactions } from '@/hooks/useFilteredTransactions'
 
 interface TransactionTableProps {

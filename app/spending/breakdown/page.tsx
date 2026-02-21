@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { CashFlowBreakdown } from '@/components/CashFlowBreakdown'
-import { SpendingNavigation } from '@/components/TopNavigation'
+import { SpendingNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, TopContent, ContentWrapper, SideContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { SpendingVsBudgetChart } from '@/components/MonthlySpendingChart'

@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useRef, useMemo } from 'react'
-import { 
-  Upload, FileText, Loader2, Save, X, Calendar, RefreshCw, Search, AlertCircle
+import React, { useState, useRef, useMemo, useEffect } from 'react'
+import {
+  Upload, FileText, Loader2, Save, X, Calendar, RefreshCw, Search, AlertCircle, Camera, Image
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -70,6 +70,8 @@ export function UnifiedStatementProcessor({
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [fileMode, setFileMode] = useState<'pdf' | 'image'>('pdf')
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [useAI, setUseAI] = useState(true)
   const [selectedAccountId, setSelectedAccountId] = useState<string>(defaultAccountId || '')
   const [selectedCurrency, setSelectedCurrency] = useState<string>('IDR')
@@ -99,29 +101,45 @@ export function UnifiedStatementProcessor({
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+
+  // Revoke object URL when image preview changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl)
+    }
+  }, [imagePreviewUrl])
 
   // -- UPLOAD HANDLERS --
 
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+
+  const applyFile = (file: File) => {
+    if (file.type === 'application/pdf') {
+      setFileMode('pdf')
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl)
+      setImagePreviewUrl(null)
+      setSelectedFile(file)
+    } else if (ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setFileMode('image')
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl)
+      setImagePreviewUrl(URL.createObjectURL(file))
+      setSelectedFile(file)
+    } else {
+      toast.error('Please upload a PDF, JPG, PNG, or WEBP file')
+    }
+  }
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      if (file.type !== 'application/pdf') {
-        toast.error('Please upload a PDF file')
-        return
-      }
-      setSelectedFile(file)
+      applyFile(e.target.files[0])
     }
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0]
-      if (file.type !== 'application/pdf') {
-        toast.error('Please upload a PDF file')
-        return
-      }
-      setSelectedFile(file)
+      applyFile(e.dataTransfer.files[0])
     }
   }
 
@@ -164,7 +182,8 @@ export function UnifiedStatementProcessor({
         setUploadProgress(prev => Math.min(prev + 10, 90))
       }, 500)
 
-      const response = await fetch('/api/statements/parse', {
+      const endpoint = fileMode === 'image' ? '/api/receipts/parse' : '/api/statements/parse'
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
       })
@@ -412,10 +431,13 @@ export function UnifiedStatementProcessor({
       toast.success(`Successfully imported ${importedCount} transactions`)
 
       if (onSuccess) onSuccess()
-      
-      // Reset state if not unmounted
+
+      // Reset state
       setViewState('UPLOAD')
       setSelectedFile(null)
+      setFileMode('pdf')
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl)
+      setImagePreviewUrl(null)
       setTransactions([])
       setSelectedIds(new Set())
     } catch (error) {
@@ -462,15 +484,25 @@ export function UnifiedStatementProcessor({
           fileInputRef.current?.click()
         }}
       >
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          className="hidden" 
-          accept=".pdf" 
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept=".pdf,image/jpeg,image/png,image/webp,image/gif"
           onChange={handleFileSelect}
         />
-        
-        {selectedFile ? (
+
+        {selectedFile && fileMode === 'image' && imagePreviewUrl ? (
+          <div className="flex flex-col items-center gap-2">
+            <img
+              src={imagePreviewUrl}
+              alt="Receipt preview"
+              className="max-h-32 max-w-full object-contain rounded-md"
+            />
+            <p className="font-medium">{selectedFile.name}</p>
+            <p className="text-sm leading-body-sm text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+          </div>
+        ) : selectedFile ? (
           <div className="flex flex-col items-center gap-2">
             <FileText className="h-10 w-10 text-primary" />
             <p className="font-medium">{selectedFile.name}</p>
@@ -479,11 +511,48 @@ export function UnifiedStatementProcessor({
         ) : (
           <div className="flex flex-col items-center gap-2">
             <Upload className="h-10 w-10 text-muted-foreground" />
-            <p className="font-medium">Drop your PDF statement here</p>
+            <p className="font-medium">Drop your file here</p>
             <p className="text-sm leading-body-sm text-muted-foreground">or click to browse</p>
           </div>
         )}
       </div>
+
+      {/* Camera capture (shown on all devices; browser handles capability) */}
+      <input
+        type="file"
+        ref={cameraInputRef}
+        className="hidden"
+        accept="image/*"
+        capture="environment"
+        onChange={handleFileSelect}
+      />
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="flex-1 gap-2"
+          onClick={() => cameraInputRef.current?.click()}
+          disabled={isUploading}
+        >
+          <Camera className="h-4 w-4" />
+          Take Photo
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="flex-1 gap-2"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+        >
+          <Image className="h-4 w-4" />
+          Upload Image
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground text-center">
+        Supports PDF bank statements · JPG, PNG, WEBP receipts &amp; invoices
+      </p>
 
       <div className="space-y-4">
         <div className="grid gap-2">

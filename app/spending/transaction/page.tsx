@@ -1,12 +1,12 @@
 'use client'
 
 import React from 'react'
-import { TransactionTable } from '@/components/TransactionTable'
-import { SpendingNavigation } from '@/components/TopNavigation'
+import { TransactionTable } from '@/components/features/transaction/TransactionTable'
+import { SpendingNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/molecules/tabs'
-import { RecurringTransactionsList } from '@/components/RecurringTransactionsList'
+import { RecurringTransactionsList } from '@/components/features/transaction/RecurringTransactionsList'
 
 
 export default function SpendingTransactionPage() {

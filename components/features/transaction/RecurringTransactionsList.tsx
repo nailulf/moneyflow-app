@@ -30,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/molecules/dropdown-menu'
-import { EditTransactionForm } from '@/components/EditTransactionForm'
+import { EditTransactionForm } from '@/components/features/transaction/EditTransactionForm'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { updateTransaction, deleteTransaction } from '@/lib/api/transactions'
