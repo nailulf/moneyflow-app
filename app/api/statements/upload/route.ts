@@ -1,14 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerComponentClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
+
+const normalizeText = (value?: string | null) =>
+  (value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+const normalizeDate = (value?: string | null) => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toISOString().slice(0, 10);
+};
+
+const toKey = (date: string, amount: number, descriptor: string) =>
+  `${date}|${amount.toFixed(2)}|${descriptor}`;
 
 export async function POST(request: NextRequest) {
   try {
-    // Check environment variables
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 });
-    }
-
-    const supabase = createServerComponentClient();
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -49,6 +60,31 @@ export async function POST(request: NextRequest) {
     }
 
     try {
+      const checksum = metadata?.file?.checksum;
+
+      if (checksum) {
+        const { data: existingChecksum, error: checksumError } = await supabase
+          .from('statements')
+          .select('id, file_name')
+          .eq('user_id', userId)
+          .eq('file_checksum', checksum)
+          .maybeSingle();
+
+        if (checksumError) {
+          console.error('Error checking checksum duplicates:', checksumError);
+        }
+
+        if (existingChecksum) {
+          return NextResponse.json({
+            success: false,
+            error: 'Duplicate statement detected',
+            isDuplicate: true,
+            duplicateStatementId: existingChecksum.id,
+            message: 'This statement has already been uploaded'
+          }, { status: 409 });
+        }
+      }
+
       // Check for duplicate statements based on metadata
       const { data: existingStatements, error: duplicateError } = await supabase
         .from('statements')
@@ -73,7 +109,78 @@ export async function POST(request: NextRequest) {
         }, { status: 409 });
       }
 
-      // Return success response for client-side parsed data
+      const normalizedTransactions = transactions.map((t: any) => {
+        const normalizedDate = normalizeDate(t.postingDate || t.date);
+        return {
+          ...t,
+          date: normalizedDate,
+          postingDate: t.postingDate ? normalizeDate(t.postingDate) : undefined
+        };
+      });
+
+      let duplicates: Array<{ transactionIndex: number; duplicateOfId: string; reason: string; confidence: number }> = [];
+
+      if (accountId) {
+        const dates = normalizedTransactions
+          .map((t: any) => normalizeDate(t.postingDate || t.date))
+          .filter(Boolean)
+          .sort();
+
+        if (dates.length > 0) {
+          const minDate = dates[0];
+          const maxDate = dates[dates.length - 1];
+
+          const { data: existingTransactions, error: existingError } = await supabase
+            .from('transactions')
+            .select('id, date, amount, description, merchant')
+            .eq('user_id', userId)
+            .eq('account_id', accountId)
+            .gte('date', minDate)
+            .lte('date', maxDate);
+
+          if (existingError) {
+            console.error('Error checking for duplicate transactions:', existingError);
+          }
+
+          const existingMap = new Map<string, { id: string }>();
+          (existingTransactions || []).forEach((existing: any) => {
+            const existingDate = normalizeDate(existing.date);
+            const descriptor = normalizeText(existing.merchant || existing.description);
+            const key = toKey(existingDate, Number(existing.amount), descriptor);
+            if (!existingMap.has(key)) {
+              existingMap.set(key, { id: existing.id });
+            }
+          });
+
+          normalizedTransactions.forEach((transaction: any, index: number) => {
+            const descriptor = normalizeText(transaction.merchant || transaction.description);
+            const transactionDate = normalizeDate(transaction.postingDate || transaction.date);
+            const key = toKey(transactionDate, Number(transaction.amount), descriptor);
+            const match = existingMap.get(key);
+            if (match) {
+              transaction.isDuplicate = true;
+              transaction.duplicateReason = 'Same date, amount, and merchant/description';
+              duplicates.push({
+                transactionIndex: index,
+                duplicateOfId: match.id,
+                reason: transaction.duplicateReason,
+                confidence: 0.9
+              });
+            } else {
+              transaction.isDuplicate = false;
+            }
+          });
+        }
+      }
+
+      const previewTransactions = normalizedTransactions.map((t: any) => ({
+        ...t,
+        type: t.type || (t.amount >= 0 ? 'INCOME' : 'EXPENSE')
+      }));
+
+      const totalAmount = previewTransactions.reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
+      const currency = previewTransactions.find((t: any) => t.currency)?.currency || metadata?.currency || 'IDR';
+
       return NextResponse.json({
         success: true,
         message: 'Statement data received and validated successfully',
@@ -85,16 +192,17 @@ export async function POST(request: NextRequest) {
             statement_period_end: statement.statement_period_end || '',
             opening_balance: statement.opening_balance || 0,
             closing_balance: statement.closing_balance || 0,
-            total_transactions: transactions.length
+            total_transactions: previewTransactions.length
           },
-          transactions: transactions.map((t: any) => ({
-            date: t.date,
-            description: t.description,
-            amount: Math.abs(t.amount),
-            type: t.amount >= 0 ? 'INCOME' : 'EXPENSE' as 'INCOME' | 'EXPENSE'
-          })),
-          duplicates: [],
-          warnings: metadata?.warnings || []
+          transactions: previewTransactions,
+          duplicates,
+          warnings: metadata?.warnings || [],
+          summary: {
+            totalTransactions: previewTransactions.length,
+            totalAmount,
+            duplicateCount: duplicates.length,
+            currency
+          }
         },
         metadata: {
           processed: new Date().toISOString(),
@@ -134,7 +242,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const supabase = createServerComponentClient();
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {

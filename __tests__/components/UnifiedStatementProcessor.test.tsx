@@ -170,7 +170,35 @@ describe('UnifiedStatementProcessor', () => {
             success: true,
             preview: {
               transactions: mockTransactions,
-              statement: { bankName: 'Test Bank' }
+              statement: { bank_name: 'Test Bank' }
+            },
+            metadata: {
+              bankName: 'Test Bank',
+              pages: 1,
+              confidence: 1,
+              file: {
+                name: 'test.pdf',
+                size: 10,
+                checksum: 'checksum'
+              }
+            }
+          })
+        })
+      }
+      if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test Bank' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
             }
           })
         })
@@ -288,10 +316,38 @@ describe('UnifiedStatementProcessor', () => {
             ok: true,
             json: async () => ({
                 success: true,
-                preview: { transactions: mockTransactions, statement: { bankName: 'Test' } }
+                preview: { transactions: mockTransactions, statement: { bank_name: 'Test' } },
+                metadata: {
+                  bankName: 'Test',
+                  pages: 1,
+                  confidence: 1,
+                  file: {
+                    name: 'test.pdf',
+                    size: 10,
+                    checksum: 'checksum'
+                  }
+                }
             })
          })
        }
+       if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
+            }
+          })
+        })
+      }
        if (url.includes('/api/ai/categorize')) {
          return Promise.resolve({
            ok: true,
@@ -321,14 +377,42 @@ describe('UnifiedStatementProcessor', () => {
             ok: true,
             json: async () => ({
                 success: true,
-                preview: { transactions: mockTransactions, statement: { bankName: 'Test' } }
+                preview: { transactions: mockTransactions, statement: { bank_name: 'Test' } },
+                metadata: {
+                  bankName: 'Test',
+                  pages: 1,
+                  confidence: 1,
+                  file: {
+                    name: 'test.pdf',
+                    size: 10,
+                    checksum: 'checksum'
+                  }
+                }
             })
          })
        }
-       if (url.includes('/api/transactions')) {
+       if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
+            }
+          })
+        })
+      }
+       if (url.includes('/api/statements/confirm')) {
          return Promise.resolve({
            ok: true,
-           json: async () => ({ count: 2 })
+           json: async () => ({ summary: { totalTransactions: 2 } })
          })
        }
        return Promise.resolve({ ok: true })
@@ -356,11 +440,39 @@ describe('UnifiedStatementProcessor', () => {
             ok: true,
             json: async () => ({
                 success: true,
-                preview: { transactions: mockTransactions, statement: { bankName: 'Test' } }
+                preview: { transactions: mockTransactions, statement: { bank_name: 'Test' } },
+                metadata: {
+                  bankName: 'Test',
+                  pages: 1,
+                  confidence: 1,
+                  file: {
+                    name: 'test.pdf',
+                    size: 10,
+                    checksum: 'checksum'
+                  }
+                }
             })
          })
        }
-       if (url.includes('/api/transactions')) {
+       if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
+            }
+          })
+        })
+      }
+       if (url.includes('/api/statements/confirm')) {
          return Promise.resolve({
            ok: false,
            status: 500,
@@ -497,10 +609,38 @@ describe('UnifiedStatementProcessor', () => {
                     success: true,
                     preview: {
                         transactions: [{ date: '2023-01-01', description: 'Invalid Curr', amount: 50000, category_id: 'cat1', currency: 'RP' }],
-                        statement: { bankName: 'Test Bank' }
+                        statement: { bank_name: 'Test Bank' }
+                    },
+                    metadata: {
+                      bankName: 'Test Bank',
+                      pages: 1,
+                      confidence: 1,
+                      file: {
+                        name: 'test.pdf',
+                        size: 10,
+                        checksum: 'checksum'
+                      }
                     }
                 })
             })
+        }
+        if (url.includes('/api/statements/upload')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              success: true,
+              preview: {
+                transactions: [{ date: '2023-01-01', description: 'Invalid Curr', amount: 50000, category_id: 'cat1', currency: 'RP', isDuplicate: false }],
+                statement: { bank_name: 'Test Bank' },
+                summary: {
+                  totalTransactions: 1,
+                  totalAmount: 50000,
+                  duplicateCount: 0,
+                  currency: 'RP'
+                }
+              }
+            })
+          })
         }
         return Promise.resolve({ ok: true })
     })
@@ -542,10 +682,38 @@ describe('UnifiedStatementProcessor', () => {
                     success: true,
                     preview: {
                         transactions: largeTransactions,
-                        statement: { bankName: 'Test Bank' }
+                        statement: { bank_name: 'Test Bank' }
+                    },
+                    metadata: {
+                      bankName: 'Test Bank',
+                      pages: 10,
+                      confidence: 1,
+                      file: {
+                        name: 'test.pdf',
+                        size: 10,
+                        checksum: 'checksum'
+                      }
                     }
                 })
             })
+        }
+        if (url.includes('/api/statements/upload')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              success: true,
+              preview: {
+                transactions: largeTransactions.map(t => ({ ...t, isDuplicate: false })),
+                statement: { bank_name: 'Test Bank' },
+                summary: {
+                  totalTransactions: largeTransactions.length,
+                  totalAmount: -100 * largeTransactions.length,
+                  duplicateCount: 0,
+                  currency: 'IDR'
+                }
+              }
+            })
+          })
         }
         return Promise.resolve({ ok: true })
     })
@@ -635,10 +803,38 @@ describe('UnifiedStatementProcessor', () => {
             ok: true,
             json: async () => ({
                 success: true,
-                preview: { transactions: mockTransactions, statement: { bankName: 'Test' } }
+                preview: { transactions: mockTransactions, statement: { bank_name: 'Test' } },
+                metadata: {
+                  bankName: 'Test',
+                  pages: 1,
+                  confidence: 1,
+                  file: {
+                    name: 'test.pdf',
+                    size: 10,
+                    checksum: 'checksum'
+                  }
+                }
             })
          })
        }
+       if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
+            }
+          })
+        })
+      }
        if (url.includes('/api/ai/categorize')) {
          return Promise.resolve({
            ok: false

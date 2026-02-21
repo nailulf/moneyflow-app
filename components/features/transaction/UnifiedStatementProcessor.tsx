@@ -182,8 +182,8 @@ export function UnifiedStatementProcessor({
         setUploadProgress(prev => Math.min(prev + 10, 90))
       }, 500)
 
-      const endpoint = fileMode === 'image' ? '/api/receipts/parse' : '/api/statements/parse'
-      const response = await fetch(endpoint, {
+    const endpoint = fileMode === 'image' ? '/api/receipts/parse' : '/api/statements/parse'
+    const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
       })
@@ -213,26 +213,91 @@ export function UnifiedStatementProcessor({
       const data = await response.json()
       
       if (data.success && data.preview) {
-        setTransactions(data.preview.transactions)
-        setStatementMetadata(data.preview.statement)
+        if (fileMode === 'image') {
+          setTransactions(data.preview.transactions)
+          setStatementMetadata(data.preview.statement)
 
-        // Extract currency from summary, first transaction, or default to IDR
-        const detectedCurrency = data.preview.summary?.currency ||
-                               data.preview.transactions[0]?.currency ||
+          const detectedCurrency = data.preview.summary?.currency ||
+                                 data.preview.transactions[0]?.currency ||
+                                 'IDR';
+          setSelectedCurrency(detectedCurrency);
+
+          const allIds = new Set<number>(data.preview.transactions.map((_: any, i: number) => i))
+          setSelectedIds(allIds)
+
+          trackProcessingCompleted(sessionId, {
+            bankDetected: data.preview.statement?.bank_name,
+            bankMatchesSelected: true,
+            confidenceScore: data.preview.summary?.confidence || 1,
+            transactionsExtracted: data.preview.transactions.length,
+            duplicatesFound: data.preview.summary?.duplicatesFound || 0,
+            processingTime: Date.now() - startTime,
+            fileType: selectedFile.type || 'application/pdf'
+          })
+
+          toast.success('Statement processed successfully')
+          setViewState('REVIEW')
+          return
+        }
+
+        const previewResponse = await fetch('/api/statements/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            accountId: selectedAccountId,
+            statement: data.preview.statement,
+            transactions: data.preview.transactions,
+            metadata: {
+              ...data.metadata,
+              warnings: data.preview.warnings || data.metadata?.warnings
+            }
+          })
+        })
+
+        if (!previewResponse.ok) {
+          const errorData = await previewResponse.json().catch(() => ({}))
+          throw new Error(errorData.error || errorData.message || 'Failed to validate statement')
+        }
+
+        const previewData = await previewResponse.json()
+
+        if (!previewData.success || !previewData.preview) {
+          throw new Error(previewData.error || 'Failed to validate statement')
+        }
+
+        const preparedTransactions = previewData.preview.transactions.map((t: ParsedTransaction) => ({
+          ...t,
+          isDuplicate: Boolean(t.isDuplicate)
+        }))
+
+        setTransactions(preparedTransactions)
+        setStatementMetadata({
+          ...data.metadata,
+          bank_name: previewData.preview.statement?.bank_name || data.preview.statement?.bank_name,
+          account_number: previewData.preview.statement?.account_number || data.preview.statement?.account_number,
+          statement_period_start: previewData.preview.statement?.statement_period_start || data.preview.statement?.statement_period_start,
+          statement_period_end: previewData.preview.statement?.statement_period_end || data.preview.statement?.statement_period_end
+        })
+
+        const detectedCurrency = previewData.preview.summary?.currency ||
+                               previewData.preview.transactions[0]?.currency ||
                                'IDR';
         setSelectedCurrency(detectedCurrency);
 
-        // Select all by default
-        const allIds = new Set<number>(data.preview.transactions.map((_: any, i: number) => i))
-        setSelectedIds(allIds)
+        const defaultSelected = new Set<number>(
+          preparedTransactions
+            .map((t, i) => (t.isDuplicate ? -1 : i))
+            .filter(i => i >= 0)
+        )
+        setSelectedIds(defaultSelected)
 
-        // Track successful processing
         trackProcessingCompleted(sessionId, {
-          bankDetected: data.preview.statement?.bank_name,
+          bankDetected: previewData.preview.statement?.bank_name,
           bankMatchesSelected: true,
-          confidenceScore: data.preview.summary?.confidence || 1,
-          transactionsExtracted: data.preview.transactions.length,
-          duplicatesFound: data.preview.summary?.duplicatesFound || 0,
+          confidenceScore: previewData.preview.summary?.confidence || 1,
+          transactionsExtracted: previewData.preview.transactions.length,
+          duplicatesFound: previewData.preview.summary?.duplicateCount || 0,
           processingTime: Date.now() - startTime,
           fileType: selectedFile.type || 'application/pdf'
         })
@@ -394,10 +459,31 @@ export function UnifiedStatementProcessor({
         }
       })
 
-      const response = await fetch('/api/transactions', {
+      const response = await fetch(fileMode === 'image' ? '/api/transactions' : '/api/statements/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validTransactions)
+        body: fileMode === 'image'
+          ? JSON.stringify(validTransactions)
+          : JSON.stringify({
+              userId,
+              accountId: selectedAccountId,
+              file: statementMetadata?.file || {
+                name: selectedFile?.name || 'statement.pdf',
+                size: selectedFile?.size || 0,
+                checksum: statementMetadata?.file?.checksum || ''
+              },
+              metadata: {
+                bankName: statementMetadata?.bankName || statementMetadata?.bank_name || 'Unknown',
+                accountNumber: statementMetadata?.accountNumber || statementMetadata?.account_number,
+                statementPeriodStart: statementMetadata?.statementPeriodStart || statementMetadata?.statement_period_start,
+                statementPeriodEnd: statementMetadata?.statementPeriodEnd || statementMetadata?.statement_period_end,
+                pages: statementMetadata?.pages || 0,
+                confidence: statementMetadata?.confidence || 1,
+                detectedBank: statementMetadata?.detectedBank || statementMetadata?.bankName || statementMetadata?.bank_name
+              },
+              transactions: validTransactions,
+              warnings: statementMetadata?.warnings || []
+            })
       })
 
       let result;
@@ -416,7 +502,7 @@ export function UnifiedStatementProcessor({
         throw new Error(result.error || result.details || 'Failed to import transactions')
       }
 
-      const importedCount = result.count || result.length || 0
+      const importedCount = result.count || result.summary?.totalTransactions || result.length || 0
       const selectedAccount = accounts.find(a => a.id === selectedAccountId)
 
       // Track successful import
@@ -424,7 +510,7 @@ export function UnifiedStatementProcessor({
         importedCount,
         accountId: selectedAccountId,
         accountName: selectedAccount?.name || 'Unknown',
-        bankName: statementMetadata?.bank_name,
+        bankName: statementMetadata?.bank_name || statementMetadata?.bankName,
         totalAmount: transactionsToImport.reduce((sum, t) => sum + Math.abs(t.amount), 0)
       })
 
@@ -724,7 +810,8 @@ export function UnifiedStatementProcessor({
                     className={cn(
             "grid grid-cols-[40px_130px_100px_minmax(200px,1.5fr)_minmax(150px,1fr)_minmax(150px,1fr)_160px_120px] gap-2 p-2 border-b transition-colors text-sm items-center hover:bg-muted/50",
             isSelected ? "bg-primary/5" : "bg-background",
-                      hasError && "bg-destructive/10"
+                      hasError && "bg-destructive/10",
+                      t.isDuplicate && !isSelected && "bg-warning/10"
                     )}
                   >
                     {/* Checkbox */}
@@ -770,13 +857,18 @@ export function UnifiedStatementProcessor({
                     </div>
 
                     {/* Description */}
-                    <div>
+                    <div className="flex flex-col gap-1">
                       <Input 
                         value={t.description} 
                         onChange={(e) => updateTransaction(originalIndex, { description: e.target.value })}
                         className={cn("h-8 w-full", !t.description && "border-destructive")}
                         placeholder="Description"
                       />
+                      {t.isDuplicate && (
+                        <span className="text-xs leading-caption text-warning">
+                          Possible duplicate
+                        </span>
+                      )}
                     </div>
 
                     {/* Merchant */}
