@@ -43,7 +43,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/organisms/sheet'
-import { updateTransaction, deleteTransaction } from '@/lib/api/transactions'
 import { useTransactionManager } from '@/hooks/use-transaction-manager'
 import { EditTransactionForm } from '@/components/EditTransactionForm'
 import { useCategories } from '@/contexts/CategoryContext'
@@ -205,17 +204,15 @@ export function TransactionTable({
 
   const confirmDeleteTransaction = useCallback(async () => {
     if (!deleteConfirmDialog || isDeleting) return
-    
+
     setIsDeleting(true)
     try {
-      await deleteTransaction(deleteConfirmDialog.transaction.id)
-      
       if (enableSelfManagement && transactionManager) {
         await transactionManager.removeTransaction(deleteConfirmDialog.transaction.id)
       } else if (transactionContext) {
         await transactionContext.removeTransaction(deleteConfirmDialog.transaction.id)
       }
-      
+
       setDeleteConfirmDialog(null)
     } catch (error) {
       console.error('Failed to delete transaction:', error)
@@ -226,17 +223,23 @@ export function TransactionTable({
 
   const confirmCategoryChange = async () => {
     if (!confirmationDialog) return
-    
+
     setIsUpdating(true)
     try {
-      const updatedTransaction = await updateTransaction(confirmationDialog.transaction.id, {
-        category_id: confirmationDialog.newCategoryId
-      })
-      
-      if (onTransactionUpdate) {
-        onTransactionUpdate(updatedTransaction)
+      if (enableSelfManagement && transactionManager) {
+        await transactionManager.editTransaction(confirmationDialog.transaction.id, {
+          category_id: confirmationDialog.newCategoryId
+        })
+      } else if (transactionContext) {
+        await transactionContext.editTransaction(confirmationDialog.transaction.id, {
+          category_id: confirmationDialog.newCategoryId
+        })
       }
-      
+
+      if (onTransactionUpdate) {
+        onTransactionUpdate({ ...confirmationDialog.transaction, category_id: confirmationDialog.newCategoryId })
+      }
+
       setConfirmationDialog(null)
     } catch (error) {
       console.error('Failed to update transaction category:', error)
