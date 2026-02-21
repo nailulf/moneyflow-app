@@ -34,7 +34,7 @@ const ACCOUNT_TYPES = [
 
 export function AccountSetupStepModal() {
   const { user } = useAuth()
-  const { nextPhase, setWizardData } = useOnboarding()
+  const { nextPhase, setWizardData, isPreviewMode } = useOnboarding()
   const { createAccount } = useAccounts()
 
   const [accountName, setAccountName] = useState('')
@@ -67,6 +67,12 @@ export function AccountSetupStepModal() {
         is_active: true,
         is_default: true,
         description: null
+      }
+
+      if (isPreviewMode) {
+        setWizardData({ account: accountData })
+        await nextPhase()
+        return
       }
 
       await createAccount(accountData)

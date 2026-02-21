@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient } from '@/lib/supabase'
-import { format, subDays, subWeeks, subMonths, subYears, startOfDay, endOfDay } from 'date-fns'
+import { format, subDays, subWeeks, subMonths, subYears } from 'date-fns'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 
 export async function GET(request: NextRequest) {
@@ -74,10 +74,10 @@ export async function GET(request: NextRequest) {
         intervalType = 'week'
     }
 
-    // Get all accounts for the user
+    // Get all accounts for the user (including created_at to correctly bound historical data)
     const { data: accounts, error: accountsError } = await supabase
       .from('accounts')
-      .select('id, name, type, balance, currency')
+      .select('id, name, type, balance, currency, created_at')
       .eq('user_id', userId)
       .eq('is_active', true)
 
@@ -149,8 +149,11 @@ export async function GET(request: NextRequest) {
       let totalNetWorth = 0
 
       for (const account of accounts) {
+        // Skip accounts that didn't exist yet at this point in time
+        if (account.created_at && new Date(account.created_at) > pointDate) continue
+
         const accountTransactions = transactionsByAccount.get(account.id) || []
-        
+
         // Calculate account balance at this point in time
         const accountBalance = calculateAccountBalanceAtDate(
           accountTransactions,
@@ -199,6 +202,20 @@ export async function GET(request: NextRequest) {
       }
       return total + account.currentBalance
     }, 0)
+
+    // Always append today as the final data point so it's visible and not cut off at the edge.
+    // The loop increments from startDateTime in fixed intervals and typically undershoots endDateTime
+    // by one interval (e.g. a 12-month 1Y chart ends on Jan when today is mid-Feb).
+    const todayLabel = format(
+      endDateTime,
+      intervalType === 'day' || intervalType === 'week' ? 'dd MMM yyyy'
+        : intervalType === 'month' ? 'MMM yyyy'
+        : 'yyyy'
+    )
+    const lastLabel = netWorthData.length > 0 ? netWorthData[netWorthData.length - 1].date : null
+    if (lastLabel !== todayLabel) {
+      netWorthData.push({ date: todayLabel, value: Math.round(currentNetWorth * 100) / 100 })
+    }
 
     return NextResponse.json({
       netWorthData,

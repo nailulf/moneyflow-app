@@ -16,27 +16,43 @@ import { toast } from 'sonner'
 import { Loader2, Info } from 'lucide-react'
 import { PasswordInput } from '@/components/ui/molecules/password-input'
 import { AuthErrorMessage } from '@/components/auth/auth-error-message'
+import { isDevToolsEnabled } from '@/lib/utils/environment'
 
-const registerSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
-  verificationConsent: z.boolean().refine(val => val === true, {
-    message: "You must acknowledge the email verification requirement"
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-})
+const createRegisterSchema = (requireVerification: boolean) =>
+  z
+    .object({
+      fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+      email: z.string().email('Invalid email address'),
+      password: z.string().min(6, 'Password must be at least 6 characters'),
+      confirmPassword: z.string(),
+      verificationConsent: z.boolean(),
+    })
+    .superRefine((data, ctx) => {
+      if (data.password !== data.confirmPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Passwords don't match",
+          path: ['confirmPassword'],
+        })
+      }
 
-type RegisterFormValues = z.infer<typeof registerSchema>
+      if (requireVerification && !data.verificationConsent) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'You must acknowledge the email verification requirement',
+          path: ['verificationConsent'],
+        })
+      }
+    })
+
+type RegisterFormValues = z.infer<ReturnType<typeof createRegisterSchema>>
 
 export default function RegisterPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [authError, setAuthError] = useState<any>(null)
   const supabase = createClient()
+  const shouldRequireVerification = !isDevToolsEnabled()
 
   const {
     register,
@@ -44,13 +60,13 @@ export default function RegisterPage() {
     control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(createRegisterSchema(shouldRequireVerification)),
     defaultValues: {
       fullName: '',
       email: '',
       password: '',
       confirmPassword: '',
-      verificationConsent: false,
+      verificationConsent: !shouldRequireVerification,
     },
   })
 
@@ -71,6 +87,34 @@ export default function RegisterPage() {
 
       if (error) {
         throw error
+      }
+
+      if (!shouldRequireVerification) {
+        const confirmResponse = await fetch('/api/dev/confirm-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: data.email }),
+        })
+
+        if (!confirmResponse.ok) {
+          throw new Error('Failed to confirm email')
+        }
+
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        })
+
+        if (signInError) {
+          throw signInError
+        }
+
+        toast.success('Registration successful! You are now signed in.')
+        router.push('/')
+        router.refresh()
+        return
       }
 
       toast.success('Registration successful! Please check your email to verify your account.')
@@ -143,40 +187,44 @@ export default function RegisterPage() {
               )}
             </div>
             
-            <div className="rounded-xl bg-white/10 border border-white/10 p-4">
-              <div className="flex gap-3 text-sm text-auth-sidebar-foreground/90">
-                <Info className="h-5 w-5 shrink-0 text-auth-accent" />
-                <p className="leading-relaxed">
-                  We&apos;ll send a verification link to your email address. You&apos;ll need to click it before you can sign in.
-                </p>
-              </div>
-            </div>
+            {shouldRequireVerification && (
+              <>
+                <div className="rounded-xl bg-white/10 border border-white/10 p-4">
+                  <div className="flex gap-3 text-sm text-auth-sidebar-foreground/90">
+                    <Info className="h-5 w-5 shrink-0 text-auth-accent" />
+                    <p className="leading-relaxed">
+                      We&apos;ll send a verification link to your email address. You&apos;ll need to click it before you can sign in.
+                    </p>
+                  </div>
+                </div>
 
-            <div className="flex items-start space-x-3">
-              <Controller
-                control={control}
-                name="verificationConsent"
-                render={({ field }) => (
-                  <Checkbox 
-                    id="verificationConsent" 
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="border-white/40 data-[state=checked]:bg-auth-accent data-[state=checked]:text-auth-accent-foreground data-[state=checked]:border-auth-accent mt-0.5"
+                <div className="flex items-start space-x-3">
+                  <Controller
+                    control={control}
+                    name="verificationConsent"
+                    render={({ field }) => (
+                      <Checkbox
+                        id="verificationConsent"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="border-white/40 data-[state=checked]:bg-auth-accent data-[state=checked]:text-auth-accent-foreground data-[state=checked]:border-auth-accent mt-0.5"
+                      />
+                    )}
                   />
-                )}
-              />
-              <div className="grid gap-1.5 leading-none">
-                <label
-                  htmlFor="verificationConsent"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-auth-sidebar-foreground/80"
-                >
-                  I understand that I will need to verify my email address to access my account.
-                </label>
-                {errors.verificationConsent && (
-                  <p className="text-sm text-[#ff6b6b]">{errors.verificationConsent.message}</p>
-                )}
-              </div>
-            </div>
+                  <div className="grid gap-1.5 leading-none">
+                    <label
+                      htmlFor="verificationConsent"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-auth-sidebar-foreground/80"
+                    >
+                      I understand that I will need to verify my email address to access my account.
+                    </label>
+                    {errors.verificationConsent && (
+                      <p className="text-sm text-[#ff6b6b]">{errors.verificationConsent.message}</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
             
             <Button className="w-full h-12 rounded-full bg-auth-accent text-auth-accent-foreground hover:bg-auth-accent/90 font-medium text-base mt-2" type="submit" disabled={isLoading}>
               {isLoading ? (

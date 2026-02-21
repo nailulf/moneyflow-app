@@ -18,7 +18,7 @@ import {
 
 export function BudgetSetupStepModal() {
   const { user } = useAuth()
-  const { prevPhase, setWizardData, goToPhase, loading } = useOnboarding()
+  const { prevPhase, setWizardData, goToPhase, loading, isPreviewMode } = useOnboarding()
   const { categories } = useCategories()
   const { data: templates, isLoading: templatesLoading } = useBudgetTemplates()
 
@@ -71,6 +71,11 @@ export function BudgetSetupStepModal() {
           allocations
         }
       })
+
+      if (isPreviewMode) {
+        await goToPhase('completed')
+        return
+      }
 
       // Create the budget plan (timeless — no name, year, or month needed)
       const budgetData = {

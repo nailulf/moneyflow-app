@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOnboarding } from '@/contexts/OnboardingContext'
-import { WelcomeScreen } from '@/components/onboarding'
+import { WelcomeScreen } from '@/components/features/onboarding'
 
 export default function WelcomePage() {
   const router = useRouter()

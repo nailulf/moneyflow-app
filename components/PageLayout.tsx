@@ -58,8 +58,7 @@ export function ContentWrapper({ children, className }: { children: React.ReactN
 export function MainContent({ children, className }: { children: React.ReactNode, className?: string }) {
   return (
     <div className={cn(
-      // Grid layout for small screens - takes 1 grid row, appears after SideContent
-      "w-full order-2",
+      "w-full order-1",
       // Flexbox layout for larger screens
       "sm:w-[80%] md:w-[80%] lg:w-[80%] sm:order-1",
       "sm:min-w-[60%] sm:max-w-[80%]", // Enforce min/max constraints on larger screens
@@ -74,8 +73,7 @@ export function MainContent({ children, className }: { children: React.ReactNode
 export function SideContent({ children, className }: { children: React.ReactNode, className?: string }) {
   return (
     <div className={cn(
-      // Grid layout for small screens - takes max 2 grid rows, appears at top
-      "w-full order-1 grid-rows-[max-content]",
+      "w-full order-2 grid-rows-[max-content]",
       // Flexbox layout for larger screens
       "sm:w-[30%] md:w-[25%] lg:w-[20%] sm:order-2",
       "sm:min-w-[30%] sm:max-w-[40%]", // Enforce min/max constraints on larger screens
@@ -86,4 +84,3 @@ export function SideContent({ children, className }: { children: React.ReactNode
     </div>
   )
 }
-

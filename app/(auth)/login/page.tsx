@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { z } from 'zod'
@@ -16,7 +16,6 @@ import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { AuthErrorMessage } from '@/components/auth/auth-error-message'
 import { PasswordInput } from '@/components/ui/molecules/password-input'
-import { OnboardingResetButton } from '@/components/dev/OnboardingResetButton'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -28,8 +27,8 @@ type LoginFormValues = z.infer<typeof loginSchema>
 export default function LoginPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isResettingTestUser, setIsResettingTestUser] = useState(false)
   const [authError, setAuthError] = useState<any>(null)
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const supabase = createClient()
 
   const {
@@ -67,7 +66,14 @@ export default function LoginPage() {
     }
   }
 
-  const [shouldResetOnboarding, setShouldResetOnboarding] = useState(false)
+  const [shouldPreviewOnboarding, setShouldPreviewOnboarding] = useState(false)
+  const [shouldBypassAccountCheck, setShouldBypassAccountCheck] = useState(false)
+  const bypassKey = 'dev_onboarding_bypass_account_check'
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    setShouldBypassAccountCheck(localStorage.getItem(bypassKey) === 'true')
+  }, [bypassKey])
 
   const handleTestUserLogin = async () => {
     setIsLoading(true)
@@ -83,34 +89,29 @@ export default function LoginPage() {
         throw error
       }
 
-      // Store the user ID for onboarding reset functionality
       if (user) {
-        setCurrentUserId(user.id)
-        
-        // Reset onboarding if checkbox is checked
-        if (shouldResetOnboarding) {
-          try {
-            const response = await fetch('/api/dev/reset-onboarding', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ userId: user.id }),
-            })
+        const previewKey = `dev_onboarding_preview_${user.id}`
+        const stateKey = `dev_onboarding_state_${user.id}`
 
-            if (!response.ok) {
-              const error = await response.json()
-              console.warn('Onboarding reset failed:', error)
-              // Continue with login even if reset fails
-            } else {
-              const result = await response.json()
-              console.log('Onboarding reset successful:', result)
-              toast.success('Onboarding reset successfully!')
-            }
-          } catch (resetError: any) {
-            console.error('Error resetting onboarding:', resetError)
-            // Continue with login even if reset fails
-          }
+        if (shouldPreviewOnboarding) {
+          const timestamp = new Date().toISOString()
+          localStorage.setItem(previewKey, 'true')
+          localStorage.setItem(stateKey, JSON.stringify({
+            id: `local-${user.id}`,
+            user_id: user.id,
+            current_phase: 'welcome',
+            current_step: 0,
+            is_completed: false,
+            is_skipped: false,
+            completed_at: null,
+            skipped_at: null,
+            created_at: timestamp,
+            updated_at: timestamp
+          }))
+          toast.success('Onboarding preview enabled')
+        } else {
+          localStorage.removeItem(previewKey)
+          localStorage.removeItem(stateKey)
         }
       }
 
@@ -121,6 +122,43 @@ export default function LoginPage() {
       setAuthError(error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleResetTestUserData = async () => {
+    setIsResettingTestUser(true)
+    try {
+      const response = await fetch('/api/dev/reset-test-user-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'test@moneyflow.com' })
+      })
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null)
+        throw new Error(payload?.error || 'Failed to reset test user data')
+      }
+
+      const data = await response.json()
+      const userId = data?.userId as string | undefined
+
+      if (typeof window !== 'undefined') {
+        if (userId) {
+          const previewKey = `dev_onboarding_preview_${userId}`
+          const stateKey = `dev_onboarding_state_${userId}`
+          localStorage.removeItem(previewKey)
+          localStorage.removeItem(stateKey)
+        }
+        localStorage.removeItem(bypassKey)
+      }
+
+      setShouldPreviewOnboarding(false)
+      setShouldBypassAccountCheck(false)
+      toast.success('Test user data reset')
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to reset test user data')
+    } finally {
+      setIsResettingTestUser(false)
     }
   }
 
@@ -194,17 +232,48 @@ export default function LoginPage() {
                 🛠️ Developer Tools
               </p>
               {/* Onboarding Reset Option */}
-              <div className="flex items-center mb-8 space-x-2 pt-3 mt-3 border-t border-white/10">
-                <Checkbox
-                  id="reset-onboarding"
-                  checked={shouldResetOnboarding}
-                  onCheckedChange={(checked) => setShouldResetOnboarding(checked === true)}
-                  disabled={isLoading}
-                  className="data-[state=checked]:bg-auth-accent data-[state=checked]:border-auth-accent"
-                />
-                <Label htmlFor="reset-onboarding" className="text-sm text-auth-sidebar-foreground/80 cursor-pointer">
-                  Show onboarding flow
-                </Label>
+              <div className="mb-4 pt-3 mt-3 border-t border-white/10">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="reset-onboarding"
+                    checked={shouldPreviewOnboarding}
+                    onCheckedChange={(checked) => setShouldPreviewOnboarding(checked === true)}
+                    disabled={isLoading}
+                    className="data-[state=checked]:bg-auth-accent data-[state=checked]:border-auth-accent"
+                  />
+                  <Label htmlFor="reset-onboarding" className="text-sm text-auth-sidebar-foreground/80 cursor-pointer">
+                    Preview onboarding journey (reset to welcome)
+                  </Label>
+                </div>
+                <p className="text-xs text-auth-sidebar-foreground/60 mt-1">
+                  Uses local preview state and resets the flow to the welcome step
+                </p>
+              </div>
+              <div className="mb-8">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="bypass-onboarding-account-check"
+                    checked={shouldBypassAccountCheck}
+                    onCheckedChange={(checked) => {
+                      const nextValue = checked === true
+                      setShouldBypassAccountCheck(nextValue)
+                      if (typeof window === 'undefined') return
+                      if (nextValue) {
+                        localStorage.setItem(bypassKey, 'true')
+                      } else {
+                        localStorage.removeItem(bypassKey)
+                      }
+                    }}
+                    disabled={isLoading}
+                    className="data-[state=checked]:bg-auth-accent data-[state=checked]:border-auth-accent"
+                  />
+                  <Label htmlFor="bypass-onboarding-account-check" className="text-sm text-auth-sidebar-foreground/80 cursor-pointer">
+                    Keep onboarding open (no reset)
+                  </Label>
+                </div>
+                <p className="text-xs text-auth-sidebar-foreground/60 mt-1">
+                  Keeps the modal open even if onboarding is already completed
+                </p>
               </div>
               
               {/* Test User Login */}
@@ -218,6 +287,17 @@ export default function LoginPage() {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
                 Test User
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full h-12 rounded-full bg-transparent border-white/20 text-auth-sidebar-foreground hover:bg-white/10 hover:text-white"
+                onClick={handleResetTestUserData}
+                disabled={isResettingTestUser}
+              >
+                {isResettingTestUser ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Reset Test User Data
               </Button>
             </div>
           </>

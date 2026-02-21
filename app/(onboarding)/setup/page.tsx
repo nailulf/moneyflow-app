@@ -8,7 +8,7 @@ import {
   CategoriesStep, 
   BudgetSetupStep,
   OnboardingProgress 
-} from '@/components/onboarding'
+} from '@/components/features/onboarding'
 import { Loader2 } from 'lucide-react'
 
 export default function SetupPage() {

@@ -134,7 +134,7 @@ function EditableCategory({ category, onSave, isUpdating }: EditableCategoryProp
 
 export function CategoriesStepModal() {
   const { user } = useAuth()
-  const { nextPhase, prevPhase, loading } = useOnboarding()
+  const { nextPhase, prevPhase, loading, isPreviewMode } = useOnboarding()
   const { categories, loading: categoriesLoading, refreshCategories } = useCategories()
   const { onCategoryChange } = useAutoRefresh(user?.id)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -144,6 +144,7 @@ export function CategoriesStepModal() {
   const transferCategories = categories.filter(c => c.group_type === 'TRANSFER')
 
   const handleUpdateCategory = async (categoryId: string, newName: string) => {
+    if (isPreviewMode) return
     setIsUpdating(true)
     try {
       const response = await fetch('/api/categories', {
