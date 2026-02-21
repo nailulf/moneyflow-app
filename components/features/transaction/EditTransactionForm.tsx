@@ -8,7 +8,7 @@ import { Transaction } from '@/types/database'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/molecules/select'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/organisms/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/organisms/sheet'
 import { toast } from 'sonner'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
@@ -192,12 +192,12 @@ export function EditTransactionForm({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={isMobile ? 'max-h-[95dvh] overflow-y-auto rounded-t-2xl' : 'w-[400px] sm:w-[540px]'}
+        className={isMobile ? 'max-h-[95dvh] overflow-y-auto rounded-t-2xl p-0' : 'w-[400px] sm:w-[540px]'}
       >
-        <SheetHeader>
+        <SheetHeader className={isMobile ? 'mx-0 px-4' : undefined}>
           <SheetTitle>Edit Transaction</SheetTitle>
         </SheetHeader>
-        <div className="mt-6 overflow-y-auto">
+        <div className={isMobile ? 'px-4 pb-4 pt-4 overflow-y-auto' : 'mt-6 overflow-y-auto'}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Date</label>
@@ -428,7 +428,7 @@ export function EditTransactionForm({
             )}
           </div>
 
-          <div className="flex gap-2 pt-4">
+          <SheetFooter className={isMobile ? undefined : 'pt-4'}>
             <Button
               type="button"
               variant="outline"
@@ -450,7 +450,7 @@ export function EditTransactionForm({
             >
               {isSubmitting ? 'Updating...' : 'Update Transaction'}
             </Button>
-          </div>
+          </SheetFooter>
         </form>
         </div>
       </SheetContent>

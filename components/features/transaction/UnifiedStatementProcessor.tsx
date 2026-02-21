@@ -287,8 +287,8 @@ export function UnifiedStatementProcessor({
 
         const defaultSelected = new Set<number>(
           preparedTransactions
-            .map((t, i) => (t.isDuplicate ? -1 : i))
-            .filter(i => i >= 0)
+            .map((t: ParsedTransaction, i: number) => (t.isDuplicate ? -1 : i))
+            .filter((i: number) => i >= 0)
         )
         setSelectedIds(defaultSelected)
 
@@ -555,7 +555,7 @@ export function UnifiedStatementProcessor({
   // -- RENDER HELPERS --
 
   const renderUploadState = () => (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 p-4 h-full min-h-[95dvh]">
       <div
         className={cn(
           "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",

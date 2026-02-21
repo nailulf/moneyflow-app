@@ -7,7 +7,7 @@ import { transactionSchema, TransactionFormData } from '@/lib/validations'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/molecules/select'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/organisms/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/molecules/tabs'
 import { Plus, Upload, Edit } from 'lucide-react'
 import { useCategories } from '@/contexts/CategoryContext'
@@ -211,13 +211,13 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
       </SheetTrigger>
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={isMobile ? 'max-h-[95dvh] overflow-y-auto rounded-t-2xl w-full' : 'w-full'}
+        className={isMobile ? 'max-h-[95dvh] overflow-y-auto rounded-t-2xl w-full p-0' : 'w-full'}
       >
-        <SheetHeader>
+        <SheetHeader className={isMobile ? 'mx-0 px-4' : undefined}>
           <SheetTitle>Add New Transaction</SheetTitle>
         </SheetHeader>
 
-        <div className="w-full">
+        <div className={isMobile ? 'w-full px-4 pb-4 pt-4' : 'w-full'}>
           <Tabs defaultValue="manual" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="manual" className="flex items-center gap-2">
@@ -481,7 +481,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
             )}
           </div>
 
-                <div className="flex gap-2 pt-4">
+                <SheetFooter className={isMobile ? undefined : 'pt-4'}>
                   <Button
                     type="button"
                     variant="outline"
@@ -502,7 +502,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                   >
                     {isSubmitting ? 'Adding...' : 'Add Transaction'}
                   </Button>
-                </div>
+                </SheetFooter>
               </form>
             </TabsContent>
             
