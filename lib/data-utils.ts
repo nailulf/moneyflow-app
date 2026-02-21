@@ -32,6 +32,49 @@ export function formatCurrency(amount: number, currency: string = DEFAULT_CURREN
   return `${symbol}${formattedAmount}`
 }
 
+/**
+ * Compact currency formatter for small cards where full numbers don't fit.
+ * Abbreviates by digit count — only use in constrained UI spaces.
+ *
+ * Thresholds (absolute value):
+ *   < 10,000          → full number  e.g. Rp 9.500
+ *   ≥ 10,000  (5 dig) → Rb/K        e.g. Rp 15Rb  / $15K
+ *   ≥ 1,000,000 (7 d) → Jt/M        e.g. Rp 1.5Jt / $1.5M
+ *   ≥ 1,000,000,000   → M/B         e.g. Rp 2M    / $2B
+ */
+export function formatCurrencyCompact(amount: number, currency: string = DEFAULT_CURRENCY): string {
+  const currencySymbols: Record<string, string> = {
+    'IDR': 'Rp',
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£',
+    'JPY': '¥',
+  }
+
+  const symbol = currencySymbols[currency] || currency
+  const abs = Math.abs(amount)
+  const sign = amount < 0 ? '-' : ''
+
+  const compact = (val: number, suffix: string) => {
+    const formatted = val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
+    return currency === 'IDR'
+      ? `${symbol} ${sign}${formatted}${suffix}`
+      : `${symbol}${sign}${formatted}${suffix}`
+  }
+
+  if (currency === 'IDR') {
+    if (abs >= 1_000_000_000) return compact(abs / 1_000_000_000, 'M')   // Miliar
+    if (abs >= 1_000_000)     return compact(abs / 1_000_000, 'Jt')       // Juta
+    if (abs >= 10_000)        return compact(abs / 1_000, 'Rb')            // Ribu
+    return `${symbol} ${sign}${abs.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`
+  }
+
+  if (abs >= 1_000_000_000) return compact(abs / 1_000_000_000, 'B')
+  if (abs >= 1_000_000)     return compact(abs / 1_000_000, 'M')
+  if (abs >= 10_000)        return compact(abs / 1_000, 'K')
+  return `${symbol}${sign}${abs.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+}
+
 export function formatDate(dateString: string): string {
   return format(parseISO(dateString), 'MMM dd, yyyy')
 }

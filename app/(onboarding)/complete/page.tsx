@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { CompletionScreen } from '@/components/onboarding'
+import { CompletionScreen } from '@/components/features/onboarding'
 
 export default function CompletePage() {
   const router = useRouter()

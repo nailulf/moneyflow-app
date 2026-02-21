@@ -17,7 +17,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { TransactionProvider } from '@/contexts/TransactionContext'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
-import { OnboardingModal } from '@/components/onboarding/OnboardingModal'
+import { OnboardingModal } from '@/components/features/onboarding/OnboardingModal'
 import { Loader2, GalleryVerticalEnd } from 'lucide-react'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
 

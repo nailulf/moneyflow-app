@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import NetWorthOverview from '@/components/NetWorthOverview'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
-import { OnboardingBanner } from '@/components/onboarding'
+import { OnboardingBanner } from '@/components/features/onboarding'
 import { FinancialGoalsSection } from '@/components/goals'
 import { BudgetStatus } from '@/components/BudgetStatus'
 import { useBudgetSnapshot } from '@/hooks/useBudgetSnapshot'
