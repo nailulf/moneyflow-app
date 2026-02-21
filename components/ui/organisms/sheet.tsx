@@ -72,10 +72,6 @@ const SheetContent = React.forwardRef<
       className={cn(sheetVariants({ side }), className)}
       {...props}
     >
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary size-10 lg:size-9 inline-flex items-center justify-center">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </SheetPrimitive.Close>
       {children}
     </SheetPrimitive.Content>
   </SheetPortal>
@@ -84,15 +80,25 @@ SheetContent.displayName = SheetPrimitive.Content.displayName
 
 const SheetHeader = ({
   className,
+  withClose = true,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+}: React.HTMLAttributes<HTMLDivElement> & { withClose?: boolean }) => (
   <div
     className={cn(
-      "flex flex-col space-y-2 text-center sm:text-left",
+      "sticky top-0 z-10 flex flex-col space-y-2 border-b pb-4 text-center sm:text-left -mx-6 px-4 pt-4 bg-background",
+      withClose ? "pr-12" : undefined,
       className
     )}
     {...props}
-  />
+  >
+    {withClose && (
+      <SheetPrimitive.Close className="absolute right-0 top-0 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary size-10 lg:size-9 inline-flex items-center justify-center">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </SheetPrimitive.Close>
+    )}
+    {props.children}
+  </div>
 )
 SheetHeader.displayName = "SheetHeader"
 
@@ -102,7 +108,7 @@ const SheetFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      "border-t bg-background px-4 py-3 grid grid-cols-2 gap-2 w-full overflow-x-hidden shrink-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:flex sm:flex-row sm:justify-end sm:space-x-2",
       className
     )}
     {...props}
