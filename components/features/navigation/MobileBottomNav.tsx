@@ -24,9 +24,9 @@ export function MobileBottomNav() {
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-3 pt-2"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
     >
-      <div className="relative flex items-center">
+      <div className="relative flex items-center grid grid-cols-5 my-auto">
         {/* Nav items bar with left padding to accommodate FAB */}
-        <div className="flex items-center justify-between rounded-2xl border border-border/40 bg-background/95 pr-14 pr-2 py-1.5 shadow-lg shadow-black/10 backdrop-blur-xl w-full">
+        <div className="flex items-center col-span-4 justify-between rounded-2xl border border-border/40 bg-background/95 py-1.5 shadow-lg shadow-black/10 backdrop-blur-xl w-full">
           {/* Left nav items */}
           {navItems.slice(0, 4).map((item) => {
             const active = isActive(item.url)
@@ -35,7 +35,7 @@ export function MobileBottomNav() {
                 key={item.url}
                 href={item.url}
                 className={cn(
-                  'flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 transition-all duration-200',
+                  'flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 mx-2 transition-all duration-200',
                   active
                     ? 'bg-primary px-3 text-primary-foreground'
                     : 'text-muted-foreground'
@@ -52,11 +52,11 @@ export function MobileBottomNav() {
           })}
         </div>
         {/* Right FAB - floating outside nav bar */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10">
+        <div className="absolute right-0 items-center top-1/2 -translate-y-1/2 z-10 col-span-1 ">
           <AddTransactionForm
             trigger={
               <button
-                className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md transition-transform active:scale-95"
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-black/10 backdrop-blur-xl transition-transform active:scale-95"
                 aria-label="Add Transaction"
               >
                 <Plus className="h-7 w-7" />
