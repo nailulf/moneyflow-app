@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/atoms/button'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/organisms/sheet'
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/organisms/sheet'
 import { Input } from '@/components/ui/atoms/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/molecules/select'
 import { Label } from '@/components/ui/atoms/label'
@@ -445,15 +445,16 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'h-[95vh] rounded-t-xl overflow-y-auto w-full' : 'w-full sm:max-w-2xl overflow-y-auto'}>
-        <SheetHeader>
-          <SheetTitle>Edit Budget</SheetTitle>
-          <SheetDescription>
-            Modify your budget breakdown and category allocations
-          </SheetDescription>
-        </SheetHeader>
+      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'max-h-[95dvh] rounded-t-2xl w-full p-0 overflow-hidden' : 'w-full sm:max-w-2xl'}>
+        <div className="flex h-full flex-col">
+          <SheetHeader>
+            <SheetTitle>Edit Budget</SheetTitle>
+            <SheetDescription>
+              Modify your budget breakdown and category allocations
+            </SheetDescription>
+          </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+          <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4 space-y-6">
           {/* Budget Basic Info */}
           <Card>
             <CardHeader>
@@ -496,7 +497,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="budget-period">Period</Label>
                   <Select
@@ -602,7 +603,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
             <CardHeader>
               <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                 <CardTitle className="text-lg leading-title-5">Category Allocations</CardTitle>
-                <div className="flex w-full sm:w-auto items-center space-x-2">
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:space-x-2">
                   <Select
                     value={selectedAddCategoryId}
                     onValueChange={setSelectedAddCategoryId}
@@ -633,6 +634,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                     size="sm"
                     disabled={!selectedAddCategoryId || isLoading}
                     title={!selectedAddCategoryId ? 'Select a category first' : 'Add selected category'}
+                    className="h-11 sm:h-10"
                   >
                     <Plus className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Add</span>
@@ -668,7 +670,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                           onClick={() => removeCategory(index)}
                           size="sm"
                           variant="ghost"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="h-11 w-11 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 sm:h-8 sm:w-8"
                           disabled={isLoading}
                           title="Remove this category"
                           aria-label={`Remove ${category.category} category`}
@@ -741,8 +743,8 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          </div>
+          <SheetFooter className="border-t p-4 safe-area-inset-bottom">
             <Button
               onClick={handleCancel}
               variant="outline"
@@ -759,7 +761,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
               <Save className="h-4 w-4 mr-2" />
               {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
-          </div>
+          </SheetFooter>
         </div>
       </SheetContent>
     </Sheet>

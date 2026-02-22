@@ -124,6 +124,7 @@
 - **Prettier**: Consistent code formatting across the project
 - **TypeScript**: Zero `any` types, comprehensive type coverage
 - **Testing**: Unit tests for utilities, integration tests for critical flows
+- **Typecheck Command**: `npx tsc --noEmit`
 
 ### Git Workflow
 - **Branch Naming**: feature/description, fix/description, refactor/description

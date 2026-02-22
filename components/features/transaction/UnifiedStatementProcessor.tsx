@@ -557,164 +557,163 @@ export function UnifiedStatementProcessor({
 
   // -- RENDER HELPERS --
   const renderUploadState = () => (
-    <div>
-    <div className='overflow-y-auto no-scrollbar space-y-2 min-h-[70vh]'>
-    <div className="flex flex-col">
-      <div className="flex-1 space-y-6 p-4">
-        <div
-          className={cn(
-            "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
-            selectedFile ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+    <div className="space-y-4">
+    <div className='overflow-y-auto no-scrollbar space-y-2 min-h-[70dvh]'>
+      <div className="flex flex-col">
+        <div className="flex-1 space-y-6 p-4">
+          <div
+            className={cn(
+              "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
+              selectedFile ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+            )}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+            onClick={() => {
+              Analytics.track('Statement Upload Area Clicked', {
+                has_existing_file: !!selectedFile
+              })
+              fileInputRef.current?.click()
+            }}
+          >
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept=".pdf,image/jpeg,image/png,image/webp,image/gif"
+            onChange={handleFileSelect}
+          />
+
+          {selectedFile && fileMode === 'image' && imagePreviewUrl ? (
+            <div className="flex flex-col items-center gap-2">
+              <img
+                src={imagePreviewUrl}
+                alt="Receipt preview"
+                className="max-h-32 max-w-full object-contain rounded-md"
+              />
+              <p className="font-medium">{selectedFile.name}</p>
+              <p className="text-sm leading-body-sm text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+          ) : selectedFile ? (
+            <div className="flex flex-col items-center gap-2">
+              <FileText className="h-10 w-10 text-primary" />
+              <p className="font-medium">{selectedFile.name}</p>
+              <p className="text-sm leading-body-sm text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <Upload className="h-10 w-10 text-muted-foreground" />
+              <p className="font-medium">Drop your file here</p>
+              <p className="text-sm leading-body-sm text-muted-foreground">or click to browse</p>
+            </div>
           )}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={handleDrop}
-          onClick={() => {
-            Analytics.track('Statement Upload Area Clicked', {
-              has_existing_file: !!selectedFile
-            })
-            fileInputRef.current?.click()
-          }}
-        >
+        </div>
+
+        {/* Camera capture (shown on all devices; browser handles capability) */}
         <input
           type="file"
-          ref={fileInputRef}
+          ref={cameraInputRef}
           className="hidden"
-          accept=".pdf,image/jpeg,image/png,image/webp,image/gif"
+          accept="image/*"
+          capture="environment"
           onChange={handleFileSelect}
         />
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="flex-1 gap-2"
+            onClick={() => cameraInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            <Camera className="h-4 w-4" />
+            Take Photo
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="flex-1 gap-2"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            <Image className="h-4 w-4" />
+            Upload Image
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground text-center">
+          Supports PDF bank statements · JPG, PNG, WEBP receipts &amp; invoices
+        </p>
+        <div className="space-y-4 grid items-center">
+          <div className="grid gap-2 grid-cols-8 items-center">
+            <Label className="text-sm font-medium col-span-3">Select Account</Label>
+            <div className='col-span-5'>
+              <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Choose account..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {accounts.length > 0 ? (
+                    accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id} data-testid={`account-option-${account.id}`}>
+                        {account.name} ({account.type.toLowerCase().replace('_', ' ')})
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      No accounts available
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-        {selectedFile && fileMode === 'image' && imagePreviewUrl ? (
-          <div className="flex flex-col items-center gap-2">
-            <img
-              src={imagePreviewUrl}
-              alt="Receipt preview"
-              className="max-h-32 max-w-full object-contain rounded-md"
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="use-ai" 
+              checked={useAI} 
+              onCheckedChange={(c) => setUseAI(!!c)} 
             />
-            <p className="font-medium">{selectedFile.name}</p>
-            <p className="text-sm leading-body-sm text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+            <Label htmlFor="use-ai" className="cursor-pointer">
+              Use AI for enhanced extraction & categorization
+            </Label>
           </div>
-        ) : selectedFile ? (
-          <div className="flex flex-col items-center gap-2">
-            <FileText className="h-10 w-10 text-primary" />
-            <p className="font-medium">{selectedFile.name}</p>
-            <p className="text-sm leading-body-sm text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2">
-            <Upload className="h-10 w-10 text-muted-foreground" />
-            <p className="font-medium">Drop your file here</p>
-            <p className="text-sm leading-body-sm text-muted-foreground">or click to browse</p>
-          </div>
-        )}
-      </div>
 
-      {/* Camera capture (shown on all devices; browser handles capability) */}
-      <input
-        type="file"
-        ref={cameraInputRef}
-        className="hidden"
-        accept="image/*"
-        capture="environment"
-        onChange={handleFileSelect}
-      />
-      <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="flex-1 gap-2"
-          onClick={() => cameraInputRef.current?.click()}
-          disabled={isUploading}
-        >
-          <Camera className="h-4 w-4" />
-          Take Photo
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="flex-1 gap-2"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-        >
-          <Image className="h-4 w-4" />
-          Upload Image
-        </Button>
-      </div>
-      <p className="text-xs text-muted-foreground text-center">
-        Supports PDF bank statements · JPG, PNG, WEBP receipts &amp; invoices
-      </p>
+          {isUploading && (
+            <div className="space-y-2">
+              <Progress value={uploadProgress} />
+              <p className="text-xs leading-caption text-center text-muted-foreground">Processing statement...</p>
+            </div>
+          )}
 
-      <div className="space-y-4 grid items-center">
-        <div className="grid gap-2 grid-cols-8 items-center">
-          <Label className="text-sm font-medium col-span-3">Select Account</Label>
-          <div className='col-span-5'>
-            <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choose account..." />
-              </SelectTrigger>
-              <SelectContent>
-                {accounts.length > 0 ? (
-                  accounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id} data-testid={`account-option-${account.id}`}>
-                      {account.name} ({account.type.toLowerCase().replace('_', ' ')})
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    No accounts available
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
           </div>
         </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="use-ai" 
-            checked={useAI} 
-            onCheckedChange={(c) => setUseAI(!!c)} 
-          />
-          <Label htmlFor="use-ai" className="cursor-pointer">
-            Use AI for enhanced extraction & categorization
-          </Label>
-        </div>
-
-        {isUploading && (
-          <div className="space-y-2">
-            <Progress value={uploadProgress} />
-            <p className="text-xs leading-caption text-center text-muted-foreground">Processing statement...</p>
-          </div>
-        )}
-
-        </div>
       </div>
-      </div>
-      </div>
-      <SheetFooter>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            Analytics.track('Statement Upload Cancelled', {
-              has_selected_file: !!selectedFile
-            })
-            onCancel?.()
-          }}
-          className="flex-1"
-        >
-          Cancel
-        </Button>
-        <Button
-          className="flex-1"
-          onClick={handleUpload}
-          disabled={!selectedFile || !selectedAccountId || isUploading}
-        >
-          {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-          Upload & Process
-        </Button>
-      </SheetFooter>
+    </div>
+    <SheetFooter>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => {
+          Analytics.track('Statement Upload Cancelled', {
+            has_selected_file: !!selectedFile
+          })
+          onCancel?.()
+        }}
+        className="flex-1"
+      >
+        Cancel
+      </Button>
+      <Button
+        className="flex-1"
+        onClick={handleUpload}
+        disabled={!selectedFile || !selectedAccountId || isUploading}
+      >
+        {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+        Upload & Process
+      </Button>
+    </SheetFooter>
     </div>
   )
 

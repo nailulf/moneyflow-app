@@ -3,10 +3,9 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/atoms/button'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/molecules/dialog'
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
 import { Input } from '@/components/ui/atoms/input'
-import { Plus, CreditCard, Search, X, Loader2, Trash2, Edit, ExternalLink } from 'lucide-react'
+import { Plus, CreditCard, Search, Loader2, Trash2, Edit, ExternalLink, ArrowLeft } from 'lucide-react'
 import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -14,64 +13,77 @@ import { formatCurrency } from '@/lib/data-utils'
 import { Analytics } from '@/lib/analytics/amplitude'
 import { useIsMobile } from '@/hooks/use-mobile'
 
+type Mode = 'list' | 'create' | 'edit' | 'delete'
+
 interface AccountManagerProps {
   onAccountUpdated?: () => void
   className?: string
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  variant?: 'sheet' | 'embedded'
 }
 
 function AccountManagerInternal({
   onAccountUpdated,
   className = '',
   open: controlledOpen,
-  onOpenChange: controlledOnOpenChange
+  onOpenChange: controlledOnOpenChange,
+  variant = 'sheet'
 }: AccountManagerProps) {
+  const isEmbedded = variant === 'embedded'
   const router = useRouter()
   const isMobile = useIsMobile()
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const isOpen = isControlled ? controlledOpen : internalOpen
+  const setIsOpen = isControlled ? (controlledOnOpenChange ?? setInternalOpen) : setInternalOpen
   const { user } = useAuth()
   const userId = user?.id || ''
   const {
     accounts,
     loading,
     error,
-    refreshAccounts,
     createAccount,
     updateAccount,
     deleteAccount
   } = useAccounts()
 
+  const [mode, setMode] = useState<Mode>('list')
   const [searchTerm, setSearchTerm] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isNewAccountDialogOpen, setIsNewAccountDialogOpen] = useState(false)
-  const [isEditAccountDialogOpen, setIsEditAccountDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
-  
+
   // New account form state
   const [newAccountName, setNewAccountName] = useState('')
   const [newAccountType, setNewAccountType] = useState('bank')
   const [newAccountBalance, setNewAccountBalance] = useState('0')
-  
+
   // Edit account form state
   const [editAccountName, setEditAccountName] = useState('')
   const [editAccountType, setEditAccountType] = useState('bank')
 
-  // Filter accounts based on search term
-  const filteredAccounts = accounts.filter(account => 
+  const filteredAccounts = accounts.filter(account =>
     account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     account.type.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const selectedAccount = accounts.find(account => account.id === selectedAccountId)
 
-  // Handle creating new account
+  const resetToList = () => {
+    setMode('list')
+    setSelectedAccountId(null)
+  }
+
+  const handleSheetOpenChange = (open: boolean) => {
+    if (!open) resetToList()
+    setIsOpen(open)
+  }
+
   const handleAddAccount = async () => {
     if (!newAccountName.trim()) return
-
     setIsSubmitting(true)
     try {
-      const accountData = {
+      const newAccount = await createAccount({
         user_id: userId,
         name: newAccountName.trim(),
         type: newAccountType.toUpperCase() as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER',
@@ -80,11 +92,7 @@ function AccountManagerInternal({
         is_active: true,
         is_default: false,
         description: null
-      }
-
-      const newAccount = await createAccount(accountData)
-
-      // Track account creation
+      })
       Analytics.track('Account Created', {
         account_id: newAccount.id,
         account_type: newAccount.type,
@@ -92,18 +100,13 @@ function AccountManagerInternal({
         initial_balance: newAccount.balance,
         source: 'settings'
       })
-
       onAccountUpdated?.()
-
-      // Reset form
       setNewAccountName('')
       setNewAccountType('bank')
       setNewAccountBalance('0')
-      setIsNewAccountDialogOpen(false)
+      resetToList()
     } catch (err) {
       console.error('Failed to add account:', err)
-
-      // Track account creation failure
       Analytics.track('Account Creation Failed', {
         account_type: newAccountType.toUpperCase(),
         error_message: err instanceof Error ? err.message : 'Unknown error'
@@ -113,36 +116,27 @@ function AccountManagerInternal({
     }
   }
 
-  // Handle editing account
   const handleEditAccount = async () => {
     if (!selectedAccountId || !editAccountName.trim()) return
-
     setIsSubmitting(true)
     try {
       const fieldsChanged: string[] = []
       if (selectedAccount?.name !== editAccountName.trim()) fieldsChanged.push('name')
       if (selectedAccount?.type.toLowerCase() !== editAccountType) fieldsChanged.push('type')
-
       await updateAccount(selectedAccountId, {
         name: editAccountName.trim(),
         type: editAccountType.toUpperCase() as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
       })
-
-      // Track account update
       Analytics.track('Account Updated', {
         account_id: selectedAccountId,
         fields_changed: fieldsChanged,
         new_type: editAccountType.toUpperCase(),
         new_name: editAccountName.trim()
       })
-
       onAccountUpdated?.()
-      setIsEditAccountDialogOpen(false)
-      setSelectedAccountId(null)
+      resetToList()
     } catch (err) {
       console.error('Failed to update account:', err)
-
-      // Track account update failure
       Analytics.track('Account Update Failed', {
         account_id: selectedAccountId,
         error_message: err instanceof Error ? err.message : 'Unknown error'
@@ -152,33 +146,21 @@ function AccountManagerInternal({
     }
   }
 
-  // Handle deleting account
   const handleDeleteAccount = async () => {
     if (!selectedAccountId || !selectedAccount) return
-
     setIsSubmitting(true)
     try {
-      const accountInfo = {
-        id: selectedAccount.id,
-        type: selectedAccount.type,
-        name: selectedAccount.name
-      }
+      const accountInfo = { id: selectedAccount.id, type: selectedAccount.type, name: selectedAccount.name }
       await deleteAccount(selectedAccountId)
-
-      // Track account deletion
       Analytics.track('Account Deleted', {
         account_id: accountInfo.id,
         account_type: accountInfo.type,
         account_name: accountInfo.name
       })
-
       onAccountUpdated?.()
-      setIsDeleteDialogOpen(false)
-      setSelectedAccountId(null)
+      resetToList()
     } catch (err) {
       console.error('Failed to delete account:', err)
-
-      // Track account deletion failure
       Analytics.track('Account Deletion Failed', {
         account_id: selectedAccountId,
         account_type: selectedAccount?.type,
@@ -189,14 +171,19 @@ function AccountManagerInternal({
     }
   }
 
-  // Open edit dialog
-  const openEditDialog = (account: AccountDB) => {
+  const openCreateMode = () => {
+    setNewAccountName('')
+    setNewAccountType('bank')
+    setNewAccountBalance('0')
+    setMode('create')
+    Analytics.track('Add Account Form Opened', { trigger: 'add_button' })
+  }
+
+  const openEditMode = (account: AccountDB) => {
     setSelectedAccountId(account.id)
     setEditAccountName(account.name)
     setEditAccountType(account.type.toLowerCase())
-    setIsEditAccountDialogOpen(true)
-
-    // Track edit dialog opened
+    setMode('edit')
     Analytics.track('Edit Account Form Opened', {
       account_id: account.id,
       account_type: account.type,
@@ -204,13 +191,10 @@ function AccountManagerInternal({
     })
   }
 
-  // Open delete dialog
-  const openDeleteDialog = (accountId: string) => {
+  const openDeleteMode = (accountId: string) => {
     const account = accounts.find(a => a.id === accountId)
     setSelectedAccountId(accountId)
-    setIsDeleteDialogOpen(true)
-
-    // Track delete dialog opened
+    setMode('delete')
     Analytics.track('Delete Account Dialog Opened', {
       account_id: accountId,
       account_type: account?.type,
@@ -218,54 +202,31 @@ function AccountManagerInternal({
     })
   }
 
-  // Open new account dialog
-  const openNewAccountDialog = () => {
-    setIsNewAccountDialogOpen(true)
+  const listContent = (
+    <>
+      <SheetHeader>
+        <SheetTitle>MANAGE ACCOUNTS</SheetTitle>
+        <SheetDescription>
+          Create, edit, and organize your bank accounts
+        </SheetDescription>
+      </SheetHeader>
 
-    // Track add account form opened
-    Analytics.track('Add Account Form Opened', {
-      trigger: 'add_button'
-    })
-  }
-
-
-
-  return (
-    <Sheet open={controlledOpen} onOpenChange={controlledOnOpenChange}>
-      {controlledOpen === undefined && (
-        <SheetTrigger asChild>
-          <Button variant="outline" size="sm" className={className}>
-            <CreditCard className="h-4 w-4 mr-2" />
-            Manage Accounts
-          </Button>
-        </SheetTrigger>
-      )}
-      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'h-[95vh] rounded-t-xl w-full' : 'w-[400px] sm:w-[540px]'}>
-        <SheetHeader>
-          <SheetTitle>MANAGE ACCOUNTS</SheetTitle>
-          <SheetDescription>
-            Create, edit, and organize your bank accounts
-          </SheetDescription>
-        </SheetHeader>
-        
+      <div className="flex-1 overflow-y-auto px-4 py-4">
         {error && (
           <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3 mb-4">
             <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
-        
-        {loading && (
+
+        {loading ? (
           <div className="text-center py-8">
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               <p className="text-muted-foreground">Loading accounts...</p>
             </div>
           </div>
-        )}
-        
-        {!loading && (
-          <div className="mt-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
-            {/* Search Bar */}
+        ) : (
+          <div className="space-y-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -276,22 +237,17 @@ function AccountManagerInternal({
               />
             </div>
 
-            {/* Add New Account Button */}
-            <Button
-              onClick={openNewAccountDialog}
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Account
-            </Button>
+            {isEmbedded && (
+              <Button onClick={openCreateMode} className="w-full" disabled={isSubmitting}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Account
+              </Button>
+            )}
 
-            {/* Accounts List */}
             <div className="space-y-3">
               <div className="text-sm font-semibold text-foreground uppercase tracking-wide">
                 Your Accounts ({filteredAccounts.length})
               </div>
-              
               <div className="space-y-2">
                 {filteredAccounts.map((account) => (
                   <div key={account.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
@@ -300,9 +256,7 @@ function AccountManagerInternal({
                         <div className="flex items-center space-x-2">
                           <span className="font-medium text-sm text-foreground">{account.name}</span>
                           {account.is_default && (
-                            <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">
-                              Default
-                            </span>
+                            <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">Default</span>
                           )}
                         </div>
                         <div className="flex items-center space-x-2 text-xs text-muted-foreground">
@@ -319,7 +273,7 @@ function AccountManagerInternal({
                         variant="ghost"
                         size="sm"
                         onClick={() => router.push(`/spending/accounts/${account.id}`)}
-                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                        className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
                         title="View Details"
                       >
                         <ExternalLink className="h-4 w-4" />
@@ -327,8 +281,8 @@ function AccountManagerInternal({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => openEditDialog(account)}
-                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                        onClick={() => openEditMode(account)}
+                        className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
                         disabled={isSubmitting}
                         title="Edit Account"
                       >
@@ -338,8 +292,8 @@ function AccountManagerInternal({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => openDeleteDialog(account.id)}
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => openDeleteMode(account.id)}
+                          className="h-11 w-11 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 sm:h-8 sm:w-8"
                           disabled={isSubmitting}
                           title="Delete Account"
                         >
@@ -349,7 +303,6 @@ function AccountManagerInternal({
                     </div>
                   </div>
                 ))}
-                
                 {filteredAccounts.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     {searchTerm ? 'No accounts found matching your search.' : 'No accounts found. Create your first account!'}
@@ -357,190 +310,214 @@ function AccountManagerInternal({
                 )}
               </div>
             </div>
-
-            {/* New Account Dialog */}
-            <Dialog open={isNewAccountDialogOpen} onOpenChange={setIsNewAccountDialogOpen}>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Add New Account</DialogTitle>
-                  <DialogDescription>
-                    Create a new account to track your transactions.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label htmlFor="account-name" className="text-right text-sm font-medium">
-                      Name
-                    </label>
-                    <Input
-                      id="account-name"
-                      value={newAccountName}
-                      onChange={(e) => setNewAccountName(e.target.value)}
-                      placeholder="e.g., Chase Checking"
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label htmlFor="account-type" className="text-right text-sm font-medium">
-                      Type
-                    </label>
-                    <select
-                      id="account-type"
-                      value={newAccountType}
-                      onChange={(e) => setNewAccountType(e.target.value)}
-                      className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <option value="bank">Bank</option>
-                      <option value="credit_card">Credit Card</option>
-                      <option value="cash">Cash</option>
-                      <option value="investment">Investment</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label htmlFor="account-balance" className="text-right text-sm font-medium">
-                      Initial Balance
-                    </label>
-                    <Input
-                      id="account-balance"
-                      type="amount"
-                      step="0.01"
-                      value={newAccountBalance}
-                      onChange={(e) => setNewAccountBalance(e.target.value)}
-                      placeholder="0.00"
-                      className="col-span-3"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsNewAccountDialogOpen(false)}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleAddAccount}
-                    disabled={!newAccountName.trim() || isSubmitting}
-                  >
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Account
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Edit Account Dialog */}
-            <Dialog open={isEditAccountDialogOpen} onOpenChange={setIsEditAccountDialogOpen}>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Edit Account</DialogTitle>
-                  <DialogDescription>
-                    Update account information.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label htmlFor="edit-account-name" className="text-right text-sm font-medium">
-                      Name
-                    </label>
-                    <Input
-                      id="edit-account-name"
-                      value={editAccountName}
-                      onChange={(e) => setEditAccountName(e.target.value)}
-                      placeholder="Account name"
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label htmlFor="edit-account-type" className="text-right text-sm font-medium">
-                      Type
-                    </label>
-                    <select
-                      id="edit-account-type"
-                      value={editAccountType}
-                      onChange={(e) => setEditAccountType(e.target.value)}
-                      className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <option value="bank">Bank</option>
-                      <option value="credit_card">Credit Card</option>
-                      <option value="cash">Cash</option>
-                      <option value="investment">Investment</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsEditAccountDialogOpen(false)}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleEditAccount}
-                    disabled={!editAccountName.trim() || isSubmitting}
-                  >
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Update Account
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Delete Account</DialogTitle>
-                  <DialogDescription>
-                    Are you sure you want to delete "{selectedAccount?.name}"? This action cannot be undone.
-                    {selectedAccount?.is_default && (
-                      <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded text-destructive text-sm">
-                        This is your default account and cannot be deleted.
-                      </div>
-                    )}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsDeleteDialogOpen(false)}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={handleDeleteAccount}
-                    disabled={isSubmitting || selectedAccount?.is_default}
-                  >
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Delete Account
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
         )}
+      </div>
+
+      {!isEmbedded && (
+        <SheetFooter>
+          <SheetClose asChild>
+            <Button variant="outline">Close</Button>
+          </SheetClose>
+          <Button onClick={openCreateMode} disabled={isSubmitting}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Account
+          </Button>
+        </SheetFooter>
+      )}
+    </>
+  )
+
+  const createContent = (
+    <>
+      <SheetHeader>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={resetToList} className="h-8 w-8 -ml-1">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <SheetTitle>Add New Account</SheetTitle>
+        </div>
+        <SheetDescription>Create a new account to track your transactions.</SheetDescription>
+      </SheetHeader>
+
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        <div className="space-y-2">
+          <label htmlFor="account-name" className="text-sm font-medium">Name</label>
+          <Input
+            id="account-name"
+            value={newAccountName}
+            onChange={(e) => setNewAccountName(e.target.value)}
+            placeholder="e.g., Chase Checking"
+          />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="account-type" className="text-sm font-medium">Type</label>
+          <select
+            id="account-type"
+            value={newAccountType}
+            onChange={(e) => setNewAccountType(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="bank">Bank</option>
+            <option value="credit_card">Credit Card</option>
+            <option value="cash">Cash</option>
+            <option value="investment">Investment</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="account-balance" className="text-sm font-medium">Initial Balance</label>
+          <Input
+            id="account-balance"
+            type="amount"
+            step="0.01"
+            value={newAccountBalance}
+            onChange={(e) => setNewAccountBalance(e.target.value)}
+            placeholder="0.00"
+          />
+        </div>
+      </div>
+
+      <SheetFooter>
+        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>Cancel</Button>
+        <Button onClick={handleAddAccount} disabled={!newAccountName.trim() || isSubmitting}>
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Create Account
+        </Button>
+      </SheetFooter>
+    </>
+  )
+
+  const editContent = (
+    <>
+      <SheetHeader>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={resetToList} className="h-8 w-8 -ml-1">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <SheetTitle>Edit Account</SheetTitle>
+        </div>
+        <SheetDescription>Update account information.</SheetDescription>
+      </SheetHeader>
+
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        <div className="space-y-2">
+          <label htmlFor="edit-account-name" className="text-sm font-medium">Name</label>
+          <Input
+            id="edit-account-name"
+            value={editAccountName}
+            onChange={(e) => setEditAccountName(e.target.value)}
+            placeholder="Account name"
+          />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="edit-account-type" className="text-sm font-medium">Type</label>
+          <select
+            id="edit-account-type"
+            value={editAccountType}
+            onChange={(e) => setEditAccountType(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="bank">Bank</option>
+            <option value="credit_card">Credit Card</option>
+            <option value="cash">Cash</option>
+            <option value="investment">Investment</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <SheetFooter>
+        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>Cancel</Button>
+        <Button onClick={handleEditAccount} disabled={!editAccountName.trim() || isSubmitting}>
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Update Account
+        </Button>
+      </SheetFooter>
+    </>
+  )
+
+  const deleteContent = (
+    <>
+      <SheetHeader>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={resetToList} className="h-8 w-8 -ml-1">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <SheetTitle>Delete Account</SheetTitle>
+        </div>
+        <SheetDescription>
+          Are you sure you want to delete &quot;{selectedAccount?.name}&quot;? This action cannot be undone.
+        </SheetDescription>
+      </SheetHeader>
+
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        {selectedAccount?.is_default && (
+          <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+            <p className="text-sm text-destructive">This is your default account and cannot be deleted.</p>
+          </div>
+        )}
+        <div className="p-4 border rounded-lg bg-muted/50">
+          <p className="font-medium text-sm">{selectedAccount?.name}</p>
+          <p className="text-xs text-muted-foreground capitalize">
+            {selectedAccount?.type.toLowerCase().replace('_', ' ')}
+          </p>
+        </div>
+      </div>
+
+      <SheetFooter>
+        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>Cancel</Button>
+        <Button
+          variant="destructive"
+          onClick={handleDeleteAccount}
+          disabled={isSubmitting || selectedAccount?.is_default}
+        >
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Delete Account
+        </Button>
+      </SheetFooter>
+    </>
+  )
+
+  const currentContent = {
+    list: listContent,
+    create: createContent,
+    edit: editContent,
+    delete: deleteContent,
+  }[mode]
+
+  if (isEmbedded) {
+    return <div className="flex flex-col gap-2">{currentContent}</div>
+  }
+
+  return (
+    <Sheet open={isOpen} onOpenChange={handleSheetOpenChange}>
+      {!isControlled && (
+        <SheetTrigger asChild>
+          <Button variant="outline" size="sm" className={className}>
+            <CreditCard className="h-4 w-4 mr-2" />
+            Manage Accounts
+          </Button>
+        </SheetTrigger>
+      )}
+      <SheetContent
+        side={isMobile ? 'bottom' : 'right'}
+        className={isMobile ? 'rounded-t-2xl w-full p-0' : 'w-[400px] sm:w-[540px]'}
+      >
+        {currentContent}
       </SheetContent>
     </Sheet>
   )
 }
 
-// Wrapper component that handles client-side mounting
 export function AccountManager(props: AccountManagerProps) {
   const [isMounted, setIsMounted] = useState(false)
-  
+
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  if (!isMounted) {
-    return null
-  }
+  if (!isMounted) return null
 
   return <AccountManagerInternal {...props} />
 }

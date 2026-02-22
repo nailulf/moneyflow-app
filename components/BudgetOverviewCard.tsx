@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Plus, Trash2, Pencil, X, Info, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
-import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/molecules/card'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
