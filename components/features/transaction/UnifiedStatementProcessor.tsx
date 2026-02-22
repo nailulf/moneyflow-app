@@ -28,6 +28,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/molecules/dialog"
+import { SheetFooter } from "@/components/ui/organisms/sheet"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +52,7 @@ import { Analytics } from '@/lib/analytics/amplitude'
 
 interface UnifiedStatementProcessorProps {
   onSuccess?: () => void
+  onCancel?: () => void
   defaultAccountId?: string
 }
 
@@ -58,6 +60,7 @@ type ViewState = 'UPLOAD' | 'REVIEW'
 
 export function UnifiedStatementProcessor({ 
   onSuccess,
+  onCancel,
   defaultAccountId 
 }: UnifiedStatementProcessorProps) {
   const { user } = useAuth()
@@ -553,23 +556,25 @@ export function UnifiedStatementProcessor({
   }
 
   // -- RENDER HELPERS --
-
   const renderUploadState = () => (
-    <div className="space-y-6 p-4 h-full min-h-[95dvh]">
-      <div
-        className={cn(
-          "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
-          selectedFile ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
-        )}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-        onClick={() => {
-          Analytics.track('Statement Upload Area Clicked', {
-            has_existing_file: !!selectedFile
-          })
-          fileInputRef.current?.click()
-        }}
-      >
+    <div>
+    <div className='overflow-y-auto no-scrollbar space-y-2 min-h-[70vh]'>
+    <div className="flex flex-col">
+      <div className="flex-1 space-y-6 p-4">
+        <div
+          className={cn(
+            "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
+            selectedFile ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50"
+          )}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={handleDrop}
+          onClick={() => {
+            Analytics.track('Statement Upload Area Clicked', {
+              has_existing_file: !!selectedFile
+            })
+            fileInputRef.current?.click()
+          }}
+        >
         <input
           type="file"
           ref={fileInputRef}
@@ -640,19 +645,29 @@ export function UnifiedStatementProcessor({
         Supports PDF bank statements · JPG, PNG, WEBP receipts &amp; invoices
       </p>
 
-      <div className="space-y-4">
-        <div className="grid gap-2">
-          <Label>Select Account</Label>
-          <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose account..." />
-            </SelectTrigger>
-            <SelectContent>
-              {accounts.map(acc => (
-                <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div className="space-y-4 grid items-center">
+        <div className="grid gap-2 grid-cols-8 items-center">
+          <Label className="text-sm font-medium col-span-3">Select Account</Label>
+          <div className='col-span-5'>
+            <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose account..." />
+              </SelectTrigger>
+              <SelectContent>
+                {accounts.length > 0 ? (
+                  accounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id} data-testid={`account-option-${account.id}`}>
+                      {account.name} ({account.type.toLowerCase().replace('_', ' ')})
+                    </SelectItem>
+                  ))
+                ) : (
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                    No accounts available
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -673,15 +688,33 @@ export function UnifiedStatementProcessor({
           </div>
         )}
 
-        <Button 
-          className="w-full" 
-          onClick={handleUpload} 
+        </div>
+      </div>
+      </div>
+      </div>
+      <SheetFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            Analytics.track('Statement Upload Cancelled', {
+              has_selected_file: !!selectedFile
+            })
+            onCancel?.()
+          }}
+          className="flex-1"
+        >
+          Cancel
+        </Button>
+        <Button
+          className="flex-1"
+          onClick={handleUpload}
           disabled={!selectedFile || !selectedAccountId || isUploading}
         >
           {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
           Upload & Process
         </Button>
-      </div>
+      </SheetFooter>
     </div>
   )
 

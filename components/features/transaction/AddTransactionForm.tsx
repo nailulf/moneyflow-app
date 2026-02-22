@@ -531,13 +531,14 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
               </form>
             </TabsContent>
             
-            <TabsContent value="upload" className="mt-4">
-              <UnifiedStatementProcessor 
-                onSuccess={() => {
-                  onSuccess?.()
-                  setOpen(false)
-                }}
-              />
+            <TabsContent value="upload" className="mt-4 my-1">
+                <UnifiedStatementProcessor 
+                  onSuccess={() => {
+                    onSuccess?.()
+                    setOpen(false)
+                  }}
+                  onCancel={() => setOpen(false)}
+                />
             </TabsContent>
           </Tabs>
         </div>
