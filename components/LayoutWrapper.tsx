@@ -97,7 +97,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
               }} />
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0 pb-24 md:pb-4">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0 pb-28 md:pb-4">
             <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
               {children}
             </div>
