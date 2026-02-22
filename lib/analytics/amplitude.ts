@@ -101,7 +101,7 @@ class AmplitudeService {
         privacyConfig: {
           // Mask all input fields by default (balances, amounts, etc.)
           maskSelector: [
-            'input[type="number"]',
+            'input[type="amount"]',
             'input[type="text"]',
             'input[type="email"]',
             'input[type="password"]',

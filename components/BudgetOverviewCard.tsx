@@ -249,7 +249,7 @@ export function BudgetOverviewCard({
           <div className="space-y-2">
             <Label className="text-xs">Total Budget</Label>
             <Input
-              type="number"
+              type="amount"
               min={0}
               step="0.01"
               value={totalAmount || ''}
@@ -311,7 +311,7 @@ export function BudgetOverviewCard({
                 </Select>
               </div>
               <Input
-                type="number"
+                type="amount"
                 min={0}
                 className="w-20 h-8 text-xs"
                 value={categoryAmount}

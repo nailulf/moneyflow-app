@@ -714,7 +714,12 @@ export function TransactionTable({
                                           onEditTransaction(transaction)
                                         } else if (enableSelfManagement) {
                                           setEditingTransaction(transaction)
-                                          setIsEditModalOpen(true)
+                                          // Defer Sheet open until DropdownMenu's DismissableLayer
+                                          // has fully unmounted. Without this, Radix sets
+                                          // pointer-events:none on the Sheet content because the
+                                          // layers context still contains the DropdownMenu node on
+                                          // the Sheet's first render.
+                                          setTimeout(() => setIsEditModalOpen(true), 0)
                                         }
                                       }}
                                     >
@@ -848,6 +853,12 @@ export function TransactionTable({
           open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
           onTransactionUpdated={handleTransactionUpdated}
+          onSuccess={() => {
+            transactionContext?.refreshTransactions?.()
+            if (enableSelfManagement && transactionManager) {
+              transactionManager.loadTransactions()
+            }
+          }}
         />
       )}
     </Card>

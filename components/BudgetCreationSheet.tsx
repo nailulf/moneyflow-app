@@ -447,7 +447,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                 <div className="text-sm font-medium text-foreground">Total Budget Amount</div>
                 <Input
                   id="total-amount"
-                  type="number"
+                  type="amount"
                   placeholder="0.00"
                   value={totalAmount}
                   onChange={(e) => setTotalAmount(e.target.value)}
@@ -547,7 +547,7 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                   </SelectContent>
                 </Select>
                 <Input
-                  type="number"
+                  type="amount"
                   placeholder="Amount"
                   value={categoryAmount}
                   onChange={(e) => setCategoryAmount(e.target.value)}

@@ -1,15 +1,12 @@
 'use client'
 
+import * as React from "react"
 import { cn } from '@/lib/utils'
 
-interface CurrencyInputProps {
+type CurrencyInputProps = Omit<React.ComponentProps<"input">, "type" | "value" | "onChange"> & {
   value: number
   onChange: (value: number) => void
   currency?: string
-  disabled?: boolean
-  placeholder?: string
-  className?: string
-  id?: string
 }
 
 function formatIDR(value: number): string {
@@ -17,15 +14,15 @@ function formatIDR(value: number): string {
   return value.toLocaleString('id-ID', { maximumFractionDigits: 0 })
 }
 
-export function CurrencyInput({
+export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(({
   value,
   onChange,
   currency = 'IDR',
-  disabled,
   placeholder = '0',
   className,
-  id
-}: CurrencyInputProps) {
+  inputMode,
+  ...props
+}, ref) => {
   const currencySymbol = currency === 'IDR' ? 'Rp' : currency
 
   const displayValue = value === 0 ? '' : formatIDR(value)
@@ -43,12 +40,12 @@ export function CurrencyInput({
         {currencySymbol}
       </span>
       <input
-        id={id}
+        {...props}
+        ref={ref}
         type="text"
-        inputMode="numeric"
+        inputMode={inputMode ?? "numeric"}
         value={displayValue}
         onChange={handleChange}
-        disabled={disabled}
         placeholder={placeholder}
         className={cn(
           'flex h-9 w-full rounded-md border border-input bg-transparent pl-10 pr-3 py-1 text-sm shadow-sm transition-colors',
@@ -61,4 +58,6 @@ export function CurrencyInput({
       />
     </div>
   )
-}
+})
+
+CurrencyInput.displayName = "CurrencyInput"

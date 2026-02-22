@@ -136,7 +136,8 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction)
-    setIsEditModalOpen(true)
+    // Defer Sheet open until DropdownMenu's DismissableLayer has fully unmounted.
+    setTimeout(() => setIsEditModalOpen(true), 0)
   }
 
   const handleDelete = async (id: string) => {

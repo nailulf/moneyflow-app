@@ -178,7 +178,7 @@ export function BudgetPlanEditSheet({
           <div className="space-y-2">
             <Label className="text-sm">Total Budget</Label>
             <Input
-              type="number"
+              type="amount"
               min={0}
               step="0.01"
               value={totalAmount || ''}
@@ -240,7 +240,7 @@ export function BudgetPlanEditSheet({
                 </Select>
               </div>
               <Input
-                type="number"
+                type="amount"
                 min={0}
                 className="w-24 h-9"
                 value={categoryAmount}

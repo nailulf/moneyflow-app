@@ -966,7 +966,7 @@ export function UnifiedStatementProcessor({
                     <div className="text-right">
                       <div className="flex flex-col items-end">
                          <Input
-                            type="number"
+                            type="amount"
                             value={Math.abs(t.amount)}
                             onChange={(e) => {
                                const val = parseFloat(e.target.value);

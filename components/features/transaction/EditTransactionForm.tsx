@@ -14,19 +14,22 @@ import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { Analytics } from '@/lib/analytics/amplitude'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 
 interface EditTransactionFormProps {
   transaction: Transaction | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onTransactionUpdated?: (id: string, data: Partial<TransactionFormData>) => void
+  onSuccess?: () => void
 }
 
 export function EditTransactionForm({ 
   transaction, 
   open, 
   onOpenChange, 
-  onTransactionUpdated 
+  onTransactionUpdated,
+  onSuccess
 }: EditTransactionFormProps) {
   const isMobile = useIsMobile()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -81,16 +84,19 @@ export function EditTransactionForm({
   // Reset form when transaction changes
   useEffect(() => {
     if (transaction && open) {
-      setValue('date', transaction.date.split('T')[0]) // Convert to YYYY-MM-DD format
-      setValue('description', transaction.description || '')
-      setValue('amount', transaction.amount)
-      setValue('type', transaction.type)
-      setValue('category_id', transaction.category_id)
-      setValue('account_id', transaction.account_id || '')
-      setValue('merchant', transaction.merchant || '')
-      setValue('is_recurring', transaction.is_recurring || false)
-      setValue('recurring_frequency', transaction.recurring_frequency || 'monthly')
-      setValue('recurring_end_date', transaction.recurring_end_date ? transaction.recurring_end_date.split('T')[0] : null)
+      reset({
+        date: transaction.date.split('T')[0],
+        description: transaction.description || '',
+        amount: transaction.amount,
+        type: transaction.type,
+        category_id: transaction.category_id,
+        account_id: transaction.account_id || '',
+        merchant: transaction.merchant || '',
+        currency: 'IDR',
+        is_recurring: transaction.is_recurring || false,
+        recurring_frequency: transaction.recurring_frequency || 'monthly',
+        recurring_end_date: transaction.recurring_end_date ? transaction.recurring_end_date.split('T')[0] : null
+      })
 
       // Track form opened
       Analytics.track('Edit Transaction Form Opened', {
@@ -98,7 +104,7 @@ export function EditTransactionForm({
         transaction_type: transaction.type
       })
     }
-  }, [transaction, open, setValue])
+  }, [transaction, open, reset])
 
   const selectedType = watch('type')
   const selectedCategoryId = watch('category_id')
@@ -144,6 +150,7 @@ export function EditTransactionForm({
       })
 
       toast.success('Transaction updated successfully!')
+      onSuccess?.()
       onOpenChange(false)
       reset() // Clear form state after successful update
     } catch (error) {
@@ -189,154 +196,173 @@ export function EditTransactionForm({
   const selectedCategory = getSelectedCategory()
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet
+      open={open}
+      onOpenChange={(next: boolean) => {
+        const suppressed = suppressCloseUntil > Date.now()
+        if (!next && (isAnySelectOpen || suppressed)) return
+        onOpenChange(next)
+      }}
+    >
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={isMobile ? 'max-h-[95dvh] overflow-y-auto rounded-t-2xl p-0' : 'w-[400px] sm:w-[540px]'}
+        className={isMobile ? 'max-h-[95dvh] rounded-t-2xl w-full p-0' : 'w-full grid flex-1 auto-rows-min px-4'}
       >
         <SheetHeader className={isMobile ? 'mx-0 px-4' : undefined}>
           <SheetTitle>Edit Transaction</SheetTitle>
         </SheetHeader>
-        <div className={isMobile ? 'px-4 pb-4 pt-4 overflow-y-auto' : 'mt-6 overflow-y-auto'}>
+        <div className={isMobile ? 'w-full px-4 pb-4 pt-4' : 'w-full'}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Date</label>
-            <Input
-              type="date"
-              {...register('date')}
-              className={errors.date ? 'border-destructive' : ''}
-            />
-            {errors.date && (
-              <p className="text-sm text-destructive">{errors.date.message}</p>
-            )}
+          <div className="overflow-y-auto no-scrollbar space-y-2 min-h-[70vh]">
+          <div className="space-y-2 grid grid-cols-7 items-center">
+            <label className="text-sm font-medium col-span-2">Date</label>
+            <div className="col-span-5">
+              <Input
+                type="date"
+                {...register('date')}
+                className={errors.date ? 'border-destructive' : ''}
+              />
+              {errors.date && (
+                <p className="text-sm text-destructive">{errors.date.message}</p>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
-            <Input
-              placeholder="Enter description"
-              {...register('description')}
-              className={errors.description ? 'border-destructive' : ''}
-            />
-            {errors.description && (
-              <p className="text-sm text-destructive">{errors.description.message}</p>
-            )}
+          <div className="space-y-2 grid grid-cols-7 items-center">
+            <label className="text-sm font-medium col-span-2">Description</label>
+            <div className="col-span-5">
+              <Input
+                placeholder="Enter description"
+                {...register('description')}
+                className={errors.description ? 'border-destructive' : ''}
+              />
+              {errors.description && (
+                <p className="text-sm text-destructive">{errors.description.message}</p>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Amount</label>
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="0.00"
-              {...register('amount', { valueAsNumber: true })}
-              className={errors.amount ? 'border-destructive' : ''}
-            />
-            {errors.amount && (
-              <p className="text-sm text-destructive">{errors.amount.message}</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Use positive numbers for income, negative for expenses
-            </p>
+          <div className="space-y-2 grid grid-cols-7 items-center">
+            <label className="text-sm font-medium col-span-2">Amount</label>
+            <div className="col-span-5">
+              <Input
+                type="amount"
+                step="0.01"
+                placeholder="0.00"
+                {...register('amount', { valueAsNumber: true })}
+                className={errors.amount ? 'border-destructive' : ''}
+              />
+              {errors.amount && (
+                <p className="text-sm text-destructive">{errors.amount.message}</p>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Type</label>
-            <Select
-              value={selectedType}
-              onValueChange={(value: string) => {
-                setSuppressCloseUntil(Date.now() + 500)
-                setValue('type', value as 'INCOME' | 'EXPENSE' | 'TRANSFER')
-              }}
-              onOpenChange={setIsAnySelectOpen}
-            >
-              <SelectTrigger className={errors.type ? 'border-destructive' : ''}>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="EXPENSE">Expense</SelectItem>
-                <SelectItem value="INCOME">Income</SelectItem>
-                <SelectItem value="TRANSFER">Transfer</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.type && (
-              <p className="text-sm text-destructive">{errors.type.message}</p>
-            )}
+          <div className="space-y-2 grid grid-cols-7 items-center">
+            <label className="text-sm font-medium col-span-2">Type</label>
+            <div className="col-span-5">
+              <Select
+                value={selectedType}
+                onValueChange={(value: string) => {
+                  setSuppressCloseUntil(Date.now() + 500)
+                  setValue('type', value as 'INCOME' | 'EXPENSE' | 'TRANSFER')
+                }}
+                onOpenChange={setIsAnySelectOpen}
+              >
+                <SelectTrigger className={cn("w-full", errors.type ? 'border-destructive' : '')}>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EXPENSE">Expense</SelectItem>
+                  <SelectItem value="INCOME">Income</SelectItem>
+                  <SelectItem value="TRANSFER">Transfer</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.type && (
+                <p className="text-sm text-destructive">{errors.type.message}</p>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Category</label>
-            <Select
-              value={selectedCategoryId || ''}
-              onValueChange={(value: string) => {
-                setSuppressCloseUntil(Date.now() + 500)
-                setValue('category_id', value)
-              }}
-              onOpenChange={setIsAnySelectOpen}
-            >
-              <SelectTrigger className={errors.category_id ? 'border-destructive' : ''}>
-                <SelectValue placeholder="Select category">
-                  {selectedCategory ? renderCategoryWithColor(selectedCategory) : "Select category"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {availableCategories.length > 0 ? (
-                  availableCategories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {renderCategoryWithColor(category)}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="px-2 py-1 text-sm text-muted-foreground">
-                    No categories available for this type
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
-            {errors.category_id && (
-              <p className="text-sm text-destructive">{errors.category_id.message}</p>
-            )}
+          <div className="space-y-2 grid grid-cols-7 items-center">
+            <label className="text-sm font-medium col-span-2">Category</label>
+            <div className="col-span-5">
+              <Select
+                value={selectedCategoryId || ''}
+                onValueChange={(value: string) => {
+                  setSuppressCloseUntil(Date.now() + 500)
+                  setValue('category_id', value)
+                }}
+                onOpenChange={setIsAnySelectOpen}
+              >
+                <SelectTrigger className={cn("w-full", errors.category_id ? 'border-destructive' : '')}>
+                  <SelectValue placeholder="Select category">
+                    {selectedCategory ? renderCategoryWithColor(selectedCategory) : "Select category"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {availableCategories.length > 0 ? (
+                    availableCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {renderCategoryWithColor(category)}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="px-2 py-1 text-sm text-muted-foreground">
+                      No categories available for this type
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.category_id && (
+                <p className="text-sm text-destructive">{errors.category_id.message}</p>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Account</label>
-            <Select
-              value={watch('account_id') || undefined}
-              onValueChange={(value) => {
-                setSuppressCloseUntil(Date.now() + 500)
-                setValue('account_id', value)
-              }}
-              disabled={accountsLoading}
-              onOpenChange={setIsAnySelectOpen}
-            >
-              <SelectTrigger className={errors.account_id ? 'border-destructive' : ''} data-testid="account-select-trigger">
-                <SelectValue placeholder={accountsLoading ? 'Loading...' : 'Select account'} />
-              </SelectTrigger>
-              <SelectContent>
-                {accounts.length > 0 ? (
-                  accounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id} data-testid={`account-option-${account.id}`}>
-                      {account.name} ({account.type.toLowerCase().replace('_', ' ')})
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    No accounts available
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
-            {errors.account_id && (
-              <p className="text-sm text-destructive">{errors.account_id.message}</p>
-            )}
+          <div className="space-y-2 grid grid-cols-7 items-center">
+            <label className="text-sm font-medium col-span-2">Account</label>
+            <div className="col-span-5">
+              <Select
+                value={watch('account_id') || undefined}
+                onValueChange={(value) => {
+                  setSuppressCloseUntil(Date.now() + 500)
+                  setValue('account_id', value)
+                }}
+                disabled={accountsLoading}
+                onOpenChange={setIsAnySelectOpen}
+              >
+                <SelectTrigger className={cn("w-full", errors.account_id ? 'border-destructive' : '')} data-testid="account-select-trigger">
+                  <SelectValue placeholder={accountsLoading ? 'Loading...' : 'Select account'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {accounts.length > 0 ? (
+                    accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id} data-testid={`account-option-${account.id}`}>
+                        {account.name} ({account.type.toLowerCase().replace('_', ' ')})
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      No accounts available
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.account_id && (
+                <p className="text-sm text-destructive">{errors.account_id.message}</p>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Merchant (Optional)</label>
-            <Input
-              placeholder="Enter merchant name"
-              {...register('merchant')}
-            />
+          <div className="space-y-2 grid grid-cols-7 items-center">
+            <label className="text-sm font-medium col-span-2">Merchant (Opt)</label>
+            <div className="col-span-5">
+              <Input
+                placeholder="Enter merchant name"
+                {...register('merchant')}
+              />
+            </div>
           </div>
 
           <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
@@ -427,8 +453,9 @@ export function EditTransactionForm({
               </div>
             )}
           </div>
+          </div>
 
-          <SheetFooter className={isMobile ? undefined : 'pt-4'}>
+          <SheetFooter>
             <Button
               type="button"
               variant="outline"

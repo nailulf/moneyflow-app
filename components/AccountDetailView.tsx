@@ -377,7 +377,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                 </Label>
                 <Input
                   id="balance"
-                  type="number"
+                  type="amount"
                   step="0.01"
                   value={editBalance}
                   onChange={(e) => setEditBalance(e.target.value)}
