@@ -3,7 +3,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Plus, Trash2, Info } from 'lucide-react'
 import { toast } from 'sonner'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/organisms/sheet'
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/organisms/sheet'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
 import { Label } from '@/components/ui/atoms/label'
@@ -40,6 +41,7 @@ export function BudgetPlanEditSheet({
   hasExistingSnapshot,
   onPlanSaved,
 }: BudgetPlanEditSheetProps) {
+  const isMobile = useIsMobile()
   const { user } = useAuth()
   const [saving, setSaving] = useState(false)
   const [availableCategories, setAvailableCategories] = useState<CategoryDB[]>([])
@@ -158,12 +160,16 @@ export function BudgetPlanEditSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{plan ? 'Edit Budget' : 'Set Up Budget'}</SheetTitle>
-        </SheetHeader>
+      <SheetContent
+        side={isMobile ? 'bottom' : 'right'}
+        className={isMobile ? 'min-h-[95dvh] rounded-t-2xl w-full p-0 overflow-hidden' : 'w-full sm:max-w-md'}
+      >
+        <div className="flex h-full flex-col">
+          <SheetHeader>
+            <SheetTitle>{plan ? 'Edit Budget' : 'Set Up Budget'}</SheetTitle>
+          </SheetHeader>
 
-        <div className="space-y-4 mt-6">
+          <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4 space-y-4">
           {/* Forward-only notice */}
           {hasExistingSnapshot && (
             <Alert className="py-2">
@@ -213,10 +219,10 @@ export function BudgetPlanEditSheet({
           {/* Add Category */}
           <div className="space-y-2">
             <Label className="text-sm">Add Category</Label>
-            <div className="flex items-end gap-2">
-              <div className="flex-1">
+            <div className="grid grid-cols-6 gap-2 sm:flex-row items-center">
+              <div className="w-full sm:flex-1 col-span-2">
                 <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
-                  <SelectTrigger className="h-9 text-sm">
+                  <SelectTrigger className="h-11 text-sm sm:h-9 w-full">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -239,28 +245,30 @@ export function BudgetPlanEditSheet({
                   </SelectContent>
                 </Select>
               </div>
-              <Input
-                type="amount"
-                min={0}
-                className="w-24 h-9"
-                value={categoryAmount}
-                onChange={(e) => setCategoryAmount(e.target.value)}
-                placeholder="0"
-              />
-              <Button
-                size="icon"
-                variant="outline"
-                className="h-9 w-9 shrink-0"
-                onClick={handleAddCategory}
-                disabled={!selectedCategoryId || !categoryAmount}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
+              <div className="col-span-3">
+                <Input
+                  type="amount"
+                  min={0}
+                  className="w-full h-11 sm:w-24 sm:h-9"
+                  value={categoryAmount}
+                  onChange={(e) => setCategoryAmount(e.target.value)}
+                  placeholder="0"
+                />
+              </div>
+              <div className="col-span-1">
+                <Button
+                  className="h-11 w-full shrink-0 sm:h-9 sm:w-9 col-span-1"
+                  onClick={handleAddCategory}
+                  disabled={!selectedCategoryId || !categoryAmount}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Allocated categories list */}
-          <div className="space-y-2">
+          <div className="space-y-2 pt-2 border-t max-h-[40dvh] overflow-y-auto">
             {budgetAllocation.allocatedCategories.map((cat) => (
               <div
                 key={cat.id}
@@ -280,7 +288,7 @@ export function BudgetPlanEditSheet({
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-7 w-7"
+                    className="h-11 w-11 p-0 sm:h-7 sm:w-7"
                     onClick={() => budgetAllocation.removeCategory(cat.category_id)}
                   >
                     <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
@@ -297,18 +305,18 @@ export function BudgetPlanEditSheet({
           </div>
 
           {/* Save / Cancel */}
-          <div className="flex gap-2 pt-2">
+          </div>
+          <SheetFooter className="border-t p-4 safe-area-inset-bottom">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button
-              className="flex-1"
               onClick={handleSave}
               disabled={saving || totalAmount <= 0 || budgetAllocation.remainingAmount < 0}
             >
               {saving ? 'Saving...' : plan ? 'Update Budget' : 'Create Budget'}
             </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-          </div>
+          </SheetFooter>
         </div>
       </SheetContent>
     </Sheet>

@@ -218,7 +218,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
           <SheetTitle>Add New Transaction</SheetTitle>
         </SheetHeader>
 
-        <div className={isMobile ? 'w-full px-4 pb-4 pt-4' : 'w-full'}>
+        <div className={isMobile ? 'w-full px-4 pt-4' : 'w-full'}>
           <Tabs defaultValue="manual" className="w-full overflow-y-auto">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="manual" className="flex items-center gap-2">
@@ -233,7 +233,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
             
             <TabsContent value="manual" className="mt-4 my-1">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className='overflow-y-auto no-scrollbar space-y-2 min-h-[70vh]'>
+                <div className='overflow-y-auto no-scrollbar space-y-2 min-h-[70dvh]'>
                   <div className="space-y-2 grid grid-cols-7 items-center">
                     <label className="text-sm font-medium col-span-2">Date</label>
                     <div className='col-span-5'>

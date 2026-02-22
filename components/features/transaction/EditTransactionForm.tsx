@@ -35,7 +35,6 @@ export function EditTransactionForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isAnySelectOpen, setIsAnySelectOpen] = useState(false)
   const [suppressCloseUntil, setSuppressCloseUntil] = useState(0)
-
   // Load user categories from shared context
   const { categories, loading: categoriesLoading } = useCategories()
   
@@ -211,7 +210,7 @@ export function EditTransactionForm({
         <SheetHeader className={isMobile ? 'mx-0 px-4' : undefined}>
           <SheetTitle>Edit Transaction</SheetTitle>
         </SheetHeader>
-        <div className={isMobile ? 'w-full px-4 pb-4 pt-4' : 'w-full'}>
+        <div className={isMobile ? 'w-full px-4 pt-4' : 'w-full'}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="overflow-y-auto no-scrollbar space-y-2 min-h-[70vh]">
           <div className="space-y-2 grid grid-cols-7 items-center">

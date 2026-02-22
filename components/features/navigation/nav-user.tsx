@@ -45,6 +45,7 @@ export function NavUser({
   }
 }) {
   const { signOut } = useAuth()
+  const [menuOpen, setMenuOpen] = useState(false)
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
   const [accountManagerOpen, setAccountManagerOpen] = useState(false)
 
@@ -52,7 +53,7 @@ export function NavUser({
     <>
       <SidebarMenu>
         <SidebarMenuItem>
-          <DropdownMenu>
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
@@ -92,6 +93,7 @@ export function NavUser({
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => {
+                  setMenuOpen(false)
                   setCategoryManagerOpen(true)
                   Analytics.track('Manage Categories Clicked', { trigger: 'user_menu' })
                 }}>
@@ -99,6 +101,7 @@ export function NavUser({
                   Manage Categories
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
+                  setMenuOpen(false)
                   setAccountManagerOpen(true)
                   Analytics.track('Manage Accounts Clicked', { trigger: 'user_menu' })
                 }}>
@@ -123,6 +126,7 @@ export function NavUser({
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => {
+                setMenuOpen(false)
                 Analytics.track('Logout Clicked', {
                   trigger: 'user_menu'
                 })
