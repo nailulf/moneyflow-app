@@ -129,20 +129,14 @@ export function BudgetSetupStepModal() {
       {/* Monthly Income */}
       <div className="space-y-2">
         <Label htmlFor="income">Monthly Income (optional)</Label>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-            Rp
-          </span>
-          <Input
-            id="income"
-            type="number"
-            placeholder="e.g., 10000000"
-            value={monthlyIncome}
-            onChange={(e) => setMonthlyIncome(e.target.value)}
-            className="pl-10"
-            disabled={isSubmitting}
-          />
-        </div>
+        <Input
+          id="income"
+          type="amount"
+          placeholder="e.g., 10000000"
+          value={monthlyIncome}
+          onChange={(e) => setMonthlyIncome(e.target.value)}
+          disabled={isSubmitting}
+        />
       </div>
 
       {/* Budget Templates */}

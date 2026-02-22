@@ -519,7 +519,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                   <Label htmlFor="total-amount">Total Budget Amount</Label>
                   <Input
                     id="total-amount"
-                    type="number"
+                    type="amount"
                     value={editForm.totalAmount || ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0
@@ -681,7 +681,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                     <div className="space-y-2">
                       <Label>Budget Amount</Label>
                       <Input
-                        type="number"
+                        type="amount"
                         value={category.budgetAmount || ''}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value) || 0

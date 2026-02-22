@@ -17,6 +17,7 @@ import { useTransactionMutations } from '@/hooks/useTransactionsQuery'
 import { UnifiedStatementProcessor } from '@/components/features/transaction/UnifiedStatementProcessor'
 import { Analytics } from '@/lib/analytics/amplitude'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 
 
 interface AddTransactionFormProps {
@@ -211,14 +212,14 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
       </SheetTrigger>
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={isMobile ? 'max-h-[95dvh] overflow-y-auto rounded-t-2xl w-full p-0' : 'w-full'}
+        className={isMobile ? 'max-h-[95dvh] rounded-t-2xl w-full p-0' : 'w-full grid flex-1 auto-rows-min px-4'}
       >
         <SheetHeader className={isMobile ? 'mx-0 px-4' : undefined}>
           <SheetTitle>Add New Transaction</SheetTitle>
         </SheetHeader>
 
         <div className={isMobile ? 'w-full px-4 pb-4 pt-4' : 'w-full'}>
-          <Tabs defaultValue="manual" className="w-full">
+          <Tabs defaultValue="manual" className="w-full overflow-y-auto">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="manual" className="flex items-center gap-2">
                 <Edit className="h-4 w-4" />
@@ -230,258 +231,282 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="manual" className="mt-4">
+            <TabsContent value="manual" className="mt-4 my-1">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Date</label>
-            <Input
-              type="date"
-              {...register('date')}
-              className={errors.date ? 'border-destructive' : ''}
-            />
-            {errors.date && (
-              <p className="text-sm text-destructive">{errors.date.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
-            <Input
-              placeholder="Enter description"
-              {...register('description')}
-              className={errors.description ? 'border-destructive' : ''}
-            />
-            {errors.description && (
-              <p className="text-sm text-destructive">{errors.description.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Amount</label>
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="0.00"
-              {...register('amount', { valueAsNumber: true })}
-              className={errors.amount ? 'border-destructive' : ''}
-            />
-            {errors.amount && (
-              <p className="text-sm text-destructive">{errors.amount.message}</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Use positive numbers for income, negative for expenses
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Type</label>
-            <Select
-              value={selectedType}
-              onValueChange={(value: string) => {
-                setSuppressCloseUntil(Date.now() + 500)
-                setValue('type', value as 'INCOME' | 'EXPENSE' | 'TRANSFER')
-              }}
-              onOpenChange={setIsAnySelectOpen}
-            >
-              <SelectTrigger className={errors.type ? 'border-destructive' : ''} data-testid="type-select-trigger">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="EXPENSE" data-testid="type-option-EXPENSE">Expense</SelectItem>
-                <SelectItem value="INCOME" data-testid="type-option-INCOME">Income</SelectItem>
-                <SelectItem value="TRANSFER" data-testid="type-option-TRANSFER">Transfer</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.type && (
-              <p className="text-sm text-destructive">{errors.type.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Category</label>
-            <div className="flex justify-between items-center">
-               {categoriesError && (
-                 <p className="text-xs text-destructive mb-1">Error: {categoriesError}</p>
-               )}
-               {process.env.NODE_ENV === 'development' && (
-                 <span className="text-[10px] text-muted-foreground">
-                   {categories.length} cats / User: {user?.id?.slice(0, 8)}...
-                 </span>
-               )}
-            </div>
-            <Select
-              value={(selectedCategoryId as string) || undefined}
-              onValueChange={(value) => {
-                setSuppressCloseUntil(Date.now() + 500)
-                setValue('category_id', value)
-              }}
-              disabled={categoriesLoading || !hasDynamicCategories}
-              onOpenChange={setIsAnySelectOpen}
-            >
-              <SelectTrigger className={errors.category_id ? 'border-destructive' : ''} data-testid="category-select-trigger">
-                <SelectValue placeholder={
-                  !hasDynamicCategories 
-                    ? (categoriesLoading ? 'Loading categories...' : `No categories for ${selectedType?.toLowerCase() || 'this type'}`)
-                    : (categoriesLoading ? 'Loading...' : 'Select category')
-                } />
-              </SelectTrigger>
-              <SelectContent>
-                {hasDynamicCategories ? (
-                  dynamicCategoryItems.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id} data-testid={`category-option-${cat.id}`}>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full flex-shrink-0" 
-                          style={{ backgroundColor: cat.color || 'hsl(var(--muted-foreground))' }}
-                        />
-                        {cat.name}
-                      </div>
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    {categoriesLoading ? 'Loading categories...' : `No categories available for ${selectedType?.toLowerCase() || 'this type'}`}
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
-            {errors.category_id && (
-              <p className="text-sm text-destructive">{errors.category_id.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Account</label>
-            <Select
-              value={watch('account_id') || undefined}
-              onValueChange={(value) => {
-                setSuppressCloseUntil(Date.now() + 500)
-                setValue('account_id', value)
-              }}
-              disabled={accountsLoading}
-              onOpenChange={setIsAnySelectOpen}
-            >
-              <SelectTrigger className={errors.account_id ? 'border-destructive' : ''} data-testid="account-select-trigger">
-                <SelectValue placeholder={accountsLoading ? 'Loading...' : 'Select account'} />
-              </SelectTrigger>
-              <SelectContent>
-                {accounts.length > 0 ? (
-                  accounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id} data-testid={`account-option-${account.id}`}>
-                      {account.name} ({account.type.toLowerCase().replace('_', ' ')})
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    No accounts available
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
-            {errors.account_id && (
-              <p className="text-sm text-destructive">{errors.account_id.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Merchant (Optional)</label>
-            <Input
-              placeholder="Enter merchant name"
-              {...register('merchant')}
-            />
-          </div>
-
-          <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="is_recurring"
-                {...register('is_recurring')}
-                className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
-              />
-              <label htmlFor="is_recurring" className="text-sm font-medium">
-                Recurring Transaction
-              </label>
-            </div>
-            
-            {isRecurring && (
-              <div className="space-y-4 pl-6 border-l-2 border-primary/20 ml-1">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Frequency</label>
-                  <Select
-                      value={watch('recurring_frequency') || 'monthly'}
-                      onValueChange={(value) => {
-                        setSuppressCloseUntil(Date.now() + 500)
-                        setValue('recurring_frequency', value as 'daily' | 'weekly' | 'monthly' | 'yearly')
-                      }}
-                      onOpenChange={setIsAnySelectOpen}
-                    >
-                      <SelectTrigger data-testid="frequency-select-trigger">
-                        <SelectValue placeholder="Select frequency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="yearly">Yearly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Period</label>
-                  <div className="flex flex-col space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="period_continuous"
-                        name="period_type"
-                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded-full"
-                        checked={!watch('recurring_end_date')}
-                        onChange={() => setValue('recurring_end_date', null)}
-                      />
-                      <label htmlFor="period_continuous" className="text-sm text-muted-foreground">
-                        Continuous (No end date)
-                      </label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="period_ended"
-                        name="period_type"
-                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded-full"
-                        checked={!!watch('recurring_end_date')}
-                        onChange={() => {
-                          // Set default end date to one year from now if not set
-                          if (!watch('recurring_end_date')) {
-                            const nextYear = new Date()
-                            nextYear.setFullYear(nextYear.getFullYear() + 1)
-                            setValue('recurring_end_date', nextYear.toISOString().split('T')[0])
-                          }
-                        }}
-                      />
-                      <label htmlFor="period_ended" className="text-sm text-muted-foreground">
-                        End Date
-                      </label>
-                    </div>
-                  </div>
-                  
-                  {!!watch('recurring_end_date') && (
-                    <div className="mt-2">
+                <div className='overflow-y-auto no-scrollbar space-y-2 min-h-[70vh]'>
+                  <div className="space-y-2 grid grid-cols-7 items-center">
+                    <label className="text-sm font-medium col-span-2">Date</label>
+                    <div className='col-span-5'>
                       <Input
                         type="date"
-                        {...register('recurring_end_date')}
-                        min={currentDate}
-                        className="w-full"
+                        {...register('date')}
+                        className={errors.date ? 'border-destructive' : ''}
+                      />
+                      {errors.date && (
+                        <p className="text-sm text-destructive">{errors.date.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 grid grid-cols-7 items-center">
+                    <label className="text-sm font-medium col-span-2">Description</label>
+                    <div className="col-span-5">
+                    <Input
+                      placeholder="Enter description"
+                      {...register('description')}
+                      className={errors.description ? 'border-destructive' : ''}
+                    />
+                    {errors.description && (
+                      <p className="text-sm text-destructive">{errors.description.message}</p>
+                    )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 grid grid-cols-7 items-center">
+                    <label className="text-sm font-medium col-span-2">Amount</label>
+                    <div className="col-span-5">
+                      <Input
+                        type="amount"
+                        step="1"
+                        placeholder="0.00"
+                        {...register('amount', { valueAsNumber: true })}
+                        className={errors.amount ? 'border-destructive' : ''}
+                      />
+                      {errors.amount && (
+                        <p className="text-sm text-destructive">{errors.amount.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 grid grid-cols-7 items-center">
+                    <label className="text-sm font-medium col-span-2">Type</label>
+                    <div className="col-span-5">
+                      <Select
+                        value={selectedType}
+                        onValueChange={(value: string) => {
+                          setSuppressCloseUntil(Date.now() + 500)
+                          setValue('type', value as 'INCOME' | 'EXPENSE' | 'TRANSFER')
+                        }}
+                        onOpenChange={setIsAnySelectOpen}
+                      >
+                        <SelectTrigger 
+                        className={cn(
+                          "w-full",
+                          errors.type ? 'border-destructive' : '')} data-testid="type-select-trigger">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="EXPENSE" data-testid="type-option-EXPENSE">Expense</SelectItem>
+                          <SelectItem value="INCOME" data-testid="type-option-INCOME">Income</SelectItem>
+                          <SelectItem value="TRANSFER" data-testid="type-option-TRANSFER">Transfer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      {errors.type && (
+                        <p className="text-sm text-destructive">{errors.type.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 grid grid-cols-7 items-center">
+                    <label className="text-sm col-span-2 font-medium">Category</label>
+                    <div className='col-span-5'>
+                    <Select
+                      value={(selectedCategoryId as string) || undefined}
+                      onValueChange={(value) => {
+                        setSuppressCloseUntil(Date.now() + 500)
+                        setValue('category_id', value)
+                      }}
+                      disabled={categoriesLoading || !hasDynamicCategories}
+                      onOpenChange={setIsAnySelectOpen}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          errors.category_id ? "border-destructive" : undefined
+                        )}
+                        data-testid="category-select-trigger"
+                      >
+                        <SelectValue placeholder={
+                          !hasDynamicCategories 
+                            ? (categoriesLoading ? 'Loading categories...' : `No categories for ${selectedType?.toLowerCase() || 'this type'}`)
+                            : (categoriesLoading ? 'Loading...' : 'Select category')
+                        } />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {hasDynamicCategories ? (
+                          dynamicCategoryItems.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id} data-testid={`category-option-${cat.id}`}>
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="w-3 h-3 rounded-full flex-shrink-0" 
+                                  style={{ backgroundColor: cat.color || 'hsl(var(--muted-foreground))' }}
+                                />
+                                {cat.name}
+                              </div>
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                            {categoriesLoading ? 'Loading categories...' : `No categories available for ${selectedType?.toLowerCase() || 'this type'}`}
+                          </div>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {errors.category_id && (
+                      <p className="text-sm text-destructive">{errors.category_id.message}</p>
+                    )}
+                    <div className="flex justify-between items-center">
+                      {categoriesError && (
+                        <p className="text-xs text-destructive mb-1">Error: {categoriesError}</p>
+                      )}
+                      {process.env.NODE_ENV === 'development' && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {categories.length} dev only stat : cats / User: {user?.id?.slice(0, 8)}...
+                        </span>
+                      )}
+                    </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 grid grid-cols-7 items-center">
+                    <label className="text-sm font-medium col-span-2">Account</label>
+                    <div className='col-span-5'>
+                      <Select
+                        value={watch('account_id') || undefined}
+                        onValueChange={(value) => {
+                          setSuppressCloseUntil(Date.now() + 500)
+                          setValue('account_id', value)
+                        }}
+                        disabled={accountsLoading}
+                        onOpenChange={setIsAnySelectOpen}
+                      >
+                        <SelectTrigger className={cn(
+                          "w-full",
+                          errors.account_id ? 'border-destructive' : '')} data-testid="account-select-trigger">
+                          <SelectValue placeholder={accountsLoading ? 'Loading...' : 'Select account'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accounts.length > 0 ? (
+                            accounts.map((account) => (
+                              <SelectItem key={account.id} value={account.id} data-testid={`account-option-${account.id}`}>
+                                {account.name} ({account.type.toLowerCase().replace('_', ' ')})
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                              No accounts available
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {errors.account_id && (
+                        <p className="text-sm text-destructive">{errors.account_id.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 grid grid-cols-7 items-center">
+                    <label className="text-sm font-medium col-span-2">Merchant (Opt)</label>
+                    <div className='col-span-5'>
+                      <Input
+                        placeholder="Enter merchant name"
+                        {...register('merchant')}
                       />
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+                  </div>
 
-                <SheetFooter className={isMobile ? undefined : 'pt-4'}>
+                  <div className="space-y-4 border rounded-lg p-4 bg-muted/50">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="is_recurring"
+                        {...register('is_recurring')}
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                      />
+                      <label htmlFor="is_recurring" className="text-sm font-medium">
+                        Recurring Transaction
+                      </label>
+                    </div>
+                    
+                    {isRecurring && (
+                      <div className="space-y-4 pl-6 border-l-2 border-primary/20 ml-1">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Frequency</label>
+                          <Select
+                              value={watch('recurring_frequency') || 'monthly'}
+                              onValueChange={(value) => {
+                                setSuppressCloseUntil(Date.now() + 500)
+                                setValue('recurring_frequency', value as 'daily' | 'weekly' | 'monthly' | 'yearly')
+                              }}
+                              onOpenChange={setIsAnySelectOpen}
+                            >
+                              <SelectTrigger data-testid="frequency-select-trigger">
+                                <SelectValue placeholder="Select frequency" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="daily">Daily</SelectItem>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="yearly">Yearly</SelectItem>
+                              </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Period</label>
+                          <div className="flex flex-col space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="radio"
+                                id="period_continuous"
+                                name="period_type"
+                                className="h-4 w-4 text-primary focus:ring-primary border-input rounded-full"
+                                checked={!watch('recurring_end_date')}
+                                onChange={() => setValue('recurring_end_date', null)}
+                              />
+                              <label htmlFor="period_continuous" className="text-sm text-muted-foreground">
+                                Continuous (No end date)
+                              </label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="radio"
+                                id="period_ended"
+                                name="period_type"
+                                className="h-4 w-4 text-primary focus:ring-primary border-input rounded-full"
+                                checked={!!watch('recurring_end_date')}
+                                onChange={() => {
+                                  // Set default end date to one year from now if not set
+                                  if (!watch('recurring_end_date')) {
+                                    const nextYear = new Date()
+                                    nextYear.setFullYear(nextYear.getFullYear() + 1)
+                                    setValue('recurring_end_date', nextYear.toISOString().split('T')[0])
+                                  }
+                                }}
+                              />
+                              <label htmlFor="period_ended" className="text-sm text-muted-foreground">
+                                End Date
+                              </label>
+                            </div>
+                          </div>
+                          
+                          {!!watch('recurring_end_date') && (
+                            <div className="mt-2">
+                              <Input
+                                type="date"
+                                {...register('recurring_end_date')}
+                                min={currentDate}
+                                className="w-full"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <SheetFooter>
                   <Button
                     type="button"
                     variant="outline"

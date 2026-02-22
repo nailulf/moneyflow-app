@@ -147,21 +147,15 @@ export function EditGoalModal({
           {/* Target Amount */}
           <div className="space-y-2">
             <Label htmlFor="targetAmount">Target Amount</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                {account.currency === 'IDR' ? 'Rp' : '$'}
-              </span>
-              <Input
-                id="targetAmount"
-                type="number"
-                className="pl-10"
-                placeholder="30,000,000"
-                value={formData.targetAmount}
-                onChange={(e) =>
-                  setFormData({ ...formData, targetAmount: e.target.value })
-                }
-              />
-            </div>
+            <Input
+              id="targetAmount"
+              type="amount"
+              placeholder="30,000,000"
+              value={formData.targetAmount}
+              onChange={(e) =>
+                setFormData({ ...formData, targetAmount: e.target.value })
+              }
+            />
             <p className="text-xs text-muted-foreground">
               Current balance: {formatCurrency(account.balance, account.currency)}
             </p>

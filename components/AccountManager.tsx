@@ -403,7 +403,7 @@ function AccountManagerInternal({
                     </label>
                     <Input
                       id="account-balance"
-                      type="number"
+                      type="amount"
                       step="0.01"
                       value={newAccountBalance}
                       onChange={(e) => setNewAccountBalance(e.target.value)}
