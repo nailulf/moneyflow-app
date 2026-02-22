@@ -14,7 +14,7 @@ import { AccountDB } from '@/types/database'
 import { useAllTransactions } from '@/hooks/useTransactionsQuery'
 import { useAuth } from '@/contexts/AuthContext'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/molecules/tabs'
-import { TransactionTable } from '@/components/TransactionTable'
+import { TransactionTable } from '@/components/features/transaction/TransactionTable'
 import { toast } from 'sonner'
 import {
   Dialog,
