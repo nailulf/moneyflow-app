@@ -82,7 +82,7 @@ export function BudgetPlanEditSheet({
         .then(setAvailableCategories)
         .catch((err) => console.error('Failed to load categories:', err))
     }
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open])
 
   const handleTotalAmountChange = (value: string) => {
     const num = parseFloat(value) || 0

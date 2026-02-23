@@ -45,7 +45,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
         router.refresh()
       }
     })
-  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   if (loading) {
     return (
