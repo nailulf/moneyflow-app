@@ -1,0 +1,166 @@
+{
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Enter your email below to login to your account",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Login",
+      "orContinueWith": "Or continue with",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "successLoggedIn": "Logged in successfully",
+      "errors": {
+        "invalidEmail": "Invalid email address",
+        "passwordTooShort": "Password must be at least 6 characters"
+      }
+    },
+    "register": {
+      "title": "Create an account",
+      "subtitle": "Enter your details below to create your account",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "primaryCurrency": "Primary Currency",
+      "currencyPlaceholder": "Currency",
+      "country": "Country",
+      "countryPlaceholder": "Country",
+      "goal": "What's your main goal?",
+      "goalOptional": "(optional)",
+      "submit": "Sign Up",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "verificationNotice": "We'll send a verification link to your email address. You'll need to click it before you can sign in.",
+      "verificationConsent": "I understand that I will need to verify my email address to access my account.",
+      "successDev": "Registration successful! You are now signed in.",
+      "successProd": "Registration successful! Please check your email to verify your account.",
+      "errors": {
+        "fullNameTooShort": "Full name must be at least 2 characters",
+        "invalidEmail": "Invalid email address",
+        "passwordTooShort": "Password must be at least 6 characters",
+        "passwordsDontMatch": "Passwords don't match",
+        "selectCountry": "Please select your country",
+        "mustAcknowledgeVerification": "You must acknowledge the email verification requirement"
+      },
+      "goals": {
+        "networth_tracking": "Track my net worth",
+        "expense_management": "Manage expenses & budgets",
+        "family_budget": "Manage family budget",
+        "saving_goals": "Save for a goal",
+        "freelance_income": "Track freelance / business income",
+        "debt_payoff": "Pay off debt"
+      }
+    },
+    "layout": {
+      "tagline": "Know where your money goes—and where it can take you.",
+      "ctaText": "See every expense clearly, so your money feels under control. Get started with MoneyFlow today.",
+      "termsPrefix": "By logging in, you agree to our",
+      "termsOfService": "terms of service",
+      "and": "and",
+      "privacyPolicy": "privacy policy",
+      "features": {
+        "uploadExpenses": "Upload Expenses",
+        "manageBudgets": "Manage Budgets",
+        "cashFlowClarity": "Cash Flow Clarity",
+        "networthTracker": "Networth Tracker",
+        "connectCFP": "Connect CFP",
+        "aiPowered": "AI powered"
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email address and we'll send you a link to reset your password",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "submit": "Send Reset Link",
+      "rememberPassword": "Remember your password?",
+      "signIn": "Sign in",
+      "successEmailSent": "Check your email for the password reset link",
+      "errorFailed": "Failed to send password reset email",
+      "errors": {
+        "invalidEmail": "Invalid email address"
+      }
+    }
+  },
+  "nav": {
+    "upgradeLabel": "Upgrade to Pro",
+    "manageCategories": "Manage Categories",
+    "manageAccounts": "Manage Accounts",
+    "account": "Account",
+    "billing": "Billing",
+    "notifications": "Notifications",
+    "logOut": "Log out",
+    "language": "Language",
+    "languageOptions": {
+      "en": "English",
+      "id": "Indonesian"
+    }
+  },
+  "layout": {
+    "pageTitle": {
+      "spending": "Spending",
+      "accounts": "Accounts",
+      "portfolio": "Portfolio",
+      "invest": "Invest",
+      "advice": "Advice",
+      "tax": "Tax",
+      "equity": "Equity",
+      "estatePlanning": "Estate Planning",
+      "dashboard": "Dashboard"
+    }
+  },
+  "dashboard": {
+    "netWorth": {
+      "totalNetWorth": "Total Net Worth",
+      "noData": "No data available",
+      "netWorth": "Net Worth",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "noAssetsRecorded": "No assets recorded",
+      "noLiabilitiesRecorded": "No liabilities recorded",
+      "added": "Added",
+      "recently": "recently",
+      "periods": {
+        "allTime": "all time",
+        "lastWeek": "last week",
+        "lastMonth": "last month",
+        "last3Months": "last 3 months",
+        "lastYear": "last year",
+        "last5Years": "last 5 years"
+      }
+    },
+    "budget": {
+      "budgetIn": "Budget in {period}",
+      "failedToLoad": "Failed to load budget",
+      "noBudgetSet": "No budget set"
+    },
+    "onboarding": {
+      "title": "Complete Your Setup",
+      "description": "You haven't finished setting up MoneyFlow. Complete the setup to unlock all features.",
+      "features": {
+        "trackExpenses": "Track expenses across all accounts",
+        "createBudgets": "Create budgets that work",
+        "understandSpending": "Understand your spending"
+      },
+      "completeSetup": "Complete Setup",
+      "maybeLater": "Maybe Later"
+    },
+    "goals": {
+      "title": "Financial Goals",
+      "subtitle": "Track progress towards your savings targets",
+      "failedToLoad": "Failed to load financial goals",
+      "emptyTitle": "Start Your Savings Journey",
+      "emptyDescription": "Set financial goals for your bank and investment accounts to track your progress towards your dreams.",
+      "setFirstGoal": "Set Your First Goal",
+      "manageGoals": "Manage Goals",
+      "goalsCount": "Goals",
+      "completedCount": "Completed",
+      "target": "Target"
+    }
+  }
+}

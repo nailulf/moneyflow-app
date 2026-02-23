@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { UserPreference } from '@/types/database'
 
 // Get a specific user preference
@@ -6,7 +6,7 @@ export async function getUserPreference<T = unknown>(
   userId: string, 
   key: string
 ): Promise<T | null> {
-  const { data, error } = await getSupabaseClient()
+  const { data, error } = await createClient()
     .from('user_preferences')
     .select('preference_value')
     .eq('user_id', userId)
@@ -27,7 +27,7 @@ export async function getUserPreference<T = unknown>(
 
 // Get all user preferences
 export async function getAllUserPreferences(userId: string): Promise<Record<string, unknown>> {
-  const { data, error } = await getSupabaseClient()
+  const { data, error } = await createClient()
     .from('user_preferences')
     .select('preference_key, preference_value')
     .eq('user_id', userId)
@@ -51,7 +51,7 @@ export async function setUserPreference<T = unknown>(
   key: string,
   value: T
 ): Promise<UserPreference> {
-  const { data, error } = await getSupabaseClient()
+  const { data, error } = await createClient()
     .from('user_preferences')
     .upsert({
       user_id: userId,
@@ -72,7 +72,7 @@ export async function setUserPreference<T = unknown>(
 
 // Delete a user preference
 export async function deleteUserPreference(userId: string, key: string): Promise<void> {
-  const { error } = await getSupabaseClient()
+  const { error } = await createClient()
     .from('user_preferences')
     .delete()
     .eq('user_id', userId)
@@ -155,5 +155,13 @@ export const preferences = {
 
   async setUserGoal(userId: string, goal: string): Promise<void> {
     await setUserPreference(userId, PREFERENCE_KEYS.USER_GOAL, goal)
-  }
+  },
+
+  async getLanguage(userId: string): Promise<'en' | 'id'> {
+    return (await getUserPreference<'en' | 'id'>(userId, PREFERENCE_KEYS.LANGUAGE)) || 'en'
+  },
+
+  async setLanguage(userId: string, language: 'en' | 'id'): Promise<void> {
+    await setUserPreference(userId, PREFERENCE_KEYS.LANGUAGE, language)
+  },
 }

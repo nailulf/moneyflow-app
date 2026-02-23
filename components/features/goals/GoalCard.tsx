@@ -9,6 +9,7 @@ import {
   getProgressColor
 } from '@/lib/goals/calculations'
 import { GoalSummaryItem } from '@/hooks/useGoalsQuery'
+import { useTranslations } from 'next-intl'
 
 interface GoalCardProps {
   goal: GoalSummaryItem
@@ -17,6 +18,7 @@ interface GoalCardProps {
 
 export function GoalCard({ goal, onClick }: GoalCardProps) {
   const router = useRouter()
+  const t = useTranslations('dashboard.goals')
 
   const tracking = isGoalOnTrack(
     goal.currentAmount,
@@ -68,7 +70,7 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
             </span>
           </div>
           <div className="text-right">
-            <div className="text-muted-foreground text-xs">Target</div>
+            <div className="text-muted-foreground text-xs">{t('target')}</div>
             <div className="font-medium text-foreground">
               {formatCurrency(goal.targetAmount, goal.currency)}
             </div>

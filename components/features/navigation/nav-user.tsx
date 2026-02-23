@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import {
   BadgeCheck,
   Bell,
@@ -8,7 +9,9 @@ import {
   LogOut,
   Settings,
   Sparkles,
+  Globe,
 } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
 
 import {
   Avatar,
@@ -21,6 +24,8 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/molecules/dropdown-menu"
@@ -34,6 +39,8 @@ import { Analytics } from '@/lib/analytics/amplitude'
 import { CategoryManager } from '@/components/CategoryManager'
 import { AccountManager } from '@/components/AccountManager'
 import { AccountProvider } from '@/contexts/AccountContext'
+import { preferences } from '@/lib/api/user-preferences'
+import { setLocaleCookie, type SupportedLocale } from '@/lib/actions/locale'
 
 export function NavUser({
   user,
@@ -44,10 +51,23 @@ export function NavUser({
     avatar: string
   }
 }) {
-  const { signOut } = useAuth()
+  const { signOut, user: authUser } = useAuth()
+  const router = useRouter()
+  const locale = useLocale()
+  const t = useTranslations('nav')
   const [menuOpen, setMenuOpen] = useState(false)
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
   const [accountManagerOpen, setAccountManagerOpen] = useState(false)
+
+  const handleLanguageChange = async (newLocale: string) => {
+    const lang = newLocale as SupportedLocale
+    await setLocaleCookie(lang)
+    if (authUser?.id) {
+      await preferences.setLanguage(authUser.id, lang)
+    }
+    Analytics.track('Language Changed', { locale: lang, trigger: 'user_menu' })
+    router.refresh()
+  }
 
   return (
     <>
@@ -87,7 +107,7 @@ export function NavUser({
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => Analytics.track('Upgrade To Pro Clicked', { trigger: 'user_menu' })}>
                   <Sparkles />
-                  Upgrade to Pro
+                  {t('upgradeLabel')}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
@@ -98,7 +118,7 @@ export function NavUser({
                   Analytics.track('Manage Categories Clicked', { trigger: 'user_menu' })
                 }}>
                   <Settings />
-                  Manage Categories
+                  {t('manageCategories')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
                   setMenuOpen(false)
@@ -106,23 +126,38 @@ export function NavUser({
                   Analytics.track('Manage Accounts Clicked', { trigger: 'user_menu' })
                 }}>
                   <CreditCard />
-                  Manage Accounts
+                  {t('manageAccounts')}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => Analytics.track('Account Settings Clicked', { trigger: 'user_menu' })}>
                   <BadgeCheck />
-                  Account
+                  {t('account')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => Analytics.track('Billing Clicked', { trigger: 'user_menu' })}>
                   <CreditCard />
-                  Billing
+                  {t('billing')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => Analytics.track('Notifications Clicked', { trigger: 'user_menu' })}>
                   <Bell />
-                  Notifications
+                  {t('notifications')}
                 </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="flex items-center gap-2 text-xs font-normal text-muted-foreground px-2 py-1">
+                  <Globe className="h-3.5 w-3.5" />
+                  {t('language')}
+                </DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={locale} onValueChange={handleLanguageChange}>
+                  <DropdownMenuRadioItem value="en">
+                    🇬🇧 {t('languageOptions.en')}
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="id">
+                    🇮🇩 {t('languageOptions.id')}
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => {
@@ -133,7 +168,7 @@ export function NavUser({
                 signOut()
               }}>
                 <LogOut />
-                Log out
+                {t('logOut')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

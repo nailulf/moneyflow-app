@@ -63,7 +63,7 @@ export function CompletionView() {
 
       {/* Header */}
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold">You're All Set!</h2>
+        <h2 className="text-2xl font-bold">You&apos;re All Set!</h2>
         <p className="text-muted-foreground">
           Your MoneyFlow workspace is ready to use
         </p>

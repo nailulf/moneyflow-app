@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/molecules/select'
 import { preferences } from '@/lib/api/user-preferences'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { useTranslations } from 'next-intl'
 
 const CURRENCIES = [
   { value: 'IDR', label: '🇮🇩 IDR — Indonesian Rupiah' },
@@ -41,24 +42,34 @@ const COUNTRIES = [
   { value: 'Other', label: '🌏 Other' },
 ] as const
 
-const USER_GOALS = [
-  { value: 'networth_tracking', label: 'Track my net worth' },
-  { value: 'expense_management', label: 'Manage expenses & budgets' },
-  { value: 'family_budget', label: 'Manage family budget' },
-  { value: 'saving_goals', label: 'Save for a goal' },
-  { value: 'freelance_income', label: 'Track freelance / business income' },
-  { value: 'debt_payoff', label: 'Pay off debt' },
+const GOAL_VALUES = [
+  'networth_tracking',
+  'expense_management',
+  'family_budget',
+  'saving_goals',
+  'freelance_income',
+  'debt_payoff',
 ] as const
 
-const createRegisterSchema = (requireVerification: boolean) =>
-  z
+const inputClassName = 'bg-white/10 border-white/20 text-auth-sidebar-foreground placeholder:text-white/40 rounded-full h-12 px-6 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-auth-accent'
+const selectTriggerClassName = 'bg-white/10 border-white/20 text-auth-sidebar-foreground rounded-full h-12 px-6 focus:ring-offset-0 focus:ring-1 focus:ring-auth-accent [&>span]:text-white/90 [&_svg]:text-white/60'
+
+export default function RegisterPage() {
+  const router = useRouter()
+  const t = useTranslations('auth.register')
+  const [isLoading, setIsLoading] = useState(false)
+  const [authError, setAuthError] = useState<any>(null)
+  const supabase = createClient()
+  const shouldRequireVerification = !isDevToolsEnabled()
+
+  const registerSchema = z
     .object({
-      fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-      email: z.string().email('Invalid email address'),
-      password: z.string().min(6, 'Password must be at least 6 characters'),
+      fullName: z.string().min(2, { message: t('errors.fullNameTooShort') }),
+      email: z.string().email({ message: t('errors.invalidEmail') }),
+      password: z.string().min(6, { message: t('errors.passwordTooShort') }),
       confirmPassword: z.string(),
       currency: z.enum(['IDR', 'USD', 'EUR', 'SGD']),
-      country: z.string().min(1, 'Please select your country'),
+      country: z.string().min(1, { message: t('errors.selectCountry') }),
       goal: z.enum(['networth_tracking', 'expense_management', 'family_budget', 'saving_goals', 'freelance_income', 'debt_payoff']).optional(),
       verificationConsent: z.boolean(),
     })
@@ -66,31 +77,21 @@ const createRegisterSchema = (requireVerification: boolean) =>
       if (data.password !== data.confirmPassword) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Passwords don't match",
+          message: t('errors.passwordsDontMatch'),
           path: ['confirmPassword'],
         })
       }
 
-      if (requireVerification && !data.verificationConsent) {
+      if (shouldRequireVerification && !data.verificationConsent) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'You must acknowledge the email verification requirement',
+          message: t('errors.mustAcknowledgeVerification'),
           path: ['verificationConsent'],
         })
       }
     })
 
-type RegisterFormValues = z.infer<ReturnType<typeof createRegisterSchema>>
-
-const inputClassName = 'bg-white/10 border-white/20 text-auth-sidebar-foreground placeholder:text-white/40 rounded-full h-12 px-6 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-auth-accent'
-const selectTriggerClassName = 'bg-white/10 border-white/20 text-auth-sidebar-foreground rounded-full h-12 px-6 focus:ring-offset-0 focus:ring-1 focus:ring-auth-accent [&>span]:text-white/90 [&_svg]:text-white/60'
-
-export default function RegisterPage() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [authError, setAuthError] = useState<any>(null)
-  const supabase = createClient()
-  const shouldRequireVerification = !isDevToolsEnabled()
+  type RegisterFormValues = z.infer<typeof registerSchema>
 
   const {
     register,
@@ -98,7 +99,7 @@ export default function RegisterPage() {
     control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
-    resolver: zodResolver(createRegisterSchema(shouldRequireVerification)),
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: '',
       email: '',
@@ -155,7 +156,6 @@ export default function RegisterPage() {
           throw signInError
         }
 
-        // Persist user preferences immediately after sign-in in dev mode
         if (signInData.user) {
           await Promise.all([
             preferences.setCurrency(signInData.user.id, data.currency),
@@ -173,13 +173,12 @@ export default function RegisterPage() {
           timestamp: new Date().toISOString(),
         })
 
-        toast.success('Registration successful! You are now signed in.')
+        toast.success(t('successDev'))
         router.push('/')
         router.refresh()
         return
       }
 
-      // Production: preferences will be synced from user_metadata by OnboardingContext on first load
       Analytics.track('registration_completed', {
         currency: data.currency,
         country: data.country,
@@ -187,7 +186,7 @@ export default function RegisterPage() {
         timestamp: new Date().toISOString(),
       })
 
-      toast.success('Registration successful! Please check your email to verify your account.')
+      toast.success(t('successProd'))
       router.push(`/verify-email?email=${encodeURIComponent(data.email)}`)
     } catch (error: any) {
       setAuthError(error)
@@ -198,10 +197,8 @@ export default function RegisterPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col items-start gap-2">
-        <h1 className="text-3xl font-serif text-auth-sidebar-foreground">Create an account</h1>
-        <p className="text-auth-sidebar-foreground/60">
-          Enter your details below to create your account
-        </p>
+        <h1 className="text-3xl font-serif text-auth-sidebar-foreground">{t('title')}</h1>
+        <p className="text-auth-sidebar-foreground/60">{t('subtitle')}</p>
       </div>
 
       <div className="grid gap-6">
@@ -211,10 +208,10 @@ export default function RegisterPage() {
           <div className="grid gap-6">
             {/* Full Name */}
             <div className="grid gap-2">
-              <Label htmlFor="fullName" className="text-auth-sidebar-foreground/80">Full Name</Label>
+              <Label htmlFor="fullName" className="text-auth-sidebar-foreground/80">{t('fullName')}</Label>
               <Input
                 id="fullName"
-                placeholder="John Doe"
+                placeholder={t('fullNamePlaceholder')}
                 className={inputClassName}
                 {...register('fullName')}
               />
@@ -225,10 +222,10 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div className="grid gap-2">
-              <Label htmlFor="email" className="text-auth-sidebar-foreground/80">Email</Label>
+              <Label htmlFor="email" className="text-auth-sidebar-foreground/80">{t('email')}</Label>
               <Input
                 id="email"
-                placeholder="m@example.com"
+                placeholder={t('emailPlaceholder')}
                 type="email"
                 className={inputClassName}
                 {...register('email')}
@@ -240,7 +237,7 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div className="grid gap-2">
-              <Label htmlFor="password" className="text-auth-sidebar-foreground/80">Password</Label>
+              <Label htmlFor="password" className="text-auth-sidebar-foreground/80">{t('password')}</Label>
               <PasswordInput
                 id="password"
                 className={inputClassName}
@@ -253,7 +250,7 @@ export default function RegisterPage() {
 
             {/* Confirm Password */}
             <div className="grid gap-2">
-              <Label htmlFor="confirmPassword" className="text-auth-sidebar-foreground/80">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="text-auth-sidebar-foreground/80">{t('confirmPassword')}</Label>
               <PasswordInput
                 id="confirmPassword"
                 className={inputClassName}
@@ -267,14 +264,14 @@ export default function RegisterPage() {
             {/* Currency + Country row */}
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-2">
-                <Label className="text-auth-sidebar-foreground/80">Primary Currency</Label>
+                <Label className="text-auth-sidebar-foreground/80">{t('primaryCurrency')}</Label>
                 <Controller
                   control={control}
                   name="currency"
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className={selectTriggerClassName}>
-                        <SelectValue placeholder="Currency" />
+                        <SelectValue placeholder={t('currencyPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {CURRENCIES.map(c => (
@@ -289,14 +286,14 @@ export default function RegisterPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label className="text-auth-sidebar-foreground/80">Country</Label>
+                <Label className="text-auth-sidebar-foreground/80">{t('country')}</Label>
                 <Controller
                   control={control}
                   name="country"
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className={selectTriggerClassName}>
-                        <SelectValue placeholder="Country" />
+                        <SelectValue placeholder={t('countryPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {COUNTRIES.map(c => (
@@ -317,20 +314,20 @@ export default function RegisterPage() {
             {/* Goal */}
             <div className="grid gap-2">
               <Label className="text-auth-sidebar-foreground/80">
-                What&apos;s your main goal? <span className="opacity-50">(optional)</span>
+                {t('goal')} <span className="opacity-50">{t('goalOptional')}</span>
               </Label>
               <Controller
                 control={control}
                 name="goal"
                 render={({ field }) => (
                   <div className="grid grid-cols-2 gap-2">
-                    {USER_GOALS.map(g => {
-                      const isSelected = field.value === g.value
+                    {GOAL_VALUES.map(value => {
+                      const isSelected = field.value === value
                       return (
                         <button
-                          key={g.value}
+                          key={value}
                           type="button"
-                          onClick={() => field.onChange(isSelected ? undefined : g.value)}
+                          onClick={() => field.onChange(isSelected ? undefined : value)}
                           className={[
                             'text-left text-sm px-3 py-2 rounded-xl border transition-colors',
                             isSelected
@@ -338,7 +335,7 @@ export default function RegisterPage() {
                               : 'border-white/20 bg-white/5 text-auth-sidebar-foreground/70 hover:bg-white/10 hover:border-white/30',
                           ].join(' ')}
                         >
-                          {g.label}
+                          {t(`goals.${value}`)}
                         </button>
                       )
                     })}
@@ -352,9 +349,7 @@ export default function RegisterPage() {
                 <div className="rounded-xl bg-white/10 border border-white/10 p-4">
                   <div className="flex gap-3 text-sm text-auth-sidebar-foreground/90">
                     <Info className="h-5 w-5 shrink-0 text-auth-accent" />
-                    <p className="leading-relaxed">
-                      We&apos;ll send a verification link to your email address. You&apos;ll need to click it before you can sign in.
-                    </p>
+                    <p className="leading-relaxed">{t('verificationNotice')}</p>
                   </div>
                 </div>
 
@@ -376,7 +371,7 @@ export default function RegisterPage() {
                       htmlFor="verificationConsent"
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-auth-sidebar-foreground/80"
                     >
-                      I understand that I will need to verify my email address to access my account.
+                      {t('verificationConsent')}
                     </label>
                     {errors.verificationConsent && (
                       <p className="text-sm text-[#ff6b6b]">{errors.verificationConsent.message}</p>
@@ -390,16 +385,16 @@ export default function RegisterPage() {
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
-              Sign Up
+              {t('submit')}
             </Button>
           </div>
         </form>
       </div>
 
       <div className="text-center text-sm text-auth-sidebar-foreground/60">
-        Already have an account?{" "}
+        {t('alreadyHaveAccount')}{" "}
         <Link href="/login" className="text-auth-accent hover:text-auth-accent/90 underline underline-offset-4">
-          Sign in
+          {t('signIn')}
         </Link>
       </div>
     </div>

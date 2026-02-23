@@ -95,17 +95,12 @@ export function BudgetFilterBar({
   const isMobile = useIsMobile()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
-  const ActionButton = () => {
-    if (onCreateBudget) {
-      return (
-        <Button onClick={onCreateBudget} size={isMobile ? 'sm' : 'default'} className="shrink-0">
-          <Plus className="h-4 w-4 mr-1" />
-          {isMobile ? 'Budget' : 'Create Budget'}
-        </Button>
-      )
-    }
-    return null
-  }
+  const actionButton = onCreateBudget ? (
+    <Button onClick={onCreateBudget} size={isMobile ? 'sm' : 'default'} className="shrink-0">
+      <Plus className="h-4 w-4 mr-1" />
+      {isMobile ? 'Budget' : 'Create Budget'}
+    </Button>
+  ) : null
 
   if (isMobile) {
     return (
@@ -119,7 +114,7 @@ export function BudgetFilterBar({
           <Filter className="h-4 w-4" />
         </Button>
 
-        <ActionButton />
+        {actionButton}
 
         <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <SheetContent side="bottom" className="h-auto rounded-t-xl pb- w-full">
@@ -165,7 +160,7 @@ export function BudgetFilterBar({
         </Badge>
       )}
 
-      <ActionButton />
+      {actionButton}
     </div>
   )
 }

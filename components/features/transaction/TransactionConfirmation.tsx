@@ -285,7 +285,7 @@ export default function TransactionConfirmation({
                     into {accountName || 'the selected account'}. This action cannot be undone.
                   </div>
                   <div className="text-sm leading-body-sm text-muted-foreground">
-                    Please review the transaction details above and click "Import Transactions" to proceed.
+                    Please review the transaction details above and click &quot;Import Transactions&quot; to proceed.
                   </div>
                 </div>
               </AlertDescription>

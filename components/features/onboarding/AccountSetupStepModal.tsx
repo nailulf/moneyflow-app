@@ -282,7 +282,6 @@ export function AccountSetupStepModal() {
                         key={bank.id}
                         type="button"
                         onClick={() => handleBankSelect(bank)}
-                        aria-selected={selectedBankId === bank.id}
                         className={cn(
                           'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground',
                           selectedBankId === bank.id && 'bg-accent text-accent-foreground'
@@ -308,7 +307,6 @@ export function AccountSetupStepModal() {
                         key={bank.id}
                         type="button"
                         onClick={() => handleBankSelect(bank)}
-                        aria-selected={selectedBankId === bank.id}
                         className={cn(
                           'flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground',
                           selectedBankId === bank.id && 'bg-accent text-accent-foreground'

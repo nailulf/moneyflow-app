@@ -27,6 +27,7 @@ import { Skeleton } from '@/components/ui/atoms/skeleton'
 import { useAccounts } from '@/contexts/AccountContext'
 import { formatDistanceToNow } from 'date-fns'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTranslations } from 'next-intl'
 
 const AccountManagerLazy = dynamic(
   () => import('@/components/AccountManager').then((mod) => ({ default: mod.AccountManager })),
@@ -60,12 +61,7 @@ const timePeriods: { value: TimePeriod; label: string }[] = [
   { value: 'ALL', label: 'ALL' },
 ]
 
-const chartConfig = {
-  value: {
-    label: 'Net Worth',
-    color: 'hsl(var(--chart-1))',
-  },
-}
+// chartConfig is defined inside NetWorthContent to access translations
 
 function NetWorthTooltip({
   active,
@@ -110,6 +106,7 @@ function AccountRow({
 }: {
   account: { name: string; type: string; currentBalance: number; created_at?: string }
 }) {
+  const t = useTranslations('dashboard.netWorth')
   return (
     <div className="flex items-center justify-between py-1.5">
       <div className="flex items-center gap-3 min-w-0">
@@ -119,10 +116,10 @@ function AccountRow({
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">{account.name}</p>
           <p className="text-xs text-muted-foreground">
-            Added{' '}
+            {t('added')}{' '}
             {account.created_at
               ? formatDistanceToNow(new Date(account.created_at), { addSuffix: true })
-              : 'recently'}
+              : t('recently')}
           </p>
         </div>
       </div>
@@ -172,6 +169,7 @@ function CategoryGroup({
 
 function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
   const { user } = useAuth()
+  const t = useTranslations('dashboard.netWorth')
   const userId = user?.id || ''
   const { accounts, loading: accountsLoading, error: accountsError } = useAccounts()
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('1Y')
@@ -180,6 +178,13 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  const chartConfig = {
+    value: {
+      label: t('netWorth'),
+      color: 'hsl(var(--chart-1))',
+    },
+  }
 
   const refreshNetWorth = useCallback(async () => {
     try {
@@ -224,16 +229,16 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
 
   const periodLabel =
     selectedPeriod === 'ALL'
-      ? 'all time'
+      ? t('periods.allTime')
       : selectedPeriod === '1W'
-        ? 'last week'
+        ? t('periods.lastWeek')
         : selectedPeriod === '1M'
-          ? 'last month'
+          ? t('periods.lastMonth')
           : selectedPeriod === '3M'
-            ? 'last 3 months'
+            ? t('periods.last3Months')
             : selectedPeriod === '1Y'
-              ? 'last year'
-              : 'last 5 years'
+              ? t('periods.lastYear')
+              : t('periods.last5Years')
 
   if ((error || accountsError) && !netWorthData) {
     return (
@@ -252,7 +257,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
       <Card className="w-full">
         <CardContent className="p-6">
           <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
-            No data available
+            {t('noData')}
           </div>
         </CardContent>
       </Card>
@@ -268,7 +273,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
             {/* Net Worth Value */}
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Total Net Worth
+                {t('totalNetWorth')}
               </p>
               {isLoading ? (
                 <div className="space-y-2 pt-1">
@@ -399,7 +404,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
         <CardFooter>
         <div className="grid grid-cols-3 divide-x mb-2">
           <div className="px-3 py-3 sm:px-6">
-            <p className="text-xs text-muted-foreground mb-1">Net Worth</p>
+            <p className="text-xs text-muted-foreground mb-1">{t('netWorth')}</p>
             {isLoading ? (
               <Skeleton className="h-5 w-20" />
             ) : (
@@ -409,7 +414,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
             )}
           </div>
           <div className="px-3 py-3 sm:px-6">
-            <p className="text-xs text-muted-foreground mb-1">Assets</p>
+            <p className="text-xs text-muted-foreground mb-1">{t('assets')}</p>
             {isLoading ? (
               <Skeleton className="h-5 w-20" />
             ) : (
@@ -419,7 +424,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
             )}
           </div>
           <div className="px-3 py-3 sm:px-6">
-            <p className="text-xs text-muted-foreground mb-1">Liabilities</p>
+            <p className="text-xs text-muted-foreground mb-1">{t('liabilities')}</p>
             {isLoading ? (
               <Skeleton className="h-5 w-20" />
             ) : (
@@ -458,7 +463,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
         <Card>
           <CardHeader className="pb-3 pt-5 px-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold">Assets</h3>
+              <h3 className="text-base font-semibold">{t('assets')}</h3>
               {isLoading ? (
                 <Skeleton className="h-5 w-24" />
               ) : (
@@ -501,7 +506,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No assets recorded</p>
+              <p className="text-sm text-muted-foreground">{t('noAssetsRecorded')}</p>
             )}
           </CardContent>
         </Card>
@@ -510,7 +515,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
         <Card>
           <CardHeader className="pb-3 pt-5 px-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold">Liabilities</h3>
+              <h3 className="text-base font-semibold">{t('liabilities')}</h3>
               {isLoading ? (
                 <Skeleton className="h-5 w-24" />
               ) : (
@@ -553,7 +558,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No liabilities recorded</p>
+              <p className="text-sm text-muted-foreground">{t('noLiabilitiesRecorded')}</p>
             )}
           </CardContent>
         </Card>
