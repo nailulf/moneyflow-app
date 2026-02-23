@@ -107,7 +107,6 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
                 />
               }
             />
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <ChartLegend content={({ payload }) => <ChartLegendContent payload={payload as any} />} />
           </PieChart>
         </ChartContainer>

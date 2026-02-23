@@ -21,6 +21,9 @@ const eslintConfig = [
       "react-hooks/set-state-in-effect": "off",
       "storybook/no-renderer-packages": "off"
     }
+  },
+  {
+    ignores: ["coverage/**"]
   }
 ];
 
