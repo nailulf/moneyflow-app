@@ -40,7 +40,7 @@ export default function Home() {
             <NetWorthOverview />
           </MainContent>
           <SideContent>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <FinancialGoalsSection />
                 <BudgetStatus
                   timeRange="monthly"

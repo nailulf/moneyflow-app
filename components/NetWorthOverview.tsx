@@ -265,10 +265,10 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
   }
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-2">
       {/* ── Main card: header + chart + summary stats ── */}
       <Card className="overflow-hidden">
-        <CardHeader className="pb-0 pt-6 px-6">
+        <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             {/* Net Worth Value */}
             <div className="space-y-1">
@@ -282,7 +282,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                 </div>
               ) : netWorthData ? (
                 <>
-                  <p className="text-3xl font-bold tracking-tight">
+                  <p className="text-2xl font-bold tracking-tight">
                     {formatCurrency(netWorthData.currentNetWorth)}
                   </p>
                   <div
@@ -297,32 +297,13 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                       <TrendingDown className="h-3.5 w-3.5" />
                     )}
                     <span>{formatCurrencyCompact(Math.abs(netWorthChange.amount))}</span>
-                    <span className="text-muted-foreground font-normal">
+                    <span className="text-xs text-muted-foreground font-normal">
                       ({Math.abs(netWorthChange.percentage).toFixed(1)}%){' '}
                       {periodLabel}
                     </span>
                   </div>
                 </>
               ) : null}
-            </div>
-
-            {/* Period Selector */}
-            <div className="flex items-center gap-0.5 bg-muted/60 rounded-lg p-1 self-start">
-              {timePeriods.map((period) => (
-                <button
-                  key={period.value}
-                  onClick={() => setSelectedPeriod(period.value)}
-                  disabled={isLoading}
-                  className={cn(
-                    'px-2.5 py-1.5 text-xs font-medium rounded-md transition-all duration-150 disabled:opacity-50',
-                    selectedPeriod === period.value
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {period.label}
-                </button>
-              ))}
             </div>
           </div>
         </CardHeader>
@@ -398,6 +379,24 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
             </Suspense>
           )}
         </div>
+        {/* Period Selector */}
+            <div className="flex items-center gap-0.5 bg-muted/40 rounded-lg p-1 self-start justify-center px-auto">
+              {timePeriods.map((period) => (
+                <button
+                  key={period.value}
+                  onClick={() => setSelectedPeriod(period.value)}
+                  disabled={isLoading}
+                  className={cn(
+                    'px-2.5 py-1.5 text-xs font-medium rounded-md transition-all duration-150 disabled:opacity-50',
+                    selectedPeriod === period.value
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {period.label}
+                </button>
+              ))}
+            </div>
         </CardContent>
 
         {/* Summary Stats */}
@@ -458,10 +457,10 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
       </Card>
 
       {/* ── Account Breakdown ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex flex-col gap-0 lg:grid lg:grid-cols-2 lg:gap-6 lg:auto-rows-fr">
         {/* Assets */}
-        <Card>
-          <CardHeader className="pb-3 pt-5 px-5">
+        <Card className="h-full">
+          <CardHeader className="pb-3 pt-3 px-5">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">{t('assets')}</h3>
               {isLoading ? (
@@ -473,7 +472,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
               )}
             </div>
           </CardHeader>
-          <CardContent className="pt-0 px-5 pb-5">
+          <CardContent className="pt-2 px-5 pb-5">
             {isLoading ? (
               <div className="space-y-5">
                 {[1, 2].map((i) => (
@@ -512,8 +511,8 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
         </Card>
 
         {/* Liabilities */}
-        <Card>
-          <CardHeader className="pb-3 pt-5 px-5">
+        <Card className="h-full">
+          <CardHeader className="pb-3 pt-3 px-5">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold">{t('liabilities')}</h3>
               {isLoading ? (
@@ -525,7 +524,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
               )}
             </div>
           </CardHeader>
-          <CardContent className="pt-0 px-5 pb-5">
+          <CardContent className="pt-2 px-5 pb-5">
             {isLoading ? (
               <div className="space-y-5">
                 {[1].map((i) => (
