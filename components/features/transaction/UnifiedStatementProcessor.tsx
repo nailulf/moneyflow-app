@@ -1,8 +1,9 @@
 'use client'
 
 import React, { useState, useRef, useMemo, useEffect } from 'react'
+import NextImage from 'next/image'
 import {
-  Upload, FileText, Loader2, Save, X, Calendar, RefreshCw, Search, AlertCircle, Camera, Image
+  Upload, FileText, Loader2, Save, X, Calendar, RefreshCw, Search, AlertCircle, Camera, Image as ImageIcon
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -585,10 +586,13 @@ export function UnifiedStatementProcessor({
 
           {selectedFile && fileMode === 'image' && imagePreviewUrl ? (
             <div className="flex flex-col items-center gap-2">
-              <img
+              <NextImage
                 src={imagePreviewUrl}
                 alt="Receipt preview"
-                className="max-h-32 max-w-full object-contain rounded-md"
+                width={320}
+                height={160}
+                unoptimized
+                className="max-h-32 w-auto max-w-full object-contain rounded-md"
               />
               <p className="font-medium">{selectedFile.name}</p>
               <p className="text-sm leading-body-sm text-muted-foreground">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
@@ -637,7 +641,7 @@ export function UnifiedStatementProcessor({
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
           >
-            <Image className="h-4 w-4" />
+            <ImageIcon className="h-4 w-4" />
             Upload Image
           </Button>
         </div>

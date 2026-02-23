@@ -1,0 +1,166 @@
+{
+  "auth": {
+    "login": {
+      "title": "Selamat datang kembali",
+      "subtitle": "Masukkan email Anda di bawah untuk masuk ke akun Anda",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Kata Sandi",
+      "forgotPassword": "Lupa kata sandi?",
+      "submit": "Masuk",
+      "orContinueWith": "Atau lanjutkan dengan",
+      "noAccount": "Belum punya akun?",
+      "signUp": "Daftar",
+      "successLoggedIn": "Berhasil masuk",
+      "errors": {
+        "invalidEmail": "Alamat email tidak valid",
+        "passwordTooShort": "Kata sandi minimal 6 karakter"
+      }
+    },
+    "register": {
+      "title": "Buat akun",
+      "subtitle": "Masukkan detail Anda di bawah untuk membuat akun",
+      "fullName": "Nama Lengkap",
+      "fullNamePlaceholder": "Budi Santoso",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Kata Sandi",
+      "confirmPassword": "Konfirmasi Kata Sandi",
+      "primaryCurrency": "Mata Uang Utama",
+      "currencyPlaceholder": "Mata Uang",
+      "country": "Negara",
+      "countryPlaceholder": "Negara",
+      "goal": "Apa tujuan utama Anda?",
+      "goalOptional": "(opsional)",
+      "submit": "Daftar",
+      "alreadyHaveAccount": "Sudah punya akun?",
+      "signIn": "Masuk",
+      "verificationNotice": "Kami akan mengirimkan tautan verifikasi ke alamat email Anda. Anda perlu mengkliknya sebelum dapat masuk.",
+      "verificationConsent": "Saya mengerti bahwa saya perlu memverifikasi alamat email saya untuk mengakses akun.",
+      "successDev": "Pendaftaran berhasil! Anda sekarang sudah masuk.",
+      "successProd": "Pendaftaran berhasil! Silakan periksa email Anda untuk memverifikasi akun.",
+      "errors": {
+        "fullNameTooShort": "Nama lengkap minimal 2 karakter",
+        "invalidEmail": "Alamat email tidak valid",
+        "passwordTooShort": "Kata sandi minimal 6 karakter",
+        "passwordsDontMatch": "Kata sandi tidak cocok",
+        "selectCountry": "Pilih negara Anda",
+        "mustAcknowledgeVerification": "Anda harus mengakui persyaratan verifikasi email"
+      },
+      "goals": {
+        "networth_tracking": "Lacak kekayaan bersih saya",
+        "expense_management": "Kelola pengeluaran & anggaran",
+        "family_budget": "Kelola anggaran keluarga",
+        "saving_goals": "Menabung untuk tujuan",
+        "freelance_income": "Lacak pendapatan freelance / bisnis",
+        "debt_payoff": "Lunasi utang"
+      }
+    },
+    "layout": {
+      "tagline": "Ketahui ke mana uang Anda pergi—dan ke mana uang itu dapat membawa Anda.",
+      "ctaText": "Lihat setiap pengeluaran dengan jelas, sehingga keuangan Anda terasa terkendali. Mulailah dengan MoneyFlow hari ini.",
+      "termsPrefix": "Dengan masuk, Anda menyetujui",
+      "termsOfService": "ketentuan layanan",
+      "and": "dan",
+      "privacyPolicy": "kebijakan privasi",
+      "features": {
+        "uploadExpenses": "Unggah Pengeluaran",
+        "manageBudgets": "Kelola Anggaran",
+        "cashFlowClarity": "Kejelasan Arus Kas",
+        "networthTracker": "Pelacak Kekayaan",
+        "connectCFP": "Hubungkan CFP",
+        "aiPowered": "Bertenaga AI"
+      }
+    },
+    "forgotPassword": {
+      "title": "Lupa Kata Sandi",
+      "description": "Masukkan alamat email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "submit": "Kirim Tautan Reset",
+      "rememberPassword": "Ingat kata sandi Anda?",
+      "signIn": "Masuk",
+      "successEmailSent": "Periksa email Anda untuk tautan reset kata sandi",
+      "errorFailed": "Gagal mengirim email reset kata sandi",
+      "errors": {
+        "invalidEmail": "Alamat email tidak valid"
+      }
+    }
+  },
+  "nav": {
+    "upgradeLabel": "Tingkatkan ke Pro",
+    "manageCategories": "Kelola Kategori",
+    "manageAccounts": "Kelola Akun",
+    "account": "Akun",
+    "billing": "Tagihan",
+    "notifications": "Notifikasi",
+    "logOut": "Keluar",
+    "language": "Bahasa",
+    "languageOptions": {
+      "en": "Inggris",
+      "id": "Indonesia"
+    }
+  },
+  "layout": {
+    "pageTitle": {
+      "spending": "Pengeluaran",
+      "accounts": "Akun",
+      "portfolio": "Portofolio",
+      "invest": "Investasi",
+      "advice": "Saran",
+      "tax": "Pajak",
+      "equity": "Ekuitas",
+      "estatePlanning": "Perencanaan Warisan",
+      "dashboard": "Dasbor"
+    }
+  },
+  "dashboard": {
+    "netWorth": {
+      "totalNetWorth": "Total Kekayaan Bersih",
+      "noData": "Tidak ada data tersedia",
+      "netWorth": "Kekayaan Bersih",
+      "assets": "Aset",
+      "liabilities": "Kewajiban",
+      "noAssetsRecorded": "Tidak ada aset tercatat",
+      "noLiabilitiesRecorded": "Tidak ada kewajiban tercatat",
+      "added": "Ditambahkan",
+      "recently": "baru-baru ini",
+      "periods": {
+        "allTime": "sepanjang waktu",
+        "lastWeek": "minggu lalu",
+        "lastMonth": "bulan lalu",
+        "last3Months": "3 bulan terakhir",
+        "lastYear": "tahun lalu",
+        "last5Years": "5 tahun terakhir"
+      }
+    },
+    "budget": {
+      "budgetIn": "Anggaran {period}",
+      "failedToLoad": "Gagal memuat anggaran",
+      "noBudgetSet": "Anggaran belum diatur"
+    },
+    "onboarding": {
+      "title": "Selesaikan Pengaturan Anda",
+      "description": "Anda belum menyelesaikan pengaturan MoneyFlow. Selesaikan pengaturan untuk membuka semua fitur.",
+      "features": {
+        "trackExpenses": "Lacak pengeluaran di semua akun",
+        "createBudgets": "Buat anggaran yang bekerja",
+        "understandSpending": "Pahami pengeluaran Anda"
+      },
+      "completeSetup": "Selesaikan Pengaturan",
+      "maybeLater": "Nanti Saja"
+    },
+    "goals": {
+      "title": "Tujuan Keuangan",
+      "subtitle": "Lacak kemajuan menuju target tabungan Anda",
+      "failedToLoad": "Gagal memuat tujuan keuangan",
+      "emptyTitle": "Mulai Perjalanan Menabung Anda",
+      "emptyDescription": "Tetapkan tujuan keuangan untuk rekening bank dan investasi Anda untuk melacak kemajuan menuju impian Anda.",
+      "setFirstGoal": "Tetapkan Tujuan Pertama Anda",
+      "manageGoals": "Kelola Tujuan",
+      "goalsCount": "Tujuan",
+      "completedCount": "Selesai",
+      "target": "Target"
+    }
+  }
+}

@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/atoms/skeleton'
 import { formatCurrency } from '@/lib/data-utils'
 import type { BudgetSnapshotWithSpending } from '@/lib/api/budget-snapshots'
 import type { Transaction } from '@/types/database'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface BudgetStatusProps {
   timeRange: 'monthly' | 'yearly'
@@ -28,6 +29,8 @@ export function BudgetStatus({
   error,
   transactions,
 }: BudgetStatusProps) {
+  const t = useTranslations('dashboard.budget')
+  const locale = useLocale()
   const totalBudget = snapshot?.total_amount || 0
   const currency = snapshot?.currency || 'IDR'
 
@@ -40,9 +43,9 @@ export function BudgetStatus({
       snapshot.budget_snapshot_categories.map(c => c.category_id)
     )
     let total = 0
-    for (const t of transactions) {
-      if (t.type === 'EXPENSE' && t.category_id && budgetCategoryIds.has(t.category_id)) {
-        total += Math.abs(t.amount)
+    for (const tx of transactions) {
+      if (tx.type === 'EXPENSE' && tx.category_id && budgetCategoryIds.has(tx.category_id)) {
+        total += Math.abs(tx.amount)
       }
     }
     return total
@@ -50,13 +53,13 @@ export function BudgetStatus({
 
   const periodTitle = useMemo(() => {
     if (timeRange === 'yearly') {
-      return `Budget in ${selectedYear}`
+      return t('budgetIn', { period: String(selectedYear) })
     }
-    const monthName = new Date(selectedYear, selectedMonth - 1).toLocaleString('default', {
+    const monthName = new Date(selectedYear, selectedMonth - 1).toLocaleString(locale, {
       month: 'long',
     })
-    return `Budget in ${monthName}`
-  }, [timeRange, selectedYear, selectedMonth])
+    return t('budgetIn', { period: monthName })
+  }, [timeRange, selectedYear, selectedMonth, locale, t])
 
   const rawSpentPercent = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0
   const spentPercent = Math.max(rawSpentPercent, 0)
@@ -75,12 +78,12 @@ export function BudgetStatus({
           <Skeleton className="h-16 w-full" />
         ) : error ? (
           <div className="text-center py-1">
-            <p className="text-sm leading-body-sm text-destructive whitespace-nowrap">Failed to load budget</p>
+            <p className="text-sm leading-body-sm text-destructive whitespace-nowrap">{t('failedToLoad')}</p>
             <p className="text-sm leading-body-sm text-muted-foreground mt-1 whitespace-nowrap">{error}</p>
           </div>
         ) : noSnapshot ? (
           <div className="text-center py-1">
-            <p className="text-sm leading-body-sm text-muted-foreground whitespace-nowrap">No budget set</p>
+            <p className="text-sm leading-body-sm text-muted-foreground whitespace-nowrap">{t('noBudgetSet')}</p>
           </div>
         ) : (
           <div className="space-y-4">

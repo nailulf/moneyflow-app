@@ -40,6 +40,66 @@ interface SpendingVsIncomeChartProps {
   onMonthClick?: (year: number, month: number) => void
 }
 
+function SpendingVsIncomeTooltip({
+  active,
+  payload,
+  label,
+  chartConfig
+}: {
+  active?: boolean
+  payload?: any[]
+  label?: string
+  chartConfig: ChartConfig
+}) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload
+    const spending = data.spending || 0
+    const income = data.income || 0
+    const netCashFlow = data.netCashFlow || 0
+
+    return (
+      <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+        <p className="font-medium text-foreground mb-2">
+          {label} {data.year}
+        </p>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-sm"
+              style={{ backgroundColor: chartConfig.income.color }}
+            />
+            <span className="text-sm leading-body-sm text-muted-foreground">Income:</span>
+            <span className="text-sm leading-body-sm font-medium">{formatCurrency(income)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-sm"
+              style={{ backgroundColor: chartConfig.spending.color }}
+            />
+            <span className="text-sm leading-body-sm text-muted-foreground">Spending:</span>
+            <span className="text-sm leading-body-sm font-medium">{formatCurrency(spending)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-sm"
+              style={{ backgroundColor: chartConfig.netCashFlow.color }}
+            />
+            <span className="text-sm leading-body-sm text-muted-foreground">Net Cash Flow:</span>
+            <span
+              className={`text-sm leading-body-sm font-medium ${
+                netCashFlow >= 0 ? 'text-success' : 'text-destructive'
+              }`}
+            >
+              {formatCurrency(netCashFlow)}
+            </span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  return null
+}
+
 // Function to transform data for the chart
 function transformDataForChart(transactions: Transaction[], budgets: TransformedBudget[]) {
   // If no transactions, return empty array
@@ -188,55 +248,6 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading, select
     );
   }
 
-  // Custom tooltip content component
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      const spending = data.spending || 0;
-      const income = data.income || 0;
-      const netCashFlow = data.netCashFlow || 0;
-      
-      return (
-        <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-          <p className="font-medium text-foreground mb-2">
-            {label} {data.year}
-          </p>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-sm" 
-                style={{ backgroundColor: chartConfig.income.color }}
-              />
-              <span className="text-sm leading-body-sm text-muted-foreground">Income:</span>
-              <span className="text-sm leading-body-sm font-medium">{formatCurrency(income)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-sm" 
-                style={{ backgroundColor: chartConfig.spending.color }}
-              />
-              <span className="text-sm leading-body-sm text-muted-foreground">Spending:</span>
-              <span className="text-sm leading-body-sm font-medium">{formatCurrency(spending)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div 
-                className="w-3 h-3 rounded-sm" 
-                style={{ backgroundColor: chartConfig.netCashFlow.color }}
-              />
-              <span className="text-sm leading-body-sm text-muted-foreground">Net Cash Flow:</span>
-              <span className={`text-sm leading-body-sm font-medium ${
-                netCashFlow >= 0 ? 'text-success' : 'text-destructive'
-              }`}>
-                {formatCurrency(netCashFlow)}
-              </span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -307,7 +318,7 @@ export function SpendingVsBudgetChart({ transactions, budgets, isLoading, select
               />
               <ChartTooltip
                 cursor={false}
-                content={<CustomTooltip />}
+                content={<SpendingVsIncomeTooltip chartConfig={chartConfig} />}
               />
               <ChartLegend content={<ChartLegendContent />} />
               <Bar

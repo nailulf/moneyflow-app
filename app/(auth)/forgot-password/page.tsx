@@ -20,17 +20,19 @@ import {
 } from '@/components/ui/molecules/card'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email address'),
-})
-
-type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
+import { useTranslations } from 'next-intl'
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
+  const t = useTranslations('auth.forgotPassword')
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
+
+  const forgotPasswordSchema = z.object({
+    email: z.string().email({ message: t('errors.invalidEmail') }),
+  })
+
+  type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>
 
   const {
     register,
@@ -51,10 +53,10 @@ export default function ForgotPasswordPage() {
         throw error
       }
 
-      toast.success('Check your email for the password reset link')
+      toast.success(t('successEmailSent'))
       router.push('/login')
     } catch (error: any) {
-      toast.error(error.message || 'Failed to send password reset email')
+      toast.error(error.message || t('errorFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -64,18 +66,16 @@ export default function ForgotPasswordPage() {
     <div className="flex flex-col gap-6">
       <Card className="overflow-hidden">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
-          <CardDescription>
-            Enter your email address and we'll send you a link to reset your password
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold">{t('title')}</CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
-                placeholder="m@example.com"
+                placeholder={t('emailPlaceholder')}
                 type="email"
                 {...register('email')}
               />
@@ -87,15 +87,15 @@ export default function ForgotPasswordPage() {
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : null}
-              Send Reset Link
+              {t('submit')}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <div className="text-sm text-muted-foreground">
-            Remember your password?{' '}
+            {t('rememberPassword')}{' '}
             <Link href="/login" className="text-primary hover:underline">
-              Sign in
+              {t('signIn')}
             </Link>
           </div>
         </CardFooter>

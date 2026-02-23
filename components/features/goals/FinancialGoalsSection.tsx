@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/atoms/button'
 import { Target, Loader2, ChevronRight, TrendingUp, Plus } from 'lucide-react'
 import { useGoalsSummary } from '@/hooks/useGoalsQuery'
 import { GoalCard } from './GoalCard'
+import { useTranslations } from 'next-intl'
 
 export function FinancialGoalsSection() {
   const router = useRouter()
+  const t = useTranslations('dashboard.goals')
   const { data: summary, isLoading, error } = useGoalsSummary()
 
   // Loading state
@@ -16,7 +18,7 @@ export function FinancialGoalsSection() {
     return (
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-xl font-semibold">Financial Goals</CardTitle>
+          <CardTitle className="text-xl font-semibold">{t('title')}</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
@@ -30,10 +32,10 @@ export function FinancialGoalsSection() {
     return (
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-xl font-semibold">Financial Goals</CardTitle>
+          <CardTitle className="text-xl font-semibold">{t('title')}</CardTitle>
         </CardHeader>
         <CardContent className="text-center py-12">
-          <p className="text-muted-foreground">Failed to load financial goals</p>
+          <p className="text-muted-foreground">{t('failedToLoad')}</p>
         </CardContent>
       </Card>
     )
@@ -44,18 +46,18 @@ export function FinancialGoalsSection() {
     return (
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-xl font-semibold">Financial Goals</CardTitle>
+          <CardTitle className="text-xl font-semibold">{t('title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-12">
             <Target className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Start Your Savings Journey</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('emptyTitle')}</h3>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Set financial goals for your bank and investment accounts to track your progress towards your dreams.
+              {t('emptyDescription')}
             </p>
             <Button onClick={() => router.push('/accounts')}>
               <Target className="w-4 h-4 mr-2" />
-              Set Your First Goal
+              {t('setFirstGoal')}
             </Button>
           </div>
         </CardContent>
@@ -67,11 +69,9 @@ export function FinancialGoalsSection() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div>
-          <CardTitle className="text-xl font-semibold">Financial Goals</CardTitle>
+          <CardTitle className="text-xl font-semibold">{t('title')}</CardTitle>
           <p className="text-sm text-muted-foreground mt-1 hidden sm:block leading-tight">
-            Track progress towards
-            <br className="hidden sm:inline" />
-            your savings targets
+            {t('subtitle')}
           </p>
         </div>
         <Button
@@ -80,7 +80,7 @@ export function FinancialGoalsSection() {
           onClick={() => router.push('/accounts')}
           className="hidden sm:flex"
         >
-          Manage Goals
+          {t('manageGoals')}
           <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
         <Button
@@ -99,7 +99,7 @@ export function FinancialGoalsSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center text-muted-foreground text-sm mb-1">
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4" />
-                <span className="hidden sm:inline">Goals</span>
+                <span className="hidden sm:inline">{t('goalsCount')}</span>
               </div>
               <p className="text-2xl font-bold sm:justify-self-end">{summary.activeGoalsCount}</p>
             </div>
@@ -108,7 +108,7 @@ export function FinancialGoalsSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center text-muted-foreground text-sm mb-1">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" />
-                <span className="hidden sm:inline">Completed</span>
+                <span className="hidden sm:inline">{t('completedCount')}</span>
               </div>
               <p className="text-2xl font-bold sm:justify-self-end">{summary.completedGoalsCount}</p>
             </div>

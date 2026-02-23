@@ -1,6 +1,6 @@
 'use client'
 
-import { Home, DollarSign, Plus, Wallet, TrendingUp } from 'lucide-react'
+import { Home, DollarSign, Receipt, Wallet, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -59,7 +59,7 @@ export function MobileBottomNav() {
                 className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-black/10 backdrop-blur-xl transition-transform active:scale-95"
                 aria-label="Add Transaction"
               >
-                <Plus className="h-7 w-7" />
+                <Receipt className="h-7 w-7" />
               </button>
             }
           />

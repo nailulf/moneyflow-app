@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/atoms/button'
 import { ArrowLeft, CreditCard, Wallet, TrendingUp, Building2, Loader2, Edit, Trash2, Download } from 'lucide-react'
 import { useAccounts } from '@/contexts/AccountContext'
 import { formatCurrency } from '@/lib/data-utils'
-import { GoalSection } from '@/components/goals'
+import { GoalSection } from '@/components/features/goals'
 import { AccountDB } from '@/types/database'
 import { useAllTransactions } from '@/hooks/useTransactionsQuery'
 import { useAuth } from '@/contexts/AuthContext'
@@ -201,7 +201,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
   const Icon = ACCOUNT_ICONS[account.type] || CreditCard
   const canHaveGoal = ['BANK', 'INVESTMENT'].includes(account.type)
 
-  const AccountHeader = () => (
+  const accountHeader = (
     <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex items-center gap-3 min-w-0">
         <div className="p-3 rounded-xl bg-muted shrink-0">
@@ -236,11 +236,11 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Accounts
             </Button>
-            <AccountHeader />
+            {accountHeader}
           </TopContent>
         ) : (
           <div className="px-1">
-             <AccountHeader />
+             {accountHeader}
           </div>
         )}
       </div>

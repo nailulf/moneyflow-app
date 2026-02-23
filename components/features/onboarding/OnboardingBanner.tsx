@@ -14,14 +14,10 @@ import {
 } from '@/components/ui/molecules/dialog'
 import { Sparkles, Wallet, PieChart, TrendingUp } from 'lucide-react'
 import { Analytics } from '@/lib/analytics/amplitude'
-
-const FEATURES = [
-  { icon: Wallet, text: 'Track expenses across all accounts' },
-  { icon: PieChart, text: 'Create budgets that work' },
-  { icon: TrendingUp, text: 'Understand your spending' },
-]
+import { useTranslations } from 'next-intl'
 
 export function OnboardingBanner() {
+  const t = useTranslations('dashboard.onboarding')
   const { user } = useAuth()
   const { openModal } = useOnboarding()
   const { data: onboarding, isLoading } = useOnboardingStatus({
@@ -84,29 +80,33 @@ export function OnboardingBanner() {
               <Sparkles className="h-7 w-7 text-primary" />
             </div>
           </div>
-          <DialogTitle className="text-xl">Complete Your Setup</DialogTitle>
+          <DialogTitle className="text-xl">{t('title')}</DialogTitle>
           <DialogDescription className="text-base">
-            You haven&apos;t finished setting up MoneyFlow. Complete the setup to unlock all features.
+            {t('description')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-4">
-          {FEATURES.map((feature, index) => (
-            <div key={index} className="flex items-center gap-3">
+          {([
+            { icon: Wallet, key: 'features.trackExpenses' },
+            { icon: PieChart, key: 'features.createBudgets' },
+            { icon: TrendingUp, key: 'features.understandSpending' },
+          ] as const).map(({ icon: Icon, key }) => (
+            <div key={key} className="flex items-center gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
-                <feature.icon className="h-4 w-4 text-muted-foreground" />
+                <Icon className="h-4 w-4 text-muted-foreground" />
               </div>
-              <span className="text-sm text-muted-foreground">{feature.text}</span>
+              <span className="text-sm text-muted-foreground">{t(key)}</span>
             </div>
           ))}
         </div>
 
         <div className="flex flex-col gap-2 pt-2">
           <Button onClick={handleComplete}>
-            Complete Setup
+            {t('completeSetup')}
           </Button>
           <Button variant="ghost" onClick={handleDismiss}>
-            Maybe Later
+            {t('maybeLater')}
           </Button>
         </div>
       </DialogContent>

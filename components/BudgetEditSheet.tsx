@@ -649,7 +649,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
               {editForm.categories.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>No categories added yet</p>
-                  <p className="text-sm leading-body-sm">Click "Add Category" to get started</p>
+                  <p className="text-sm leading-body-sm">Click &quot;Add Category&quot; to get started</p>
                 </div>
               ) : (
                 editForm.categories.map((category, index) => (

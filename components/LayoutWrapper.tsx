@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { AppSidebar } from '@/components/features/navigation/app-sidebar'
 import { NavUser } from '@/components/features/navigation/nav-user'
 import { Toaster } from '@/components/ui/molecules/sonner'
@@ -9,7 +10,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/organisms/sidebar'
 import { Separator } from '@/components/ui/atoms/separator'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { AccountProvider } from '@/contexts/AccountContext'
 import { CategoryProvider } from '@/contexts/CategoryContext'
 import { OnboardingProvider } from '@/contexts/OnboardingContext'
@@ -20,6 +21,9 @@ import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { OnboardingModal } from '@/components/features/onboarding/OnboardingModal'
 import { Loader2, GalleryVerticalEnd } from 'lucide-react'
 import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'
+import { useLocale, useTranslations } from 'next-intl'
+import { preferences } from '@/lib/api/user-preferences'
+import { setLocaleCookie } from '@/lib/actions/locale'
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -27,11 +31,22 @@ interface LayoutWrapperProps {
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const { user, loading } = useAuth()
-  
-  // Test user ID for development - in production this would come from authentication
-  // const TEST_USER_ID = process.env.NEXT_PUBLIC_TEST_USER_ID!
-  
+  const locale = useLocale()
+  const t = useTranslations('layout.pageTitle')
+
+  // Sync DB language preference → cookie once per user session
+  useEffect(() => {
+    if (!user) return
+    preferences.getLanguage(user.id).then(async (dbLang) => {
+      if (dbLang && dbLang !== locale) {
+        await setLocaleCookie(dbLang)
+        router.refresh()
+      }
+    })
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -50,6 +65,17 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     return null
   }
 
+  const pageTitle =
+    pathname === '/spending' || pathname.startsWith('/spending') ? t('spending') :
+    pathname === '/accounts' || pathname.startsWith('/accounts') ? t('accounts') :
+    pathname === '/portfolio' || pathname.startsWith('/portfolio') ? t('portfolio') :
+    pathname === '/invest' ? t('invest') :
+    pathname === '/advice' ? t('advice') :
+    pathname === '/tax' ? t('tax') :
+    pathname === '/equity' ? t('equity') :
+    pathname === '/estate-planning' ? t('estatePlanning') :
+    t('dashboard')
+
   return (
     <SidebarProvider>
       <TransactionProvider>
@@ -64,7 +90,6 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
               <div className="flex aspect-square size-6 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
                 <GalleryVerticalEnd className="size-4" />
               </div>
-              {/* <span className="truncate font-semibold text-sm">MoneyFlow</span> */}
             </div>
             <div className="hidden md:flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
@@ -73,22 +98,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
             </div>
-            <h1 className="text-xl font-semibold md:pl-0">
-                {
-                  pathname === '/spending' ? 'Spending' :
-                  pathname.startsWith('/spending') ? 'Spending' :
-                  pathname === '/accounts' ? 'Accounts' :
-                  pathname.startsWith('/accounts') ? 'Accounts' :
-                  pathname === '/portfolio' ? 'Portfolio' :
-                  pathname.startsWith('/portfolio') ? 'Portfolio' :
-                  pathname === '/invest' ? 'Invest' :
-                  pathname === '/advice' ? 'Advice' :
-                  pathname === '/tax' ? 'Tax' :
-                  pathname === '/equity' ? 'Equity' :
-                  pathname === '/estate-planning' ? 'Estate Planning' :
-                  'Dashboard'
-                }
-            </h1>
+            <h1 className="text-xl font-semibold md:pl-0">{pageTitle}</h1>
             <div className="ml-auto px-4">
               <NavUser user={{
                 name: user.user_metadata.full_name || user.email?.split('@')[0] || "User",
