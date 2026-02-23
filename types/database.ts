@@ -275,28 +275,42 @@ export interface Database {
           updated_at?: string
         }
       }
-      user_preferences: {
+      user_settings: {
         Row: {
-          id: string
           user_id: string
-          preference_key: string
-          preference_value: any
+          language: string
+          default_currency: string
+          country: string | null
+          user_goal: string | null
+          theme: string
+          notification_settings: Record<string, boolean>
+          budget_alert_threshold: number
+          extras: Record<string, unknown>
           created_at: string
           updated_at: string
         }
         Insert: {
-          id?: string
           user_id: string
-          preference_key: string
-          preference_value: any
+          language?: string
+          default_currency?: string
+          country?: string | null
+          user_goal?: string | null
+          theme?: string
+          notification_settings?: Record<string, boolean>
+          budget_alert_threshold?: number
+          extras?: Record<string, unknown>
           created_at?: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          preference_key?: string
-          preference_value?: any
+          language?: string
+          default_currency?: string
+          country?: string | null
+          user_goal?: string | null
+          theme?: string
+          notification_settings?: Record<string, boolean>
+          budget_alert_threshold?: number
+          extras?: Record<string, unknown>
           updated_at?: string
         }
       }
@@ -635,9 +649,9 @@ export type CategoryDB = Database['public']['Tables']['categories']['Row']
 export type CategoryInsert = Database['public']['Tables']['categories']['Insert']
 export type CategoryUpdate = Database['public']['Tables']['categories']['Update']
 
-export type UserPreference = Database['public']['Tables']['user_preferences']['Row']
-export type UserPreferenceInsert = Database['public']['Tables']['user_preferences']['Insert']
-export type UserPreferenceUpdate = Database['public']['Tables']['user_preferences']['Update']
+export type UserSettings = Database['public']['Tables']['user_settings']['Row']
+export type UserSettingsInsert = Database['public']['Tables']['user_settings']['Insert']
+export type UserSettingsUpdate = Database['public']['Tables']['user_settings']['Update']
 
 export type BudgetDB = Database['public']['Tables']['budgets']['Row']
 export type BudgetInsert = Database['public']['Tables']['budgets']['Insert']

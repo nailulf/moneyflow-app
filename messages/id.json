@@ -104,14 +104,14 @@
   "layout": {
     "pageTitle": {
       "spending": "Pengeluaran",
-      "accounts": "Akun",
+      "accounts": "Akun & Aset",
       "portfolio": "Portofolio",
       "invest": "Investasi",
-      "advice": "Saran",
+      "advice": "Konsultasi",
       "tax": "Pajak",
       "equity": "Ekuitas",
       "estatePlanning": "Perencanaan Warisan",
-      "dashboard": "Dasbor"
+      "dashboard": "Beranda"
     }
   },
   "dashboard": {
@@ -156,9 +156,9 @@
       "failedToLoad": "Gagal memuat tujuan keuangan",
       "emptyTitle": "Mulai Perjalanan Menabung Anda",
       "emptyDescription": "Tetapkan tujuan keuangan untuk rekening bank dan investasi Anda untuk melacak kemajuan menuju impian Anda.",
-      "setFirstGoal": "Tetapkan Tujuan Pertama Anda",
-      "manageGoals": "Kelola Tujuan",
-      "goalsCount": "Tujuan",
+      "setFirstGoal": "Tetapkan Target Pertama Anda",
+      "manageGoals": "Kelola Target",
+      "goalsCount": "Target",
       "completedCount": "Selesai",
       "target": "Target"
     }
