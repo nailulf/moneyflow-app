@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/atoms/button'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
 import { Input } from '@/components/ui/atoms/input'
@@ -33,6 +34,7 @@ function AccountManagerInternal({
   const isEmbedded = variant === 'embedded'
   const router = useRouter()
   const isMobile = useIsMobile()
+  const t = useTranslations('accountManager')
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = controlledOpen !== undefined
   const isOpen = isControlled ? controlledOpen : internalOpen
@@ -205,9 +207,9 @@ function AccountManagerInternal({
   const listContent = (
     <>
       <SheetHeader>
-        <SheetTitle>MANAGE ACCOUNTS</SheetTitle>
+        <SheetTitle>{t('title')}</SheetTitle>
         <SheetDescription>
-          Create, edit, and organize your bank accounts
+          {t('description')}
         </SheetDescription>
       </SheetHeader>
 
@@ -222,7 +224,7 @@ function AccountManagerInternal({
           <div className="text-center py-8">
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              <p className="text-muted-foreground">Loading accounts...</p>
+              <p className="text-muted-foreground">{t('loadingAccounts')}</p>
             </div>
           </div>
         ) : (
@@ -230,7 +232,7 @@ function AccountManagerInternal({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search accounts..."
+                placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -240,13 +242,13 @@ function AccountManagerInternal({
             {isEmbedded && (
               <Button onClick={openCreateMode} className="w-full" disabled={isSubmitting}>
                 <Plus className="h-4 w-4 mr-2" />
-                Add New Account
+                {t('addNewAccount')}
               </Button>
             )}
 
             <div className="space-y-3">
               <div className="text-sm font-semibold text-foreground uppercase tracking-wide">
-                Your Accounts ({filteredAccounts.length})
+                {t('yourAccounts', { count: filteredAccounts.length })}
               </div>
               <div className="space-y-2">
                 {filteredAccounts.map((account) => (
@@ -256,7 +258,7 @@ function AccountManagerInternal({
                         <div className="flex items-center space-x-2">
                           <span className="font-medium text-sm text-foreground">{account.name}</span>
                           {account.is_default && (
-                            <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">Default</span>
+                            <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">{t('default')}</span>
                           )}
                         </div>
                         <div className="flex items-center space-x-2 text-xs text-muted-foreground">
@@ -305,7 +307,7 @@ function AccountManagerInternal({
                 ))}
                 {filteredAccounts.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
-                    {searchTerm ? 'No accounts found matching your search.' : 'No accounts found. Create your first account!'}
+                    {searchTerm ? t('noAccountsSearch') : t('noAccounts')}
                   </div>
                 )}
               </div>
@@ -317,11 +319,11 @@ function AccountManagerInternal({
       {!isEmbedded && (
         <SheetFooter>
           <SheetClose asChild>
-            <Button variant="outline">Close</Button>
+            <Button variant="outline">{t('close')}</Button>
           </SheetClose>
           <Button onClick={openCreateMode} disabled={isSubmitting}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Account
+            {t('addAccount')}
           </Button>
         </SheetFooter>
       )}
@@ -335,38 +337,38 @@ function AccountManagerInternal({
           <Button variant="ghost" size="icon" onClick={resetToList} className="h-8 w-8 -ml-1">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <SheetTitle>Add New Account</SheetTitle>
+          <SheetTitle>{t('create.title')}</SheetTitle>
         </div>
-        <SheetDescription>Create a new account to track your transactions.</SheetDescription>
+        <SheetDescription>{t('create.description')}</SheetDescription>
       </SheetHeader>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         <div className="space-y-2">
-          <label htmlFor="account-name" className="text-sm font-medium">Name</label>
+          <label htmlFor="account-name" className="text-sm font-medium">{t('create.name')}</label>
           <Input
             id="account-name"
             value={newAccountName}
             onChange={(e) => setNewAccountName(e.target.value)}
-            placeholder="e.g., Chase Checking"
+            placeholder={t('create.namePlaceholder')}
           />
         </div>
         <div className="space-y-2">
-          <label htmlFor="account-type" className="text-sm font-medium">Type</label>
+          <label htmlFor="account-type" className="text-sm font-medium">{t('create.type')}</label>
           <select
             id="account-type"
             value={newAccountType}
             onChange={(e) => setNewAccountType(e.target.value)}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="bank">Bank</option>
-            <option value="credit_card">Credit Card</option>
-            <option value="cash">Cash</option>
-            <option value="investment">Investment</option>
-            <option value="other">Other</option>
+            <option value="bank">{t('accountTypes.bank')}</option>
+            <option value="credit_card">{t('accountTypes.creditCard')}</option>
+            <option value="cash">{t('accountTypes.cash')}</option>
+            <option value="investment">{t('accountTypes.investment')}</option>
+            <option value="other">{t('accountTypes.other')}</option>
           </select>
         </div>
         <div className="space-y-2">
-          <label htmlFor="account-balance" className="text-sm font-medium">Initial Balance</label>
+          <label htmlFor="account-balance" className="text-sm font-medium">{t('create.initialBalance')}</label>
           <Input
             id="account-balance"
             type="amount"
@@ -379,10 +381,10 @@ function AccountManagerInternal({
       </div>
 
       <SheetFooter>
-        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>Cancel</Button>
+        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>{t('create.cancel')}</Button>
         <Button onClick={handleAddAccount} disabled={!newAccountName.trim() || isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Create Account
+          {t('create.createAccount')}
         </Button>
       </SheetFooter>
     </>
@@ -395,43 +397,43 @@ function AccountManagerInternal({
           <Button variant="ghost" size="icon" onClick={resetToList} className="h-8 w-8 -ml-1">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <SheetTitle>Edit Account</SheetTitle>
+          <SheetTitle>{t('edit.title')}</SheetTitle>
         </div>
-        <SheetDescription>Update account information.</SheetDescription>
+        <SheetDescription>{t('edit.description')}</SheetDescription>
       </SheetHeader>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         <div className="space-y-2">
-          <label htmlFor="edit-account-name" className="text-sm font-medium">Name</label>
+          <label htmlFor="edit-account-name" className="text-sm font-medium">{t('edit.name')}</label>
           <Input
             id="edit-account-name"
             value={editAccountName}
             onChange={(e) => setEditAccountName(e.target.value)}
-            placeholder="Account name"
+            placeholder={t('edit.namePlaceholder')}
           />
         </div>
         <div className="space-y-2">
-          <label htmlFor="edit-account-type" className="text-sm font-medium">Type</label>
+          <label htmlFor="edit-account-type" className="text-sm font-medium">{t('edit.type')}</label>
           <select
             id="edit-account-type"
             value={editAccountType}
             onChange={(e) => setEditAccountType(e.target.value)}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="bank">Bank</option>
-            <option value="credit_card">Credit Card</option>
-            <option value="cash">Cash</option>
-            <option value="investment">Investment</option>
-            <option value="other">Other</option>
+            <option value="bank">{t('accountTypes.bank')}</option>
+            <option value="credit_card">{t('accountTypes.creditCard')}</option>
+            <option value="cash">{t('accountTypes.cash')}</option>
+            <option value="investment">{t('accountTypes.investment')}</option>
+            <option value="other">{t('accountTypes.other')}</option>
           </select>
         </div>
       </div>
 
       <SheetFooter>
-        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>Cancel</Button>
+        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>{t('edit.cancel')}</Button>
         <Button onClick={handleEditAccount} disabled={!editAccountName.trim() || isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Update Account
+          {t('edit.updateAccount')}
         </Button>
       </SheetFooter>
     </>
@@ -444,17 +446,17 @@ function AccountManagerInternal({
           <Button variant="ghost" size="icon" onClick={resetToList} className="h-8 w-8 -ml-1">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <SheetTitle>Delete Account</SheetTitle>
+          <SheetTitle>{t('delete.title')}</SheetTitle>
         </div>
         <SheetDescription>
-          Are you sure you want to delete &quot;{selectedAccount?.name}&quot;? This action cannot be undone.
+          {t('delete.description', { name: selectedAccount?.name ?? '' })}
         </SheetDescription>
       </SheetHeader>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {selectedAccount?.is_default && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-            <p className="text-sm text-destructive">This is your default account and cannot be deleted.</p>
+            <p className="text-sm text-destructive">{t('delete.defaultWarning')}</p>
           </div>
         )}
         <div className="p-4 border rounded-lg bg-muted/50">
@@ -466,14 +468,14 @@ function AccountManagerInternal({
       </div>
 
       <SheetFooter>
-        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>Cancel</Button>
+        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>{t('delete.cancel')}</Button>
         <Button
           variant="destructive"
           onClick={handleDeleteAccount}
           disabled={isSubmitting || selectedAccount?.is_default}
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Delete Account
+          {t('delete.deleteAccount')}
         </Button>
       </SheetFooter>
     </>
@@ -496,7 +498,7 @@ function AccountManagerInternal({
         <SheetTrigger asChild>
           <Button variant="outline" size="sm" className={className}>
             <CreditCard className="h-4 w-4 mr-2" />
-            Manage Accounts
+            {t('manageAccounts')}
           </Button>
         </SheetTrigger>
       )}

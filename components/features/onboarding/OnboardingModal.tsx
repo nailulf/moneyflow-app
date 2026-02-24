@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import {
   Dialog,
@@ -9,6 +10,7 @@ import {
 import { OnboardingModalContent } from './OnboardingModalContent'
 
 export function OnboardingModal() {
+  const t = useTranslations('onboarding.modal')
   const { isModalOpen, needsOnboarding, loading } = useOnboarding()
 
   // Don't render if not needed or still loading initial state
@@ -25,7 +27,7 @@ export function OnboardingModal() {
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         {/* Hidden title for screen reader accessibility */}
-        <DialogTitle className="sr-only">Complete your setup</DialogTitle>
+        <DialogTitle className="sr-only">{t('srTitle')}</DialogTitle>
         <OnboardingModalContent />
       </DialogContent>
     </Dialog>

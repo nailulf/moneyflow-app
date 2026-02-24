@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { AccountNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
@@ -69,6 +70,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
   // Use prop or param
   const accountId = propAccountId || (params.accountId as string)
 
+  const t = useTranslations('accountDetail')
   const { user } = useAuth()
   const { accounts, loading, deleteAccount, updateAccount } = useAccounts()
   const [account, setAccount] = useState<AccountDB | null>(null)
@@ -213,7 +215,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
             {account.type.toLowerCase().replace('_', ' ')}
             {account.is_default && (
               <span className="ml-2 px-2 py-0.5 text-xs leading-caption bg-primary/10 text-primary rounded-full">
-                Default
+                {t('default')}
               </span>
             )}
           </p>
@@ -234,7 +236,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
               className="mb-4"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Accounts
+              {t('backToAccounts')}
             </Button>
             {accountHeader}
           </TopContent>
@@ -249,8 +251,8 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
           <MainContent className={isModal ? "w-full max-w-full p-0 overflow-x-hidden" : "w-full"}>
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="mb-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="transactions">Transactions</TabsTrigger>
+                <TabsTrigger value="overview">{t('tabs.overview')}</TabsTrigger>
+                <TabsTrigger value="transactions">{t('tabs.transactions')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview">
@@ -260,35 +262,35 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                 {/* Account Info */}
                 <Card className="mt-6">
                   <CardHeader>
-                    <CardTitle className="text-lg leading-title-5">Account Details</CardTitle>
+                    <CardTitle className="text-lg leading-title-5">{t('details.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <dl className="space-y-3">
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">Account Type</dt>
+                        <dt className="text-muted-foreground">{t('details.accountType')}</dt>
                         <dd className="font-medium capitalize">{account.type.toLowerCase().replace('_', ' ')}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">Currency</dt>
+                        <dt className="text-muted-foreground">{t('details.currency')}</dt>
                         <dd className="font-medium">{account.currency}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">Current Balance</dt>
+                        <dt className="text-muted-foreground">{t('details.currentBalance')}</dt>
                         <dd className="font-medium">{formatCurrency(account.balance, account.currency)}</dd>
                       </div>
                       <div className="flex justify-between">
-                        <dt className="text-muted-foreground">Status</dt>
+                        <dt className="text-muted-foreground">{t('details.status')}</dt>
                         <dd className="font-medium">
                           {account.is_active ? (
-                            <span className="text-success">Active</span>
+                            <span className="text-success">{t('details.active')}</span>
                           ) : (
-                            <span className="text-muted-foreground">Inactive</span>
+                            <span className="text-muted-foreground">{t('details.inactive')}</span>
                           )}
                         </dd>
                       </div>
                       {account.description && (
                         <div className="pt-3 border-t">
-                          <dt className="text-muted-foreground mb-1">Description</dt>
+                          <dt className="text-muted-foreground mb-1">{t('details.descriptionLabel')}</dt>
                           <dd className="font-medium">{account.description}</dd>
                         </div>
                       )}
@@ -313,15 +315,15 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
             <div className="sticky bottom-0 left-0 right-0 z-10 flex gap-3 p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border">
               <Button variant="outline" onClick={handleOpenEditDialog} className="flex-1">
                 <Edit className="w-4 h-4 mr-2" />
-                Edit
+                {t('actions.edit')}
               </Button>
               <Button variant="outline" onClick={handleExport} className="flex-1">
                 <Download className="w-4 h-4 mr-2" />
-                Export
+                {t('actions.export')}
               </Button>
               <Button variant="destructive" onClick={() => setIsDeleteOpen(true)} className="flex-1">
                 <Trash2 className="w-4 h-4 mr-2" />
-                Delete
+                {t('actions.delete')}
               </Button>
             </div>
           </MainContent>
@@ -332,16 +334,16 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
         <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit Account</DialogTitle>
+              <DialogTitle>{t('editDialog.title')}</DialogTitle>
               <DialogDescription>
-                Make changes to your account details here.
+                {t('editDialog.subtitle')}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {/* Account Name */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">
-                  Name
+                  {t('editDialog.name')}
                 </Label>
                 <Input
                   id="name"
@@ -354,11 +356,11 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
               {/* Account Type */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="type" className="text-right">
-                  Type
+                  {t('editDialog.type')}
                 </Label>
                 <Select value={editType} onValueChange={(value) => setEditType(value as typeof editType)}>
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select account type" />
+                    <SelectValue placeholder={t('editDialog.selectAccountType')} />
                   </SelectTrigger>
                   <SelectContent>
                     {ACCOUNT_TYPE_OPTIONS.map((option) => (
@@ -373,7 +375,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
               {/* Balance */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="balance" className="text-right">
-                  Balance
+                  {t('editDialog.balance')}
                 </Label>
                 <Input
                   id="balance"
@@ -388,11 +390,11 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
               {/* Currency */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="currency" className="text-right">
-                  Currency
+                  {t('editDialog.currency')}
                 </Label>
                 <Select value={editCurrency} onValueChange={setEditCurrency}>
                   <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select currency" />
+                    <SelectValue placeholder={t('editDialog.selectCurrency')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CURRENCY_OPTIONS.map((option) => (
@@ -408,11 +410,11 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
               {currencyChanged && (
                 <div className="grid grid-cols-4 items-start gap-4">
                   <Label className="text-right pt-2">
-                    Amount
+                    {t('editDialog.amount')}
                   </Label>
                   <div className="col-span-3 space-y-3">
                     <p className="text-sm leading-body-sm text-muted-foreground">
-                      Currency changed from {originalCurrency} to {editCurrency}. How would you like to handle the balance?
+                      {t('editDialog.currencyChangedNote', { from: originalCurrency, to: editCurrency })}
                     </p>
                     <div className="space-y-2">
                       <button
@@ -432,7 +434,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                           )}
                         </div>
                         <span className="text-sm leading-body-sm">
-                          Keep the same numeric value ({editBalance} {editCurrency})
+                          {t('editDialog.keepValue', { balance: editBalance, currency: editCurrency })}
                         </span>
                       </button>
                       <button
@@ -442,7 +444,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                       >
                         <div className="w-4 h-4 rounded-full border-2 border-muted-foreground" />
                         <span className="text-sm leading-body-sm text-muted-foreground">
-                          Convert amount (coming soon)
+                          {t('editDialog.convertAmount')}
                         </span>
                       </button>
                     </div>
@@ -453,20 +455,20 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
               {/* Description */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="description" className="text-right">
-                  Description
+                  {t('editDialog.descriptionLabel')}
                 </Label>
                 <Input
                   id="description"
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
-                  placeholder="Optional description"
+                  placeholder={t('editDialog.descriptionPlaceholder')}
                   className="col-span-3"
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
-              <Button type="submit" onClick={handleUpdate}>Save changes</Button>
+              <Button variant="outline" onClick={() => setIsEditOpen(false)}>{t('editDialog.cancel')}</Button>
+              <Button type="submit" onClick={handleUpdate}>{t('editDialog.saveChanges')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -475,14 +477,14 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
         <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Delete Account</DialogTitle>
+              <DialogTitle>{t('deleteDialog.title')}</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this account? This action cannot be undone.
+                {t('deleteDialog.description')}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+              <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>{t('deleteDialog.cancel')}</Button>
+              <Button variant="destructive" onClick={handleDelete}>{t('deleteDialog.delete')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import { useTranslations } from 'next-intl'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -23,6 +24,7 @@ export function OnboardingStepItem({
   children,
   isExpanded = false
 }: OnboardingStepItemProps) {
+  const t = useTranslations('onboarding.stepItem')
   return (
     <div
       className={cn(
@@ -69,10 +71,10 @@ export function OnboardingStepItem({
         {/* Status badge */}
         <div className="flex-shrink-0">
           {status === 'completed' && (
-            <span className="text-xs text-success font-medium">Done</span>
+            <span className="text-xs text-success font-medium">{t('done')}</span>
           )}
           {status === 'pending' && (
-            <span className="text-xs text-muted-foreground">Pending</span>
+            <span className="text-xs text-muted-foreground">{t('pending')}</span>
           )}
         </div>
       </div>

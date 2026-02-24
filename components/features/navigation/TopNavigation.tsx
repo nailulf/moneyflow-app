@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 interface TopNavigationProps {
@@ -48,27 +49,30 @@ export function DashboardNavigation() {
 }
 
 export function AccountNavigation() {
+  const t = useTranslations('navigation.topNav')
   const subMenus = [
-    { label: "Overview", href: "/accounts" }
+    { label: t('overview'), href: "/accounts" }
   ]
   return <TopNavigation subMenus={subMenus} />
 }
 
 export function SpendingNavigation() {
+  const t = useTranslations('navigation.topNav')
   const subMenus = [
-    { label: "Overview", href: "/spending" },
-    { label: "Breakdown", href: "/spending/breakdown" },
-    { label: "Cash Flow", href: "/spending/cashflow" },
-    { label: "Transaction", href: "/spending/transaction" }
+    { label: t('overview'), href: "/spending" },
+    { label: t('breakdown'), href: "/spending/breakdown" },
+    { label: t('cashFlow'), href: "/spending/cashflow" },
+    { label: t('transaction'), href: "/spending/transaction" }
   ]
   return <TopNavigation subMenus={subMenus} />
 }
 
 export function PortfolioNavigation() {
+  const t = useTranslations('navigation.topNav')
   const subMenus = [
-    { label: "Overview", href: "/portfolio" },
-    { label: "Holdings", href: "/portfolio/holdings" },
-    { label: "Analytics", href: "/portfolio/analytics" }
+    { label: t('overview'), href: "/portfolio" },
+    { label: t('holdings'), href: "/portfolio/holdings" },
+    { label: t('analytics'), href: "/portfolio/analytics" }
   ]
   return <TopNavigation subMenus={subMenus} />
 }

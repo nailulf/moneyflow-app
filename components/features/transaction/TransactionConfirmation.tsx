@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
 import { Button } from '@/components/ui/atoms/button'
 import { Badge } from '@/components/ui/atoms/badge'
@@ -51,6 +52,7 @@ export default function TransactionConfirmation({
   onBack,
   isLoading = false
 }: TransactionConfirmationProps) {
+  const t = useTranslations('transactions.confirmation')
   const [showAllTransactions, setShowAllTransactions] = useState(false)
   const [page, setPage] = useState(1)
   const itemsPerPage = 10
@@ -106,7 +108,7 @@ export default function TransactionConfirmation({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5" />
-            Confirm Transaction Import
+            {t('title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -118,7 +120,7 @@ export default function TransactionConfirmation({
                   <FileText className="h-5 w-5 text-primary" />
                   <div>
                     <div className="font-semibold">{summary.totalTransactions}</div>
-                    <div className="text-sm leading-body-sm text-muted-foreground">Transactions</div>
+                    <div className="text-sm leading-body-sm text-muted-foreground">{t('transactionsLabel')}</div>
                   </div>
                 </div>
               </Card>
@@ -129,7 +131,7 @@ export default function TransactionConfirmation({
                     <div className="font-semibold text-success">
                       {formatCurrency(summary.totalCredits)}
                     </div>
-                    <div className="text-sm leading-body-sm text-muted-foreground">Credits ({summary.creditCount})</div>
+                    <div className="text-sm leading-body-sm text-muted-foreground">{t('credits', { count: summary.creditCount })}</div>
                   </div>
                 </div>
               </Card>
@@ -140,7 +142,7 @@ export default function TransactionConfirmation({
                     <div className="font-semibold text-destructive">
                       {formatCurrency(summary.totalDebits)}
                     </div>
-                    <div className="text-sm leading-body-sm text-muted-foreground">Debits ({summary.debitCount})</div>
+                    <div className="text-sm leading-body-sm text-muted-foreground">{t('debits', { count: summary.debitCount })}</div>
                   </div>
                 </div>
               </Card>
@@ -151,7 +153,7 @@ export default function TransactionConfirmation({
                     <div className={`font-semibold ${summary.totalAmount >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {formatCurrency(summary.totalAmount)}
                     </div>
-                    <div className="text-sm leading-body-sm text-muted-foreground">Net Amount</div>
+                    <div className="text-sm leading-body-sm text-muted-foreground">{t('netAmount')}</div>
                   </div>
                 </div>
               </Card>
@@ -161,15 +163,15 @@ export default function TransactionConfirmation({
             <Card className="p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="h-5 w-5 text-primary" />
-                <span className="font-semibold">Import Details</span>
+                <span className="font-semibold">{t('importDetails')}</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm leading-body-sm">
                 <div>
-                  <span className="text-muted-foreground">Target Account:</span>
+                  <span className="text-muted-foreground">{t('targetAccount')}</span>
                   <span className="ml-2 font-medium">{accountName || accountId}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Date Range:</span>
+                  <span className="text-muted-foreground">{t('dateRange')}</span>
                   <span className="ml-2 font-medium">
                     {summary.dateRange.earliest.toLocaleDateString()} - {summary.dateRange.latest.toLocaleDateString()}
                   </span>
@@ -180,12 +182,12 @@ export default function TransactionConfirmation({
             {/* Category Breakdown */}
             {summary.topCategories.length > 0 && (
               <Card className="p-4">
-                <h3 className="font-semibold mb-3">Category Breakdown</h3>
+                <h3 className="font-semibold mb-3">{t('categoryBreakdown')}</h3>
                 <div className="space-y-2">
                   {summary.topCategories.map(([category, count]) => (
                     <div key={category} className="flex items-center justify-between">
                       <span className="text-sm leading-body-sm">{category}</span>
-                      <Badge variant="outline">{count} transactions</Badge>
+                      <Badge variant="outline">{count} {t('transactionsBadge')}</Badge>
                     </div>
                   ))}
                 </div>
@@ -195,14 +197,14 @@ export default function TransactionConfirmation({
             {/* Transaction Preview */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg leading-title-5 font-semibold">Transaction Preview</h3>
+                <h3 className="text-lg leading-title-5 font-semibold">{t('transactionPreview')}</h3>
                 {transactions.length > 10 && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowAllTransactions(!showAllTransactions)}
                   >
-                    {showAllTransactions ? 'Show Less' : `Show All (${transactions.length})`}
+                    {showAllTransactions ? t('showLess') : t('showAll', { count: transactions.length })}
                   </Button>
                 )}
               </div>
@@ -211,10 +213,10 @@ export default function TransactionConfirmation({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Category</TableHead>
+                      <TableHead>{t('headerDate')}</TableHead>
+                      <TableHead>{t('headerDescription')}</TableHead>
+                      <TableHead className="text-right">{t('headerAmount')}</TableHead>
+                      <TableHead>{t('headerCategory')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -237,7 +239,7 @@ export default function TransactionConfirmation({
                           {transaction.category_id ? (
                             <Badge variant="outline">{transaction.category_id}</Badge>
                           ) : (
-                            <span className="text-muted-foreground">Uncategorized</span>
+                            <span className="text-muted-foreground">{t('uncategorized')}</span>
                           )}
                         </TableCell>
                       </TableRow>
@@ -247,24 +249,24 @@ export default function TransactionConfirmation({
                 
                 {totalPages > 1 && (
                   <div className="p-3 text-center text-sm leading-body-sm text-muted-foreground border-t">
-                    Showing {paginatedTransactions.length} of {transactions.length} transactions
+                    {t('showing', { shown: paginatedTransactions.length, total: transactions.length })}
                     <div className="flex justify-center gap-2 mt-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
                       >
-                        Previous
+                        {t('previous')}
                       </Button>
-                      <span className="py-1">Page {page} of {totalPages}</span>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <span className="py-1">{t('page', { page, total: totalPages })}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
                       >
-                        Next
+                        {t('next')}
                       </Button>
                     </div>
                   </div>
@@ -279,13 +281,12 @@ export default function TransactionConfirmation({
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 <div className="space-y-2">
-                  <div className="font-semibold">Ready to Import</div>
+                  <div className="font-semibold">{t('alertTitle')}</div>
                   <div className="text-sm leading-body-sm">
-                    You are about to import {summary.totalTransactions} transactions 
-                    into {accountName || 'the selected account'}. This action cannot be undone.
+                    {t('alertDescription', { count: summary.totalTransactions, account: accountName || 'the selected account' })}
                   </div>
                   <div className="text-sm leading-body-sm text-muted-foreground">
-                    Please review the transaction details above and click &quot;Import Transactions&quot; to proceed.
+                    {t('alertReview')}
                   </div>
                 </div>
               </AlertDescription>
@@ -295,9 +296,9 @@ export default function TransactionConfirmation({
             <div className="flex justify-between pt-4">
               <Button variant="outline" onClick={onBack} disabled={isLoading}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Preview
+                {t('backToPreview')}
               </Button>
-              <Button 
+              <Button
                 onClick={onConfirm}
                 disabled={isLoading}
                 className="flex items-center gap-2"
@@ -305,12 +306,12 @@ export default function TransactionConfirmation({
                 {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Importing...
+                    {t('importing')}
                   </>
                 ) : (
                   <>
                     <Upload className="h-4 w-4" />
-                    Import Transactions
+                    {t('importButton')}
                   </>
                 )}
               </Button>

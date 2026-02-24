@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/atoms/button'
 import { Check, ArrowRight, Loader2 } from 'lucide-react'
 
 export function CompletionView() {
+  const t = useTranslations('onboarding.completion')
   const { complete, closeModal, loading } = useOnboarding()
   const { accounts } = useAccounts()
   const { categories } = useCategories()
@@ -49,7 +51,7 @@ export function CompletionView() {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">Finishing setup...</p>
+        <p className="text-muted-foreground">{t('finishing')}</p>
       </div>
     )
   }
@@ -63,24 +65,24 @@ export function CompletionView() {
 
       {/* Header */}
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold">You&apos;re All Set!</h2>
+        <h2 className="text-2xl font-bold">{t('title')}</h2>
         <p className="text-muted-foreground">
-          Your MoneyFlow workspace is ready to use
+          {t('description')}
         </p>
       </div>
 
       {/* Setup Summary */}
       {summary && (
         <div className="w-full max-w-sm space-y-3 text-left bg-muted/30 rounded-lg p-4">
-          <h3 className="font-medium text-sm text-center mb-3">Setup Summary</h3>
+          <h3 className="font-medium text-sm text-center mb-3">{t('summary.title')}</h3>
           <div className="flex items-center gap-3">
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-success/20">
               <Check className="h-3 w-3 text-success" />
             </div>
             <span className="text-sm">
               {summary.accountsCreated > 0
-                ? `${summary.accountsCreated} account${summary.accountsCreated > 1 ? 's' : ''} created`
-                : 'Accounts ready (add later)'}
+                ? t(summary.accountsCreated > 1 ? 'summary.accountsCreated' : 'summary.accountCreated', { count: summary.accountsCreated })
+                : t('summary.accountsReady')}
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -88,7 +90,7 @@ export function CompletionView() {
               <Check className="h-3 w-3 text-success" />
             </div>
             <span className="text-sm">
-              {summary.categoriesCount} categories configured
+              {t('summary.categoriesConfigured', { count: summary.categoriesCount })}
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -97,8 +99,8 @@ export function CompletionView() {
             </div>
             <span className="text-sm">
               {summary.budgetsCreated > 0
-                ? 'Budget created'
-                : 'Budget ready (create when you want)'}
+                ? t('summary.budgetCreated')
+                : t('summary.budgetReady')}
             </span>
           </div>
         </div>
@@ -106,7 +108,7 @@ export function CompletionView() {
 
       {/* CTA */}
       <Button onClick={handleGoToDashboard} className="gap-2 w-full max-w-xs">
-        Go to Dashboard
+        {t('goToDashboard')}
         <ArrowRight className="h-4 w-4" />
       </Button>
     </div>

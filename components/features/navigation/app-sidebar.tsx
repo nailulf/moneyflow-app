@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import {
   Home,
   DollarSign,
@@ -27,49 +28,19 @@ import {
   SidebarRail,
 } from "@/components/ui/organisms/sidebar"
 
-// This is sample data.
-const data = {
-  user: {
-    name: "MoneyFlow User",
-    email: "user@moneyflow.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/",
-      icon: Home,
-      isActive: true,
-    },
-    {
-      title: "Accounts",
-      url: "/accounts",
-      icon: Wallet,
-    },
-    {
-      title: "Spending",
-      url: "/spending",
-      icon: DollarSign,
-    },
-    {
-      title: "Portfolio",
-      url: "/portfolio",
-      icon: PieChart,
-    },
-    {
-      title: "Advice",
-      url: "/advice",
-      icon: Lightbulb,
-    },
-    // Hidden until features are ready:
-    // { title: "Invest", url: "/invest", icon: TrendingUp },
-    // { title: "Estate Planning", url: "/estate-planning", icon: Building },
-    // { title: "Equity", url: "/equity", icon: Landmark },
-    // { title: "Tax", url: "/tax", icon: Scale },
-  ],
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const t = useTranslations('navigation')
+
+  const navMain = [
+    { title: t('items.dashboard'), url: "/", icon: Home, isActive: true },
+    { title: t('items.accounts'), url: "/accounts", icon: Wallet },
+    { title: t('items.spending'), url: "/spending", icon: DollarSign },
+    { title: t('items.portfolio'), url: "/portfolio", icon: PieChart },
+    { title: t('items.advice'), url: "/advice", icon: Lightbulb },
+    // Hidden until features are ready:
+    // { title: t('items.invest'), url: "/invest", icon: TrendingUp },
+  ]
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -82,7 +53,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">MoneyFlow</span>
-                  <span className="truncate text-xs">Personal Finance</span>
+                  <span className="truncate text-xs">{t('sidebar.tagline')}</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -90,7 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

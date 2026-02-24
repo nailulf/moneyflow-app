@@ -677,7 +677,7 @@ export function TransactionTable({
                                   style={{ backgroundColor: getCategoryColor(transaction.category_id) }}
                                 />
                                 <span className="text-sm leading-body-sm font-medium text-foreground truncate">
-                                  {transaction.merchant || transaction.description || 'No description'}
+                                  {transaction.merchant || transaction.description || t('noDescription')}
                                 </span>
                               </div>
                             </TableCell>

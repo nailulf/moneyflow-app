@@ -253,6 +253,358 @@
       "cancel": "Cancel",
       "delete": "Delete Transaction",
       "deleting": "Deleting..."
+    },
+    "noDescription": "No description",
+    "form": {
+      "addTitle": "Add New Transaction",
+      "editTitle": "Edit Transaction",
+      "addTrigger": "Add Transaction",
+      "manualEntry": "Manual Entry",
+      "uploadPdf": "Upload PDF",
+      "date": "Date",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter description",
+      "amount": "Amount",
+      "type": "Type",
+      "selectType": "Select type",
+      "typeExpense": "Expense",
+      "typeIncome": "Income",
+      "typeTransfer": "Transfer",
+      "category": "Category",
+      "categoryLoading": "Loading categories...",
+      "noCategoriesForType": "No categories for this type",
+      "loadingShort": "Loading...",
+      "selectCategory": "Select category",
+      "noCategoriesAvailable": "No categories available for this type",
+      "account": "Account",
+      "selectAccount": "Select account",
+      "noAccountsAvailable": "No accounts available",
+      "merchantOpt": "Merchant (Opt)",
+      "merchantPlaceholder": "Enter merchant name",
+      "recurringTransaction": "Recurring Transaction",
+      "frequency": "Frequency",
+      "selectFrequency": "Select frequency",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "period": "Period",
+      "continuous": "Continuous (No end date)",
+      "endDate": "End Date",
+      "cancel": "Cancel",
+      "adding": "Adding...",
+      "addButton": "Add Transaction",
+      "updating": "Updating...",
+      "updateButton": "Update Transaction"
+    },
+    "confirmation": {
+      "title": "Confirm Transaction Import",
+      "transactionsLabel": "Transactions",
+      "credits": "Credits ({count})",
+      "debits": "Debits ({count})",
+      "netAmount": "Net Amount",
+      "importDetails": "Import Details",
+      "targetAccount": "Target Account:",
+      "dateRange": "Date Range:",
+      "categoryBreakdown": "Category Breakdown",
+      "transactionsBadge": "transactions",
+      "transactionPreview": "Transaction Preview",
+      "showLess": "Show Less",
+      "showAll": "Show All ({count})",
+      "headerDate": "Date",
+      "headerDescription": "Description",
+      "headerAmount": "Amount",
+      "headerCategory": "Category",
+      "showing": "Showing {shown} of {total} transactions",
+      "previous": "Previous",
+      "page": "Page {page} of {total}",
+      "next": "Next",
+      "uncategorized": "Uncategorized",
+      "alertTitle": "Ready to Import",
+      "alertDescription": "You are about to import {count} transactions into {account}. This action cannot be undone.",
+      "alertReview": "Please review the transaction details above and click \"Import Transactions\" to proceed.",
+      "backToPreview": "Back to Preview",
+      "importing": "Importing...",
+      "importButton": "Import Transactions"
+    },
+    "statementProcessor": {
+      "dropHere": "Drop your file here",
+      "clickToBrowse": "or click to browse",
+      "takePhoto": "Take Photo",
+      "uploadImage": "Upload Image",
+      "fileSupport": "Supports PDF bank statements · JPG, PNG, WEBP receipts & invoices",
+      "selectAccount": "Select Account",
+      "chooseAccount": "Choose account...",
+      "noAccountsAvailable": "No accounts available",
+      "useAI": "Use AI for enhanced extraction & categorization",
+      "processingStatement": "Processing statement...",
+      "cancel": "Cancel",
+      "uploadProcess": "Upload & Process",
+      "reviewTitle": "Review Transactions",
+      "reviewDescription": "{selected} of {total} selected. Review and edit before importing.",
+      "account": "Account:",
+      "currency": "Currency:",
+      "searchPlaceholder": "Search description or merchant...",
+      "allTypes": "All Types",
+      "incomeOnly": "Income Only",
+      "expenseOnly": "Expense Only",
+      "recategorize": "Re-categorize",
+      "headerDate": "Date",
+      "headerType": "Type",
+      "headerDescription": "Description",
+      "headerMerchant": "Merchant",
+      "headerNotes": "Notes",
+      "headerCategory": "Category",
+      "headerAmount": "Amount",
+      "noTransactions": "No transactions found",
+      "noTransactionsFromFile": "We couldn't extract any transactions from the uploaded file.",
+      "noTransactionsFilter": "Try adjusting your filters to see more results.",
+      "possibleDuplicate": "Possible duplicate",
+      "uncategorized": "Uncategorized",
+      "expensesGroup": "Expenses",
+      "incomeGroup": "Income",
+      "transfersGroup": "Transfers",
+      "typeIncome": "Income",
+      "typeExpense": "Expense",
+      "typeTransfer": "Transfer",
+      "selected": "Selected: {count}",
+      "totalAmount": "Total: {amount}",
+      "cancelReview": "Cancel",
+      "addTransactions": "Add transactions",
+      "discardTitle": "Discard changes?",
+      "discardDescription": "Are you sure you want to close? Unsaved progress will be lost.",
+      "discardCancel": "Cancel",
+      "discardConfirm": "Discard"
+    }
+  },
+  "navigation": {
+    "sidebar": {
+      "tagline": "Personal Finance"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "accounts": "Accounts",
+      "spending": "Spending",
+      "portfolio": "Portfolio",
+      "advice": "Advice",
+      "home": "Home",
+      "spend": "Spend",
+      "invest": "Invest"
+    },
+    "topNav": {
+      "overview": "Overview",
+      "breakdown": "Breakdown",
+      "cashFlow": "Cash Flow",
+      "transaction": "Transaction",
+      "holdings": "Holdings",
+      "analytics": "Analytics"
+    }
+  },
+  "onboarding": {
+    "modal": {
+      "title": "Complete your setup",
+      "progress": "{completed} of {total} complete",
+      "skipSetup": "Skip setup for now",
+      "srTitle": "Complete your setup"
+    },
+    "steps": {
+      "accountSetup": {
+        "title": "Create your first account",
+        "description": "Set up a bank account, credit card, or e-wallet"
+      },
+      "categories": {
+        "title": "Review your categories",
+        "description": "We've set up default categories for you"
+      },
+      "budgetSetup": {
+        "title": "Set up your budget",
+        "description": "Create a spending plan for the month"
+      }
+    },
+    "stepItem": {
+      "done": "Done",
+      "pending": "Pending"
+    },
+    "welcome": {
+      "heading": "Welcome to MoneyFlow, {name}!",
+      "tagline": "Your Personal Finance Companion",
+      "helpIntro": "We'll help you:",
+      "features": {
+        "track": {
+          "title": "Track expenses across all accounts",
+          "description": "Connect your bank accounts, credit cards, and e-wallets in one place"
+        },
+        "budgets": {
+          "title": "Create budgets that actually work",
+          "description": "Set spending limits and get alerts before you overspend"
+        },
+        "insights": {
+          "title": "Understand where your money goes",
+          "description": "Visual insights and reports to help you make better financial decisions"
+        }
+      },
+      "setupTime": "Setup takes about 3 minutes",
+      "startSetup": "Start Setup",
+      "skipForNow": "Skip for now",
+      "skipNote": "You can always complete the setup later from your dashboard"
+    },
+    "completion": {
+      "finishing": "Finishing setup...",
+      "title": "You're All Set!",
+      "description": "Your MoneyFlow workspace is ready to use",
+      "summary": {
+        "title": "Setup Summary",
+        "accountCreated": "{count} account created",
+        "accountsCreated": "{count} accounts created",
+        "accountsReady": "Accounts ready (add later)",
+        "categoriesConfigured": "{count} categories configured",
+        "budgetCreated": "Budget created",
+        "budgetReady": "Budget ready (create when you want)"
+      },
+      "goToDashboard": "Go to Dashboard"
+    },
+    "accountSetup": {
+      "accountTypeLabel": "Account Type *",
+      "selectAccountType": "Select account type",
+      "bankInstitution": "Bank / Institution",
+      "optional": "(optional)",
+      "searchBanks": "Search banks & e-wallets…",
+      "banks": "Banks",
+      "eWallets": "E-Wallets",
+      "noResults": "No results for \"{search}\"",
+      "accountNameLabel": "Account Name *",
+      "accountNamePlaceholder": "e.g., My BCA Checking, Main Cash",
+      "atLeast3Chars": "At least 3 characters required",
+      "currencyLabel": "Currency *",
+      "selectCurrency": "Select currency",
+      "startingBalance": "Starting Balance",
+      "balanceNote": "Enter your current balance — you can update this anytime",
+      "errors": {
+        "enterName": "Please enter an account name",
+        "minChars": "Account name must be at least 3 characters",
+        "notAuthenticated": "User not authenticated",
+        "failedToCreate": "Failed to create account. Please try again."
+      },
+      "skip": "Skip this step",
+      "creating": "Creating…",
+      "continue": "Continue",
+      "accountTypes": {
+        "BANK": { "label": "Bank Account", "description": "Checking or savings account" },
+        "CREDIT_CARD": { "label": "Credit Card", "description": "Credit card account" },
+        "CASH": { "label": "Cash", "description": "Cash on hand" },
+        "INVESTMENT": { "label": "Investment", "description": "Stocks, bonds, mutual funds" },
+        "OTHER": { "label": "E-Wallet / Other", "description": "GoPay, OVO, Dana, etc." }
+      }
+    },
+    "budgetSetup": {
+      "monthlyIncomeLabel": "Monthly Income (optional)",
+      "incomePlaceholder": "e.g., 10000000",
+      "chooseBudgetTemplate": "Choose a Budget Template",
+      "needs": "Needs",
+      "wants": "Wants",
+      "savings": "Savings",
+      "budgetPreview": "Budget Preview",
+      "incomeAllocated": "{percent}% of income allocated",
+      "editNote": "You can create or edit budgets anytime from your dashboard",
+      "skipBudget": "Skip budget",
+      "back": "Back",
+      "creating": "Creating...",
+      "createBudget": "Create Budget"
+    }
+  },
+  "accountManager": {
+    "title": "MANAGE ACCOUNTS",
+    "description": "Create, edit, and organize your bank accounts",
+    "loadingAccounts": "Loading accounts...",
+    "searchPlaceholder": "Search accounts...",
+    "addNewAccount": "Add New Account",
+    "yourAccounts": "Your Accounts ({count})",
+    "default": "Default",
+    "noAccountsSearch": "No accounts found matching your search.",
+    "noAccounts": "No accounts found. Create your first account!",
+    "close": "Close",
+    "addAccount": "Add Account",
+    "manageAccounts": "Manage Accounts",
+    "create": {
+      "title": "Add New Account",
+      "description": "Create a new account to track your transactions.",
+      "name": "Name",
+      "type": "Type",
+      "initialBalance": "Initial Balance",
+      "namePlaceholder": "e.g., Chase Checking",
+      "balancePlaceholder": "0.00",
+      "cancel": "Cancel",
+      "createAccount": "Create Account"
+    },
+    "edit": {
+      "title": "Edit Account",
+      "description": "Update account information.",
+      "name": "Name",
+      "type": "Type",
+      "namePlaceholder": "Account name",
+      "cancel": "Cancel",
+      "updateAccount": "Update Account"
+    },
+    "delete": {
+      "title": "Delete Account",
+      "description": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+      "defaultWarning": "This is your default account and cannot be deleted.",
+      "cancel": "Cancel",
+      "deleteAccount": "Delete Account"
+    },
+    "accountTypes": {
+      "bank": "Bank",
+      "creditCard": "Credit Card",
+      "cash": "Cash",
+      "investment": "Investment",
+      "other": "Other"
+    }
+  },
+  "accountDetail": {
+    "backToAccounts": "Back to Accounts",
+    "tabs": {
+      "overview": "Overview",
+      "transactions": "Transactions"
+    },
+    "details": {
+      "title": "Account Details",
+      "accountType": "Account Type",
+      "currency": "Currency",
+      "currentBalance": "Current Balance",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "descriptionLabel": "Description"
+    },
+    "default": "Default",
+    "actions": {
+      "edit": "Edit",
+      "export": "Export",
+      "delete": "Delete"
+    },
+    "editDialog": {
+      "title": "Edit Account",
+      "subtitle": "Make changes to your account details here.",
+      "name": "Name",
+      "type": "Type",
+      "balance": "Balance",
+      "currency": "Currency",
+      "amount": "Amount",
+      "currencyChangedNote": "Currency changed from {from} to {to}. How would you like to handle the balance?",
+      "keepValue": "Keep the same numeric value ({balance} {currency})",
+      "convertAmount": "Convert amount (coming soon)",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "selectAccountType": "Select account type",
+      "selectCurrency": "Select currency",
+      "cancel": "Cancel",
+      "saveChanges": "Save changes"
+    },
+    "deleteDialog": {
+      "title": "Delete Account",
+      "description": "Are you sure you want to delete this account? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
     }
   },
   "dashboard": {
