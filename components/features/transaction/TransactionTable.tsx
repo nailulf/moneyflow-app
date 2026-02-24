@@ -65,6 +65,9 @@ interface TransactionTableProps {
   // New props for lazy loading
   enableLazyLoading?: boolean
   pageSize?: number
+  showAddButton?: boolean
+  showFilters?: boolean
+  dateFilterPreset?: 'last7days' | 'currentMonth' | 'none'
 }
 
 type SortField = 'date' | 'description' | 'category' | 'amount' | 'merchant'
@@ -85,7 +88,10 @@ export function TransactionTable({
   onTransactionUpdate,
   enableSelfManagement = false,
   enableLazyLoading = false,
-  pageSize = 50
+  pageSize = 50,
+  showAddButton = true,
+  showFilters = true,
+  dateFilterPreset = 'none'
 }: TransactionTableProps) {
   const t = useTranslations('transactions')
   const { user } = useAuth()
@@ -127,6 +133,29 @@ export function TransactionTable({
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  useEffect(() => {
+    if (dateFilterPreset === 'none') return
+
+    const now = new Date()
+    if (dateFilterPreset === 'last7days') {
+      const startDate = new Date()
+      startDate.setDate(now.getDate() - 6)
+      setDateRange({
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: now.toISOString().split('T')[0]
+      })
+      return
+    }
+
+    if (dateFilterPreset === 'currentMonth') {
+      const startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+      setDateRange({
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: now.toISOString().split('T')[0]
+      })
+    }
+  }, [dateFilterPreset])
 
   // Separate effect for transaction loading to avoid dependency issues
   useEffect(() => {
@@ -426,113 +455,38 @@ export function TransactionTable({
         <div className="mb-6">
           <div className="flex justify-between items-center gap-3 mb-4 w-full">
             <h1 className="text-md leading-body-lg font-semibold text-muted-foreground">{t('title')}</h1>
-            <div className="flex items-center">
-              <AddTransactionForm onSuccess={() => {
-                transactionContext?.refreshTransactions?.()
-                // Also refresh local manager if enabled
-                if (enableSelfManagement && transactionManager) {
-                  transactionManager.loadTransactions()
-                }
-              }}/>
-            </div>
+            {showAddButton && (
+              <div className="flex items-center">
+                <AddTransactionForm onSuccess={() => {
+                  transactionContext?.refreshTransactions?.()
+                  // Also refresh local manager if enabled
+                  if (enableSelfManagement && transactionManager) {
+                    transactionManager.loadTransactions()
+                  }
+                }}/>
+              </div>
+            )}
           </div>
           
-          {/* Filter Controls - Desktop */}
-          <div className="hidden lg:flex items-center justify-between mb-4 w-full gap-6">
-            <div className="flex items-center gap-3">
-              <div className="min-w-0 w-40">
-                <DateRangePicker
-                  value={dateRange}
-                  onChange={setDateRange}
-                />
-              </div>
-              <div className="min-w-0 w-40">
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-full text-xs" size="sm">
-                    <SelectValue placeholder={t('allCategories')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('allCategories')}</SelectItem>
-                    {categories.map((category) => (
-                      <SelectItem key={`category-${category.id}`} value={category.id}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: category.color }}
-                          />
-                          {category.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="min-w-0 w-40">
-                <Select value={merchantFilter} onValueChange={setMerchantFilter}>
-                  <SelectTrigger className="w-full text-xs" size="sm">
-                    <SelectValue placeholder={t('allMerchants')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('allMerchants')}</SelectItem>
-                    {uniqueMerchants.map((merchant) => (
-                      <SelectItem key={`merchant-${merchant}`} value={merchant}>
-                        {merchant}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="relative min-w-0 w-64">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder={t('search')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-8 bg-muted/50 border-border w-full"
-              />
-            </div>
-          </div>
-
-          {/* Filter Controls - Mobile/Tablet */}
-          <div className="flex lg:hidden items-center gap-2 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder={t('search')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-10 bg-muted/50 border-border w-full"
-              />
-            </div>
-            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="h-10 w-10 shrink-0">
-                  <Filter className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-auto max-h-[80vh] w-full">
-                <SheetHeader>
-                  <SheetTitle>{t('filters')}</SheetTitle>
-                </SheetHeader>
-                <div className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <label className="text-sm leading-body-sm font-medium">{t('dateRange')}</label>
+          {showFilters && (
+            <>
+              <div className="hidden lg:flex items-center justify-between mb-4 w-full gap-6">
+                <div className="flex items-center gap-3">
+                  <div className="min-w-0 w-40">
                     <DateRangePicker
                       value={dateRange}
                       onChange={setDateRange}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm leading-body-sm font-medium">{t('category')}</label>
+                  <div className="min-w-0 w-40">
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full text-xs" size="sm">
                         <SelectValue placeholder={t('allCategories')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">{t('allCategories')}</SelectItem>
                         {categories.map((category) => (
-                          <SelectItem key={`category-mobile-${category.id}`} value={category.id}>
+                          <SelectItem key={`category-${category.id}`} value={category.id}>
                             <div className="flex items-center gap-2">
                               <div
                                 className="w-3 h-3 rounded-full"
@@ -545,29 +499,108 @@ export function TransactionTable({
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm leading-body-sm font-medium">{t('merchant')}</label>
+                  <div className="min-w-0 w-40">
                     <Select value={merchantFilter} onValueChange={setMerchantFilter}>
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="w-full text-xs" size="sm">
                         <SelectValue placeholder={t('allMerchants')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">{t('allMerchants')}</SelectItem>
                         {uniqueMerchants.map((merchant) => (
-                          <SelectItem key={`merchant-mobile-${merchant}`} value={merchant}>
+                          <SelectItem key={`merchant-${merchant}`} value={merchant}>
                             {merchant}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
-                    {t('applyFilters')}
-                  </Button>
                 </div>
-              </SheetContent>
-            </Sheet>
-          </div>
+                <div className="relative min-w-0 w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder={t('search')}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 h-8 bg-muted/50 border-border w-full"
+                  />
+                </div>
+              </div>
+
+              <div className="flex lg:hidden items-center gap-2 mb-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Input
+                    placeholder={t('search')}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 h-10 bg-muted/50 border-border w-full"
+                  />
+                </div>
+                <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="icon" className="h-10 w-10 shrink-0">
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="bottom" className="h-auto max-h-[80vh] w-full">
+                    <SheetHeader>
+                      <SheetTitle>{t('filters')}</SheetTitle>
+                    </SheetHeader>
+                    <div className="space-y-4 pt-4">
+                      <div className="space-y-2">
+                        <label className="text-sm leading-body-sm font-medium">{t('dateRange')}</label>
+                        <DateRangePicker
+                          value={dateRange}
+                          onChange={setDateRange}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm leading-body-sm font-medium">{t('category')}</label>
+                        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={t('allCategories')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">{t('allCategories')}</SelectItem>
+                            {categories.map((category) => (
+                              <SelectItem key={`category-mobile-${category.id}`} value={category.id}>
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-3 h-3 rounded-full"
+                                    style={{ backgroundColor: category.color }}
+                                  />
+                                  {category.name}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm leading-body-sm font-medium">{t('merchant')}</label>
+                        <Select value={merchantFilter} onValueChange={setMerchantFilter}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={t('allMerchants')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">{t('allMerchants')}</SelectItem>
+                            {uniqueMerchants.map((merchant) => (
+                              <SelectItem key={`merchant-mobile-${merchant}`} value={merchant}>
+                                {merchant}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
+                        {t('applyFilters')}
+                      </Button>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </>
+          )}
 
           {/* Transaction Summary */}
           <div className="hidden sm:block mt-4 text-sm leading-body-sm text-muted-foreground">

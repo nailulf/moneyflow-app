@@ -123,6 +123,31 @@ export interface Database {
           updated_at?: string
         }
       }
+      account_balance_adjustments: {
+        Row: {
+          id: string
+          account_id: string
+          user_id: string
+          previous_balance: number
+          new_balance: number
+          adjustment_amount: number
+          note: string | null
+          adjustment_date: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          account_id: string
+          user_id: string
+          previous_balance: number
+          new_balance: number
+          adjustment_amount: number
+          note?: string | null
+          adjustment_date?: string
+          created_at?: string
+        }
+        Update: Record<string, never>
+      }
       accounts: {
         Row: {
           id: string
@@ -664,6 +689,9 @@ export type BudgetCategoryUpdate = Database['public']['Tables']['budget_categori
 export type AccountDB = Database['public']['Tables']['accounts']['Row']
 export type AccountInsert = Database['public']['Tables']['accounts']['Insert']
 export type AccountUpdate = Database['public']['Tables']['accounts']['Update']
+
+export type BalanceAdjustment = Database['public']['Tables']['account_balance_adjustments']['Row']
+export type BalanceAdjustmentInsert = Database['public']['Tables']['account_balance_adjustments']['Insert']
 
 export type StatementDB = Database['public']['Tables']['statements']['Row']
 export type StatementInsert = Database['public']['Tables']['statements']['Insert']

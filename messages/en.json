@@ -570,6 +570,7 @@
       "title": "Account Details",
       "accountType": "Account Type",
       "currency": "Currency",
+      "initialBalance": "Initial Balance",
       "currentBalance": "Current Balance",
       "status": "Status",
       "active": "Active",
@@ -580,6 +581,7 @@
     "actions": {
       "edit": "Edit",
       "export": "Export",
+      "adjust": "Adjust",
       "delete": "Delete"
     },
     "editDialog": {
@@ -605,6 +607,22 @@
       "description": "Are you sure you want to delete this account? This action cannot be undone.",
       "cancel": "Cancel",
       "delete": "Delete"
+    },
+    "adjustDialog": {
+      "title": "Adjust Balance",
+      "subtitle": "Set the correct current balance. Your existing transactions will not be changed.",
+      "currentBalance": "Current",
+      "newBalance": "New Balance",
+      "date": "Date",
+      "note": "Note",
+      "notePlaceholder": "e.g. Bank statement reconciliation",
+      "adjustment": "Adjustment",
+      "cancel": "Cancel",
+      "confirm": "Adjust Balance",
+      "adjusting": "Adjusting..."
+    },
+    "adjustments": {
+      "title": "Balance History"
     }
   },
   "dashboard": {

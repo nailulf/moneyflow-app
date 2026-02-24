@@ -1,19 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AccountNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
 import { Button } from '@/components/ui/atoms/button'
-import { ArrowLeft, CreditCard, Wallet, TrendingUp, Building2, Loader2, Edit, Trash2, Download } from 'lucide-react'
-import { useAccounts } from '@/contexts/AccountContext'
+import { ArrowLeft, CreditCard, Wallet, TrendingUp, Building2, Loader2, Edit, Trash2, Download, SlidersHorizontal } from 'lucide-react'
+import { useAccounts, AccountWithHistory } from '@/contexts/AccountContext'
 import { formatCurrency } from '@/lib/data-utils'
 import { GoalSection } from '@/components/features/goals'
-import { AccountDB } from '@/types/database'
+import { AccountDB, BalanceAdjustment } from '@/types/database'
 import { useAllTransactions } from '@/hooks/useTransactionsQuery'
 import { useAuth } from '@/contexts/AuthContext'
+import { queryKeys } from '@/hooks/useDataRefresh'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/molecules/tabs'
 import { TransactionTable } from '@/components/features/transaction/TransactionTable'
 import { toast } from 'sonner'
@@ -73,7 +75,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
   const t = useTranslations('accountDetail')
   const { user } = useAuth()
   const { accounts, loading, deleteAccount, updateAccount } = useAccounts()
-  const [account, setAccount] = useState<AccountDB | null>(null)
+  const [account, setAccount] = useState<AccountWithHistory | null>(null)
   
   // State for actions
   const [isEditOpen, setIsEditOpen] = useState(false)
@@ -86,12 +88,48 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
   const [currencyConversionMode, setCurrencyConversionMode] = useState<'keep' | 'convert'>('keep')
   const [originalCurrency, setOriginalCurrency] = useState('')
 
+  // Adjust balance state
+  const queryClient = useQueryClient()
+  const [isAdjustOpen, setIsAdjustOpen] = useState(false)
+  const [adjustNewBalance, setAdjustNewBalance] = useState('')
+  const [adjustNote, setAdjustNote] = useState('')
+  const [adjustDate, setAdjustDate] = useState('')
+  const [isAdjusting, setIsAdjusting] = useState(false)
+
   // Transactions
   const { transactions, isLoading: transactionsLoading } = useAllTransactions({
     userId: user?.id || '',
     accountId: accountId,
     enabled: !!user?.id && !!accountId
   })
+
+  // account.balance is maintained by a DB trigger on every transaction, so it IS the current balance.
+  // Initial balance = current balance minus the cumulative effect of all transactions.
+  const initialBalance = useMemo(() => {
+    if (!account) return 0
+    const txEffect = transactions.reduce((sum, t) => {
+      if (t.type === 'INCOME') return sum + t.amount
+      if (t.type === 'EXPENSE') return sum - t.amount
+      return sum // TRANSFER is excluded (doesn't change net worth for one account)
+    }, 0)
+    return account.balance - txEffect
+  }, [account, transactions])
+
+  // Fetch balance adjustment log
+  const { data: adjustments = [] } = useQuery<BalanceAdjustment[]>({
+    queryKey: ['balance-adjustments', accountId],
+    queryFn: async () => {
+      const res = await fetch(`/api/accounts/${accountId}/adjust-balance`)
+      if (!res.ok) throw new Error('Failed to fetch adjustments')
+      return res.json()
+    },
+    enabled: !!accountId,
+  })
+
+  // Real-time adjustment preview
+  const currentBalance = account?.currentBalance ?? account?.balance ?? 0
+  const parsedNewBalance = parseFloat(adjustNewBalance)
+  const adjustmentDiff = isNaN(parsedNewBalance) ? null : parsedNewBalance - currentBalance
 
   useEffect(() => {
     if (!loading && accounts.length > 0) {
@@ -192,6 +230,44 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
     toast.success('Export started')
   }
 
+  const handleOpenAdjustDialog = () => {
+    setAdjustNewBalance('')
+    setAdjustNote('')
+    setAdjustDate(new Date().toISOString().slice(0, 10))
+    setIsAdjustOpen(true)
+  }
+
+  const handleAdjustBalance = async () => {
+    if (!account || adjustmentDiff === null) return
+    setIsAdjusting(true)
+    try {
+      const res = await fetch(`/api/accounts/${accountId}/adjust-balance`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          new_balance: parsedNewBalance,
+          note: adjustNote.trim() || null,
+          adjustment_date: adjustDate || new Date().toISOString().slice(0, 10),
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to adjust balance')
+      const data = await res.json()
+      if (data.message === 'no_change') {
+        toast.info('Balance is already up to date')
+      } else {
+        toast.success('Balance adjusted successfully')
+        queryClient.invalidateQueries({ queryKey: queryKeys.accounts(user?.id) })
+        queryClient.invalidateQueries({ queryKey: queryKeys.netWorth(user?.id) })
+        queryClient.invalidateQueries({ queryKey: ['balance-adjustments', accountId] })
+      }
+      setIsAdjustOpen(false)
+    } catch {
+      toast.error('Failed to adjust balance')
+    } finally {
+      setIsAdjusting(false)
+    }
+  }
+
   if (loading || !account) {
     return (
       <div className="flex items-center justify-center h-full min-h-[200px]">
@@ -275,8 +351,12 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                         <dd className="font-medium">{account.currency}</dd>
                       </div>
                       <div className="flex justify-between">
+                        <dt className="text-muted-foreground">{t('details.initialBalance')}</dt>
+                        <dd className="font-medium">{formatCurrency(initialBalance, account.currency)}</dd>
+                      </div>
+                      <div className="flex justify-between">
                         <dt className="text-muted-foreground">{t('details.currentBalance')}</dt>
-                        <dd className="font-medium">{formatCurrency(account.balance, account.currency)}</dd>
+                        <dd className="font-medium">{formatCurrency(account.currentBalance ?? account.balance, account.currency)}</dd>
                       </div>
                       <div className="flex justify-between">
                         <dt className="text-muted-foreground">{t('details.status')}</dt>
@@ -297,6 +377,34 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                     </dl>
                   </CardContent>
                 </Card>
+                {/* Balance History */}
+                {adjustments.length > 0 && (
+                  <Card className="mt-6">
+                    <CardHeader>
+                      <CardTitle className="text-lg leading-title-5">{t('adjustments.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {adjustments.map((adj) => (
+                          <div key={adj.id} className="flex flex-col gap-1 pb-3 border-b last:border-0 last:pb-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-muted-foreground">
+                                {new Date(adj.adjustment_date).toLocaleDateString()}
+                              </span>
+                              <span className={`text-sm font-semibold ${adj.adjustment_amount >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                {adj.adjustment_amount >= 0 ? '+' : ''}{formatCurrency(adj.adjustment_amount, account.currency)}
+                              </span>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {formatCurrency(adj.previous_balance, account.currency)} → {formatCurrency(adj.new_balance, account.currency)}
+                            </div>
+                            {adj.note && <p className="text-xs text-muted-foreground italic">"{adj.note}"</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="transactions">
@@ -307,6 +415,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                       enableSelfManagement={false}
                       enableLazyLoading={true}
                       pageSize={20}
+                      showAddButton={false}
                     />
                   </CardContent>
                 </Card>
@@ -320,6 +429,10 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
               <Button variant="outline" onClick={handleExport} className="flex-1">
                 <Download className="w-4 h-4 mr-2" />
                 {t('actions.export')}
+              </Button>
+              <Button variant="outline" onClick={handleOpenAdjustDialog} className="flex-1">
+                <SlidersHorizontal className="w-4 h-4 mr-2" />
+                {t('actions.adjust')}
               </Button>
               <Button variant="destructive" onClick={() => setIsDeleteOpen(true)} className="flex-1">
                 <Trash2 className="w-4 h-4 mr-2" />
@@ -469,6 +582,81 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsEditOpen(false)}>{t('editDialog.cancel')}</Button>
               <Button type="submit" onClick={handleUpdate}>{t('editDialog.saveChanges')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Adjust Balance Dialog */}
+        <Dialog open={isAdjustOpen} onOpenChange={setIsAdjustOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{t('adjustDialog.title')}</DialogTitle>
+              <DialogDescription>{t('adjustDialog.subtitle')}</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              {/* Current balance — read-only */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right text-muted-foreground">{t('adjustDialog.currentBalance')}</Label>
+                <div className="col-span-3 font-semibold">
+                  {formatCurrency(currentBalance, account.currency)}
+                </div>
+              </div>
+              {/* New balance */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="adj-balance" className="text-right">{t('adjustDialog.newBalance')}</Label>
+                <Input
+                  id="adj-balance"
+                  type="number"
+                  step="0.01"
+                  value={adjustNewBalance}
+                  onChange={(e) => setAdjustNewBalance(e.target.value)}
+                  className="col-span-3"
+                  placeholder="0.00"
+                />
+              </div>
+              {/* Date */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="adj-date" className="text-right">{t('adjustDialog.date')}</Label>
+                <Input
+                  id="adj-date"
+                  type="date"
+                  value={adjustDate}
+                  onChange={(e) => setAdjustDate(e.target.value)}
+                  className="col-span-3"
+                />
+              </div>
+              {/* Note */}
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="adj-note" className="text-right pt-2">{t('adjustDialog.note')}</Label>
+                <textarea
+                  id="adj-note"
+                  value={adjustNote}
+                  onChange={(e) => setAdjustNote(e.target.value)}
+                  placeholder={t('adjustDialog.notePlaceholder')}
+                  className="col-span-3 flex min-h-[60px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                  rows={2}
+                />
+              </div>
+              {/* Live adjustment preview */}
+              {adjustmentDiff !== null && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right text-muted-foreground">{t('adjustDialog.adjustment')}</Label>
+                  <div className={`col-span-3 font-semibold ${adjustmentDiff >= 0 ? 'text-success' : 'text-destructive'}`}>
+                    {adjustmentDiff >= 0 ? '+' : ''}{formatCurrency(adjustmentDiff, account.currency)}
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAdjustOpen(false)} disabled={isAdjusting}>
+                {t('adjustDialog.cancel')}
+              </Button>
+              <Button
+                onClick={handleAdjustBalance}
+                disabled={isAdjusting || adjustmentDiff === null || adjustmentDiff === 0}
+              >
+                {isAdjusting ? t('adjustDialog.adjusting') : t('adjustDialog.confirm')}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
