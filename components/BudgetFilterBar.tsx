@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { Button } from '@/components/ui/atoms/button'
 import { Badge } from '@/components/ui/atoms/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/molecules/select'
@@ -30,23 +31,25 @@ function FilterControls({
   onMonthChange,
   stacked = false,
 }: Omit<BudgetFilterBarProps, 'selectedBudgetName' | 'onCreateBudget'> & { stacked?: boolean }) {
+  const t = useTranslations('budgetFilterBar')
+  const locale = useLocale()
   return (
     <div className={stacked ? 'space-y-4' : 'flex items-center gap-2'}>
       {stacked && (
-        <label className="text-sm font-medium text-foreground">Period</label>
+        <label className="text-sm font-medium text-foreground">{t('period')}</label>
       )}
       <Select value={timeRange} onValueChange={(value: 'monthly' | 'yearly') => onTimeRangeChange(value)}>
         <SelectTrigger className={stacked ? 'w-full' : 'w-32'}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="monthly">Monthly</SelectItem>
-          <SelectItem value="yearly">Yearly</SelectItem>
+          <SelectItem value="monthly">{t('monthly')}</SelectItem>
+          <SelectItem value="yearly">{t('yearly')}</SelectItem>
         </SelectContent>
       </Select>
 
       {stacked && (
-        <label className="text-sm font-medium text-foreground">Year</label>
+        <label className="text-sm font-medium text-foreground">{t('year')}</label>
       )}
       <Select value={selectedYear.toString()} onValueChange={(value) => onYearChange(parseInt(value))}>
         <SelectTrigger className={stacked ? 'w-full' : 'w-20'}>
@@ -62,7 +65,7 @@ function FilterControls({
       {timeRange === 'monthly' && (
         <>
           {stacked && (
-            <label className="text-sm font-medium text-foreground">Month</label>
+            <label className="text-sm font-medium text-foreground">{t('month')}</label>
           )}
           <Select value={selectedMonth.toString()} onValueChange={(value) => onMonthChange(parseInt(value))}>
             <SelectTrigger className={stacked ? 'w-full' : 'w-24'}>
@@ -71,7 +74,7 @@ function FilterControls({
             <SelectContent>
               {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
                 <SelectItem key={month} value={month.toString()}>
-                  {new Date(0, month - 1).toLocaleString('default', { month: stacked ? 'long' : 'short' })}
+                  {new Date(0, month - 1).toLocaleString(locale, { month: stacked ? 'long' : 'short' })}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -92,13 +95,14 @@ export function BudgetFilterBar({
   selectedBudgetName,
   onCreateBudget,
 }: BudgetFilterBarProps) {
+  const t = useTranslations('budgetFilterBar')
   const isMobile = useIsMobile()
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   const actionButton = onCreateBudget ? (
     <Button onClick={onCreateBudget} size={isMobile ? 'sm' : 'default'} className="shrink-0">
       <Plus className="h-4 w-4 mr-1" />
-      {isMobile ? 'Budget' : 'Create Budget'}
+      {isMobile ? t('budget') : t('createBudget')}
     </Button>
   ) : null
 
@@ -121,7 +125,7 @@ export function BudgetFilterBar({
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Filter Period
+                {t('filterPeriod')}
               </SheetTitle>
             </SheetHeader>
             <div className="mt-6">

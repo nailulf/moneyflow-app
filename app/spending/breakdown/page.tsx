@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { CashFlowBreakdown } from '@/components/CashFlowBreakdown'
 import { SpendingNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, TopContent, ContentWrapper, SideContent } from '@/components/PageLayout'
@@ -14,6 +15,7 @@ import { CashFlowSummary } from '@/components/CashFlowSummary'
 import { BudgetStatus } from '@/components/BudgetStatus'
 
 export default function BudgetReportPage() {
+  const t = useTranslations('spending.breakdown')
   // Initialize date state — default to server-safe values, then correct on mount
   const [selectedYear, setSelectedYear] = useState<number>(2025)
   const [selectedMonth, setSelectedMonth] = useState<number>(1)
@@ -84,9 +86,9 @@ export default function BudgetReportPage() {
           {/* Header */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-xl font-semibold tracking-tight mb-1">Budget Report</h2>
+              <h2 className="text-xl font-semibold tracking-tight mb-1">{t('title')}</h2>
               <p className="text-sm text-muted-foreground">
-                View your budget performance and spending patterns
+                {t('description')}
               </p>
             </div>
             <BudgetFilterBar

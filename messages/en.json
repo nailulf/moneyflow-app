@@ -114,6 +114,147 @@
       "dashboard": "Dashboard"
     }
   },
+  "spending": {
+    "breakdown": {
+      "title": "Budget Report",
+      "description": "View your budget performance and spending patterns"
+    },
+    "cashflow": {
+      "title": "Cash Flow",
+      "description": "Visualize your income and expenses flow",
+      "totalIncome": "Total Income",
+      "totalExpenses": "Total Expenses",
+      "netCashFlow": "Net Cash Flow",
+      "month": "Month",
+      "year": "Year"
+    },
+    "transactions": {
+      "allTransactions": "All Transactions",
+      "recurringTransactions": "Recurring Transactions"
+    }
+  },
+  "cashflowBreakdown": {
+    "title": "Cash Flow Breakdown",
+    "viewBy": "View by",
+    "tabs": {
+      "expenses": "Expenses",
+      "budget": "Budget",
+      "income": "Income"
+    },
+    "noData": "No data available",
+    "noExpenseData": "No expense data available",
+    "noIncomeData": "No income data available",
+    "expensesTitle": "Expenses",
+    "totalSpending": "Total spending this month: {amount}",
+    "expensesBreakdown": "Expenses Breakdown",
+    "expenseCategories": "{count} expense categories",
+    "incomeSources": "Income Sources",
+    "incomeBreakdown": "Income Breakdown",
+    "totalIncome": "Total income this month: {amount}",
+    "incomeCounts": "{count} income sources",
+    "budgetPerformance": "Budget Performance",
+    "upcoming": "Upcoming",
+    "projectedBudget": "Projected budget for this period",
+    "budgetUsed": "{percent}% of budget used",
+    "editBudget": "Edit budget",
+    "categoryBreakdown": "Category Breakdown",
+    "budgetCategoriesCount": "{count} budget categories",
+    "noBudgetCategories": "No budget categories",
+    "noBudgetForPeriod": "No budget set for this period",
+    "createBudgetPrompt": "Create a budget to track your spending against targets.",
+    "setupBudget": "Set up your budget",
+    "errorLoading": "Error loading budget data.",
+    "status": {
+      "over": "Over",
+      "warning": "Warning",
+      "onTrack": "On track"
+    },
+    "amounts": {
+      "spent": "Spent",
+      "budget": "Budget",
+      "left": "Left"
+    }
+  },
+  "cashflowSummary": {
+    "title": "Cash Flow",
+    "income": "Income",
+    "spending": "Spending",
+    "netCashFlow": "Net Cash Flow"
+  },
+  "budgetFilterBar": {
+    "period": "Period",
+    "year": "Year",
+    "month": "Month",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "filterPeriod": "Filter Period",
+    "createBudget": "Create Budget",
+    "budget": "Budget"
+  },
+  "accounts": {
+    "totalSavingsProgress": "Total Savings Progress",
+    "activeGoals": "Active Goals",
+    "completedGoals": "Completed Goals",
+    "savingsAndInvestment": "Savings & Investment Accounts",
+    "otherAccounts": "Other Accounts",
+    "noAccountsTitle": "No Accounts Yet",
+    "noAccountsDescription": "Create your first account to start tracking your finances",
+    "noGoalSet": "No goal set",
+    "target": "Target: {amount}"
+  },
+  "transactions": {
+    "title": "TRANSACTIONS",
+    "recentTransactions": "Recent Transactions",
+    "loading": "Loading...",
+    "noTransactionsFound": "No transactions found",
+    "search": "Search",
+    "allCategories": "All Categories",
+    "allMerchants": "All Merchants",
+    "filters": "Filters",
+    "dateRange": "Date Range",
+    "category": "Category",
+    "merchant": "Merchant",
+    "applyFilters": "Apply Filters",
+    "summary": {
+      "total": "Total transactions",
+      "dateRange": "Date range",
+      "noTransactions": "No transactions",
+      "totalExpenses": "Total expenses",
+      "totalIncome": "Total income",
+      "balance": "Balance"
+    },
+    "columns": {
+      "merchantDescription": "Merchant / Description",
+      "category": "Category",
+      "amount": "Amount"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "loadMore": "Load More ({remaining} remaining)",
+    "loadingMore": "Loading more transactions...",
+    "allLoaded": "All transactions loaded ({total} total)",
+    "confirmCategoryChange": {
+      "title": "Confirm Category Change",
+      "description": "Are you sure you want to change the category for \"{description}\" to \"{category}\"?",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "updating": "Updating..."
+    },
+    "confirmDelete": {
+      "title": "Delete Transaction",
+      "description": "Are you sure you want to delete this transaction? This action cannot be undone.",
+      "details": "Transaction Details:",
+      "merchantLabel": "Merchant",
+      "amountLabel": "Amount",
+      "dateLabel": "Date",
+      "notAvailable": "N/A",
+      "cancel": "Cancel",
+      "delete": "Delete Transaction",
+      "deleting": "Deleting..."
+    }
+  },
   "dashboard": {
     "netWorth": {
       "totalNetWorth": "Total Net Worth",

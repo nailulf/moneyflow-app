@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { SpendingNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
@@ -14,7 +15,8 @@ import { useCategories } from '@/contexts/CategoryContext'
 import { TrendingUp, TrendingDown, Calendar } from 'lucide-react'
 
 export default function CashFlowPage() {
-  
+  const t = useTranslations('spending.cashflow')
+
   // Use shared transaction context
   const { transactions, loading } = useTransactions()
   const { getCategoryName } = useCategories()
@@ -80,15 +82,15 @@ export default function CashFlowPage() {
           {/* Header Row */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-xl font-semibold tracking-tight mb-2">Cash Flow</h2>
-              <p className="text-muted-foreground">Visualize your income and expenses flow</p>
+              <h2 className="text-xl font-semibold tracking-tight mb-2">{t('title')}</h2>
+              <p className="text-muted-foreground">{t('description')}</p>
             </div>
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'month' | 'year')} className="w-auto">
                 <TabsList className="grid w-full grid-cols-2 h-9">
-                  <TabsTrigger value="month" className="text-xs">Month</TabsTrigger>
-                  <TabsTrigger value="year" className="text-xs">Year</TabsTrigger>
+                  <TabsTrigger value="month" className="text-xs">{t('month')}</TabsTrigger>
+                  <TabsTrigger value="year" className="text-xs">{t('year')}</TabsTrigger>
                 </TabsList>
               </Tabs>
               <PeriodPicker 
@@ -105,7 +107,7 @@ export default function CashFlowPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Income</p>
+                    <p className="text-sm text-muted-foreground">{t('totalIncome')}</p>
                     <p className="text-2xl font-bold text-success">{formatCurrency(totalIncome)}</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-success" />
@@ -118,7 +120,7 @@ export default function CashFlowPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      Total Expenses
+                      {t('totalExpenses')}
                       <span className={`ml-2 text-xs ${expenseChange > 0 ? 'text-destructive' : 'text-success'}`}>
                         {expenseChange > 0 ? '↑' : '↓'} {Math.abs(expenseChange).toFixed(1)}%
                       </span>
@@ -134,7 +136,7 @@ export default function CashFlowPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Net Cash Flow</p>
+                    <p className="text-sm text-muted-foreground">{t('netCashFlow')}</p>
                     <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {formatCurrency(netCashFlow)}
                     </p>

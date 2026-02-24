@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { Transaction } from '@/types/database'
 import { formatCurrency } from '@/lib/data-utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
@@ -12,6 +13,7 @@ interface CashFlowSummaryProps {
 export function CashFlowSummary({
   transactions,
 }: CashFlowSummaryProps) {
+  const t = useTranslations('cashflowSummary')
   const { totalIncome, totalSpending, netCashFlow } = useMemo(() => {
     let totalIncome = 0
     let totalSpending = 0
@@ -29,7 +31,7 @@ export function CashFlowSummary({
     <Card className="w-full">
       <CardHeader>
         <CardTitle>
-          <span>Cash Flow</span>
+          <span>{t('title')}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">
@@ -37,7 +39,7 @@ export function CashFlowSummary({
           <div>
             <div className="flex items-center justify-between gap-4 py-1">
               <span className="text-sm leading-body-sm text-muted-foreground whitespace-nowrap">
-                Income
+                {t('income')}
               </span>
               <span className="text-sm leading-body-sm font-normal text-success tabular-nums whitespace-nowrap">
                 {formatCurrency(totalIncome)}
@@ -45,7 +47,7 @@ export function CashFlowSummary({
             </div>
             <div className="flex items-center justify-between gap-4 py-1">
               <span className="text-sm leading-body-sm text-muted-foreground whitespace-nowrap">
-                Spending
+                {t('spending')}
               </span>
               <span className="text-sm leading-body-sm font-normal text-destructive tabular-nums whitespace-nowrap">
                 {formatCurrency(totalSpending)}
@@ -54,7 +56,7 @@ export function CashFlowSummary({
           </div>
           <div className="flex items-center justify-between gap-4 py-3">
             <span className="text-sm leading-body-sm text-muted-foreground whitespace-nowrap">
-              Net Cash Flow
+              {t('netCashFlow')}
             </span>
             <span
               className={`text-sm leading-body-sm font-normal tabular-nums whitespace-nowrap ${
