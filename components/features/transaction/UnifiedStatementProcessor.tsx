@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useMemo, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import NextImage from 'next/image'
 import {
   Upload, FileText, Loader2, Save, X, Calendar, RefreshCw, Search, AlertCircle, Camera, Image as ImageIcon
@@ -64,6 +65,7 @@ export function UnifiedStatementProcessor({
   onCancel,
   defaultAccountId 
 }: UnifiedStatementProcessorProps) {
+  const tl = useTranslations('transactions.statementProcessor')
   const { user } = useAuth()
   const userId = user?.id || ''
   // Global State
@@ -606,8 +608,8 @@ export function UnifiedStatementProcessor({
           ) : (
             <div className="flex flex-col items-center gap-2">
               <Upload className="h-10 w-10 text-muted-foreground" />
-              <p className="font-medium">Drop your file here</p>
-              <p className="text-sm leading-body-sm text-muted-foreground">or click to browse</p>
+              <p className="font-medium">{tl('dropHere')}</p>
+              <p className="text-sm leading-body-sm text-muted-foreground">{tl('clickToBrowse')}</p>
             </div>
           )}
         </div>
@@ -631,7 +633,7 @@ export function UnifiedStatementProcessor({
             disabled={isUploading}
           >
             <Camera className="h-4 w-4" />
-            Take Photo
+            {tl('takePhoto')}
           </Button>
           <Button
             type="button"
@@ -642,19 +644,19 @@ export function UnifiedStatementProcessor({
             disabled={isUploading}
           >
             <ImageIcon className="h-4 w-4" />
-            Upload Image
+            {tl('uploadImage')}
           </Button>
         </div>
         <p className="text-xs text-muted-foreground text-center">
-          Supports PDF bank statements · JPG, PNG, WEBP receipts &amp; invoices
+          {tl('fileSupport')}
         </p>
         <div className="space-y-4 grid items-center">
           <div className="grid gap-2 grid-cols-8 items-center">
-            <Label className="text-sm font-medium col-span-3">Select Account</Label>
+            <Label className="text-sm font-medium col-span-3">{tl('selectAccount')}</Label>
             <div className='col-span-5'>
               <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose account..." />
+                  <SelectValue placeholder={tl('chooseAccount')} />
                 </SelectTrigger>
                 <SelectContent>
                   {accounts.length > 0 ? (
@@ -665,7 +667,7 @@ export function UnifiedStatementProcessor({
                     ))
                   ) : (
                     <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                      No accounts available
+                      {tl('noAccountsAvailable')}
                     </div>
                   )}
                 </SelectContent>
@@ -680,14 +682,14 @@ export function UnifiedStatementProcessor({
               onCheckedChange={(c) => setUseAI(!!c)} 
             />
             <Label htmlFor="use-ai" className="cursor-pointer">
-              Use AI for enhanced extraction & categorization
+              {tl('useAI')}
             </Label>
           </div>
 
           {isUploading && (
             <div className="space-y-2">
               <Progress value={uploadProgress} />
-              <p className="text-xs leading-caption text-center text-muted-foreground">Processing statement...</p>
+              <p className="text-xs leading-caption text-center text-muted-foreground">{tl('processingStatement')}</p>
             </div>
           )}
 
@@ -707,7 +709,7 @@ export function UnifiedStatementProcessor({
         }}
         className="flex-1"
       >
-        Cancel
+        {tl('cancel')}
       </Button>
       <Button
         className="flex-1"
@@ -715,7 +717,7 @@ export function UnifiedStatementProcessor({
         disabled={!selectedFile || !selectedAccountId || isUploading}
       >
         {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-        Upload & Process
+        {tl('uploadProcess')}
       </Button>
     </SheetFooter>
     </div>
@@ -730,16 +732,16 @@ export function UnifiedStatementProcessor({
       }}>
         <DialogContent className="max-w-[80vw] w-[80vw] h-[70vh] flex flex-col p-0 gap-0 sm:max-w-[80vw] transition-all duration-300">
           <DialogHeader className="p-4 border-b shrink-0">
-            <DialogTitle>Review Transactions</DialogTitle>
+            <DialogTitle>{tl('reviewTitle')}</DialogTitle>
             <DialogDescription>
-              {selectedIds.size} of {transactions.length} selected. Review and edit before importing.
+              {tl('reviewDescription', { selected: selectedIds.size, total: transactions.length })}
             </DialogDescription>
           </DialogHeader>
 
         {/* Global Settings */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border-b bg-muted/20 shrink-0">
           <div className="flex items-center space-x-2">
-            <Label className="w-20 font-medium">Account:</Label>
+            <Label className="w-20 font-medium">{tl('account')}</Label>
              <Select value={selectedAccountId} onValueChange={setSelectedAccountId}>
                 <SelectTrigger className="flex-1 bg-background h-9">
                   <SelectValue placeholder="Choose account..." />
@@ -752,7 +754,7 @@ export function UnifiedStatementProcessor({
               </Select>
           </div>
           <div className="flex items-center space-x-2">
-             <Label className="w-20 font-medium">Currency:</Label>
+             <Label className="w-20 font-medium">{tl('currency')}</Label>
              <Select 
                 value={selectedCurrency} 
                 onValueChange={(val) => {
@@ -781,8 +783,8 @@ export function UnifiedStatementProcessor({
         <div className="flex flex-wrap gap-2 items-center p-4 border-b bg-muted/10 shrink-0">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search description or merchant..." 
+            <Input
+              placeholder={tl('searchPlaceholder')}
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="pl-8 bg-background"
@@ -793,14 +795,14 @@ export function UnifiedStatementProcessor({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All Types</SelectItem>
-              <SelectItem value="INCOME">Income Only</SelectItem>
-              <SelectItem value="EXPENSE">Expense Only</SelectItem>
+              <SelectItem value="ALL">{tl('allTypes')}</SelectItem>
+              <SelectItem value="INCOME">{tl('incomeOnly')}</SelectItem>
+              <SelectItem value="EXPENSE">{tl('expenseOnly')}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="secondary" size="sm" onClick={handleAutoCategorize} disabled={isCategorizing}>
             {isCategorizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-            Re-categorize
+            {tl('recategorize')}
           </Button>
         </div>
 
@@ -814,23 +816,23 @@ export function UnifiedStatementProcessor({
                 onCheckedChange={toggleAll}
               />
             </div>
-            <div>Date</div>
-            <div>Type</div>
-            <div>Description</div>
-            <div>Merchant</div>
-            <div>Notes</div>
-            <div>Category</div>
-            <div className="text-right">Amount</div>
+            <div>{tl('headerDate')}</div>
+            <div>{tl('headerType')}</div>
+            <div>{tl('headerDescription')}</div>
+            <div>{tl('headerMerchant')}</div>
+            <div>{tl('headerNotes')}</div>
+            <div>{tl('headerCategory')}</div>
+            <div className="text-right">{tl('headerAmount')}</div>
           </div>
 
           {filteredTransactions.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-muted-foreground min-w-[1000px]">
               <AlertCircle className="h-12 w-12 mb-4 text-muted-foreground/50" />
-              <p className="text-lg leading-title-5 font-medium">No transactions found</p>
+              <p className="text-lg leading-title-5 font-medium">{tl('noTransactions')}</p>
               <p className="text-sm leading-body-sm">
-                {transactions.length === 0 
-                  ? "We couldn't extract any transactions from the uploaded file." 
-                  : "Try adjusting your filters to see more results."}
+                {transactions.length === 0
+                  ? tl('noTransactionsFromFile')
+                  : tl('noTransactionsFilter')}
               </p>
             </div>
           ) : (
@@ -885,9 +887,9 @@ export function UnifiedStatementProcessor({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="INCOME">Income</SelectItem>
-                          <SelectItem value="EXPENSE">Expense</SelectItem>
-                          <SelectItem value="TRANSFER">Transfer</SelectItem>
+                          <SelectItem value="INCOME">{tl('typeIncome')}</SelectItem>
+                          <SelectItem value="EXPENSE">{tl('typeExpense')}</SelectItem>
+                          <SelectItem value="TRANSFER">{tl('typeTransfer')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -902,7 +904,7 @@ export function UnifiedStatementProcessor({
                       />
                       {t.isDuplicate && (
                         <span className="text-xs leading-caption text-warning">
-                          Possible duplicate
+                          {tl('possibleDuplicate')}
                         </span>
                       )}
                     </div>
@@ -940,7 +942,7 @@ export function UnifiedStatementProcessor({
                           <SelectItem value="uncategorized">
                             <span className="flex items-center gap-2">
                               <span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
-                              Uncategorized
+                              {tl('uncategorized')}
                             </span>
                           </SelectItem>
                           
@@ -948,7 +950,7 @@ export function UnifiedStatementProcessor({
                             <>
                               <SelectSeparator />
                               <SelectGroup>
-                                <SelectLabel>Expenses</SelectLabel>
+                                <SelectLabel>{tl('expensesGroup')}</SelectLabel>
                                 {groupedCategories.EXPENSE.map(c => (
                                   <SelectItem key={c.id} value={c.id}>
                                     <span className="flex items-center gap-2">
@@ -965,7 +967,7 @@ export function UnifiedStatementProcessor({
                             <>
                               <SelectSeparator />
                               <SelectGroup>
-                                <SelectLabel>Income</SelectLabel>
+                                <SelectLabel>{tl('incomeGroup')}</SelectLabel>
                                 {groupedCategories.INCOME.map(c => (
                                   <SelectItem key={c.id} value={c.id}>
                                     <span className="flex items-center gap-2">
@@ -982,7 +984,7 @@ export function UnifiedStatementProcessor({
                             <>
                               <SelectSeparator />
                               <SelectGroup>
-                                <SelectLabel>Transfers</SelectLabel>
+                                <SelectLabel>{tl('transfersGroup')}</SelectLabel>
                                 {groupedCategories.TRANSFER.map(c => (
                                   <SelectItem key={c.id} value={c.id}>
                                     <span className="flex items-center gap-2">
@@ -1031,14 +1033,14 @@ export function UnifiedStatementProcessor({
         <DialogFooter className="p-4 border-t bg-muted/10 shrink-0">
             <div className="flex justify-between w-full items-center">
               <div className="text-sm leading-body-sm text-muted-foreground flex gap-4">
-                  <span>Selected: {selectedIds.size}</span>
+                  <span>{tl('selected', { count: selectedIds.size })}</span>
                   {selectedIds.size > 0 && (
                       <span>
-                        Total: {formatCurrency(
+                        {tl('totalAmount', { amount: formatCurrency(
                           transactions
                             .filter((_, i) => selectedIds.has(i))
                             .reduce((acc, t) => acc + t.amount, 0)
-                        )}
+                        ) })}
                       </span>
                   )}
               </div>
@@ -1050,11 +1052,11 @@ export function UnifiedStatementProcessor({
                     })
                     setShowExitConfirmation(true)
                   }}>
-                    Cancel
+                    {tl('cancelReview')}
                   </Button>
                   <Button onClick={handleConfirmImport} disabled={isImporting || selectedIds.size === 0}>
                     {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                    Add transactions
+                    {tl('addTransactions')}
                   </Button>
               </div>
             </div>
@@ -1065,9 +1067,9 @@ export function UnifiedStatementProcessor({
     <AlertDialog open={showExitConfirmation} onOpenChange={setShowExitConfirmation}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Discard changes?</AlertDialogTitle>
+          <AlertDialogTitle>{tl('discardTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to close? Unsaved progress will be lost.
+            {tl('discardDescription')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -1075,7 +1077,7 @@ export function UnifiedStatementProcessor({
             Analytics.track('Statement Import Discard Cancelled', {
               transactions_count: transactions.length
             })
-          }}>Cancel</AlertDialogCancel>
+          }}>{tl('discardCancel')}</AlertDialogCancel>
           <AlertDialogAction onClick={() => {
             Analytics.track('Statement Import Discarded', {
               transactions_count: transactions.length,
@@ -1084,7 +1086,7 @@ export function UnifiedStatementProcessor({
             setViewState('UPLOAD')
             setShowExitConfirmation(false)
           }}>
-            Discard
+            {tl('discardConfirm')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

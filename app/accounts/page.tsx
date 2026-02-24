@@ -43,7 +43,9 @@ function AccountsPageContent() {
     const aHasGoal = goalsSummary?.goals.some(g => g.accountId === a.id) ? 1 : 0
     const bHasGoal = goalsSummary?.goals.some(g => g.accountId === b.id) ? 1 : 0
     if (aHasGoal !== bHasGoal) return bHasGoal - aHasGoal
-    return b.balance - a.balance
+    const aBalance = a.currentBalance ?? a.balance
+    const bBalance = b.currentBalance ?? b.balance
+    return bBalance - aBalance
   })
 
   // Filter accounts that can have goals
@@ -126,7 +128,7 @@ function AccountsPageContent() {
 
                             <div className="mb-3">
                               <p className="text-2xl font-bold">
-                                {formatCurrency(account.balance, account.currency)}
+                                {formatCurrency(account.currentBalance ?? account.balance, account.currency)}
                               </p>
                             </div>
 
@@ -190,8 +192,8 @@ function AccountsPageContent() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <p className={`text-lg font-bold ${account.balance >= 0 ? '' : 'text-destructive'}`}>
-                                  {formatCurrency(account.balance, account.currency)}
+                                <p className={`text-lg font-bold ${(account.currentBalance ?? account.balance) >= 0 ? '' : 'text-destructive'}`}>
+                                  {formatCurrency(account.currentBalance ?? account.balance, account.currency)}
                                 </p>
                                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
                               </div>

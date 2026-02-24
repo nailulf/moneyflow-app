@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useBudgetTemplates } from '@/hooks/useOnboardingQuery'
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react'
 
 export function BudgetSetupStepModal() {
+  const t = useTranslations('onboarding.budgetSetup')
   const { user } = useAuth()
   const { prevPhase, setWizardData, goToPhase, loading, isPreviewMode } = useOnboarding()
   const { categories } = useCategories()
@@ -128,11 +130,11 @@ export function BudgetSetupStepModal() {
     <div className="space-y-4">
       {/* Monthly Income */}
       <div className="space-y-2">
-        <Label htmlFor="income">Monthly Income (optional)</Label>
+        <Label htmlFor="income">{t('monthlyIncomeLabel')}</Label>
         <Input
           id="income"
           type="amount"
-          placeholder="e.g., 10000000"
+          placeholder={t('incomePlaceholder')}
           value={monthlyIncome}
           onChange={(e) => setMonthlyIncome(e.target.value)}
           disabled={isSubmitting}
@@ -141,7 +143,7 @@ export function BudgetSetupStepModal() {
 
       {/* Budget Templates */}
       <div className="space-y-2">
-        <Label>Choose a Budget Template</Label>
+        <Label>{t('chooseBudgetTemplate')}</Label>
         <div className="space-y-2">
           {templates?.map((template) => {
             const templateAllocations = template.allocations as { needs: number; wants: number; savings: number }
@@ -164,7 +166,7 @@ export function BudgetSetupStepModal() {
                   <div className="flex-1">
                     <div className="font-medium text-sm">{template.name}</div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      Needs: {templateAllocations.needs}% | Wants: {templateAllocations.wants}% | Savings: {templateAllocations.savings}%
+                      {t('needs')}: {templateAllocations.needs}% | {t('wants')}: {templateAllocations.wants}% | {t('savings')}: {templateAllocations.savings}%
                     </div>
                   </div>
                   {isSelected && (
@@ -183,20 +185,20 @@ export function BudgetSetupStepModal() {
       {selectedTemplateId && income > 0 && (
         <div className="space-y-2 p-3 bg-muted/30 rounded-lg">
           <div className="flex justify-between text-sm">
-            <span>Budget Preview</span>
+            <span>{t('budgetPreview')}</span>
             <span className="font-medium">
               Rp {totalAllocated.toLocaleString('id-ID')}
             </span>
           </div>
           <Progress value={allocationPercentage} className="h-2" />
           <div className="text-xs text-muted-foreground">
-            {allocationPercentage}% of income allocated
+            {t('incomeAllocated', { percent: allocationPercentage })}
           </div>
         </div>
       )}
 
       <p className="text-xs text-muted-foreground text-center">
-        You can create or edit budgets anytime from your dashboard
+        {t('editNote')}
       </p>
 
       {/* Actions */}
@@ -207,7 +209,7 @@ export function BudgetSetupStepModal() {
           disabled={isSubmitting || loading}
           size="sm"
         >
-          Skip budget
+          {t('skipBudget')}
         </Button>
 
         <div className="flex gap-2">
@@ -218,7 +220,7 @@ export function BudgetSetupStepModal() {
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            {t('back')}
           </Button>
           <Button
             onClick={handleCreateBudget}
@@ -228,11 +230,11 @@ export function BudgetSetupStepModal() {
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Creating...
+                {t('creating')}
               </>
             ) : (
               <>
-                Create Budget
+                {t('createBudget')}
                 <Check className="h-4 w-4" />
               </>
             )}

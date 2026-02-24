@@ -253,6 +253,358 @@
       "cancel": "Batal",
       "delete": "Hapus Transaksi",
       "deleting": "Menghapus..."
+    },
+    "noDescription": "Tidak ada deskripsi",
+    "form": {
+      "addTitle": "Tambah Transaksi Baru",
+      "editTitle": "Edit Transaksi",
+      "addTrigger": "Tambah Transaksi",
+      "manualEntry": "Masukkan Manual",
+      "uploadPdf": "Upload PDF",
+      "date": "Tanggal",
+      "description": "Deskripsi",
+      "descriptionPlaceholder": "Masukkan deskripsi",
+      "amount": "Jumlah",
+      "type": "Jenis",
+      "selectType": "Pilih jenis",
+      "typeExpense": "Pengeluaran",
+      "typeIncome": "Pemasukan",
+      "typeTransfer": "Transfer",
+      "category": "Kategori",
+      "categoryLoading": "Memuat kategori...",
+      "noCategoriesForType": "Tidak ada kategori untuk jenis ini",
+      "loadingShort": "Memuat...",
+      "selectCategory": "Pilih kategori",
+      "noCategoriesAvailable": "Tidak ada kategori untuk jenis ini",
+      "account": "Akun",
+      "selectAccount": "Pilih akun",
+      "noAccountsAvailable": "Tidak ada akun tersedia",
+      "merchantOpt": "Merchant (Ops)",
+      "merchantPlaceholder": "Masukkan nama merchant",
+      "recurringTransaction": "Transaksi Berulang",
+      "frequency": "Frekuensi",
+      "selectFrequency": "Pilih frekuensi",
+      "daily": "Harian",
+      "weekly": "Mingguan",
+      "monthly": "Bulanan",
+      "yearly": "Tahunan",
+      "period": "Periode",
+      "continuous": "Terus-menerus (Tanpa tanggal akhir)",
+      "endDate": "Tanggal Akhir",
+      "cancel": "Batal",
+      "adding": "Menambahkan...",
+      "addButton": "Tambah Transaksi",
+      "updating": "Memperbarui...",
+      "updateButton": "Perbarui Transaksi"
+    },
+    "confirmation": {
+      "title": "Konfirmasi Import Transaksi",
+      "transactionsLabel": "Transaksi",
+      "credits": "Kredit ({count})",
+      "debits": "Debit ({count})",
+      "netAmount": "Jumlah Bersih",
+      "importDetails": "Detail Import",
+      "targetAccount": "Akun Tujuan:",
+      "dateRange": "Rentang Tanggal:",
+      "categoryBreakdown": "Rincian Kategori",
+      "transactionsBadge": "transaksi",
+      "transactionPreview": "Pratinjau Transaksi",
+      "showLess": "Tampilkan Lebih Sedikit",
+      "showAll": "Tampilkan Semua ({count})",
+      "headerDate": "Tanggal",
+      "headerDescription": "Deskripsi",
+      "headerAmount": "Jumlah",
+      "headerCategory": "Kategori",
+      "showing": "Menampilkan {shown} dari {total} transaksi",
+      "previous": "Sebelumnya",
+      "page": "Halaman {page} dari {total}",
+      "next": "Berikutnya",
+      "uncategorized": "Tidak Dikategorikan",
+      "alertTitle": "Siap Diimpor",
+      "alertDescription": "Anda akan mengimpor {count} transaksi ke {account}. Tindakan ini tidak dapat dibatalkan.",
+      "alertReview": "Tinjau detail transaksi di atas dan klik \"Import Transaksi\" untuk melanjutkan.",
+      "backToPreview": "Kembali ke Pratinjau",
+      "importing": "Mengimpor...",
+      "importButton": "Import Transaksi"
+    },
+    "statementProcessor": {
+      "dropHere": "Letakkan file di sini",
+      "clickToBrowse": "atau klik untuk menelusuri",
+      "takePhoto": "Ambil Foto",
+      "uploadImage": "Upload Gambar",
+      "fileSupport": "Mendukung laporan bank PDF · JPG, PNG, WEBP kuitansi & faktur",
+      "selectAccount": "Pilih Akun",
+      "chooseAccount": "Pilih akun...",
+      "noAccountsAvailable": "Tidak ada akun tersedia",
+      "useAI": "Gunakan AI untuk ekstraksi & kategorisasi yang lebih baik",
+      "processingStatement": "Memproses laporan...",
+      "cancel": "Batal",
+      "uploadProcess": "Upload & Proses",
+      "reviewTitle": "Tinjau Transaksi",
+      "reviewDescription": "{selected} dari {total} dipilih. Tinjau dan edit sebelum mengimpor.",
+      "account": "Akun:",
+      "currency": "Mata Uang:",
+      "searchPlaceholder": "Cari deskripsi atau merchant...",
+      "allTypes": "Semua Jenis",
+      "incomeOnly": "Pemasukan Saja",
+      "expenseOnly": "Pengeluaran Saja",
+      "recategorize": "Kategorikan Ulang",
+      "headerDate": "Tanggal",
+      "headerType": "Jenis",
+      "headerDescription": "Deskripsi",
+      "headerMerchant": "Merchant",
+      "headerNotes": "Catatan",
+      "headerCategory": "Kategori",
+      "headerAmount": "Jumlah",
+      "noTransactions": "Tidak ada transaksi ditemukan",
+      "noTransactionsFromFile": "Kami tidak dapat mengekstrak transaksi dari file yang diunggah.",
+      "noTransactionsFilter": "Coba sesuaikan filter untuk melihat lebih banyak hasil.",
+      "possibleDuplicate": "Kemungkinan duplikat",
+      "uncategorized": "Tidak Dikategorikan",
+      "expensesGroup": "Pengeluaran",
+      "incomeGroup": "Pemasukan",
+      "transfersGroup": "Transfer",
+      "typeIncome": "Pemasukan",
+      "typeExpense": "Pengeluaran",
+      "typeTransfer": "Transfer",
+      "selected": "Dipilih: {count}",
+      "totalAmount": "Total: {amount}",
+      "cancelReview": "Batal",
+      "addTransactions": "Tambah transaksi",
+      "discardTitle": "Buang perubahan?",
+      "discardDescription": "Apakah Anda yakin ingin menutup? Progres yang belum disimpan akan hilang.",
+      "discardCancel": "Batal",
+      "discardConfirm": "Buang"
+    }
+  },
+  "navigation": {
+    "sidebar": {
+      "tagline": "Keuangan Pribadi"
+    },
+    "items": {
+      "dashboard": "Beranda",
+      "accounts": "Akun",
+      "spending": "Pengeluaran",
+      "portfolio": "Portofolio",
+      "advice": "Saran",
+      "home": "Beranda",
+      "spend": "Belanja",
+      "invest": "Investasi"
+    },
+    "topNav": {
+      "overview": "Ringkasan",
+      "breakdown": "Rincian",
+      "cashFlow": "Arus Kas",
+      "transaction": "Transaksi",
+      "holdings": "Aset",
+      "analytics": "Analitik"
+    }
+  },
+  "onboarding": {
+    "modal": {
+      "title": "Selesaikan pengaturan",
+      "progress": "{completed} dari {total} selesai",
+      "skipSetup": "Lewati pengaturan untuk sekarang",
+      "srTitle": "Selesaikan pengaturan"
+    },
+    "steps": {
+      "accountSetup": {
+        "title": "Buat akun pertama Anda",
+        "description": "Siapkan rekening bank, kartu kredit, atau e-wallet"
+      },
+      "categories": {
+        "title": "Tinjau kategori Anda",
+        "description": "Kami telah menyiapkan kategori default untuk Anda"
+      },
+      "budgetSetup": {
+        "title": "Siapkan anggaran Anda",
+        "description": "Buat rencana pengeluaran untuk bulan ini"
+      }
+    },
+    "stepItem": {
+      "done": "Selesai",
+      "pending": "Menunggu"
+    },
+    "welcome": {
+      "heading": "Selamat datang di MoneyFlow, {name}!",
+      "tagline": "Teman Keuangan Pribadi Anda",
+      "helpIntro": "Kami akan membantu Anda:",
+      "features": {
+        "track": {
+          "title": "Lacak pengeluaran di semua akun",
+          "description": "Hubungkan rekening bank, kartu kredit, dan e-wallet Anda dalam satu tempat"
+        },
+        "budgets": {
+          "title": "Buat anggaran yang benar-benar berfungsi",
+          "description": "Tetapkan batas pengeluaran dan dapatkan peringatan sebelum Anda berlebihan"
+        },
+        "insights": {
+          "title": "Pahami ke mana uang Anda pergi",
+          "description": "Wawasan visual dan laporan untuk membantu Anda membuat keputusan keuangan yang lebih baik"
+        }
+      },
+      "setupTime": "Pengaturan membutuhkan sekitar 3 menit",
+      "startSetup": "Mulai Pengaturan",
+      "skipForNow": "Lewati untuk sekarang",
+      "skipNote": "Anda selalu dapat menyelesaikan pengaturan nanti dari dasbor Anda"
+    },
+    "completion": {
+      "finishing": "Menyelesaikan pengaturan...",
+      "title": "Semuanya Siap!",
+      "description": "Ruang kerja MoneyFlow Anda siap digunakan",
+      "summary": {
+        "title": "Ringkasan Pengaturan",
+        "accountCreated": "{count} akun dibuat",
+        "accountsCreated": "{count} akun dibuat",
+        "accountsReady": "Akun siap (tambahkan nanti)",
+        "categoriesConfigured": "{count} kategori dikonfigurasi",
+        "budgetCreated": "Anggaran dibuat",
+        "budgetReady": "Anggaran siap (buat kapan saja)"
+      },
+      "goToDashboard": "Pergi ke Dasbor"
+    },
+    "accountSetup": {
+      "accountTypeLabel": "Jenis Akun *",
+      "selectAccountType": "Pilih jenis akun",
+      "bankInstitution": "Bank / Institusi",
+      "optional": "(opsional)",
+      "searchBanks": "Cari bank & e-wallet…",
+      "banks": "Bank",
+      "eWallets": "E-Wallet",
+      "noResults": "Tidak ada hasil untuk \"{search}\"",
+      "accountNameLabel": "Nama Akun *",
+      "accountNamePlaceholder": "mis., BCA Tabungan, Kas Utama",
+      "atLeast3Chars": "Minimal 3 karakter diperlukan",
+      "currencyLabel": "Mata Uang *",
+      "selectCurrency": "Pilih mata uang",
+      "startingBalance": "Saldo Awal",
+      "balanceNote": "Masukkan saldo Anda saat ini — Anda dapat memperbaruinya kapan saja",
+      "errors": {
+        "enterName": "Masukkan nama akun",
+        "minChars": "Nama akun harus minimal 3 karakter",
+        "notAuthenticated": "Pengguna tidak terautentikasi",
+        "failedToCreate": "Gagal membuat akun. Silakan coba lagi."
+      },
+      "skip": "Lewati langkah ini",
+      "creating": "Membuat…",
+      "continue": "Lanjutkan",
+      "accountTypes": {
+        "BANK": { "label": "Rekening Bank", "description": "Rekening giro atau tabungan" },
+        "CREDIT_CARD": { "label": "Kartu Kredit", "description": "Akun kartu kredit" },
+        "CASH": { "label": "Tunai", "description": "Uang tunai" },
+        "INVESTMENT": { "label": "Investasi", "description": "Saham, obligasi, reksa dana" },
+        "OTHER": { "label": "E-Wallet / Lainnya", "description": "GoPay, OVO, Dana, dll." }
+      }
+    },
+    "budgetSetup": {
+      "monthlyIncomeLabel": "Pendapatan Bulanan (opsional)",
+      "incomePlaceholder": "mis., 10000000",
+      "chooseBudgetTemplate": "Pilih Template Anggaran",
+      "needs": "Kebutuhan",
+      "wants": "Keinginan",
+      "savings": "Tabungan",
+      "budgetPreview": "Pratinjau Anggaran",
+      "incomeAllocated": "{percent}% dari pendapatan dialokasikan",
+      "editNote": "Anda dapat membuat atau mengedit anggaran kapan saja dari dasbor",
+      "skipBudget": "Lewati anggaran",
+      "back": "Kembali",
+      "creating": "Membuat...",
+      "createBudget": "Buat Anggaran"
+    }
+  },
+  "accountManager": {
+    "title": "KELOLA AKUN",
+    "description": "Buat, edit, dan atur rekening bank Anda",
+    "loadingAccounts": "Memuat akun...",
+    "searchPlaceholder": "Cari akun...",
+    "addNewAccount": "Tambah Akun Baru",
+    "yourAccounts": "Akun Anda ({count})",
+    "default": "Default",
+    "noAccountsSearch": "Tidak ada akun yang sesuai dengan pencarian Anda.",
+    "noAccounts": "Tidak ada akun. Buat akun pertama Anda!",
+    "close": "Tutup",
+    "addAccount": "Tambah Akun",
+    "manageAccounts": "Kelola Akun",
+    "create": {
+      "title": "Tambah Akun Baru",
+      "description": "Buat akun baru untuk melacak transaksi Anda.",
+      "name": "Nama",
+      "type": "Jenis",
+      "initialBalance": "Saldo Awal",
+      "namePlaceholder": "mis., BCA Tabungan",
+      "balancePlaceholder": "0,00",
+      "cancel": "Batal",
+      "createAccount": "Buat Akun"
+    },
+    "edit": {
+      "title": "Edit Akun",
+      "description": "Perbarui informasi akun.",
+      "name": "Nama",
+      "type": "Jenis",
+      "namePlaceholder": "Nama akun",
+      "cancel": "Batal",
+      "updateAccount": "Perbarui Akun"
+    },
+    "delete": {
+      "title": "Hapus Akun",
+      "description": "Apakah Anda yakin ingin menghapus \"{name}\"? Tindakan ini tidak dapat dibatalkan.",
+      "defaultWarning": "Ini adalah akun default Anda dan tidak dapat dihapus.",
+      "cancel": "Batal",
+      "deleteAccount": "Hapus Akun"
+    },
+    "accountTypes": {
+      "bank": "Bank",
+      "creditCard": "Kartu Kredit",
+      "cash": "Tunai",
+      "investment": "Investasi",
+      "other": "Lainnya"
+    }
+  },
+  "accountDetail": {
+    "backToAccounts": "Kembali ke Akun",
+    "tabs": {
+      "overview": "Ringkasan",
+      "transactions": "Transaksi"
+    },
+    "details": {
+      "title": "Detail Akun",
+      "accountType": "Jenis Akun",
+      "currency": "Mata Uang",
+      "currentBalance": "Saldo Saat Ini",
+      "status": "Status",
+      "active": "Aktif",
+      "inactive": "Tidak Aktif",
+      "descriptionLabel": "Deskripsi"
+    },
+    "default": "Default",
+    "actions": {
+      "edit": "Edit",
+      "export": "Ekspor",
+      "delete": "Hapus"
+    },
+    "editDialog": {
+      "title": "Edit Akun",
+      "subtitle": "Buat perubahan pada detail akun Anda di sini.",
+      "name": "Nama",
+      "type": "Jenis",
+      "balance": "Saldo",
+      "currency": "Mata Uang",
+      "amount": "Jumlah",
+      "currencyChangedNote": "Mata uang diubah dari {from} ke {to}. Bagaimana Anda ingin menangani saldo?",
+      "keepValue": "Pertahankan nilai numerik yang sama ({balance} {currency})",
+      "convertAmount": "Konversi jumlah (segera hadir)",
+      "descriptionLabel": "Deskripsi",
+      "descriptionPlaceholder": "Deskripsi opsional",
+      "selectAccountType": "Pilih jenis akun",
+      "selectCurrency": "Pilih mata uang",
+      "cancel": "Batal",
+      "saveChanges": "Simpan perubahan"
+    },
+    "deleteDialog": {
+      "title": "Hapus Akun",
+      "description": "Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak dapat dibatalkan.",
+      "cancel": "Batal",
+      "delete": "Hapus"
     }
   },
   "dashboard": {

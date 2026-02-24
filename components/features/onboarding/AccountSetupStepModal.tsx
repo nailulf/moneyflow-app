@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -54,6 +55,7 @@ const CURRENCY_OPTIONS = [
 ]
 
 export function AccountSetupStepModal() {
+  const t = useTranslations('onboarding.accountSetup')
   const { user } = useAuth()
   const { nextPhase, setWizardData, isPreviewMode } = useOnboarding()
   const { createAccount } = useAccounts()
@@ -109,17 +111,17 @@ export function AccountSetupStepModal() {
 
   const handleCreateAccount = async () => {
     if (!accountName.trim()) {
-      setError('Please enter an account name')
+      setError(t('errors.enterName'))
       return
     }
 
     if (accountName.trim().length < 3) {
-      setError('Account name must be at least 3 characters')
+      setError(t('errors.minChars'))
       return
     }
 
     if (!user?.id) {
-      setError('User not authenticated')
+      setError(t('errors.notAuthenticated'))
       return
     }
 
@@ -169,7 +171,7 @@ export function AccountSetupStepModal() {
         error_message: err instanceof Error ? err.message : 'Unknown error',
         timestamp: new Date().toISOString()
       })
-      setError('Failed to create account. Please try again.')
+      setError(t('errors.failedToCreate'))
     } finally {
       setIsSubmitting(false)
     }
@@ -190,21 +192,21 @@ export function AccountSetupStepModal() {
     <div className="space-y-2">
       {/* Account Type */}
       <div className="space-y-2">
-        <Label htmlFor="accountType">Account Type *</Label>
+        <Label htmlFor="accountType">{t('accountTypeLabel')}</Label>
         <Select
           value={accountType}
           onValueChange={setAccountType}
           disabled={isSubmitting}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select account type" />
+            <SelectValue placeholder={t('selectAccountType')} />
           </SelectTrigger>
           <SelectContent>
             {ACCOUNT_TYPES.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 <div className="flex items-center gap-2">
                   <type.icon className="h-4 w-4" />
-                  <span>{type.label}</span>
+                  <span>{t(`accountTypes.${type.value}.label` as Parameters<typeof t>[0])}</span>
                 </div>
               </SelectItem>
             ))}
@@ -212,15 +214,15 @@ export function AccountSetupStepModal() {
         </Select>
         {selectedType && (
           <p className="text-xs text-muted-foreground">
-            {selectedType.description}
+            {t(`accountTypes.${selectedType.value}.description` as Parameters<typeof t>[0])}
           </p>
         )}
       </div>
       {(accountType === 'BANK' || accountType === 'OTHER') && (
         <div className="space-y-2">
           <Label>
-            Bank / Institution{' '}
-            <span className="text-muted-foreground font-normal">(optional)</span>
+            {t('bankInstitution')}{' '}
+            <span className="text-muted-foreground font-normal">{t('optional')}</span>
           </Label>
 
           <Popover open={isBankPopoverOpen} onOpenChange={setIsBankPopoverOpen}>
@@ -243,7 +245,7 @@ export function AccountSetupStepModal() {
                       <span className="font-medium">{selectedBank.name}</span>
                     </>
                   ) : (
-                    'Search banks & e-wallets…'
+                    t('searchBanks')
                   )}
                 </span>
                 <ChevronsUpDown className="h-4 w-4 opacity-50" />
@@ -275,7 +277,7 @@ export function AccountSetupStepModal() {
                 {filteredBankGroup.length > 0 && (
                   <div className="mb-1">
                     <p className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      Banks
+                      {t('banks')}
                     </p>
                     {filteredBankGroup.map((bank: BankOption) => (
                       <button
@@ -300,7 +302,7 @@ export function AccountSetupStepModal() {
                 {filteredEwalletGroup.length > 0 && (
                   <div>
                     <p className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      E-Wallets
+                      {t('eWallets')}
                     </p>
                     {filteredEwalletGroup.map((bank: BankOption) => (
                       <button
@@ -324,7 +326,7 @@ export function AccountSetupStepModal() {
 
                 {filteredBanks.length === 0 && (
                   <p className="px-2 py-4 text-sm text-center text-muted-foreground">
-                    No results for &ldquo;{bankSearch}&rdquo;
+                    {t('noResults', { search: bankSearch })}
                   </p>
                 )}
               </ScrollArea>
@@ -335,28 +337,28 @@ export function AccountSetupStepModal() {
 
       {/* Account Name */}
       <div className="space-y-2">
-        <Label htmlFor="accountName">Account Name *</Label>
+        <Label htmlFor="accountName">{t('accountNameLabel')}</Label>
         <Input
           id="accountName"
-          placeholder="e.g., My BCA Checking, Main Cash"
+          placeholder={t('accountNamePlaceholder')}
           value={accountName}
           onChange={(e) => setAccountName(e.target.value)}
           disabled={isSubmitting}
         />
         {accountName.trim().length > 0 && accountName.trim().length < 3 && (
-          <p className="text-xs text-destructive">At least 3 characters required</p>
+          <p className="text-xs text-destructive">{t('atLeast3Chars')}</p>
         )}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="currency">Currency *</Label>
+        <Label htmlFor="currency">{t('currencyLabel')}</Label>
         <Select
           value={currency}
           onValueChange={setCurrency}
           disabled={isSubmitting}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select currency" />
+            <SelectValue placeholder={t('selectCurrency')} />
           </SelectTrigger>
           <SelectContent>
             {CURRENCY_OPTIONS.map((option) => (
@@ -371,8 +373,8 @@ export function AccountSetupStepModal() {
       {/* Starting Balance */}
       <div className="space-y-2">
         <Label htmlFor="balance">
-          Starting Balance{' '}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          {t('startingBalance')}{' '}
+          <span className="text-muted-foreground font-normal">{t('optional')}</span>
         </Label>
         <CurrencyInput
           id="balance"
@@ -383,7 +385,7 @@ export function AccountSetupStepModal() {
           disabled={isSubmitting}
         />
         <p className="text-xs text-muted-foreground">
-          Enter your current balance — you can update this anytime
+          {t('balanceNote')}
         </p>
       </div>
 
@@ -399,7 +401,7 @@ export function AccountSetupStepModal() {
           onClick={handleSkipStep}
           disabled={isSubmitting}
         >
-          Skip this step
+          {t('skip')}
         </Button>
         <Button
           onClick={handleCreateAccount}
@@ -409,11 +411,11 @@ export function AccountSetupStepModal() {
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Creating…
+              {t('creating')}
             </>
           ) : (
             <>
-              Continue
+              {t('continue')}
               <ArrowRight className="h-4 w-4" />
             </>
           )}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { transactionSchema, TransactionFormData } from '@/lib/validations'
@@ -26,6 +27,7 @@ interface AddTransactionFormProps {
 }
 
 export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormProps) {
+  const t = useTranslations('transactions.form')
   const { user } = useAuth()
   const userId = user?.id || ''
   const isMobile = useIsMobile()
@@ -206,7 +208,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
         {trigger || (
           <Button className="gap-2" data-testid="add-transaction-trigger">
             <Plus className="h-4 w-4" />
-            Add Transaction
+            {t('addTrigger')}
           </Button>
         )}
       </SheetTrigger>
@@ -215,7 +217,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
         className={isMobile ? 'max-h-[95dvh] rounded-t-2xl w-full p-0' : 'w-full grid flex-1 auto-rows-min px-4'}
       >
         <SheetHeader className={isMobile ? 'mx-0 px-4' : undefined}>
-          <SheetTitle>Add New Transaction</SheetTitle>
+          <SheetTitle>{t('addTitle')}</SheetTitle>
         </SheetHeader>
 
         <div className={isMobile ? 'w-full px-4 pt-4' : 'w-full'}>
@@ -223,11 +225,11 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="manual" className="flex items-center gap-2">
                 <Edit className="h-4 w-4" />
-                Manual Entry
+                {t('manualEntry')}
               </TabsTrigger>
               <TabsTrigger value="upload" className="flex items-center gap-2">
                 <Upload className="h-4 w-4" />
-                Upload PDF
+                {t('uploadPdf')}
               </TabsTrigger>
             </TabsList>
             
@@ -235,7 +237,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className='overflow-y-auto no-scrollbar space-y-2 min-h-[70dvh]'>
                   <div className="space-y-2 grid grid-cols-7 items-center">
-                    <label className="text-sm font-medium col-span-2">Date</label>
+                    <label className="text-sm font-medium col-span-2">{t('date')}</label>
                     <div className='col-span-5'>
                       <Input
                         type="date"
@@ -249,10 +251,10 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                   </div>
 
                   <div className="space-y-2 grid grid-cols-7 items-center">
-                    <label className="text-sm font-medium col-span-2">Description</label>
+                    <label className="text-sm font-medium col-span-2">{t('description')}</label>
                     <div className="col-span-5">
                     <Input
-                      placeholder="Enter description"
+                      placeholder={t('descriptionPlaceholder')}
                       {...register('description')}
                       className={errors.description ? 'border-destructive' : ''}
                     />
@@ -263,7 +265,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                   </div>
 
                   <div className="space-y-2 grid grid-cols-7 items-center">
-                    <label className="text-sm font-medium col-span-2">Amount</label>
+                    <label className="text-sm font-medium col-span-2">{t('amount')}</label>
                     <div className="col-span-5">
                       <Input
                         type="amount"
@@ -279,7 +281,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                   </div>
 
                   <div className="space-y-2 grid grid-cols-7 items-center">
-                    <label className="text-sm font-medium col-span-2">Type</label>
+                    <label className="text-sm font-medium col-span-2">{t('type')}</label>
                     <div className="col-span-5">
                       <Select
                         value={selectedType}
@@ -289,16 +291,16 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                         }}
                         onOpenChange={setIsAnySelectOpen}
                       >
-                        <SelectTrigger 
+                        <SelectTrigger
                         className={cn(
                           "w-full",
                           errors.type ? 'border-destructive' : '')} data-testid="type-select-trigger">
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder={t('selectType')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="EXPENSE" data-testid="type-option-EXPENSE">Expense</SelectItem>
-                          <SelectItem value="INCOME" data-testid="type-option-INCOME">Income</SelectItem>
-                          <SelectItem value="TRANSFER" data-testid="type-option-TRANSFER">Transfer</SelectItem>
+                          <SelectItem value="EXPENSE" data-testid="type-option-EXPENSE">{t('typeExpense')}</SelectItem>
+                          <SelectItem value="INCOME" data-testid="type-option-INCOME">{t('typeIncome')}</SelectItem>
+                          <SelectItem value="TRANSFER" data-testid="type-option-TRANSFER">{t('typeTransfer')}</SelectItem>
                         </SelectContent>
                       </Select>
                       
@@ -309,7 +311,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                   </div>
 
                   <div className="space-y-2 grid grid-cols-7 items-center">
-                    <label className="text-sm col-span-2 font-medium">Category</label>
+                    <label className="text-sm col-span-2 font-medium">{t('category')}</label>
                     <div className='col-span-5'>
                     <Select
                       value={(selectedCategoryId as string) || undefined}
@@ -328,9 +330,9 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                         data-testid="category-select-trigger"
                       >
                         <SelectValue placeholder={
-                          !hasDynamicCategories 
-                            ? (categoriesLoading ? 'Loading categories...' : `No categories for ${selectedType?.toLowerCase() || 'this type'}`)
-                            : (categoriesLoading ? 'Loading...' : 'Select category')
+                          !hasDynamicCategories
+                            ? (categoriesLoading ? t('categoryLoading') : t('noCategoriesForType'))
+                            : (categoriesLoading ? t('loadingShort') : t('selectCategory'))
                         } />
                       </SelectTrigger>
                       <SelectContent>
@@ -338,8 +340,8 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                           dynamicCategoryItems.map((cat) => (
                             <SelectItem key={cat.id} value={cat.id} data-testid={`category-option-${cat.id}`}>
                               <div className="flex items-center gap-2">
-                                <div 
-                                  className="w-3 h-3 rounded-full flex-shrink-0" 
+                                <div
+                                  className="w-3 h-3 rounded-full flex-shrink-0"
                                   style={{ backgroundColor: cat.color || 'hsl(var(--muted-foreground))' }}
                                 />
                                 {cat.name}
@@ -348,7 +350,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                           ))
                         ) : (
                           <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            {categoriesLoading ? 'Loading categories...' : `No categories available for ${selectedType?.toLowerCase() || 'this type'}`}
+                            {categoriesLoading ? t('categoryLoading') : t('noCategoriesAvailable')}
                           </div>
                         )}
                       </SelectContent>
@@ -370,7 +372,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                   </div>
 
                   <div className="space-y-2 grid grid-cols-7 items-center">
-                    <label className="text-sm font-medium col-span-2">Account</label>
+                    <label className="text-sm font-medium col-span-2">{t('account')}</label>
                     <div className='col-span-5'>
                       <Select
                         value={watch('account_id') || undefined}
@@ -384,7 +386,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                         <SelectTrigger className={cn(
                           "w-full",
                           errors.account_id ? 'border-destructive' : '')} data-testid="account-select-trigger">
-                          <SelectValue placeholder={accountsLoading ? 'Loading...' : 'Select account'} />
+                          <SelectValue placeholder={accountsLoading ? t('loadingShort') : t('selectAccount')} />
                         </SelectTrigger>
                         <SelectContent>
                           {accounts.length > 0 ? (
@@ -395,7 +397,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                             ))
                           ) : (
                             <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                              No accounts available
+                              {t('noAccountsAvailable')}
                             </div>
                           )}
                         </SelectContent>
@@ -407,10 +409,10 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                   </div>
 
                   <div className="space-y-2 grid grid-cols-7 items-center">
-                    <label className="text-sm font-medium col-span-2">Merchant (Opt)</label>
+                    <label className="text-sm font-medium col-span-2">{t('merchantOpt')}</label>
                     <div className='col-span-5'>
                       <Input
-                        placeholder="Enter merchant name"
+                        placeholder={t('merchantPlaceholder')}
                         {...register('merchant')}
                       />
                     </div>
@@ -425,14 +427,14 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                         className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                       />
                       <label htmlFor="is_recurring" className="text-sm font-medium">
-                        Recurring Transaction
+                        {t('recurringTransaction')}
                       </label>
                     </div>
                     
                     {isRecurring && (
                       <div className="space-y-4 pl-6 border-l-2 border-primary/20 ml-1">
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">Frequency</label>
+                          <label className="text-sm font-medium">{t('frequency')}</label>
                           <Select
                               value={watch('recurring_frequency') || 'monthly'}
                               onValueChange={(value) => {
@@ -442,19 +444,19 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                               onOpenChange={setIsAnySelectOpen}
                             >
                               <SelectTrigger data-testid="frequency-select-trigger">
-                                <SelectValue placeholder="Select frequency" />
+                                <SelectValue placeholder={t('selectFrequency')} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="daily">Daily</SelectItem>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                                <SelectItem value="yearly">Yearly</SelectItem>
+                                <SelectItem value="daily">{t('daily')}</SelectItem>
+                                <SelectItem value="weekly">{t('weekly')}</SelectItem>
+                                <SelectItem value="monthly">{t('monthly')}</SelectItem>
+                                <SelectItem value="yearly">{t('yearly')}</SelectItem>
                               </SelectContent>
                             </Select>
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-sm font-medium">Period</label>
+                          <label className="text-sm font-medium">{t('period')}</label>
                           <div className="flex flex-col space-y-2">
                             <div className="flex items-center space-x-2">
                               <input
@@ -466,7 +468,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                                 onChange={() => setValue('recurring_end_date', null)}
                               />
                               <label htmlFor="period_continuous" className="text-sm text-muted-foreground">
-                                Continuous (No end date)
+                                {t('continuous')}
                               </label>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -486,7 +488,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                                 }}
                               />
                               <label htmlFor="period_ended" className="text-sm text-muted-foreground">
-                                End Date
+                                {t('endDate')}
                               </label>
                             </div>
                           </div>
@@ -518,14 +520,14 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                     }}
                     className="flex-1"
                   >
-                    Cancel
+                    {t('cancel')}
                   </Button>
                   <Button
                     type="submit"
                     disabled={isSubmitting}
                     className="flex-1"
                   >
-                    {isSubmitting ? 'Adding...' : 'Add Transaction'}
+                    {isSubmitting ? t('adding') : t('addButton')}
                   </Button>
                 </SheetFooter>
               </form>

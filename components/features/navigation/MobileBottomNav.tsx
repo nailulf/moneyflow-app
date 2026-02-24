@@ -3,18 +3,20 @@
 import { Home, DollarSign, Receipt, Wallet, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { AddTransactionForm } from '@/components/features/transaction/AddTransactionForm'
 
-const navItems = [
-  { title: 'Home', url: '/', icon: Home },
-  { title: 'Spend', url: '/spending', icon: DollarSign },
-  { title: 'Account', url: '/accounts', icon: Wallet },
-  { title: 'Invest', url: '/portfolio', icon: TrendingUp },
-]
-
 export function MobileBottomNav() {
   const pathname = usePathname()
+  const t = useTranslations('navigation.items')
+
+  const navItems = [
+    { title: t('home'), url: '/', icon: Home },
+    { title: t('spend'), url: '/spending', icon: DollarSign },
+    { title: t('accounts'), url: '/accounts', icon: Wallet },
+    { title: t('invest'), url: '/portfolio', icon: TrendingUp },
+  ]
 
   const isActive = (url: string) =>
     url === '/' ? pathname === '/' : pathname.startsWith(url)

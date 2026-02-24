@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { Analytics } from '@/lib/analytics/amplitude'
@@ -14,28 +15,10 @@ import { CompletionView } from './CompletionView'
 import { Button } from '@/components/ui/atoms/button'
 import type { OnboardingPhase } from '@/types/database'
 
-const ONBOARDING_STEPS = [
-  {
-    id: 'account_setup',
-    phase: 'account_setup' as OnboardingPhase,
-    title: 'Create your first account',
-    description: 'Set up a bank account, credit card, or e-wallet',
-    stepNumber: 1
-  },
-  {
-    id: 'categories',
-    phase: 'categories' as OnboardingPhase,
-    title: 'Review your categories',
-    description: 'We\'ve set up default categories for you',
-    stepNumber: 2
-  },
-  {
-    id: 'budget_setup',
-    phase: 'budget_setup' as OnboardingPhase,
-    title: 'Set up your budget',
-    description: 'Create a spending plan for the month',
-    stepNumber: 3
-  }
+const ONBOARDING_STEP_DEFS = [
+  { id: 'account_setup', phase: 'account_setup' as OnboardingPhase, stepNumber: 1 },
+  { id: 'categories',    phase: 'categories'    as OnboardingPhase, stepNumber: 2 },
+  { id: 'budget_setup',  phase: 'budget_setup'  as OnboardingPhase, stepNumber: 3 },
 ]
 
 const PHASE_ORDER: OnboardingPhase[] = ['welcome', 'account_setup', 'categories', 'budget_setup', 'completed']
@@ -80,6 +63,7 @@ function WelcomeView() {
 }
 
 export function OnboardingModalContent() {
+  const t = useTranslations('onboarding')
   const { currentPhase, skip, closeModal, loading } = useOnboarding()
 
   const handleSkipSetup = async () => {
@@ -97,7 +81,13 @@ export function OnboardingModalContent() {
   }
 
   const completedCount = getCompletedStepsCount(currentPhase)
-  const totalSteps = ONBOARDING_STEPS.length
+  const totalSteps = ONBOARDING_STEP_DEFS.length
+
+  const onboardingSteps = ONBOARDING_STEP_DEFS.map(def => ({
+    ...def,
+    title: t(`steps.${def.id === 'account_setup' ? 'accountSetup' : def.id === 'budget_setup' ? 'budgetSetup' : 'categories'}.title`),
+    description: t(`steps.${def.id === 'account_setup' ? 'accountSetup' : def.id === 'budget_setup' ? 'budgetSetup' : 'categories'}.description`),
+  }))
 
   return (
     <div className="flex flex-col max-h-[80vh]">
@@ -109,16 +99,16 @@ export function OnboardingModalContent() {
           size={56}
         />
         <div>
-          <h2 className="text-lg font-semibold">Complete your setup</h2>
+          <h2 className="text-lg font-semibold">{t('modal.title')}</h2>
           <p className="text-sm text-muted-foreground">
-            {completedCount} of {totalSteps} complete
+            {t('modal.progress', { completed: completedCount, total: totalSteps })}
           </p>
         </div>
       </div>
 
       {/* Steps list with content */}
       <div className="flex-1 overflow-y-auto py-2">
-        {ONBOARDING_STEPS.map((step) => {
+        {onboardingSteps.map((step) => {
           const status = getStepStatus(step.phase, currentPhase)
           const isCurrent = status === 'current'
 
@@ -147,7 +137,7 @@ export function OnboardingModalContent() {
           disabled={loading}
           className="w-full text-muted-foreground"
         >
-          Skip setup for now
+          {t('modal.skipSetup')}
         </Button>
       </div>
     </div>
