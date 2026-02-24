@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { Card, CardContent } from '@/components/ui/molecules/card'
 import { CreditCard, Wallet, TrendingUp, Building2, Loader2, Plus, ChevronRight, Target } from 'lucide-react'

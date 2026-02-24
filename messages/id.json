@@ -383,7 +383,7 @@
     },
     "items": {
       "dashboard": "Beranda",
-      "accounts": "Akun",
+      "accounts": "Akun & Aset",
       "spending": "Pengeluaran",
       "portfolio": "Portofolio",
       "advice": "Saran",
@@ -570,6 +570,7 @@
       "title": "Detail Akun",
       "accountType": "Jenis Akun",
       "currency": "Mata Uang",
+      "initialBalance": "Saldo Awal",
       "currentBalance": "Saldo Saat Ini",
       "status": "Status",
       "active": "Aktif",
@@ -580,6 +581,7 @@
     "actions": {
       "edit": "Edit",
       "export": "Ekspor",
+      "adjust": "Sesuaikan",
       "delete": "Hapus"
     },
     "editDialog": {
@@ -605,6 +607,22 @@
       "description": "Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak dapat dibatalkan.",
       "cancel": "Batal",
       "delete": "Hapus"
+    },
+    "adjustDialog": {
+      "title": "Sesuaikan Saldo",
+      "subtitle": "Tetapkan saldo terkini yang benar. Transaksi Anda yang ada tidak akan berubah.",
+      "currentBalance": "Saldo Saat Ini",
+      "newBalance": "Saldo Baru",
+      "date": "Tanggal",
+      "note": "Catatan",
+      "notePlaceholder": "mis. Rekonsiliasi rekening koran",
+      "adjustment": "Penyesuaian",
+      "cancel": "Batal",
+      "confirm": "Sesuaikan Saldo",
+      "adjusting": "Menyesuaikan..."
+    },
+    "adjustments": {
+      "title": "Riwayat Saldo"
     }
   },
   "dashboard": {

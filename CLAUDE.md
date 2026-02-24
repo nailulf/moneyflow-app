@@ -189,3 +189,51 @@ Migrations are in `supabase/migrations/` with sequential numbering:
 - Format: `NNN_description.sql`
 - Run via Supabase CLI or dashboard
 - Schema types in `types/database.ts` should match latest migrations
+
+## Database Design Principles
+
+### Prefer Wide Tables over EAV
+
+**Always use wide (columnar) tables** for feature data. Do not use EAV (Entity-Attribute-Value) or generic key-value patterns unless there is no alternative.
+
+**Why:**
+- Each attribute becomes a typed column — the database enforces types, constraints, and defaults
+- Single-row queries per entity instead of multiple key lookups
+- TypeScript types map 1-to-1 with DB columns — no runtime casting or silent key typos
+- Query performance: filters, joins, and indexes work on real columns, not JSON blobs
+- Easier to audit, migrate, and extend
+
+**Wide table example (correct):**
+```sql
+CREATE TABLE user_settings (
+  user_id          UUID PRIMARY KEY,
+  language         TEXT NOT NULL DEFAULT 'en' CHECK (language IN ('en', 'id')),
+  default_currency TEXT NOT NULL DEFAULT 'IDR',
+  theme            TEXT NOT NULL DEFAULT 'system',
+  -- add new preferences as new columns
+);
+```
+
+**EAV pattern (avoid):**
+```sql
+-- Do not do this
+CREATE TABLE user_preferences (
+  user_id          UUID,
+  preference_key   TEXT,   -- 'language', 'default_currency', etc.
+  preference_value JSONB
+);
+```
+
+**When EAV is acceptable:**
+- Truly dynamic, user-defined attributes (e.g., custom metadata tags the user invents at runtime)
+- Schema is genuinely unknown at design time
+- Even then, prefer a single `extras JSONB` overflow column on a wide table rather than a full EAV table
+
+**Existing exception:** `user_preferences` table is legacy EAV and is being migrated to `user_settings` (wide table). New features must not follow the old pattern.
+
+### Immutable Audit Logs
+
+For audit/history tables (e.g., `account_balance_adjustments`), enforce immutability at the DB level:
+- Grant only SELECT + INSERT RLS policies — no UPDATE or DELETE
+- Never add an `UPDATE` policy to a log table
+- The `Update` type in `types/database.ts` should be `Record<string, never>`
