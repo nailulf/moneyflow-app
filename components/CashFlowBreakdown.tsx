@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { PieChart, Pie, Cell, Label } from 'recharts'
 import { formatCurrency } from '@/lib/data-utils'
 import { calculateBudgetStatus } from '@/lib/budget-utils'
@@ -49,6 +50,8 @@ export function CashFlowBreakdown({
   budgetPlanLoading,
   onBudgetPlanSaved,
 }: CashFlowBreakdownProps) {
+  const t = useTranslations('cashflowBreakdown')
+  const tTx = useTranslations('transactions')
   const [viewBy, setViewBy] = useState<'category' | 'amount'>('category')
   const [editSheetOpen, setEditSheetOpen] = useState(false)
   const { getCategoryName, getCategoryColor } = useCategories()
@@ -182,7 +185,7 @@ export function CashFlowBreakdown({
     if (data.length === 0) {
       return (
         <div className="flex items-center justify-center h-64 text-muted-foreground">
-          <p>No data available</p>
+          <p>{t('noData')}</p>
         </div>
       )
     }
@@ -214,11 +217,11 @@ export function CashFlowBreakdown({
     )
   }
 
-  const renderCategoryList = (data: CategoryDataWithPercentage[], type: 'expense' | 'income') => {
+  const renderCategoryList = (data: CategoryDataWithPercentage[], emptyLabel: string) => {
     if (data.length === 0) {
       return (
         <div className="flex items-center justify-center h-32 text-muted-foreground">
-          <p>No {type} data available</p>
+          <p>{emptyLabel}</p>
         </div>
       )
     }
@@ -295,7 +298,7 @@ export function CashFlowBreakdown({
     if (categories.length === 0) {
       return (
         <div className="flex items-center justify-center h-32 text-muted-foreground">
-          <p>No budget categories</p>
+          <p>{t('noBudgetCategories')}</p>
         </div>
       )
     }
@@ -325,7 +328,7 @@ export function CashFlowBreakdown({
                   variant={status === 'over' ? 'destructive' : status === 'warning' ? 'secondary' : 'outline'}
                   className="text-xs"
                 >
-                  {status === 'over' ? 'Over' : status === 'warning' ? 'Warning' : 'On track'}
+                  {status === 'over' ? t('status.over') : status === 'warning' ? t('status.warning') : t('status.onTrack')}
                 </Badge>
               </div>
 
@@ -343,10 +346,10 @@ export function CashFlowBreakdown({
 
               {/* Amounts row */}
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Spent: <span className="text-foreground font-medium">{formatCurrency(spent, budgetCurrency)}</span></span>
-                <span>Budget: <span className="text-foreground font-medium">{formatCurrency(allocated, budgetCurrency)}</span></span>
+                <span>{t('amounts.spent')}: <span className="text-foreground font-medium">{formatCurrency(spent, budgetCurrency)}</span></span>
+                <span>{t('amounts.budget')}: <span className="text-foreground font-medium">{formatCurrency(allocated, budgetCurrency)}</span></span>
                 <span className={available < 0 ? 'text-destructive' : 'text-success'}>
-                  {available < 0 ? 'Over' : 'Left'}: <span className="font-medium">{formatCurrency(Math.abs(available), budgetCurrency)}</span>
+                  {available < 0 ? t('status.over') : t('amounts.left')}: <span className="font-medium">{formatCurrency(Math.abs(available), budgetCurrency)}</span>
                 </span>
               </div>
             </div>
@@ -372,7 +375,7 @@ export function CashFlowBreakdown({
     if (budgetSnapshotError) {
       return (
         <div className="text-center py-8">
-          <p className="text-sm text-destructive">Error loading budget data.</p>
+          <p className="text-sm text-destructive">{t('errorLoading')}</p>
           <p className="text-xs text-muted-foreground mt-1">{budgetSnapshotError}</p>
         </div>
       )
@@ -383,11 +386,11 @@ export function CashFlowBreakdown({
       return (
         <div className="text-center py-12 text-muted-foreground">
           <Wallet className="h-12 w-12 mx-auto mb-3 opacity-50" />
-          <p className="text-sm font-medium mb-1">No budget set for this period</p>
-          <p className="text-xs mb-4">Create a budget to track your spending against targets.</p>
+          <p className="text-sm font-medium mb-1">{t('noBudgetForPeriod')}</p>
+          <p className="text-xs mb-4">{t('createBudgetPrompt')}</p>
           {onBudgetPlanSaved && (
             <Button size="sm" onClick={() => setEditSheetOpen(true)}>
-              Set up your budget
+              {t('setupBudget')}
               <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
             </Button>
           )}
@@ -402,15 +405,15 @@ export function CashFlowBreakdown({
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h3 className="text-lg leading-title-5 font-semibold mb-2">
-                Budget Performance
+                {t('budgetPerformance')}
                 {isUpcoming && (
-                  <Badge variant="secondary" className="ml-2 text-xs align-middle">Upcoming</Badge>
+                  <Badge variant="secondary" className="ml-2 text-xs align-middle">{t('upcoming')}</Badge>
                 )}
               </h3>
               <p className="text-sm leading-body-sm text-muted-foreground">
                 {isUpcoming
-                  ? 'Projected budget for this period'
-                  : `${budgetUsedPct.toFixed(1)}% of budget used`}
+                  ? t('projectedBudget')
+                  : t('budgetUsed', { percent: budgetUsedPct.toFixed(1) })}
               </p>
             </div>
           </div>
@@ -419,16 +422,16 @@ export function CashFlowBreakdown({
             {onBudgetPlanSaved && (
                 <Button variant="outline" size="sm" onClick={() => setEditSheetOpen(true)}>
                   <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                  Edit budget
+                  {t('editBudget')}
                 </Button>
               )}
             </div>
         </div>
         <div>
           <div className="mb-4">
-            <h3 className="text-lg leading-title-5 font-semibold mb-2">Category Breakdown</h3>
+            <h3 className="text-lg leading-title-5 font-semibold mb-2">{t('categoryBreakdown')}</h3>
             <p className="text-sm leading-body-sm text-muted-foreground">
-              {budgetSnapshot?.budget_snapshot_categories?.length || 0} budget categories
+              {t('budgetCategoriesCount', { count: budgetSnapshot?.budget_snapshot_categories?.length || 0 })}
             </p>
           </div>
           <div className="max-h-[400px] overflow-y-auto">
@@ -444,16 +447,16 @@ export function CashFlowBreakdown({
       <Card className="w-full">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl leading-title-4 font-semibold">Cash Flow Breakdown</CardTitle>
+            <CardTitle className="text-xl leading-title-4 font-semibold">{t('title')}</CardTitle>
             <div className="flex items-center space-x-2">
-              <span className="text-sm leading-body-sm text-muted-foreground">View by</span>
+              <span className="text-sm leading-body-sm text-muted-foreground">{t('viewBy')}</span>
               <Select value={viewBy} onValueChange={(value: 'category' | 'amount') => setViewBy(value)}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="category">Category</SelectItem>
-                  <SelectItem value="amount">Amount</SelectItem>
+                  <SelectItem value="category">{tTx('columns.category')}</SelectItem>
+                  <SelectItem value="amount">{tTx('columns.amount')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -464,15 +467,15 @@ export function CashFlowBreakdown({
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="expenses" className="flex items-center space-x-2">
                 <TrendingDown className="h-4 w-4" />
-                <span>Expenses</span>
+                <span>{t('tabs.expenses')}</span>
               </TabsTrigger>
               <TabsTrigger value="budget" className="flex items-center space-x-2">
                 <Wallet className="h-4 w-4" />
-                <span>Budget</span>
+                <span>{t('tabs.budget')}</span>
               </TabsTrigger>
               <TabsTrigger value="income" className="flex items-center space-x-2">
                 <TrendingUp className="h-4 w-4" />
-                <span>Income</span>
+                <span>{t('tabs.income')}</span>
               </TabsTrigger>
             </TabsList>
 
@@ -480,18 +483,18 @@ export function CashFlowBreakdown({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <div className="mb-4">
-                    <h3 className="text-lg leading-title-5 font-semibold mb-2">Expenses</h3>
-                    <p className="text-sm leading-body-sm text-muted-foreground">Total spending this month: {formatCurrency(totalExpenses)}</p>
+                    <h3 className="text-lg leading-title-5 font-semibold mb-2">{t('expensesTitle')}</h3>
+                    <p className="text-sm leading-body-sm text-muted-foreground">{t('totalSpending', { amount: formatCurrency(totalExpenses) })}</p>
                   </div>
                   {renderPieChart(expenseData, 'amount', 'category')}
                 </div>
                 <div>
                   <div className="mb-4">
-                    <h3 className="text-lg leading-title-5 font-semibold mb-2">Expenses Breakdown</h3>
-                    <p className="text-sm leading-body-sm text-muted-foreground">{expenseData.length} expense categories</p>
+                    <h3 className="text-lg leading-title-5 font-semibold mb-2">{t('expensesBreakdown')}</h3>
+                    <p className="text-sm leading-body-sm text-muted-foreground">{t('expenseCategories', { count: expenseData.length })}</p>
                   </div>
                   <div className="max-h-80 overflow-y-auto">
-                    {renderCategoryList(expenseData, 'expense')}
+                    {renderCategoryList(expenseData, t('noExpenseData'))}
                   </div>
                 </div>
               </div>
@@ -505,18 +508,18 @@ export function CashFlowBreakdown({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <div className="mb-4">
-                    <h3 className="text-lg leading-title-5 font-semibold mb-2">Income Sources</h3>
-                    <p className="text-sm leading-body-sm text-muted-foreground">Total income this month: {formatCurrency(totalIncome)}</p>
+                    <h3 className="text-lg leading-title-5 font-semibold mb-2">{t('incomeSources')}</h3>
+                    <p className="text-sm leading-body-sm text-muted-foreground">{t('totalIncome', { amount: formatCurrency(totalIncome) })}</p>
                   </div>
                   {renderPieChart(incomeData, 'amount', 'category')}
                 </div>
                 <div>
                   <div className="mb-4">
-                    <h3 className="text-lg leading-title-5 font-semibold mb-2">Income Breakdown</h3>
-                    <p className="text-sm leading-body-sm text-muted-foreground">{incomeData.length} income sources</p>
+                    <h3 className="text-lg leading-title-5 font-semibold mb-2">{t('incomeBreakdown')}</h3>
+                    <p className="text-sm leading-body-sm text-muted-foreground">{t('incomeCounts', { count: incomeData.length })}</p>
                   </div>
                   <div className="max-h-80 overflow-y-auto">
-                    {renderCategoryList(incomeData, 'income')}
+                    {renderCategoryList(incomeData, t('noIncomeData'))}
                   </div>
                 </div>
               </div>

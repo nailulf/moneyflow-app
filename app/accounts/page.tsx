@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { Card, CardContent } from '@/components/ui/molecules/card'
@@ -24,6 +25,7 @@ const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
 }
 
 function AccountsPageContent() {
+  const t = useTranslations('accounts')
   const { accounts, loading: accountsLoading } = useAccounts()
   const { data: goalsSummary, isLoading: goalsLoading } = useGoalsSummary()
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
@@ -67,7 +69,7 @@ function AccountsPageContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Total Savings Progress</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('totalSavingsProgress')}</p>
                   <p className="text-2xl font-bold">
                     {formatCurrency(goalsSummary.totalSavings)}
                   </p>
@@ -75,13 +77,13 @@ function AccountsPageContent() {
               </Card>
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Active Goals</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('activeGoals')}</p>
                   <p className="text-2xl font-bold">{goalsSummary.activeGoalsCount}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Completed Goals</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('completedGoals')}</p>
                   <p className="text-2xl font-bold text-success">{goalsSummary.completedGoalsCount}</p>
                 </CardContent>
               </Card>
@@ -94,7 +96,7 @@ function AccountsPageContent() {
             {/* Savings & Investment Accounts */}
             {savingsAccounts.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-4">Savings & Investment Accounts</h3>
+                <h3 className="text-lg font-semibold mb-4">{t('savingsAndInvestment')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {savingsAccounts.map((account) => {
                     const Icon = ACCOUNT_ICONS[account.type] || CreditCard
@@ -143,14 +145,14 @@ function AccountsPageContent() {
                                 </div>
                                 <div className="flex justify-between text-xs text-muted-foreground">
                                   <span>{goal.progressPercentage.toFixed(1)}%</span>
-                                  <span>Target: {formatCurrency(goal.targetAmount, goal.currency)}</span>
+                                  <span>{t('target', { amount: formatCurrency(goal.targetAmount, goal.currency) })}</span>
                                 </div>
                               </div>
                             ) : (
                               <div className="pt-3 border-t">
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <Target className="w-4 h-4" />
-                                  <span className="text-sm">No goal set</span>
+                                  <span className="text-sm">{t('noGoalSet')}</span>
                                 </div>
                               </div>
                             )}
@@ -166,7 +168,7 @@ function AccountsPageContent() {
             {/* Other Accounts */}
             {otherAccounts.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold mb-4">Other Accounts</h3>
+                <h3 className="text-lg font-semibold mb-4">{t('otherAccounts')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {otherAccounts.map((account) => {
                     const Icon = ACCOUNT_ICONS[account.type] || CreditCard
@@ -207,9 +209,9 @@ function AccountsPageContent() {
             {accounts.length === 0 && (
               <div className="text-center py-12">
                 <CreditCard className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Accounts Yet</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('noAccountsTitle')}</h3>
                 <p className="text-muted-foreground mb-4">
-                  Create your first account to start tracking your finances
+                  {t('noAccountsDescription')}
                 </p>
               </div>
             )}

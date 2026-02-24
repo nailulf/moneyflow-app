@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import { useTranslations } from 'next-intl'
 import { TransactionTable } from '@/components/features/transaction/TransactionTable'
 import { SpendingNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
@@ -10,7 +10,8 @@ import { RecurringTransactionsList } from '@/components/features/transaction/Rec
 
 
 export default function SpendingTransactionPage() {
-  
+  const t = useTranslations('spending.transactions')
+
   // Use shared transaction context
   const { transactions, addTransaction } = useTransactions()
 
@@ -26,8 +27,8 @@ export default function SpendingTransactionPage() {
           <Tabs defaultValue="all" className="w-full">
             <div className="flex items-center justify-between mb-4">
               <TabsList>
-                <TabsTrigger value="all">All Transactions</TabsTrigger>
-                <TabsTrigger value="recurring">Recurring Transactions</TabsTrigger>
+                <TabsTrigger value="all">{t('allTransactions')}</TabsTrigger>
+                <TabsTrigger value="recurring">{t('recurringTransactions')}</TabsTrigger>
               </TabsList>
             </div>
             

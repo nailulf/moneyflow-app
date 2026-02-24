@@ -114,6 +114,147 @@
       "dashboard": "Beranda"
     }
   },
+  "spending": {
+    "breakdown": {
+      "title": "Laporan Anggaran",
+      "description": "Lihat performa anggaran dan pola pengeluaran Anda"
+    },
+    "cashflow": {
+      "title": "Arus Kas",
+      "description": "Visualisasikan aliran pendapatan dan pengeluaran Anda",
+      "totalIncome": "Total Pendapatan",
+      "totalExpenses": "Total Pengeluaran",
+      "netCashFlow": "Arus Kas Bersih",
+      "month": "Bulan",
+      "year": "Tahun"
+    },
+    "transactions": {
+      "allTransactions": "Semua Transaksi",
+      "recurringTransactions": "Transaksi Berulang"
+    }
+  },
+  "cashflowBreakdown": {
+    "title": "Rincian Arus Kas",
+    "viewBy": "Tampilkan per",
+    "tabs": {
+      "expenses": "Pengeluaran",
+      "budget": "Anggaran",
+      "income": "Pendapatan"
+    },
+    "noData": "Tidak ada data tersedia",
+    "noExpenseData": "Tidak ada data pengeluaran tersedia",
+    "noIncomeData": "Tidak ada data pendapatan tersedia",
+    "expensesTitle": "Pengeluaran",
+    "totalSpending": "Total pengeluaran bulan ini: {amount}",
+    "expensesBreakdown": "Rincian Pengeluaran",
+    "expenseCategories": "{count} kategori pengeluaran",
+    "incomeSources": "Sumber Pendapatan",
+    "incomeBreakdown": "Rincian Pendapatan",
+    "totalIncome": "Total pendapatan bulan ini: {amount}",
+    "incomeCounts": "{count} sumber pendapatan",
+    "budgetPerformance": "Performa Anggaran",
+    "upcoming": "Akan Datang",
+    "projectedBudget": "Proyeksi anggaran untuk periode ini",
+    "budgetUsed": "{percent}% anggaran terpakai",
+    "editBudget": "Edit anggaran",
+    "categoryBreakdown": "Rincian Kategori",
+    "budgetCategoriesCount": "{count} kategori anggaran",
+    "noBudgetCategories": "Tidak ada kategori anggaran",
+    "noBudgetForPeriod": "Tidak ada anggaran untuk periode ini",
+    "createBudgetPrompt": "Buat anggaran untuk melacak pengeluaran sesuai target.",
+    "setupBudget": "Atur anggaran Anda",
+    "errorLoading": "Gagal memuat data anggaran.",
+    "status": {
+      "over": "Melebihi",
+      "warning": "Peringatan",
+      "onTrack": "Sesuai rencana"
+    },
+    "amounts": {
+      "spent": "Terpakai",
+      "budget": "Anggaran",
+      "left": "Sisa"
+    }
+  },
+  "cashflowSummary": {
+    "title": "Arus Kas",
+    "income": "Pendapatan",
+    "spending": "Pengeluaran",
+    "netCashFlow": "Arus Kas Bersih"
+  },
+  "budgetFilterBar": {
+    "period": "Periode",
+    "year": "Tahun",
+    "month": "Bulan",
+    "monthly": "Bulanan",
+    "yearly": "Tahunan",
+    "filterPeriod": "Filter Periode",
+    "createBudget": "Buat Anggaran",
+    "budget": "Anggaran"
+  },
+  "accounts": {
+    "totalSavingsProgress": "Total Progres Tabungan",
+    "activeGoals": "Tujuan Aktif",
+    "completedGoals": "Tujuan Selesai",
+    "savingsAndInvestment": "Akun Tabungan & Investasi",
+    "otherAccounts": "Akun Lainnya",
+    "noAccountsTitle": "Belum Ada Akun",
+    "noAccountsDescription": "Buat akun pertama Anda untuk mulai melacak keuangan",
+    "noGoalSet": "Belum ada tujuan",
+    "target": "Target: {amount}"
+  },
+  "transactions": {
+    "title": "TRANSAKSI",
+    "recentTransactions": "Transaksi Terbaru",
+    "loading": "Memuat...",
+    "noTransactionsFound": "Tidak ada transaksi ditemukan",
+    "search": "Cari",
+    "allCategories": "Semua Kategori",
+    "allMerchants": "Semua Merchant",
+    "filters": "Filter",
+    "dateRange": "Rentang Tanggal",
+    "category": "Kategori",
+    "merchant": "Merchant",
+    "applyFilters": "Terapkan Filter",
+    "summary": {
+      "total": "Total transaksi",
+      "dateRange": "Rentang tanggal",
+      "noTransactions": "Tidak ada transaksi",
+      "totalExpenses": "Total pengeluaran",
+      "totalIncome": "Total pendapatan",
+      "balance": "Saldo"
+    },
+    "columns": {
+      "merchantDescription": "Merchant / Deskripsi",
+      "category": "Kategori",
+      "amount": "Jumlah"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Hapus"
+    },
+    "loadMore": "Muat Lebih ({remaining} tersisa)",
+    "loadingMore": "Memuat lebih banyak transaksi...",
+    "allLoaded": "Semua transaksi dimuat ({total} total)",
+    "confirmCategoryChange": {
+      "title": "Konfirmasi Perubahan Kategori",
+      "description": "Apakah Anda yakin ingin mengubah kategori untuk \"{description}\" menjadi \"{category}\"?",
+      "cancel": "Batal",
+      "confirm": "Konfirmasi",
+      "updating": "Memperbarui..."
+    },
+    "confirmDelete": {
+      "title": "Hapus Transaksi",
+      "description": "Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.",
+      "details": "Detail Transaksi:",
+      "merchantLabel": "Merchant",
+      "amountLabel": "Jumlah",
+      "dateLabel": "Tanggal",
+      "notAvailable": "N/A",
+      "cancel": "Batal",
+      "delete": "Hapus Transaksi",
+      "deleting": "Menghapus..."
+    }
+  },
   "dashboard": {
     "netWorth": {
       "totalNetWorth": "Total Kekayaan Bersih",

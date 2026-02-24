@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { Transaction, CategoryDB } from '@/types/database'
 import { formatCurrency, getTotalBalance, calculateTotalSpending, calculateTotalIncome } from '@/lib/data-utils'
 import { Button } from '@/components/ui/atoms/button'
@@ -86,6 +87,7 @@ export function TransactionTable({
   enableLazyLoading = false,
   pageSize = 50
 }: TransactionTableProps) {
+  const t = useTranslations('transactions')
   const { user } = useAuth()
   const userId = user?.id || ''
   const [isClient, setIsClient] = useState(false)
@@ -404,11 +406,11 @@ export function TransactionTable({
     return (
       <Card className="bg-card border border-border shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg leading-title-5 font-semibold text-foreground">Recent Transactions</CardTitle>
+          <CardTitle className="text-lg leading-title-5 font-semibold text-foreground">{t('recentTransactions')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-32 text-muted-foreground">
-            Loading...
+            {t('loading')}
           </div>
         </CardContent>
       </Card>
@@ -423,7 +425,7 @@ export function TransactionTable({
         {/* Header Section */}
         <div className="mb-6">
           <div className="flex justify-between items-center gap-3 mb-4 w-full">
-            <h1 className="text-md leading-body-lg font-semibold text-muted-foreground">TRANSACTIONS</h1>
+            <h1 className="text-md leading-body-lg font-semibold text-muted-foreground">{t('title')}</h1>
             <div className="flex items-center">
               <AddTransactionForm onSuccess={() => {
                 transactionContext?.refreshTransactions?.()
@@ -447,10 +449,10 @@ export function TransactionTable({
               <div className="min-w-0 w-40">
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-full text-xs" size="sm">
-                    <SelectValue placeholder="All Categories" />
+                    <SelectValue placeholder={t('allCategories')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="all">{t('allCategories')}</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={`category-${category.id}`} value={category.id}>
                         <div className="flex items-center gap-2">
@@ -468,10 +470,10 @@ export function TransactionTable({
               <div className="min-w-0 w-40">
                 <Select value={merchantFilter} onValueChange={setMerchantFilter}>
                   <SelectTrigger className="w-full text-xs" size="sm">
-                    <SelectValue placeholder="All Merchants" />
+                    <SelectValue placeholder={t('allMerchants')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Merchants</SelectItem>
+                    <SelectItem value="all">{t('allMerchants')}</SelectItem>
                     {uniqueMerchants.map((merchant) => (
                       <SelectItem key={`merchant-${merchant}`} value={merchant}>
                         {merchant}
@@ -484,7 +486,7 @@ export function TransactionTable({
             <div className="relative min-w-0 w-64">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Search"
+                placeholder={t('search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-8 bg-muted/50 border-border w-full"
@@ -497,7 +499,7 @@ export function TransactionTable({
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Search"
+                placeholder={t('search')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-10 bg-muted/50 border-border w-full"
@@ -511,24 +513,24 @@ export function TransactionTable({
               </SheetTrigger>
               <SheetContent side="bottom" className="h-auto max-h-[80vh] w-full">
                 <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
+                  <SheetTitle>{t('filters')}</SheetTitle>
                 </SheetHeader>
                 <div className="space-y-4 pt-4">
                   <div className="space-y-2">
-                    <label className="text-sm leading-body-sm font-medium">Date Range</label>
+                    <label className="text-sm leading-body-sm font-medium">{t('dateRange')}</label>
                     <DateRangePicker
                       value={dateRange}
                       onChange={setDateRange}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm leading-body-sm font-medium">Category</label>
+                    <label className="text-sm leading-body-sm font-medium">{t('category')}</label>
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="All Categories" />
+                        <SelectValue placeholder={t('allCategories')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="all">{t('allCategories')}</SelectItem>
                         {categories.map((category) => (
                           <SelectItem key={`category-mobile-${category.id}`} value={category.id}>
                             <div className="flex items-center gap-2">
@@ -544,13 +546,13 @@ export function TransactionTable({
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm leading-body-sm font-medium">Merchant</label>
+                    <label className="text-sm leading-body-sm font-medium">{t('merchant')}</label>
                     <Select value={merchantFilter} onValueChange={setMerchantFilter}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="All Merchants" />
+                        <SelectValue placeholder={t('allMerchants')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Merchants</SelectItem>
+                        <SelectItem value="all">{t('allMerchants')}</SelectItem>
                         {uniqueMerchants.map((merchant) => (
                           <SelectItem key={`merchant-mobile-${merchant}`} value={merchant}>
                             {merchant}
@@ -560,7 +562,7 @@ export function TransactionTable({
                     </Select>
                   </div>
                   <Button className="w-full" onClick={() => setIsFilterOpen(false)}>
-                    Apply Filters
+                    {t('applyFilters')}
                   </Button>
                 </div>
               </SheetContent>
@@ -569,17 +571,17 @@ export function TransactionTable({
 
           {/* Transaction Summary */}
           <div className="hidden sm:block mt-4 text-sm leading-body-sm text-muted-foreground">
-             <span className="font-medium">Total transactions:</span> {filteredTransactions.length} •
-             <span className="font-medium">Date range:</span> {(() => {
-               if (filteredTransactions.length === 0) return 'No transactions';
-               const dates = filteredTransactions.map(t => new Date(t.date)).sort((a, b) => a.getTime() - b.getTime());
+             <span className="font-medium">{t('summary.total')}:</span> {filteredTransactions.length} •
+             <span className="font-medium">{t('summary.dateRange')}:</span> {(() => {
+               if (filteredTransactions.length === 0) return t('summary.noTransactions');
+               const dates = filteredTransactions.map(tx => new Date(tx.date)).sort((a, b) => a.getTime() - b.getTime());
                const startDate = dates[0].toLocaleDateString();
                const endDate = dates[dates.length - 1].toLocaleDateString();
                return dates.length === 1 ? startDate : `${startDate} - ${endDate}`;
              })()} •
-             <span className="font-medium">Total expenses:</span> <span className="text-destructive">{formatCurrency(calculateTotalSpending(filteredTransactions))}</span> •
-             <span className="font-medium">Total income:</span> <span className="text-success">{formatCurrency(calculateTotalIncome(filteredTransactions))}</span> •
-             <span className="font-medium">Balance:</span> <span className={getTotalBalance(filteredTransactions) >= 0 ? 'text-success' : 'text-destructive'}>{formatCurrency(getTotalBalance(filteredTransactions))}</span>
+             <span className="font-medium">{t('summary.totalExpenses')}:</span> <span className="text-destructive">{formatCurrency(calculateTotalSpending(filteredTransactions))}</span> •
+             <span className="font-medium">{t('summary.totalIncome')}:</span> <span className="text-success">{formatCurrency(calculateTotalIncome(filteredTransactions))}</span> •
+             <span className="font-medium">{t('summary.balance')}:</span> <span className={getTotalBalance(filteredTransactions) >= 0 ? 'text-success' : 'text-destructive'}>{formatCurrency(getTotalBalance(filteredTransactions))}</span>
            </div>
         </div>
         
@@ -594,7 +596,7 @@ export function TransactionTable({
                     onClick={() => handleSort('description')}
                   >
                     <div className="flex items-center gap-2">
-                      Merchant / Description
+                      {t('columns.merchantDescription')}
                       {sortField === 'description' && (
                         <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
                       )}
@@ -605,7 +607,7 @@ export function TransactionTable({
                     onClick={() => handleSort('category')}
                   >
                     <div className="flex items-center gap-2">
-                      Category
+                      {t('columns.category')}
                       {sortField === 'category' && (
                         <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
                       )}
@@ -616,7 +618,7 @@ export function TransactionTable({
                     onClick={() => handleSort('amount')}
                   >
                     <div className="flex items-center justify-end gap-2">
-                      Amount
+                      {t('columns.amount')}
                       {sortField === 'amount' && (
                         <ArrowUpDown className={`h-4 w-4 ${sortDirection === 'asc' ? 'rotate-180' : ''}`} />
                       )}
@@ -631,7 +633,7 @@ export function TransactionTable({
               {displayTransactions.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={10} className="py-12 text-center text-muted-foreground">
-                    No transactions found
+                    {t('noTransactionsFound')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -724,14 +726,14 @@ export function TransactionTable({
                                       }}
                                     >
                                       <Edit className="h-4 w-4 mr-2" />
-                                      Edit
+                                      {t('actions.edit')}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       onClick={() => handleDeleteTransactionClick(transaction)}
                                       className="text-destructive focus:text-destructive"
                                     >
                                       <Trash2 className="h-4 w-4 mr-2" />
-                                      Delete
+                                      {t('actions.delete')}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -755,15 +757,15 @@ export function TransactionTable({
                   {isLoadingMore ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Loading more transactions...</span>
+                      <span>{t('loadingMore')}</span>
                     </div>
                   ) : (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={loadMoreTransactions}
                       className="text-sm"
                     >
-                      Load More ({filteredTransactions.length - displayedCount} remaining)
+                      {t('loadMore', { remaining: filteredTransactions.length - displayedCount })}
                     </Button>
                   )}
                 </div>
@@ -771,7 +773,7 @@ export function TransactionTable({
               
               {displayedCount >= filteredTransactions.length && filteredTransactions.length > 0 && (
                 <div className="text-center py-4 text-muted-foreground text-sm leading-body-sm">
-                  All transactions loaded ({filteredTransactions.length} total)
+                  {t('allLoaded', { total: filteredTransactions.length })}
                 </div>
               )}
             </div>
@@ -783,9 +785,12 @@ export function TransactionTable({
       <Dialog open={!!confirmationDialog} onOpenChange={() => setConfirmationDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Category Change</DialogTitle>
+            <DialogTitle>{t('confirmCategoryChange.title')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to change the category for &quot;{confirmationDialog?.transaction.description}&quot; to &quot;{confirmationDialog?.newCategoryName}&quot;?
+              {t('confirmCategoryChange.description', {
+                description: confirmationDialog?.transaction.description ?? '',
+                category: confirmationDialog?.newCategoryName ?? '',
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -794,13 +799,13 @@ export function TransactionTable({
               onClick={() => setConfirmationDialog(null)}
               disabled={isUpdating}
             >
-              Cancel
+              {t('confirmCategoryChange.cancel')}
             </Button>
             <Button
               onClick={confirmCategoryChange}
               disabled={isUpdating}
             >
-              {isUpdating ? 'Updating...' : 'Confirm'}
+              {isUpdating ? t('confirmCategoryChange.updating') : t('confirmCategoryChange.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -810,14 +815,14 @@ export function TransactionTable({
       <Dialog open={!!deleteConfirmDialog} onOpenChange={() => setDeleteConfirmDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Transaction</DialogTitle>
+            <DialogTitle>{t('confirmDelete.title')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this transaction? This action cannot be undone.
+              {t('confirmDelete.description')}
               <br /><br />
-              <strong>Transaction Details:</strong>
-              <br />Merchant: {deleteConfirmDialog?.transaction.merchant}
-              <br />Amount: {deleteConfirmDialog?.transaction.amount ? formatCurrency(deleteConfirmDialog.transaction.amount) : 'N/A'}
-              <br />Date: {deleteConfirmDialog?.transaction.date ? new Date(deleteConfirmDialog.transaction.date).toLocaleDateString() : 'N/A'}
+              <strong>{t('confirmDelete.details')}</strong>
+              <br />{t('confirmDelete.merchantLabel')}: {deleteConfirmDialog?.transaction.merchant}
+              <br />{t('confirmDelete.amountLabel')}: {deleteConfirmDialog?.transaction.amount ? formatCurrency(deleteConfirmDialog.transaction.amount) : t('confirmDelete.notAvailable')}
+              <br />{t('confirmDelete.dateLabel')}: {deleteConfirmDialog?.transaction.date ? new Date(deleteConfirmDialog.transaction.date).toLocaleDateString() : t('confirmDelete.notAvailable')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -826,7 +831,7 @@ export function TransactionTable({
               onClick={() => setDeleteConfirmDialog(null)}
               disabled={isDeleting}
             >
-              Cancel
+              {t('confirmDelete.cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -836,10 +841,10 @@ export function TransactionTable({
               {isDeleting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  {t('confirmDelete.deleting')}
                 </>
               ) : (
-                'Delete Transaction'
+                t('confirmDelete.delete')
               )}
             </Button>
           </DialogFooter>
