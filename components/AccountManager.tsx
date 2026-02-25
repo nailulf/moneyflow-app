@@ -274,7 +274,7 @@ function AccountManagerInternal({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => router.push(`/accounts/${account.id}`)}
+                        onClick={() => router.push(`/accounts?accountId=${account.id}`)}
                         className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
                         title="View Details"
                       >

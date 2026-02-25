@@ -194,6 +194,7 @@
   "accounts": {
     "totalSavingsProgress": "Total Savings Progress",
     "activeGoals": "Active Goals",
+    "goalProgress": "Goal Progress",
     "completedGoals": "Completed Goals",
     "savingsAndInvestment": "Savings & Investment Accounts",
     "otherAccounts": "Other Accounts",

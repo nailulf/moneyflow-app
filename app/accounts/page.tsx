@@ -1,16 +1,17 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
-import { Card, CardContent } from '@/components/ui/molecules/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/molecules/card'
 import { CreditCard, Wallet, TrendingUp, Building2, Loader2, Plus, ChevronRight, Target } from 'lucide-react'
 import { useAccounts } from '@/contexts/AccountContext'
 import { formatCurrency } from '@/lib/data-utils'
 import { useGoalsSummary } from '@/hooks/useGoalsQuery'
 import { getGoalIcon, isGoalOnTrack, getProgressColor } from '@/lib/goals/calculations'
 import { AccountNavigation } from '@/components/features/navigation/TopNavigation'
-import { Dialog, DialogContent } from '@/components/ui/molecules/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/molecules/dialog'
 import { Sheet, SheetContent } from '@/components/ui/organisms/sheet'
 import { AccountDetailView } from '@/components/AccountDetailView'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -25,10 +26,35 @@ const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
 
 function AccountsPageContent() {
   const t = useTranslations('accounts')
+  const tAccountDetail = useTranslations('accountDetail')
   const { accounts, loading: accountsLoading } = useAccounts()
   const { data: goalsSummary, isLoading: goalsLoading } = useGoalsSummary()
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
   const isMobile = useIsMobile()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const accountIdParam = searchParams.get('accountId')
+
+  useEffect(() => {
+    if (accountIdParam) {
+      setSelectedAccountId(accountIdParam)
+    }
+  }, [accountIdParam])
+
+  const openAccountDetail = useCallback((accountId: string) => {
+    setSelectedAccountId(accountId)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('accountId', accountId)
+    router.push(`/accounts?${params.toString()}`)
+  }, [router, searchParams])
+
+  const closeAccountDetail = useCallback(() => {
+    setSelectedAccountId(null)
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('accountId')
+    const query = params.toString()
+    router.replace(query ? `/accounts?${query}` : '/accounts')
+  }, [router, searchParams])
 
   const loading = accountsLoading || goalsLoading
 
@@ -62,30 +88,36 @@ function AccountsPageContent() {
   return (
     <div className="flex flex-col h-full">
       <AccountNavigation />
-
       <PageLayout>
         <TopContent>
           {/* Summary Cards */}
-          {goalsSummary && goalsSummary.goals.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {goalsSummary && goalsSummary.goals.length >= 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
               <Card>
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">{t('totalSavingsProgress')}</p>
+                <CardHeader>
+                  <p>{t('totalSavingsProgress')}</p>
+                </CardHeader>
+                <CardContent className="p-2">
                   <p className="text-2xl font-bold">
                     {formatCurrency(goalsSummary.totalSavings)}
                   </p>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">{t('activeGoals')}</p>
-                  <p className="text-2xl font-bold">{goalsSummary.activeGoalsCount}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">{t('completedGoals')}</p>
-                  <p className="text-2xl font-bold text-success">{goalsSummary.completedGoalsCount}</p>
+                <CardHeader>
+                  <p>{t('goalProgress')}</p>
+                </CardHeader>
+                <CardContent className="p-2">
+                  <div className="flex flex-col grid grid-cols-2">
+                    <div className="col-span-1 flex gap-2">
+                      <p className="text-sm text-muted-foreground mb-1">{t('activeGoals')}</p>
+                      <p className="text-2xl font-bold">{goalsSummary.activeGoalsCount}</p>
+                    </div>
+                    <div className="col-span-1 flex gap-2">
+                      <p className="text-sm text-muted-foreground mb-1">{t('completedGoals')}</p>
+                      <p className="text-2xl font-bold text-success">{goalsSummary.completedGoalsCount}</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -107,7 +139,7 @@ function AccountsPageContent() {
                       : null
 
                     return (
-                      <div key={account.id} onClick={() => setSelectedAccountId(account.id)} className="cursor-pointer">
+                      <div key={account.id} onClick={() => openAccountDetail(account.id)} className="cursor-pointer">
                         <Card className="hover:shadow-md transition-shadow h-full">
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-3">
@@ -175,7 +207,7 @@ function AccountsPageContent() {
                     const Icon = ACCOUNT_ICONS[account.type] || CreditCard
 
                     return (
-                      <div key={account.id} onClick={() => setSelectedAccountId(account.id)} className="cursor-pointer">
+                      <div key={account.id} onClick={() => openAccountDetail(account.id)} className="cursor-pointer">
                         <Card className="hover:shadow-md transition-shadow h-full">
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
@@ -222,7 +254,7 @@ function AccountsPageContent() {
 
       {/* Account Detail - Bottom Sheet on mobile, Dialog on desktop */}
       {isMobile ? (
-        <Sheet open={!!selectedAccountId} onOpenChange={(open) => !open && setSelectedAccountId(null)}>
+        <Sheet open={!!selectedAccountId} onOpenChange={(open) => !open && closeAccountDetail()}>
           <SheetContent side="bottom" className="h-[95vh] w-full overflow-y-auto rounded-t-2xl px-4 pt-2 pb-6">
             <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-muted-foreground/30" />
             {selectedAccountId && (
@@ -234,8 +266,9 @@ function AccountsPageContent() {
           </SheetContent>
         </Sheet>
       ) : (
-        <Dialog open={!!selectedAccountId} onOpenChange={(open) => !open && setSelectedAccountId(null)}>
+        <Dialog open={!!selectedAccountId} onOpenChange={(open) => !open && closeAccountDetail()}>
           <DialogContent className="sm:max-w-[80vw] w-[80vw] h-[80vh] overflow-y-auto">
+            <DialogTitle className="sr-only">{tAccountDetail('details.title')}</DialogTitle>
             {selectedAccountId && (
               <AccountDetailView
                 accountId={selectedAccountId}
