@@ -398,7 +398,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                             <div className="text-sm text-muted-foreground">
                               {formatCurrency(adj.previous_balance, account.currency)} → {formatCurrency(adj.new_balance, account.currency)}
                             </div>
-                            {adj.note && <p className="text-xs text-muted-foreground italic">"{adj.note}"</p>}
+                            {adj.note && <p className="text-xs text-muted-foreground italic">&quot;{adj.note}&quot;</p>}
                           </div>
                         ))}
                       </div>

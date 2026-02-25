@@ -193,6 +193,7 @@
   },
   "accounts": {
     "totalSavingsProgress": "Total Progres Tabungan",
+    "goalProgress": "Progres Target",
     "activeGoals": "Tujuan Aktif",
     "completedGoals": "Tujuan Selesai",
     "savingsAndInvestment": "Akun Tabungan & Investasi",

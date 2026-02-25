@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateGoalProgress } from '@/lib/goals/calculations'
-import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
-import { AccountDB, Transaction } from '@/types/database'
+import { AccountDB } from '@/types/database'
 
 // GET /api/goals/summary - Get all user goals with progress
 export async function GET(request: NextRequest) {
@@ -45,32 +44,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch goals' }, { status: 500 })
     }
 
-    const targetDate = new Date()
-    const accountIds = Array.from(new Set((goalsWithAccounts || []).map(item => item.account_id)))
-    const transactionsByAccount = new Map<string, Transaction[]>()
-
-    if (accountIds.length > 0) {
-      const { data: transactions, error: transactionsError } = await supabase
-        .from('transactions')
-        .select('*')
-        .in('account_id', accountIds)
-        .eq('user_id', user.id)
-        .lte('date', targetDate.toISOString())
-        .order('date', { ascending: true })
-
-      if (transactionsError) {
-        console.error('[Goals Summary API] Error fetching transactions:', transactionsError)
-        return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 })
-      }
-
-      for (const transaction of transactions || []) {
-        if (!transactionsByAccount.has(transaction.account_id)) {
-          transactionsByAccount.set(transaction.account_id, [])
-        }
-        transactionsByAccount.get(transaction.account_id)?.push(transaction)
-      }
-    }
-
     // Process goals and calculate progress
     const goals = (goalsWithAccounts || []).map((item) => {
       // TypeScript needs help with the joined data
@@ -83,13 +56,7 @@ export async function GET(request: NextRequest) {
         currency: string
       }
 
-      const accountTransactions = transactionsByAccount.get(account.id) || []
-      const currentBalance = calculateAccountBalanceAtDate(
-        accountTransactions,
-        targetDate,
-        account.type,
-        account.balance ?? 0
-      )
+      const currentBalance = account.balance ?? 0
       const progress = calculateGoalProgress(currentBalance, item.target_amount)
 
       return {
