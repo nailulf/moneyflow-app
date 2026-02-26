@@ -103,18 +103,6 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
     enabled: !!user?.id && !!accountId
   })
 
-  // account.balance is maintained by a DB trigger on every transaction, so it IS the current balance.
-  // Initial balance = current balance minus the cumulative effect of all transactions.
-  const initialBalance = useMemo(() => {
-    if (!account) return 0
-    const txEffect = transactions.reduce((sum, t) => {
-      if (t.type === 'INCOME') return sum + t.amount
-      if (t.type === 'EXPENSE') return sum - t.amount
-      return sum // TRANSFER is excluded (doesn't change net worth for one account)
-    }, 0)
-    return account.balance - txEffect
-  }, [account, transactions])
-
   // Fetch balance adjustment log
   const { data: adjustments = [] } = useQuery<BalanceAdjustment[]>({
     queryKey: ['balance-adjustments', accountId],
@@ -125,6 +113,20 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
     },
     enabled: !!accountId,
   })
+
+  const adjustmentTotal = useMemo(() => (
+    adjustments.reduce((sum, adj) => sum + adj.adjustment_amount, 0)
+  ), [adjustments])
+
+  const initialBalance = useMemo(() => {
+    if (!account) return 0
+    const txEffect = transactions.reduce((sum, t) => {
+      if (t.type === 'INCOME') return sum + t.amount
+      if (t.type === 'EXPENSE') return sum - t.amount
+      return sum
+    }, 0)
+    return account.balance - txEffect - adjustmentTotal
+  }, [account, transactions, adjustmentTotal])
 
   // Real-time adjustment preview
   const currentBalance = account?.currentBalance ?? account?.balance ?? 0
@@ -589,41 +591,44 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
         {/* Adjust Balance Dialog */}
         <Dialog open={isAdjustOpen} onOpenChange={setIsAdjustOpen}>
           <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
+            <DialogHeader className='border-b mb-2 pb-4'>
               <DialogTitle>{t('adjustDialog.title')}</DialogTitle>
-              <DialogDescription>{t('adjustDialog.subtitle')}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {/* Current balance — read-only */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right text-muted-foreground">{t('adjustDialog.currentBalance')}</Label>
-                <div className="col-span-3 font-semibold">
+                <Label className="text-right">{t('adjustDialog.currentBalance')}</Label>
+                <div className="col-span-3 font-semibold test-right">
                   {formatCurrency(currentBalance, account.currency)}
                 </div>
               </div>
               {/* New balance */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="adj-balance" className="text-right">{t('adjustDialog.newBalance')}</Label>
-                <Input
-                  id="adj-balance"
-                  type="number"
-                  step="0.01"
-                  value={adjustNewBalance}
-                  onChange={(e) => setAdjustNewBalance(e.target.value)}
-                  className="col-span-3"
-                  placeholder="0.00"
-                />
+              <div className="grid grid-cols-4 items-center w-full gap-4">
+                <Label htmlFor="adj-balance" className="col-span-1 text-right">{t('adjustDialog.newBalance')}</Label>
+                <div className="col-span-3 w-full">
+                  <Input
+                    id="adj-balance"
+                    type="amount"
+                    step="0.01"
+                    value={adjustNewBalance}
+                    onChange={(e) => setAdjustNewBalance(e.target.value)}
+                    className="col-span-3 flex w-full"
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
               {/* Date */}
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="adj-date" className="text-right">{t('adjustDialog.date')}</Label>
-                <Input
-                  id="adj-date"
-                  type="date"
-                  value={adjustDate}
-                  onChange={(e) => setAdjustDate(e.target.value)}
-                  className="col-span-3"
-                />
+                <Label htmlFor="adj-date" className="col-span-1 text-right">{t('adjustDialog.date')}</Label>
+                <div className="col-span-3 w-full">
+                  <Input
+                    id="adj-date"
+                    type="date"
+                    value={adjustDate}
+                    onChange={(e) => setAdjustDate(e.target.value)}
+                    className="col-span-3 flex w-full"
+                  />
+                </div>
               </div>
               {/* Note */}
               <div className="grid grid-cols-4 items-start gap-4">

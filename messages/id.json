@@ -106,6 +106,7 @@
       "spending": "Pengeluaran",
       "accounts": "Akun & Aset",
       "portfolio": "Portofolio",
+      "forecast": "Prakiraan",
       "invest": "Investasi",
       "advice": "Konsultasi",
       "tax": "Pajak",
@@ -387,6 +388,7 @@
       "accounts": "Akun & Aset",
       "spending": "Pengeluaran",
       "portfolio": "Portofolio",
+      "forecast": "Prakiraan",
       "advice": "Saran",
       "home": "Beranda",
       "spend": "Belanja",
@@ -398,7 +400,8 @@
       "cashFlow": "Arus Kas",
       "transaction": "Transaksi",
       "holdings": "Aset",
-      "analytics": "Analitik"
+      "analytics": "Analitik",
+      "forecast": "Proyeksi"
     }
   },
   "onboarding": {
