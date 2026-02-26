@@ -22,4 +22,7 @@ module.exports = {
     '**/?(*.)+(spec|test).ts',
     '**/?(*.)+(spec|test).tsx'
   ],
+  testPathIgnorePatterns: [
+    '<rootDir>/__tests__/e2e/'
+  ]
 }

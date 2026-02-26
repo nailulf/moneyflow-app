@@ -106,6 +106,7 @@
       "spending": "Spending",
       "accounts": "Accounts",
       "portfolio": "Portfolio",
+      "forecast": "Forecast",
       "invest": "Invest",
       "advice": "Advice",
       "tax": "Tax",
@@ -387,6 +388,7 @@
       "accounts": "Accounts",
       "spending": "Spending",
       "portfolio": "Portfolio",
+      "forecast": "Forecast",
       "advice": "Advice",
       "home": "Home",
       "spend": "Spend",
@@ -398,7 +400,8 @@
       "cashFlow": "Cash Flow",
       "transaction": "Transaction",
       "holdings": "Holdings",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "forecast": "Forecast"
     }
   },
   "onboarding": {

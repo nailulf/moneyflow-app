@@ -310,6 +310,11 @@ export interface Database {
           theme: string
           notification_settings: Record<string, boolean>
           budget_alert_threshold: number
+          forecast_default_scenario_id: string | null
+          forecast_default_horizon_years: number
+          forecast_default_return: number
+          forecast_default_volatility: number
+          forecast_default_inflation: number
           extras: Record<string, unknown>
           created_at: string
           updated_at: string
@@ -323,6 +328,11 @@ export interface Database {
           theme?: string
           notification_settings?: Record<string, boolean>
           budget_alert_threshold?: number
+          forecast_default_scenario_id?: string | null
+          forecast_default_horizon_years?: number
+          forecast_default_return?: number
+          forecast_default_volatility?: number
+          forecast_default_inflation?: number
           extras?: Record<string, unknown>
           created_at?: string
           updated_at?: string
@@ -335,6 +345,11 @@ export interface Database {
           theme?: string
           notification_settings?: Record<string, boolean>
           budget_alert_threshold?: number
+          forecast_default_scenario_id?: string | null
+          forecast_default_horizon_years?: number
+          forecast_default_return?: number
+          forecast_default_volatility?: number
+          forecast_default_inflation?: number
           extras?: Record<string, unknown>
           updated_at?: string
         }
@@ -654,6 +669,92 @@ export interface Database {
           updated_at?: string
         }
       }
+      wealth_forecast_scenarios: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          description: string | null
+          start_date: string
+          horizon_years: number
+          expected_annual_return: number
+          annual_volatility: number
+          inflation_rate: number
+          monthly_contribution: number
+          monthly_withdrawal: number
+          include_cashflow: boolean
+          is_default: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          description?: string | null
+          start_date?: string
+          horizon_years?: number
+          expected_annual_return?: number
+          annual_volatility?: number
+          inflation_rate?: number
+          monthly_contribution?: number
+          monthly_withdrawal?: number
+          include_cashflow?: boolean
+          is_default?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          description?: string | null
+          start_date?: string
+          horizon_years?: number
+          expected_annual_return?: number
+          annual_volatility?: number
+          inflation_rate?: number
+          monthly_contribution?: number
+          monthly_withdrawal?: number
+          include_cashflow?: boolean
+          is_default?: boolean
+          updated_at?: string
+        }
+      }
+      wealth_forecast_events: {
+        Row: {
+          id: string
+          scenario_id: string
+          user_id: string
+          event_date: string
+          event_type: 'CONTRIBUTION' | 'WITHDRAWAL' | 'INCOME' | 'EXPENSE' | 'ADJUSTMENT'
+          amount: number
+          note: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          scenario_id: string
+          user_id: string
+          event_date: string
+          event_type: 'CONTRIBUTION' | 'WITHDRAWAL' | 'INCOME' | 'EXPENSE' | 'ADJUSTMENT'
+          amount: number
+          note?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          scenario_id?: string
+          user_id?: string
+          event_date?: string
+          event_type?: 'CONTRIBUTION' | 'WITHDRAWAL' | 'INCOME' | 'EXPENSE' | 'ADJUSTMENT'
+          amount?: number
+          note?: string | null
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -712,6 +813,14 @@ export type BudgetTemplateUpdate = Database['public']['Tables']['budget_template
 export type FinancialGoalDB = Database['public']['Tables']['financial_goals']['Row']
 export type FinancialGoalInsert = Database['public']['Tables']['financial_goals']['Insert']
 export type FinancialGoalUpdate = Database['public']['Tables']['financial_goals']['Update']
+
+export type WealthForecastScenarioDB = Database['public']['Tables']['wealth_forecast_scenarios']['Row']
+export type WealthForecastScenarioInsert = Database['public']['Tables']['wealth_forecast_scenarios']['Insert']
+export type WealthForecastScenarioUpdate = Database['public']['Tables']['wealth_forecast_scenarios']['Update']
+
+export type WealthForecastEventDB = Database['public']['Tables']['wealth_forecast_events']['Row']
+export type WealthForecastEventInsert = Database['public']['Tables']['wealth_forecast_events']['Insert']
+export type WealthForecastEventUpdate = Database['public']['Tables']['wealth_forecast_events']['Update']
 
 // Goal type for convenience
 export type GoalType = 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
