@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import {
   Home,
   DollarSign,
-  LineChart,
+  Binoculars,
   PieChart,
   // TrendingUp,  // Hidden: Invest
   Lightbulb,
@@ -37,7 +37,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     { title: t('items.accounts'), url: "/accounts", icon: Wallet },
     { title: t('items.spending'), url: "/spending", icon: DollarSign },
     { title: t('items.portfolio'), url: "/portfolio", icon: PieChart },
-    { title: t('items.forecast'), url: "/forecast", icon: LineChart },
+    { title: t('items.forecast'), url: "/forecast", icon: Binoculars },
     { title: t('items.advice'), url: "/advice", icon: Lightbulb },
     // Hidden until features are ready:
     // { title: t('items.invest'), url: "/invest", icon: TrendingUp },

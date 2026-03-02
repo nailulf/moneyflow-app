@@ -1,6 +1,6 @@
 'use client'
 
-import { Home, DollarSign, Receipt, Wallet, LineChart } from 'lucide-react'
+import { Home, DollarSign, Receipt, Wallet, Binoculars } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -15,7 +15,7 @@ export function MobileBottomNav() {
     { title: t('home'), url: '/', icon: Home },
     { title: t('spend'), url: '/spending', icon: DollarSign },
     { title: t('accounts'), url: '/accounts', icon: Wallet },
-    { title: t('forecast'), url: '/forecast', icon: LineChart },
+    { title: t('forecast'), url: '/forecast', icon: Binoculars },
   ]
 
   const isActive = (url: string) =>
