@@ -73,11 +73,11 @@ export function useTransactionManager({
       
       const newTransaction = await createTransaction(transactionData)
       setTransactions(prev => [newTransaction, ...prev])
-      toast.success('Transaction added successfully')
+      toast.success('Transaction added successfully', { id: 'tx-add' })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to add transaction'
       setError(errorMessage)
-      toast.error(errorMessage)
+      toast.error(errorMessage, { id: 'tx-add' })
     } finally {
       setIsLoading(false)
     }
@@ -98,11 +98,11 @@ export function useTransactionManager({
         transaction.id === id ? updatedTransaction : transaction
       ))
       
-      toast.success('Transaction updated successfully')
+      toast.success('Transaction updated successfully', { id: 'tx-edit' })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update transaction'
       setError(errorMessage)
-      toast.error(errorMessage)
+      toast.error(errorMessage, { id: 'tx-edit' })
     } finally {
       setIsLoading(false)
     }
@@ -115,11 +115,11 @@ export function useTransactionManager({
       
       await deleteTransaction(id)
       setTransactions(prev => prev.filter(transaction => transaction.id !== id))
-      toast.success('Transaction deleted successfully')
+      toast.success('Transaction deleted successfully', { id: 'tx-delete' })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete transaction'
       setError(errorMessage)
-      toast.error(errorMessage)
+      toast.error(errorMessage, { id: 'tx-delete' })
     } finally {
       setIsLoading(false)
     }

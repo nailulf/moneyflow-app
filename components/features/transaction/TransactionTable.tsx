@@ -227,10 +227,11 @@ export function TransactionTable({
     })
   }
 
-  const handleDeleteTransactionClick = useCallback(async (transaction: Transaction) => {
-    setDeleteConfirmDialog({
-      transaction,
-    })
+  const handleDeleteTransactionClick = useCallback((transaction: Transaction) => {
+    // Defer dialog open until DropdownMenu's DismissableLayer has fully unmounted.
+    // Without this, Radix sets pointer-events:none on the Dialog content because
+    // the layers context still contains the DropdownMenu node on first render.
+    setTimeout(() => setDeleteConfirmDialog({ transaction }), 0)
   }, [])
 
   const confirmDeleteTransaction = useCallback(async () => {
@@ -245,6 +246,10 @@ export function TransactionTable({
       }
 
       setDeleteConfirmDialog(null)
+      transactionContext?.refreshTransactions?.()
+      if (enableSelfManagement && transactionManager) {
+        transactionManager.loadTransactions()
+      }
     } catch (error) {
       console.error('Failed to delete transaction:', error)
     } finally {
@@ -296,6 +301,10 @@ export function TransactionTable({
       
       setEditingTransaction(null)
       setIsEditModalOpen(false)
+      transactionContext?.refreshTransactions?.()
+      if (enableSelfManagement && transactionManager) {
+        transactionManager.loadTransactions()
+      }
     } catch (error) {
       console.error('Failed to update transaction:', error)
     }
