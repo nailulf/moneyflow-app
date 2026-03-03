@@ -150,7 +150,7 @@ export function EditTransactionForm({
         new_category_id: data.category_id
       })
 
-      toast.success('Transaction updated successfully!')
+      // Toast is handled by the mutation layer (useTransactionsQuery / use-transaction-manager)
       onSuccess?.()
       onOpenChange(false)
       reset() // Clear form state after successful update
@@ -160,8 +160,7 @@ export function EditTransactionForm({
         transaction_id: transaction.id,
         error_message: error instanceof Error ? error.message : 'Unknown error'
       })
-
-      toast.error('Failed to update transaction')
+      // Toast is handled by the mutation layer
     } finally {
       setIsSubmitting(false)
     }

@@ -176,7 +176,7 @@ export function useTransactionMutations(userId: string) {
     },
     onSuccess: (transaction: Transaction) => {
       invalidateRelatedQueries()
-      toast.success('Transaction added successfully')
+      toast.success('Transaction added successfully', { id: 'tx-add' })
       Analytics.track('transaction_created', {
         transaction_id: transaction.id,
         amount: transaction.amount,
@@ -189,7 +189,7 @@ export function useTransactionMutations(userId: string) {
       })
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      toast.error(error.message, { id: 'tx-add' })
     },
   })
 
@@ -210,7 +210,7 @@ export function useTransactionMutations(userId: string) {
     },
     onSuccess: (transaction: Transaction, variables) => {
       invalidateRelatedQueries()
-      toast.success('Transaction updated successfully')
+      toast.success('Transaction updated successfully', { id: 'tx-edit' })
       Analytics.track('transaction_updated', {
         transaction_id: variables.id,
         fields_changed: Object.keys(variables.data),
@@ -219,7 +219,7 @@ export function useTransactionMutations(userId: string) {
       })
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      toast.error(error.message, { id: 'tx-edit' })
     },
   })
 
@@ -238,14 +238,14 @@ export function useTransactionMutations(userId: string) {
     },
     onSuccess: (deletedId: string) => {
       invalidateRelatedQueries()
-      toast.success('Transaction deleted successfully')
+      toast.success('Transaction deleted successfully', { id: 'tx-delete' })
       Analytics.track('transaction_deleted', {
         transaction_id: deletedId,
         timestamp: new Date().toISOString()
       })
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      toast.error(error.message, { id: 'tx-delete' })
     },
   })
 

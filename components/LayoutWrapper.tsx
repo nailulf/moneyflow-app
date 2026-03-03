@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { AppSidebar } from '@/components/features/navigation/app-sidebar'
 import { NavUser } from '@/components/features/navigation/nav-user'
-import { Toaster } from '@/components/ui/molecules/sonner'
+import { Toaster } from '@/components/ui/atoms/sonner'
 import {
   SidebarInset,
   SidebarProvider,
