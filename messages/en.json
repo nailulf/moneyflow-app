@@ -42,7 +42,8 @@
       "errors": {
         "fullNameTooShort": "Full name must be at least 2 characters",
         "invalidEmail": "Invalid email address",
-        "passwordTooShort": "Password must be at least 6 characters",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "passwordNeedsNumber": "Password must contain at least one number",
         "passwordsDontMatch": "Passwords don't match",
         "selectCountry": "Please select your country",
         "mustAcknowledgeVerification": "You must acknowledge the email verification requirement"
@@ -72,6 +73,22 @@
         "aiPowered": "AI powered"
       }
     },
+    "verifyEmail": {
+      "title": "Check your email",
+      "description": "We've sent a verification link to",
+      "instruction": "Click the link in the email to verify your account. If you don't see it, check your spam folder.",
+      "resendCountdown": "Resend email in {countdown}s",
+      "resendButton": "Resend verification email",
+      "backToLogin": "Back to Login",
+      "needHelp": "Need help?",
+      "contactSupport": "Contact Support",
+      "toasts": {
+        "emailMissing": "Email address is missing",
+        "sentSuccess": "Verification email sent successfully",
+        "rateLimited": "Please wait a moment before trying again",
+        "sendFailed": "Failed to resend verification email"
+      }
+    },
     "forgotPassword": {
       "title": "Forgot Password",
       "description": "Enter your email address and we'll send you a link to reset your password",
@@ -85,6 +102,10 @@
       "errors": {
         "invalidEmail": "Invalid email address"
       }
+    },
+    "social": {
+      "orContinueWith": "Or continue with",
+      "oauthError": "Failed to connect with {provider}. Please try again."
     }
   },
   "nav": {

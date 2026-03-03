@@ -10,7 +10,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/organisms/sidebar'
 import { Separator } from '@/components/ui/atoms/separator'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { AccountProvider } from '@/contexts/AccountContext'
 import { CategoryProvider } from '@/contexts/CategoryContext'
 import { OnboardingProvider } from '@/contexts/OnboardingContext'
@@ -24,6 +24,7 @@ import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNa
 import { useLocale, useTranslations } from 'next-intl'
 import { preferences } from '@/lib/api/user-preferences'
 import { setLocaleCookie } from '@/lib/actions/locale'
+import { Analytics } from '@/lib/analytics/amplitude'
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -32,6 +33,7 @@ interface LayoutWrapperProps {
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, loading } = useAuth()
   const locale = useLocale()
   const t = useTranslations('layout.pageTitle')
@@ -46,6 +48,17 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
       }
     })
   }, [user?.id])
+
+  // Fire registration_completed after email verification callback lands here.
+  // The /auth/callback route sets ?registered=1 on the redirect destination.
+  useEffect(() => {
+    if (searchParams.get('registered') !== '1') return
+    Analytics.track('registration_completed', { timestamp: new Date().toISOString() })
+    // Remove the param without a navigation so it doesn't fire again on refresh.
+    const url = new URL(window.location.href)
+    url.searchParams.delete('registered')
+    window.history.replaceState({}, '', url.toString())
+  }, [searchParams])
 
   if (loading) {
     return (
