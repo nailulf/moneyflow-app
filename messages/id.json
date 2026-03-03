@@ -42,7 +42,8 @@
       "errors": {
         "fullNameTooShort": "Nama lengkap minimal 2 karakter",
         "invalidEmail": "Alamat email tidak valid",
-        "passwordTooShort": "Kata sandi minimal 6 karakter",
+        "passwordTooShort": "Kata sandi minimal 8 karakter",
+        "passwordNeedsNumber": "Kata sandi harus mengandung setidaknya satu angka",
         "passwordsDontMatch": "Kata sandi tidak cocok",
         "selectCountry": "Pilih negara Anda",
         "mustAcknowledgeVerification": "Anda harus mengakui persyaratan verifikasi email"
@@ -72,6 +73,22 @@
         "aiPowered": "Bertenaga AI"
       }
     },
+    "verifyEmail": {
+      "title": "Periksa email Anda",
+      "description": "Kami telah mengirimkan tautan verifikasi ke",
+      "instruction": "Klik tautan di email untuk memverifikasi akun Anda. Jika tidak menemukannya, periksa folder spam.",
+      "resendCountdown": "Kirim ulang email dalam {countdown}d",
+      "resendButton": "Kirim ulang email verifikasi",
+      "backToLogin": "Kembali ke Masuk",
+      "needHelp": "Butuh bantuan?",
+      "contactSupport": "Hubungi Dukungan",
+      "toasts": {
+        "emailMissing": "Alamat email tidak ada",
+        "sentSuccess": "Email verifikasi berhasil dikirim",
+        "rateLimited": "Mohon tunggu sebentar sebelum mencoba lagi",
+        "sendFailed": "Gagal mengirim ulang email verifikasi"
+      }
+    },
     "forgotPassword": {
       "title": "Lupa Kata Sandi",
       "description": "Masukkan alamat email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda",
@@ -85,6 +102,10 @@
       "errors": {
         "invalidEmail": "Alamat email tidak valid"
       }
+    },
+    "social": {
+      "orContinueWith": "Atau lanjutkan dengan",
+      "oauthError": "Gagal terhubung dengan {provider}. Silakan coba lagi."
     }
   },
   "nav": {

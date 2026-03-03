@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { AuthErrorMessage } from '@/components/auth/auth-error-message'
 import { PasswordInput } from '@/components/ui/molecules/password-input'
+import { SocialLoginButtons } from '@/components/auth/social-login-buttons'
 import { useTranslations } from 'next-intl'
 
 export default function LoginPage() {
@@ -218,14 +219,10 @@ export default function LoginPage() {
           </div>
         </form>
 
+        <SocialLoginButtons />
+
         {(process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_VERCEL_ENV === 'preview') && (
           <>
-            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-white/20">
-              <span className="relative z-10 bg-auth-sidebar px-2 text-auth-sidebar-foreground/60">
-                {t('orContinueWith')}
-              </span>
-            </div>
-
             {/* Developer Tools Section */}
             <div className="mt-4 p-4 border border-white/20 rounded-lg bg-white/5">
               <p className="text-sm font-medium text-auth-sidebar-foreground/80 mb-3">

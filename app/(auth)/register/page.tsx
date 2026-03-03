@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { z } from 'zod'
@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { Loader2, Info } from 'lucide-react'
 import { PasswordInput } from '@/components/ui/molecules/password-input'
 import { AuthErrorMessage } from '@/components/auth/auth-error-message'
+import { SocialLoginButtons } from '@/components/auth/social-login-buttons'
 import { isDevToolsEnabled } from '@/lib/utils/environment'
 import {
   Select,
@@ -58,15 +59,18 @@ export default function RegisterPage() {
   const router = useRouter()
   const t = useTranslations('auth.register')
   const [isLoading, setIsLoading] = useState(false)
-  const [authError, setAuthError] = useState<any>(null)
-  const supabase = createClient()
+  const [authError, setAuthError] = useState<Error | null>(null)
+  // Stable reference — createClient() must not run on every render
+  const supabase = useMemo(() => createClient(), [])
   const shouldRequireVerification = !isDevToolsEnabled()
 
   const registerSchema = z
     .object({
-      fullName: z.string().min(2, { message: t('errors.fullNameTooShort') }),
+      fullName: z.string().trim().min(2, { message: t('errors.fullNameTooShort') }),
       email: z.string().email({ message: t('errors.invalidEmail') }),
-      password: z.string().min(6, { message: t('errors.passwordTooShort') }),
+      password: z.string()
+        .min(8, { message: t('errors.passwordTooShort') })
+        .regex(/[0-9]/, { message: t('errors.passwordNeedsNumber') }),
       confirmPassword: z.string(),
       currency: z.enum(['IDR', 'USD', 'EUR', 'SGD']),
       country: z.string().min(1, { message: t('errors.selectCountry') }),
@@ -120,6 +124,9 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
         options: {
+          // Point the verification link to our PKCE callback handler so the
+          // code can be exchanged for a session and preferences written.
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: data.fullName,
             role: 'user',
@@ -179,7 +186,10 @@ export default function RegisterPage() {
         return
       }
 
-      Analytics.track('registration_completed', {
+      // Email is sent but not yet verified — the user hasn't completed registration.
+      // Fire registration_completed only after the callback confirms the session
+      // (dev path below). Here we track the submit event only.
+      Analytics.track('registration_email_sent', {
         currency: data.currency,
         country: data.country,
         goal: data.goal ?? null,
@@ -188,8 +198,9 @@ export default function RegisterPage() {
 
       toast.success(t('successProd'))
       router.push(`/verify-email?email=${encodeURIComponent(data.email)}`)
-    } catch (error: any) {
-      setAuthError(error)
+    } catch (error: unknown) {
+      setAuthError(error instanceof Error ? error : new Error('An unexpected error occurred'))
+    } finally {
       setIsLoading(false)
     }
   }
@@ -216,7 +227,7 @@ export default function RegisterPage() {
                 {...register('fullName')}
               />
               {errors.fullName && (
-                <p className="text-sm text-[#ff6b6b]">{errors.fullName.message}</p>
+                <p className="text-sm text-destructive">{errors.fullName.message}</p>
               )}
             </div>
 
@@ -231,7 +242,7 @@ export default function RegisterPage() {
                 {...register('email')}
               />
               {errors.email && (
-                <p className="text-sm text-[#ff6b6b]">{errors.email.message}</p>
+                <p className="text-sm text-destructive">{errors.email.message}</p>
               )}
             </div>
 
@@ -244,7 +255,7 @@ export default function RegisterPage() {
                 {...register('password')}
               />
               {errors.password && (
-                <p className="text-sm text-[#ff6b6b]">{errors.password.message}</p>
+                <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
 
@@ -257,7 +268,7 @@ export default function RegisterPage() {
                 {...register('confirmPassword')}
               />
               {errors.confirmPassword && (
-                <p className="text-sm text-[#ff6b6b]">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
               )}
             </div>
 
@@ -306,7 +317,7 @@ export default function RegisterPage() {
                   )}
                 />
                 {errors.country && (
-                  <p className="text-sm text-[#ff6b6b]">{errors.country.message}</p>
+                  <p className="text-sm text-destructive">{errors.country.message}</p>
                 )}
               </div>
             </div>
@@ -374,7 +385,7 @@ export default function RegisterPage() {
                       {t('verificationConsent')}
                     </label>
                     {errors.verificationConsent && (
-                      <p className="text-sm text-[#ff6b6b]">{errors.verificationConsent.message}</p>
+                      <p className="text-sm text-destructive">{errors.verificationConsent.message}</p>
                     )}
                   </div>
                 </div>
@@ -389,6 +400,8 @@ export default function RegisterPage() {
             </Button>
           </div>
         </form>
+
+        <SocialLoginButtons />
       </div>
 
       <div className="text-center text-sm text-auth-sidebar-foreground/60">

@@ -23,6 +23,7 @@ import {
   ONBOARDING_PHASES
 } from '@/lib/api/onboarding'
 import { preferences } from '@/lib/api/user-preferences'
+import { createClient } from '@/lib/supabase/client'
 
 /**
  * Wizard data collected during onboarding
@@ -175,11 +176,86 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         setState(localState)
       } else {
         const data = await getOnboardingStatus(user.id)
-        setState(data)
+
+        // Client-side reconciliation: if the server says the user isn't done,
+        // check their actual accounts/categories/budgets directly via the
+        // authenticated Supabase session and correct the phase on the spot.
+        // This is more reliable than server-side reconciliation because it uses
+        // the user's own JWT, bypassing any service-role/env-var issues.
+        // Client-side reconciliation runs for any user not yet marked completed,
+        // including those who previously skipped — if they've since set up their
+        // accounts/categories/budgets we mark them done and clear the skip flag.
+        let finalData = data
+        if (data && !data.is_completed) {
+          try {
+            const supabase = createClient()
+            const [
+              { count: accountCount },
+              { count: categoryCount },
+              { count: budgetCount },
+            ] = await Promise.all([
+              supabase.from('accounts').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+              supabase.from('categories').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+              supabase.from('budgets').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+            ])
+
+            const hasAccounts = (accountCount ?? 0) > 0
+            const hasCategories = (categoryCount ?? 0) > 0
+            const hasBudgets = (budgetCount ?? 0) > 0
+            const currentPhaseIdx = ONBOARDING_PHASES.indexOf(data.current_phase as OnboardingPhase)
+
+            if (hasBudgets) {
+              // User has completed all setup steps — mark onboarding as done.
+              // Also clear is_skipped in case they previously dismissed the wizard.
+              const { data: reconciled } = await supabase
+                .from('user_onboarding')
+                .update({
+                  current_phase: 'completed',
+                  current_step: 0,
+                  is_completed: true,
+                  is_skipped: false,
+                  completed_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                })
+                .eq('user_id', user.id)
+                .select()
+                .single()
+              if (reconciled) {
+                finalData = reconciled as UserOnboardingDB
+                clearOnboardingCache(user.id)
+              }
+            } else if (hasAccounts && hasCategories && !data.is_skipped) {
+              // User has accounts and categories but no budget — advance to budget_setup.
+              // Only advance if they haven't explicitly skipped (respect the skip for partial state).
+              const budgetPhaseIdx = ONBOARDING_PHASES.indexOf('budget_setup')
+              if (currentPhaseIdx < budgetPhaseIdx) {
+                const { data: reconciled } = await supabase
+                  .from('user_onboarding')
+                  .update({
+                    current_phase: 'budget_setup',
+                    current_step: 0,
+                    updated_at: new Date().toISOString(),
+                  })
+                  .eq('user_id', user.id)
+                  .select()
+                  .single()
+                if (reconciled) {
+                  finalData = reconciled as UserOnboardingDB
+                  clearOnboardingCache(user.id)
+                }
+              }
+            }
+          } catch (reconcileErr) {
+            console.warn('[onboarding] client-side reconciliation failed:', reconcileErr)
+            // finalData stays as the original server data — will retry next load
+          }
+        }
+
+        setState(finalData)
 
         // Sync user_metadata preferences (set during registration) → user_preferences table
         // This runs fire-and-forget so it doesn't block onboarding load
-        if (data && !data.is_completed) {
+        if (finalData && !finalData.is_completed) {
           const meta = user.user_metadata
           if (meta?.preferred_currency) {
             preferences.getCurrency(user.id).then(saved => {
@@ -224,12 +300,23 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
   // Auto-open modal for users who need onboarding
   useEffect(() => {
+    if (loading) return
+
     const bypassEnabled = resolveBypassEnabled()
-    const userNeedsOnboarding = isPreviewMode ? true : (bypassEnabled ? true : needsOnboarding(state))
-    if (!loading && userNeedsOnboarding && (bypassEnabled || state?.current_phase !== 'completed')) {
+
+    if (isPreviewMode || bypassEnabled) {
       setIsModalOpen(true)
-      // Track onboarding started when modal auto-opens
-      if (state?.current_phase === 'welcome') {
+      return
+    }
+
+    // Only auto-open when we have a confirmed server response.
+    // If state is null the API call failed — don't show the modal
+    // because we don't know if the user actually needs onboarding.
+    if (!state) return
+
+    if (needsOnboarding(state) && state.current_phase !== 'completed') {
+      setIsModalOpen(true)
+      if (state.current_phase === 'welcome') {
         Analytics.track('onboarding_started', {
           timestamp: new Date().toISOString()
         })
