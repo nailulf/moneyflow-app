@@ -82,10 +82,9 @@ export async function POST(request: NextRequest) {
         .eq('user_id', userId)
         .eq('is_active', true),
       supabase
-        .from('budgets')
+        .from('budget_plans')
         .select('id')
         .eq('user_id', userId)
-        .eq('is_active', true)
     ])
 
     return NextResponse.json({
