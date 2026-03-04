@@ -22,7 +22,7 @@ export function OnboardingModal() {
     <Dialog open={isModalOpen} onOpenChange={() => {}}>
       <DialogContent
         showCloseButton={true}
-        className="sm:max-w-2xl max-h-[90vh] overflow-hidden p-6"
+        className="w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90svh] overflow-hidden p-4 sm:p-6"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >

@@ -91,7 +91,7 @@ export function OnboardingModalContent() {
   }))
 
   return (
-    <div className="flex flex-col max-h-[80vh]">
+    <div className="flex flex-col max-h-[80svh]">
       {/* Header with progress */}
       <div className="flex items-center gap-4 pb-4 border-b">
         <OnboardingProgressCircle
