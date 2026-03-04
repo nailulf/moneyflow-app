@@ -14,6 +14,7 @@ import { BudgetSetupStepModal } from './BudgetSetupStepModal'
 import { CompletionView } from './CompletionView'
 import { Button } from '@/components/ui/atoms/button'
 import type { OnboardingPhase } from '@/types/database'
+import { DialogFooter } from '@/components/ui/molecules/dialog'
 
 const ONBOARDING_STEP_DEFS = [
   { id: 'account_setup', phase: 'account_setup' as OnboardingPhase, stepNumber: 1 },
@@ -129,6 +130,7 @@ export function OnboardingModalContent() {
         })}
       </div>
 
+      
       {/* Footer with skip option */}
       <div className="pt-4 border-t">
         <Button

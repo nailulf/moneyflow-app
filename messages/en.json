@@ -49,12 +49,11 @@
         "mustAcknowledgeVerification": "You must acknowledge the email verification requirement"
       },
       "goals": {
-        "networth_tracking": "Track my net worth",
-        "expense_management": "Manage expenses & budgets",
-        "family_budget": "Manage family budget",
-        "saving_goals": "Save for a goal",
-        "freelance_income": "Track freelance / business income",
-        "debt_payoff": "Pay off debt"
+        "networth_tracking": "Manage and track my networth",
+        "expense_management": "Manage personal expenses & budgets",
+        "family_budget": "Manage and prepare family budget & expenses",
+        "saving_goals": "Manage saving to achieve targets",
+        "debt_payoff": "Manage debt"
       }
     },
     "layout": {

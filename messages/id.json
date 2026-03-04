@@ -49,12 +49,11 @@
         "mustAcknowledgeVerification": "Anda harus mengakui persyaratan verifikasi email"
       },
       "goals": {
-        "networth_tracking": "Lacak kekayaan bersih saya",
-        "expense_management": "Kelola pengeluaran & anggaran",
-        "family_budget": "Kelola anggaran keluarga",
-        "saving_goals": "Menabung untuk tujuan",
-        "freelance_income": "Lacak pendapatan freelance / bisnis",
-        "debt_payoff": "Lunasi utang"
+        "networth_tracking": "Melacak kekayaan bersih",
+        "expense_management": "Mengelola pengeluaran & anggaran pribadi",
+        "family_budget": "Mengelola dan mempersiapkan anggaran keluarga",
+        "saving_goals": "Mengelola tabungan untuk target",
+        "debt_payoff": "Mengelola hutang"
       }
     },
     "layout": {

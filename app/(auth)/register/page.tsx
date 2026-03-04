@@ -48,12 +48,11 @@ const GOAL_VALUES = [
   'expense_management',
   'family_budget',
   'saving_goals',
-  'freelance_income',
   'debt_payoff',
 ] as const
 
 const inputClassName = 'bg-white/10 border-white/20 text-auth-sidebar-foreground placeholder:text-white/40 rounded-full h-12 px-6 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-auth-accent'
-const selectTriggerClassName = 'bg-white/10 border-white/20 text-auth-sidebar-foreground rounded-full h-12 px-6 focus:ring-offset-0 focus:ring-1 focus:ring-auth-accent [&>span]:text-white/90 [&_svg]:text-white/60'
+const selectTriggerClassName = 'bg-white/10 border-white/20 text-auth-sidebar-foreground rounded-full h-12 px-6 focus:ring-offset-0 focus:ring-1 focus:ring-auth-accent [&>span]:text-white/90 [&_svg]:text-white/60 w-full'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -273,53 +272,51 @@ export default function RegisterPage() {
             </div>
 
             {/* Currency + Country row */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-2">
-                <Label className="text-auth-sidebar-foreground/80">{t('primaryCurrency')}</Label>
-                <Controller
-                  control={control}
-                  name="currency"
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className={selectTriggerClassName}>
-                        <SelectValue placeholder={t('currencyPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CURRENCIES.map(c => (
-                          <SelectItem key={c.value} value={c.value}>
-                            {c.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label className="text-auth-sidebar-foreground/80">{t('country')}</Label>
-                <Controller
-                  control={control}
-                  name="country"
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className={selectTriggerClassName}>
-                        <SelectValue placeholder={t('countryPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {COUNTRIES.map(c => (
-                          <SelectItem key={c.value} value={c.value}>
-                            {c.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.country && (
-                  <p className="text-sm text-destructive">{errors.country.message}</p>
+            <div className="grid gap-2 w-full">
+              <Label className="text-auth-sidebar-foreground/80">{t('primaryCurrency')}</Label>
+              <Controller
+                control={control}
+                name="currency"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className={selectTriggerClassName}>
+                      <SelectValue placeholder={t('currencyPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map(c => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
-              </div>
+              />
+            </div>
+
+            <div className="grid gap-2 w-full">
+              <Label className="text-auth-sidebar-foreground/80">{t('country')}</Label>
+              <Controller
+                control={control}
+                name="country"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className={selectTriggerClassName}>
+                      <SelectValue placeholder={t('countryPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRIES.map(c => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.country && (
+                <p className="text-sm text-destructive">{errors.country.message}</p>
+              )}
             </div>
 
             {/* Goal */}
@@ -331,7 +328,7 @@ export default function RegisterPage() {
                 control={control}
                 name="goal"
                 render={({ field }) => (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid gap-2 w-full">
                     {GOAL_VALUES.map(value => {
                       const isSelected = field.value === value
                       return (

@@ -37,6 +37,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { INDONESIAN_BANKS, type BankOption } from '@/lib/constants/banks'
+import { DialogFooter } from '@/components/ui/molecules/dialog'
 
 const ACCOUNT_TYPES = [
   { value: 'BANK', label: 'Bank Account', icon: Banknote, description: 'Checking or savings account' },
@@ -393,34 +394,35 @@ export function AccountSetupStepModal() {
       {error && (
         <p className="text-sm text-destructive">{error}</p>
       )}
-
+      <DialogFooter>
       {/* Actions */}
-      <div className="flex gap-3 justify-end pt-2">
-        <Button
-          variant="outline"
-          onClick={handleSkipStep}
-          disabled={isSubmitting}
-        >
-          {t('skip')}
-        </Button>
-        <Button
-          onClick={handleCreateAccount}
-          disabled={isSubmitting || !accountName.trim() || accountName.trim().length < 3}
-          className="gap-2"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t('creating')}
-            </>
-          ) : (
-            <>
-              {t('continue')}
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </Button>
-      </div>
+        <div className="flex gap-3 justify-end pt-2">
+          <Button
+            variant="outline"
+            onClick={handleSkipStep}
+            disabled={isSubmitting}
+          >
+            {t('skip')}
+          </Button>
+          <Button
+            onClick={handleCreateAccount}
+            disabled={isSubmitting || !accountName.trim() || accountName.trim().length < 3}
+            className="gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t('creating')}
+              </>
+            ) : (
+              <>
+                {t('continue')}
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </Button>
+        </div>
+      </DialogFooter>
     </div>
   )
 }
