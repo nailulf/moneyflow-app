@@ -19,18 +19,18 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useAutoRefresh } from '@/hooks/useDataRefresh'
 
 const CATEGORY_ICONS: Record<string, string> = {
-  'Food & Dining': '🍕',
-  'Transportation': '🚗',
-  'Shopping': '🛍️',
-  'Entertainment': '🎬',
-  'Bills & Utilities': '💡',
-  'Healthcare': '🏥',
-  'Education': '🎓',
-  'Travel': '✈️',
-  'Other': '📦',
-  'Income': '💰',
-  'Transfer': '🔄',
-  'Savings transfer': '🏦',
+  'Food & Dining': '🍽️',
+  'Transportation': '🚙',
+  'Shopping': '🛒',
+  'Entertainment': '🎮',
+  'Bills & Utilities': '🧾',
+  'Healthcare': '❤️',
+  'Education': '📚',
+  'Travel': '🧳',
+  'Other': '📎',
+  'Income': '💵',
+  'Transfer': '➡️',
+  'Savings transfer': '🏷️',
   'Credit card payment': '💳'
 }
 

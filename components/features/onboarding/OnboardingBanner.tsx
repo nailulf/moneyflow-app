@@ -9,6 +9,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/molecules/dialog'
@@ -75,12 +76,12 @@ export function OnboardingBanner() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-2">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
               <Sparkles className="h-7 w-7 text-primary" />
             </div>
           </div>
-          <DialogTitle className="text-xl">{t('title')}</DialogTitle>
+          <DialogTitle className="text-sm">{t('title')}</DialogTitle>
           <DialogDescription className="text-base">
             {t('description')}
           </DialogDescription>
@@ -100,7 +101,8 @@ export function OnboardingBanner() {
             </div>
           ))}
         </div>
-
+      </DialogContent>
+      <DialogFooter>
         <div className="flex flex-col gap-2 pt-2">
           <Button onClick={handleComplete}>
             {t('completeSetup')}
@@ -109,7 +111,7 @@ export function OnboardingBanner() {
             {t('maybeLater')}
           </Button>
         </div>
-      </DialogContent>
+      </DialogFooter>
     </Dialog>
   )
 }

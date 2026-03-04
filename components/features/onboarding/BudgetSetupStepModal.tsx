@@ -16,6 +16,7 @@ import {
   Loader2,
   Check
 } from 'lucide-react'
+import { DialogFooter } from '@/components/ui/molecules/dialog'
 
 export function BudgetSetupStepModal() {
   const t = useTranslations('onboarding.budgetSetup')
@@ -201,6 +202,7 @@ export function BudgetSetupStepModal() {
         {t('editNote')}
       </p>
 
+      <DialogFooter>
       {/* Actions */}
       <div className="flex gap-3 justify-between pt-2">
         <Button
@@ -241,6 +243,7 @@ export function BudgetSetupStepModal() {
           </Button>
         </div>
       </div>
+      </DialogFooter>
     </div>
   )
 }
