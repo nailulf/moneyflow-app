@@ -206,14 +206,13 @@ export function EditTransactionForm({
     >
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={isMobile ? 'max-h-[95dvh] rounded-t-2xl w-full p-0' : 'w-full grid flex-1 auto-rows-min px-4'}
+        className={isMobile ? 'rounded-t-2xl overflow-hidden' : 'w-full sm:max-w-md'}
       >
-        <SheetHeader className={isMobile ? 'mx-0 px-4' : undefined}>
+        <SheetHeader>
           <SheetTitle>{t('editTitle')}</SheetTitle>
         </SheetHeader>
-        <div className={isMobile ? 'w-full px-4 pt-4' : 'w-full'}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="overflow-y-auto no-scrollbar space-y-2 min-h-[70vh]">
+        <form onSubmit={handleSubmit(onSubmit)} className={isMobile ? 'flex flex-col flex-1 min-h-0 px-4 pt-4' : 'flex flex-col flex-1 min-h-0'}>
+          <div className="overflow-y-auto no-scrollbar space-y-2 flex-1 min-h-0">
           <div className="space-y-2 grid grid-cols-7 items-center">
             <label className="text-sm font-medium col-span-2">{t('date')}</label>
             <div className="col-span-5">
@@ -479,7 +478,6 @@ export function EditTransactionForm({
             </Button>
           </SheetFooter>
         </form>
-        </div>
       </SheetContent>
     </Sheet>
   )

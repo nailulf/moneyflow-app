@@ -162,14 +162,13 @@ export function BudgetPlanEditSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={isMobile ? 'min-h-[95dvh] rounded-t-2xl w-full p-0 overflow-hidden' : 'w-full sm:max-w-md'}
+        className={isMobile ? 'rounded-t-2xl overflow-hidden' : 'w-full sm:max-w-md'}
       >
-        <div className="flex h-full flex-col">
           <SheetHeader>
             <SheetTitle>{plan ? 'Edit Budget' : 'Set Up Budget'}</SheetTitle>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4 space-y-4">
+          <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4 pt-4 space-y-4">
           {/* Forward-only notice */}
           {hasExistingSnapshot && (
             <Alert className="py-2">
@@ -317,7 +316,6 @@ export function BudgetPlanEditSheet({
               {saving ? 'Saving...' : plan ? 'Update Budget' : 'Create Budget'}
             </Button>
           </SheetFooter>
-        </div>
       </SheetContent>
     </Sheet>
   )

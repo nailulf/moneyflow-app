@@ -213,7 +213,7 @@ function AccountManagerInternal({
         </SheetDescription>
       </SheetHeader>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4">
         {error && (
           <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3 mb-4">
             <p className="text-sm text-destructive">{error}</p>
@@ -342,7 +342,7 @@ function AccountManagerInternal({
         <SheetDescription>{t('create.description')}</SheetDescription>
       </SheetHeader>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4">
         <div className="space-y-2">
           <label htmlFor="account-name" className="text-sm font-medium">{t('create.name')}</label>
           <Input
@@ -402,7 +402,7 @@ function AccountManagerInternal({
         <SheetDescription>{t('edit.description')}</SheetDescription>
       </SheetHeader>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-4">
         <div className="space-y-2">
           <label htmlFor="edit-account-name" className="text-sm font-medium">{t('edit.name')}</label>
           <Input
@@ -453,7 +453,7 @@ function AccountManagerInternal({
         </SheetDescription>
       </SheetHeader>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4 space-y-3">
         {selectedAccount?.is_default && (
           <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
             <p className="text-sm text-destructive">{t('delete.defaultWarning')}</p>
@@ -504,7 +504,7 @@ function AccountManagerInternal({
       )}
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={isMobile ? 'rounded-t-2xl w-full p-0' : 'w-[400px] sm:w-[540px]'}
+        className={isMobile ? 'rounded-t-2xl overflow-hidden' : 'w-[400px] sm:w-[540px]'}
       >
         {currentContent}
       </SheetContent>

@@ -376,15 +376,14 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'max-h-[95dvh] rounded-t-2xl w-full p-0 overflow-hidden' : 'w-full sm:max-w-2xl'}>
-        <div className="flex h-full flex-col">
+      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'rounded-t-2xl overflow-hidden' : 'w-full sm:max-w-2xl'}>
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
               Create New Budget
             </SheetTitle>
           </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4">
+          <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4 pt-4">
             {step === 1 && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -617,7 +616,6 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
               </>
             )}
           </SheetFooter>
-        </div>
       </SheetContent>
     </Sheet>
   )

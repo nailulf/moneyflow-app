@@ -214,15 +214,15 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
       </SheetTrigger>
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
-        className={isMobile ? 'max-h-[95dvh] rounded-t-2xl w-full p-0' : 'w-full grid flex-1 auto-rows-min px-4'}
+        className={isMobile ? 'rounded-t-2xl overflow-hidden' : 'w-full sm:max-w-md'}
       >
-        <SheetHeader className={isMobile ? 'mx-0 px-4' : undefined}>
+        <SheetHeader>
           <SheetTitle>{t('addTitle')}</SheetTitle>
         </SheetHeader>
 
-        <div className={isMobile ? 'w-full px-4 pt-4' : 'w-full'}>
-          <Tabs defaultValue="manual" className="w-full overflow-y-auto">
-            <TabsList className="grid w-full grid-cols-2">
+        <div className={isMobile ? 'flex-1 min-h-0 flex flex-col px-4 pt-4' : 'flex-1 min-h-0 flex flex-col'}>
+          <Tabs defaultValue="manual" className="flex flex-col flex-1 min-h-0 w-full">
+            <TabsList className="grid w-full grid-cols-2 shrink-0">
               <TabsTrigger value="manual" className="flex items-center gap-2">
                 <Edit className="h-4 w-4" />
                 {t('manualEntry')}
@@ -233,9 +233,9 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="manual" className="mt-4 my-1">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className='overflow-y-auto no-scrollbar space-y-2 min-h-[70dvh]'>
+            <TabsContent value="manual" className="flex flex-col flex-1 min-h-0 mt-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+                <div className='overflow-y-auto no-scrollbar space-y-2 flex-1 min-h-0'>
                   <div className="space-y-2 grid grid-cols-7 items-center">
                     <label className="text-sm font-medium col-span-2">{t('date')}</label>
                     <div className='col-span-5'>
@@ -533,7 +533,7 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
               </form>
             </TabsContent>
             
-            <TabsContent value="upload" className="mt-4 my-1">
+            <TabsContent value="upload" className="flex-1 overflow-y-auto min-h-0 mt-4">
                 <UnifiedStatementProcessor 
                   onSuccess={() => {
                     onSuccess?.()
