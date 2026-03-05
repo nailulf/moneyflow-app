@@ -105,7 +105,7 @@ export function NavUser({
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => Analytics.track('Upgrade To Pro Clicked', { trigger: 'user_menu' })}>
+                <DropdownMenuItem disabled>
                   <Sparkles />
                   {t('upgradeLabel')}
                 </DropdownMenuItem>
@@ -131,15 +131,15 @@ export function NavUser({
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => Analytics.track('Account Settings Clicked', { trigger: 'user_menu' })}>
+                <DropdownMenuItem disabled>
                   <BadgeCheck />
                   {t('account')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => Analytics.track('Billing Clicked', { trigger: 'user_menu' })}>
+                <DropdownMenuItem disabled>
                   <CreditCard />
                   {t('billing')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => Analytics.track('Notifications Clicked', { trigger: 'user_menu' })}>
+                <DropdownMenuItem disabled>
                   <Bell />
                   {t('notifications')}
                 </DropdownMenuItem>

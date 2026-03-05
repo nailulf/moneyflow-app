@@ -79,45 +79,41 @@ export default function CashFlowPage() {
       
       <PageLayout>
         <TopContent>
-          {/* Header Row */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight mb-2">{t('title')}</h2>
-              <p className="text-muted-foreground">{t('description')}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'month' | 'year')} className="w-auto">
-                <TabsList className="grid w-full grid-cols-2 h-9">
-                  <TabsTrigger value="month" className="text-xs">{t('month')}</TabsTrigger>
-                  <TabsTrigger value="year" className="text-xs">{t('year')}</TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <PeriodPicker 
-                date={selectedDate} 
-                onDateChange={setSelectedDate} 
-                mode={viewMode}
-              />
-            </div>
-          </div>
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              {/* Header Row */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:gap-2 gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight mb-2">{t('title')}</h2>
+                  <p className="text-muted-foreground">{t('description')}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'month' | 'year')} className="w-auto">
+                    <TabsList className="grid w-full grid-cols-2 h-9">
+                      <TabsTrigger value="month" className="text-xs">{t('month')}</TabsTrigger>
+                      <TabsTrigger value="year" className="text-xs">{t('year')}</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <PeriodPicker 
+                    date={selectedDate} 
+                    onDateChange={setSelectedDate} 
+                    mode={viewMode}
+                  />
+                </div>
+              </div>
 
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-0">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+              {/* Metrics Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center justify-between p-4 bg-success/5 rounded-lg">
                   <div>
                     <p className="text-sm text-muted-foreground">{t('totalIncome')}</p>
                     <p className="text-2xl font-bold text-success">{formatCurrency(totalIncome)}</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-success" />
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-4 bg-destructive/5 rounded-lg">
                   <div>
                     <p className="text-sm text-muted-foreground">
                       {t('totalExpenses')}
@@ -129,12 +125,8 @@ export default function CashFlowPage() {
                   </div>
                   <TrendingDown className="h-8 w-8 text-destructive" />
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className={`flex items-center justify-between p-4 rounded-lg ${netCashFlow >= 0 ? 'bg-success/5' : 'bg-destructive/5'}`}>
                   <div>
                     <p className="text-sm text-muted-foreground">{t('netCashFlow')}</p>
                     <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-success' : 'text-destructive'}`}>
@@ -146,9 +138,9 @@ export default function CashFlowPage() {
                     <TrendingDown className="h-8 w-8 text-destructive" />
                   }
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </TopContent>
         
         <ContentWrapper>
