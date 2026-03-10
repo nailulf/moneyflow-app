@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const accountId = searchParams.get('accountId')
     const includeHistory = searchParams.get('includeHistory') === 'true'
     const asOfDate = searchParams.get('asOfDate')
+    const type = searchParams.get('type')
 
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -62,11 +63,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(account)
     }
 
-    const { data: accounts, error } = await supabase
+    let accountsQuery = supabase
       .from('accounts')
       .select('*')
       .eq('user_id', user.id)
       .eq('is_active', true)
+
+    if (type) {
+      accountsQuery = accountsQuery.eq('type', type.toUpperCase())
+    }
+
+    const { data: accounts, error } = await accountsQuery
       .order('is_default', { ascending: false })
       .order('created_at', { ascending: true })
 
@@ -122,7 +129,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, type, balance, currency, is_default, description } = body
+    const { name, type, balance, currency, is_default, description, property_type, asset_location, depreciation_rate, monthly_payment, mortgage_end_date } = body
 
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -147,12 +154,17 @@ export async function POST(request: NextRequest) {
     const insertData = {
       user_id: user.id,
       name,
-      type: type || 'BANK',
+      type: (type || 'BANK').toUpperCase(),
       balance: balance || 0.00,
       currency: currency || 'USD',
       is_default: is_default || false,
       is_active: true,
       description: description || null,
+      property_type: property_type || null,
+      asset_location: asset_location || null,
+      depreciation_rate: depreciation_rate ?? null,
+      monthly_payment: monthly_payment ?? null,
+      mortgage_end_date: mortgage_end_date || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
@@ -178,7 +190,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, name, type, balance, currency, is_default, is_active, description } = body
+    const { id, name, type, balance, currency, is_default, is_active, description, property_type, asset_location, depreciation_rate, monthly_payment, mortgage_end_date } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Account ID is required' }, { status: 400 })
@@ -220,12 +232,17 @@ export async function PUT(request: NextRequest) {
     }
 
     if (name !== undefined) updateData.name = name
-    if (type !== undefined) updateData.type = type
+    if (type !== undefined) updateData.type = type.toUpperCase()
     if (balance !== undefined) updateData.balance = balance
     if (currency !== undefined) updateData.currency = currency
     if (is_default !== undefined) updateData.is_default = is_default
     if (is_active !== undefined) updateData.is_active = is_active
     if (description !== undefined) updateData.description = description
+    if (property_type !== undefined) updateData.property_type = property_type || null
+    if (asset_location !== undefined) updateData.asset_location = asset_location || null
+    if (depreciation_rate !== undefined) updateData.depreciation_rate = depreciation_rate ?? null
+    if (monthly_payment !== undefined) updateData.monthly_payment = monthly_payment ?? null
+    if (mortgage_end_date !== undefined) updateData.mortgage_end_date = mortgage_end_date || null
 
     const { data, error } = await supabase
       .from('accounts')

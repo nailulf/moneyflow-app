@@ -123,6 +123,8 @@ export async function GET(request: NextRequest) {
     // Calculate historical net worth data points
     const netWorthData = []
 
+    const liabilityTypes = new Set(['CREDIT_CARD', 'MORTGAGE'])
+
     for (let i = 0; i < dataPoints; i++) {
       let pointDate: Date
 
@@ -163,8 +165,8 @@ export async function GET(request: NextRequest) {
         )
 
         // For credit cards, negative balance is actually positive net worth (less debt)
-        if (account.type === 'CREDIT_CARD') {
-          totalNetWorth -= accountBalance // Credit card debt reduces net worth
+        if (liabilityTypes.has(account.type)) {
+          totalNetWorth -= Math.abs(accountBalance)
         } else {
           totalNetWorth += accountBalance
         }
@@ -196,8 +198,7 @@ export async function GET(request: NextRequest) {
     // Calculate current net worth from today's account balances (not last chart data point)
     // This ensures the net worth matches Assets - Liabilities calculation
     const currentNetWorth = accountsWithBalances.reduce((total, account) => {
-      if (account.type === 'CREDIT_CARD') {
-        // Credit card balance is debt, subtract from net worth
+      if (liabilityTypes.has(account.type)) {
         return total - Math.abs(account.currentBalance)
       }
       return total + account.currentBalance

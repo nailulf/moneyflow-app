@@ -218,6 +218,8 @@
     "goalProgress": "Goal Progress",
     "completedGoals": "Completed Goals",
     "savingsAndInvestment": "Savings & Investment Accounts",
+    "assetsAccounts": "Assets",
+    "liabilitiesAccounts": "Liabilities",
     "otherAccounts": "Other Accounts",
     "noAccountsTitle": "No Accounts Yet",
     "noAccountsDescription": "Create your first account to start tracking your finances",
@@ -517,6 +519,9 @@
         "CREDIT_CARD": { "label": "Credit Card", "description": "Credit card account" },
         "CASH": { "label": "Cash", "description": "Cash on hand" },
         "INVESTMENT": { "label": "Investment", "description": "Stocks, bonds, mutual funds" },
+        "PROPERTY": { "label": "Property", "description": "House, apartment, or land" },
+        "VEHICLE": { "label": "Vehicle", "description": "Car, motorcycle, etc." },
+        "MORTGAGE": { "label": "Mortgage / KPR", "description": "Home loan or mortgage" },
         "OTHER": { "label": "E-Wallet / Other", "description": "GoPay, OVO, Dana, etc." }
       }
     },
@@ -581,7 +586,39 @@
       "creditCard": "Credit Card",
       "cash": "Cash",
       "investment": "Investment",
+      "other": "Other",
+      "property": "Property",
+      "vehicle": "Vehicle",
+      "mortgage": "Mortgage / KPR"
+    },
+    "groups": {
+      "savingsInvestment": "Savings & Investment",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
       "other": "Other"
+    },
+    "assetDetails": {
+      "propertyType": "Property Type",
+      "propertyTypePlaceholder": "Select property type",
+      "propertyTypes": {
+        "house": "House",
+        "apartment": "Apartment",
+        "land": "Land"
+      },
+      "location": "Location (optional)",
+      "locationPlaceholder": "e.g., Jakarta Selatan",
+      "depreciationRate": "Annual Depreciation Rate (%)",
+      "depreciationRatePlaceholder": "15",
+      "depreciationRateHint": "Default 15% per year",
+      "monthlyPayment": "Monthly Payment",
+      "monthlyPaymentPlaceholder": "e.g., 3500000",
+      "mortgageEndDate": "Final Payment Month",
+      "mortgageEndDateHint": "The month and year of your last mortgage payment",
+      "balanceHint": {
+        "property": "Enter the current estimated value of the property",
+        "vehicle": "Enter the current estimated value of the vehicle",
+        "mortgage": "Enter the outstanding (remaining) mortgage balance"
+      }
     }
   },
   "accountDetail": {

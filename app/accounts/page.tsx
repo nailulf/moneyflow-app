@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { Card, CardContent, CardHeader } from '@/components/ui/molecules/card'
-import { CreditCard, Wallet, TrendingUp, Building2, Loader2, Plus, ChevronRight, Target } from 'lucide-react'
+import { CreditCard, Wallet, TrendingUp, Building2, Loader2, Plus, ChevronRight, Target, Home, Car, Landmark } from 'lucide-react'
 import { useAccounts } from '@/contexts/AccountContext'
 import { formatCurrency } from '@/lib/data-utils'
 import { useGoalsSummary } from '@/hooks/useGoalsQuery'
@@ -21,6 +21,9 @@ const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   CREDIT_CARD: CreditCard,
   CASH: Wallet,
   INVESTMENT: TrendingUp,
+  PROPERTY: Home,
+  VEHICLE: Car,
+  MORTGAGE: Landmark,
   OTHER: CreditCard
 }
 
@@ -73,9 +76,10 @@ function AccountsPageContent() {
     return bBalance - aBalance
   })
 
-  // Filter accounts that can have goals
   const savingsAccounts = sortedAccounts.filter(a => ['BANK', 'INVESTMENT'].includes(a.type))
-  const otherAccounts = sortedAccounts.filter(a => !['BANK', 'INVESTMENT'].includes(a.type))
+  const assetAccounts = sortedAccounts.filter(a => ['PROPERTY', 'VEHICLE'].includes(a.type))
+  const liabilityAccounts = sortedAccounts.filter(a => ['MORTGAGE'].includes(a.type))
+  const otherAccounts = sortedAccounts.filter(a => !['BANK', 'INVESTMENT', 'PROPERTY', 'VEHICLE', 'MORTGAGE'].includes(a.type))
 
   if (loading) {
     return (
@@ -189,6 +193,84 @@ function AccountsPageContent() {
                                 </div>
                               </div>
                             )}
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Asset Accounts (Property & Vehicle) */}
+            {assetAccounts.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4">{t('assetsAccounts')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {assetAccounts.map((account) => {
+                    const Icon = ACCOUNT_ICONS[account.type] || CreditCard
+                    return (
+                      <div key={account.id} onClick={() => openAccountDetail(account.id)} className="cursor-pointer">
+                        <Card className="hover:shadow-md transition-shadow h-full">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-muted">
+                                  <Icon className="w-5 h-5 text-muted-foreground" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold">{account.name}</h4>
+                                  <p className="text-sm text-muted-foreground capitalize">
+                                    {account.type.toLowerCase().replace('_', ' ')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-lg font-bold">
+                                  {formatCurrency(account.currentBalance ?? account.balance, account.currency)}
+                                </p>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Liability Accounts (Mortgage/KPR) */}
+            {liabilityAccounts.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4">{t('liabilitiesAccounts')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {liabilityAccounts.map((account) => {
+                    const Icon = ACCOUNT_ICONS[account.type] || CreditCard
+                    return (
+                      <div key={account.id} onClick={() => openAccountDetail(account.id)} className="cursor-pointer">
+                        <Card className="hover:shadow-md transition-shadow h-full">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-muted">
+                                  <Icon className="w-5 h-5 text-muted-foreground" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold">{account.name}</h4>
+                                  <p className="text-sm text-muted-foreground capitalize">
+                                    {account.type.toLowerCase().replace('_', ' ')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <p className={`text-lg font-bold text-destructive`}>
+                                  {formatCurrency(account.currentBalance ?? account.balance, account.currency)}
+                                </p>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
                       </div>

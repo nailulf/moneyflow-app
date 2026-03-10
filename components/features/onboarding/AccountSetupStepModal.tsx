@@ -33,7 +33,10 @@ import {
   Loader2,
   Check,
   ChevronsUpDown,
-  X
+  X,
+  Home,
+  Car,
+  Landmark
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { INDONESIAN_BANKS, type BankOption } from '@/lib/constants/banks'
@@ -44,6 +47,9 @@ const ACCOUNT_TYPES = [
   { value: 'CREDIT_CARD', label: 'Credit Card', icon: CreditCard, description: 'Credit card account' },
   { value: 'CASH', label: 'Cash', icon: Wallet, description: 'Cash on hand' },
   { value: 'INVESTMENT', label: 'Investment', icon: PiggyBank, description: 'Stocks, bonds, mutual funds' },
+  { value: 'PROPERTY', label: 'Property', icon: Home, description: 'House, apartment, or land' },
+  { value: 'VEHICLE', label: 'Vehicle', icon: Car, description: 'Car, motorcycle, etc.' },
+  { value: 'MORTGAGE', label: 'Mortgage / KPR', icon: Landmark, description: 'Home loan or mortgage' },
   { value: 'OTHER', label: 'E-Wallet / Other', icon: Smartphone, description: 'GoPay, OVO, Dana, etc.' }
 ]
 
@@ -139,12 +145,17 @@ export function AccountSetupStepModal() {
       const accountData = {
         user_id: user.id,
         name: accountName.trim(),
-        type: accountType as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER',
+        type: accountType as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE',
         balance,
         currency,
         is_active: true,
         is_default: true,
-        description: selectedBank ? selectedBank.name : null
+        description: selectedBank ? selectedBank.name : null,
+        property_type: null,
+        asset_location: null,
+        depreciation_rate: null,
+        monthly_payment: null,
+        mortgage_end_date: null,
       }
 
       if (isPreviewMode) {

@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/atoms/button'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
 import { Input } from '@/components/ui/atoms/input'
-import { Plus, CreditCard, Search, Loader2, Trash2, Edit, ExternalLink, ArrowLeft } from 'lucide-react'
+import { Plus, CreditCard, Search, Loader2, Trash2, Edit, ExternalLink, ArrowLeft, Building2, Wallet, TrendingUp, Home, Car, Landmark } from 'lucide-react'
 import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -15,6 +15,31 @@ import { Analytics } from '@/lib/analytics/amplitude'
 import { useIsMobile } from '@/hooks/use-mobile'
 
 type Mode = 'list' | 'create' | 'edit' | 'delete'
+type AccountType = 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
+type PropertyType = 'HOUSE' | 'APARTMENT' | 'LAND'
+
+const ASSET_TYPES: AccountType[] = ['PROPERTY', 'VEHICLE', 'MORTGAGE']
+
+const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  BANK: Building2,
+  CREDIT_CARD: CreditCard,
+  CASH: Wallet,
+  INVESTMENT: TrendingUp,
+  PROPERTY: Home,
+  VEHICLE: Car,
+  MORTGAGE: Landmark,
+  OTHER: CreditCard,
+}
+
+type AccountGroup = { labelKey: string; types: AccountType[] }
+const ACCOUNT_GROUPS: AccountGroup[] = [
+  { labelKey: 'groups.savingsInvestment', types: ['BANK', 'INVESTMENT'] },
+  { labelKey: 'groups.assets',            types: ['PROPERTY', 'VEHICLE'] },
+  { labelKey: 'groups.liabilities',       types: ['MORTGAGE'] },
+  { labelKey: 'groups.other',             types: ['CASH', 'CREDIT_CARD', 'OTHER'] },
+]
+
+const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 
 interface AccountManagerProps {
   onAccountUpdated?: () => void
@@ -22,6 +47,7 @@ interface AccountManagerProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   variant?: 'sheet' | 'embedded'
+  defaultMode?: Mode
 }
 
 function AccountManagerInternal({
@@ -29,7 +55,8 @@ function AccountManagerInternal({
   className = '',
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
-  variant = 'sheet'
+  variant = 'sheet',
+  defaultMode
 }: AccountManagerProps) {
   const isEmbedded = variant === 'embedded'
   const router = useRouter()
@@ -50,7 +77,15 @@ function AccountManagerInternal({
     deleteAccount
   } = useAccounts()
 
-  const [mode, setMode] = useState<Mode>('list')
+  const [mode, setMode] = useState<Mode>(defaultMode ?? 'list')
+
+  // When the sheet opens, jump to defaultMode (e.g. 'create') if specified
+  useEffect(() => {
+    if (isOpen && defaultMode) {
+      if (defaultMode === 'create') openCreateMode()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
   const [searchTerm, setSearchTerm] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
@@ -59,10 +94,22 @@ function AccountManagerInternal({
   const [newAccountName, setNewAccountName] = useState('')
   const [newAccountType, setNewAccountType] = useState('bank')
   const [newAccountBalance, setNewAccountBalance] = useState('0')
+  // Asset-specific fields (create)
+  const [newPropertyType, setNewPropertyType] = useState<PropertyType | ''>('')
+  const [newAssetLocation, setNewAssetLocation] = useState('')
+  const [newDepreciationRate, setNewDepreciationRate] = useState('15')
+  const [newMonthlyPayment, setNewMonthlyPayment] = useState('')
+  const [newMortgageEndDate, setNewMortgageEndDate] = useState('')
 
   // Edit account form state
   const [editAccountName, setEditAccountName] = useState('')
   const [editAccountType, setEditAccountType] = useState('bank')
+  // Asset-specific fields (edit)
+  const [editPropertyType, setEditPropertyType] = useState<PropertyType | ''>('')
+  const [editAssetLocation, setEditAssetLocation] = useState('')
+  const [editDepreciationRate, setEditDepreciationRate] = useState('15')
+  const [editMonthlyPayment, setEditMonthlyPayment] = useState('')
+  const [editMortgageEndDate, setEditMortgageEndDate] = useState('')
 
   const filteredAccounts = accounts.filter(account =>
     account.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,16 +131,34 @@ function AccountManagerInternal({
   const handleAddAccount = async () => {
     if (!newAccountName.trim()) return
     setIsSubmitting(true)
+    const accountType = newAccountType.toUpperCase() as AccountType
     try {
+      const assetFields: Partial<AccountDB> = {}
+      if (accountType === 'PROPERTY') {
+        assetFields.property_type = (newPropertyType as PropertyType) || null
+        assetFields.asset_location = newAssetLocation.trim() || null
+      } else if (accountType === 'VEHICLE') {
+        assetFields.depreciation_rate = parseFloat(newDepreciationRate) || 15
+      } else if (accountType === 'MORTGAGE') {
+        if (newMonthlyPayment) assetFields.monthly_payment = parseCurrencyAmount(newMonthlyPayment)
+        if (newMortgageEndDate) assetFields.mortgage_end_date = newMortgageEndDate
+      }
+
       const newAccount = await createAccount({
         user_id: userId,
         name: newAccountName.trim(),
-        type: newAccountType.toUpperCase() as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER',
+        type: accountType,
         balance: parseCurrencyAmount(newAccountBalance),
-        currency: 'USD',
+        currency: 'IDR',
         is_active: true,
         is_default: false,
-        description: null
+        description: null,
+        property_type: null,
+        asset_location: null,
+        depreciation_rate: null,
+        monthly_payment: null,
+        mortgage_end_date: null,
+        ...assetFields,
       })
       Analytics.track('Account Created', {
         account_id: newAccount.id,
@@ -106,11 +171,16 @@ function AccountManagerInternal({
       setNewAccountName('')
       setNewAccountType('bank')
       setNewAccountBalance('0')
+      setNewPropertyType('')
+      setNewAssetLocation('')
+      setNewDepreciationRate('15')
+      setNewMonthlyPayment('')
+      setNewMortgageEndDate('')
       resetToList()
     } catch (err) {
       console.error('Failed to add account:', err)
       Analytics.track('Account Creation Failed', {
-        account_type: newAccountType.toUpperCase(),
+        account_type: accountType,
         error_message: err instanceof Error ? err.message : 'Unknown error'
       })
     } finally {
@@ -121,18 +191,32 @@ function AccountManagerInternal({
   const handleEditAccount = async () => {
     if (!selectedAccountId || !editAccountName.trim()) return
     setIsSubmitting(true)
+    const accountType = editAccountType.toUpperCase() as AccountType
     try {
       const fieldsChanged: string[] = []
       if (selectedAccount?.name !== editAccountName.trim()) fieldsChanged.push('name')
       if (selectedAccount?.type.toLowerCase() !== editAccountType) fieldsChanged.push('type')
+
+      const assetFields: Partial<AccountDB> = {}
+      if (accountType === 'PROPERTY') {
+        assetFields.property_type = editPropertyType || null
+        assetFields.asset_location = editAssetLocation.trim() || null
+      } else if (accountType === 'VEHICLE') {
+        assetFields.depreciation_rate = parseFloat(editDepreciationRate) || 15
+      } else if (accountType === 'MORTGAGE') {
+        assetFields.monthly_payment = editMonthlyPayment ? parseCurrencyAmount(editMonthlyPayment) : null
+        assetFields.mortgage_end_date = editMortgageEndDate || null
+      }
+
       await updateAccount(selectedAccountId, {
         name: editAccountName.trim(),
-        type: editAccountType.toUpperCase() as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
+        type: accountType,
+        ...assetFields
       })
       Analytics.track('Account Updated', {
         account_id: selectedAccountId,
         fields_changed: fieldsChanged,
-        new_type: editAccountType.toUpperCase(),
+        new_type: accountType,
         new_name: editAccountName.trim()
       })
       onAccountUpdated?.()
@@ -177,6 +261,11 @@ function AccountManagerInternal({
     setNewAccountName('')
     setNewAccountType('bank')
     setNewAccountBalance('0')
+    setNewPropertyType('')
+    setNewAssetLocation('')
+    setNewDepreciationRate('15')
+    setNewMonthlyPayment('')
+    setNewMortgageEndDate('')
     setMode('create')
     Analytics.track('Add Account Form Opened', { trigger: 'add_button' })
   }
@@ -185,6 +274,11 @@ function AccountManagerInternal({
     setSelectedAccountId(account.id)
     setEditAccountName(account.name)
     setEditAccountType(account.type.toLowerCase())
+    setEditPropertyType((account.property_type as PropertyType) || '')
+    setEditAssetLocation(account.asset_location || '')
+    setEditDepreciationRate(account.depreciation_rate != null ? String(account.depreciation_rate) : '15')
+    setEditMonthlyPayment(account.monthly_payment != null ? String(account.monthly_payment) : '')
+    setEditMortgageEndDate(account.mortgage_end_date || '')
     setMode('edit')
     Analytics.track('Edit Account Form Opened', {
       account_id: account.id,
@@ -250,67 +344,86 @@ function AccountManagerInternal({
               <div className="text-sm font-semibold text-foreground uppercase tracking-wide">
                 {t('yourAccounts', { count: filteredAccounts.length })}
               </div>
-              <div className="space-y-2">
-                {filteredAccounts.map((account) => (
-                  <div key={account.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex flex-col">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium text-sm text-foreground">{account.name}</span>
-                          {account.is_default && (
-                            <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">{t('default')}</span>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                          <span className="capitalize">{account.type.toLowerCase().replace('_', ' ')}</span>
-                          <span>•</span>
-                          <span className={(account.currentBalance ?? account.balance) >= 0 ? 'text-success' : 'text-destructive'}>
-                            {formatCurrency(account.currentBalance ?? account.balance)}
-                          </span>
+              {filteredAccounts.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  {searchTerm ? t('noAccountsSearch') : t('noAccounts')}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {ACCOUNT_GROUPS.map((group) => {
+                    const groupAccounts = filteredAccounts.filter(a =>
+                      group.types.includes(a.type as AccountType)
+                    )
+                    if (groupAccounts.length === 0) return null
+                    const isLiability = group.labelKey === 'groups.liabilities'
+                    return (
+                      <div key={group.labelKey}>
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 px-1">
+                          {t(group.labelKey)}
+                        </p>
+                        <div className="space-y-2">
+                          {groupAccounts.map((account) => {
+                            const Icon = ACCOUNT_ICONS[account.type] || CreditCard
+                            return (
+                              <div key={account.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                                <div className="flex items-center space-x-3 min-w-0">
+                                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted shrink-0 text-muted-foreground">
+                                    <Icon className="h-4 w-4" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="font-medium text-sm text-foreground truncate">{account.name}</span>
+                                      {account.is_default && (
+                                        <span className="px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full shrink-0">{t('default')}</span>
+                                      )}
+                                    </div>
+                                    <span className={`text-xs ${isLiability ? 'text-destructive' : (account.currentBalance ?? account.balance) >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                      {formatCurrency(account.currentBalance ?? account.balance)}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-1 shrink-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => router.push(`/accounts?accountId=${account.id}`)}
+                                    className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
+                                    title="View Details"
+                                  >
+                                    <ExternalLink className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => openEditMode(account)}
+                                    className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
+                                    disabled={isSubmitting}
+                                    title="Edit Account"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  {!account.is_default && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => openDeleteMode(account.id)}
+                                      className="h-11 w-11 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 sm:h-8 sm:w-8"
+                                      disabled={isSubmitting}
+                                      title="Delete Account"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/accounts?accountId=${account.id}`)}
-                        className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
-                        title="View Details"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openEditMode(account)}
-                        className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
-                        disabled={isSubmitting}
-                        title="Edit Account"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      {!account.is_default && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openDeleteMode(account.id)}
-                          className="h-11 w-11 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 sm:h-8 sm:w-8"
-                          disabled={isSubmitting}
-                          title="Delete Account"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                {filteredAccounts.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    {searchTerm ? t('noAccountsSearch') : t('noAccounts')}
-                  </div>
-                )}
-              </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -326,6 +439,156 @@ function AccountManagerInternal({
             {t('addAccount')}
           </Button>
         </SheetFooter>
+      )}
+    </>
+  )
+
+  const isAssetType = (type: string) => ASSET_TYPES.includes(type.toUpperCase() as AccountType)
+
+  const assetFieldsCreate = (
+    <>
+      {newAccountType === 'property' && (
+        <>
+          <div className="space-y-2">
+            <label htmlFor="property-type" className="text-sm font-medium">{t('assetDetails.propertyType')}</label>
+            <select
+              id="property-type"
+              value={newPropertyType}
+              onChange={(e) => setNewPropertyType(e.target.value as PropertyType | '')}
+              className={selectClass}
+            >
+              <option value="">{t('assetDetails.propertyTypePlaceholder')}</option>
+              <option value="HOUSE">{t('assetDetails.propertyTypes.house')}</option>
+              <option value="APARTMENT">{t('assetDetails.propertyTypes.apartment')}</option>
+              <option value="LAND">{t('assetDetails.propertyTypes.land')}</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="asset-location" className="text-sm font-medium">{t('assetDetails.location')}</label>
+            <Input
+              id="asset-location"
+              value={newAssetLocation}
+              onChange={(e) => setNewAssetLocation(e.target.value)}
+              placeholder={t('assetDetails.locationPlaceholder')}
+            />
+          </div>
+        </>
+      )}
+      {newAccountType === 'vehicle' && (
+        <div className="space-y-2">
+          <label htmlFor="depreciation-rate" className="text-sm font-medium">{t('assetDetails.depreciationRate')}</label>
+          <Input
+            id="depreciation-rate"
+            type="number"
+            min="0"
+            max="100"
+            step="0.5"
+            value={newDepreciationRate}
+            onChange={(e) => setNewDepreciationRate(e.target.value)}
+            placeholder={t('assetDetails.depreciationRatePlaceholder')}
+          />
+          <p className="text-xs text-muted-foreground">{t('assetDetails.depreciationRateHint')}</p>
+        </div>
+      )}
+      {newAccountType === 'mortgage' && (
+        <>
+          <div className="space-y-2">
+            <label htmlFor="monthly-payment" className="text-sm font-medium">{t('assetDetails.monthlyPayment')}</label>
+            <Input
+              id="monthly-payment"
+              type="number"
+              min="0"
+              step="0.01"
+              value={newMonthlyPayment}
+              onChange={(e) => setNewMonthlyPayment(e.target.value)}
+              placeholder={t('assetDetails.monthlyPaymentPlaceholder')}
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="mortgage-end-date" className="text-sm font-medium">{t('assetDetails.mortgageEndDate')}</label>
+            <Input
+              id="mortgage-end-date"
+              type="month"
+              value={newMortgageEndDate}
+              onChange={(e) => setNewMortgageEndDate(e.target.value ? `${e.target.value}-01` : '')}
+            />
+            <p className="text-xs text-muted-foreground">{t('assetDetails.mortgageEndDateHint')}</p>
+          </div>
+        </>
+      )}
+    </>
+  )
+
+  const assetFieldsEdit = (
+    <>
+      {editAccountType === 'property' && (
+        <>
+          <div className="space-y-2">
+            <label htmlFor="edit-property-type" className="text-sm font-medium">{t('assetDetails.propertyType')}</label>
+            <select
+              id="edit-property-type"
+              value={editPropertyType}
+              onChange={(e) => setEditPropertyType(e.target.value as PropertyType | '')}
+              className={selectClass}
+            >
+              <option value="">{t('assetDetails.propertyTypePlaceholder')}</option>
+              <option value="HOUSE">{t('assetDetails.propertyTypes.house')}</option>
+              <option value="APARTMENT">{t('assetDetails.propertyTypes.apartment')}</option>
+              <option value="LAND">{t('assetDetails.propertyTypes.land')}</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="edit-asset-location" className="text-sm font-medium">{t('assetDetails.location')}</label>
+            <Input
+              id="edit-asset-location"
+              value={editAssetLocation}
+              onChange={(e) => setEditAssetLocation(e.target.value)}
+              placeholder={t('assetDetails.locationPlaceholder')}
+            />
+          </div>
+        </>
+      )}
+      {editAccountType === 'vehicle' && (
+        <div className="space-y-2">
+          <label htmlFor="edit-depreciation-rate" className="text-sm font-medium">{t('assetDetails.depreciationRate')}</label>
+          <Input
+            id="edit-depreciation-rate"
+            type="number"
+            min="0"
+            max="100"
+            step="0.5"
+            value={editDepreciationRate}
+            onChange={(e) => setEditDepreciationRate(e.target.value)}
+            placeholder={t('assetDetails.depreciationRatePlaceholder')}
+          />
+          <p className="text-xs text-muted-foreground">{t('assetDetails.depreciationRateHint')}</p>
+        </div>
+      )}
+      {editAccountType === 'mortgage' && (
+        <>
+          <div className="space-y-2">
+            <label htmlFor="edit-monthly-payment" className="text-sm font-medium">{t('assetDetails.monthlyPayment')}</label>
+            <Input
+              id="edit-monthly-payment"
+              type="number"
+              min="0"
+              step="0.01"
+              value={editMonthlyPayment}
+              onChange={(e) => setEditMonthlyPayment(e.target.value)}
+              placeholder={t('assetDetails.monthlyPaymentPlaceholder')}
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="edit-mortgage-end-date" className="text-sm font-medium">{t('assetDetails.mortgageEndDate')}</label>
+            <Input
+              id="edit-mortgage-end-date"
+              type="month"
+              value={editMortgageEndDate ? editMortgageEndDate.slice(0, 7) : ''}
+              onChange={(e) => setEditMortgageEndDate(e.target.value ? `${e.target.value}-01` : '')}
+            />
+            <p className="text-xs text-muted-foreground">{t('assetDetails.mortgageEndDateHint')}</p>
+          </div>
+        </>
       )}
     </>
   )
@@ -357,21 +620,30 @@ function AccountManagerInternal({
           <select
             id="account-type"
             value={newAccountType}
-            onChange={(e) => setNewAccountType(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            onChange={(e) => {
+              setNewAccountType(e.target.value)
+              setNewDepreciationRate('15')
+            }}
+            className={selectClass}
           >
             <option value="bank">{t('accountTypes.bank')}</option>
             <option value="credit_card">{t('accountTypes.creditCard')}</option>
             <option value="cash">{t('accountTypes.cash')}</option>
             <option value="investment">{t('accountTypes.investment')}</option>
+            <option value="property">{t('accountTypes.property')}</option>
+            <option value="vehicle">{t('accountTypes.vehicle')}</option>
+            <option value="mortgage">{t('accountTypes.mortgage')}</option>
             <option value="other">{t('accountTypes.other')}</option>
           </select>
         </div>
+        {assetFieldsCreate}
         <div className="space-y-2">
-          <label htmlFor="account-balance" className="text-sm font-medium">{t('create.initialBalance')}</label>
+          <label htmlFor="account-balance" className="text-sm font-medium">
+            {isAssetType(newAccountType) ? t(`assetDetails.balanceHint.${newAccountType as 'property' | 'vehicle' | 'mortgage'}`) : t('create.initialBalance')}
+          </label>
           <Input
             id="account-balance"
-            type="amount"
+            type="number"
             step="0.01"
             value={newAccountBalance}
             onChange={(e) => setNewAccountBalance(e.target.value)}
@@ -417,16 +689,23 @@ function AccountManagerInternal({
           <select
             id="edit-account-type"
             value={editAccountType}
-            onChange={(e) => setEditAccountType(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            onChange={(e) => {
+              setEditAccountType(e.target.value)
+              setEditDepreciationRate('15')
+            }}
+            className={selectClass}
           >
             <option value="bank">{t('accountTypes.bank')}</option>
             <option value="credit_card">{t('accountTypes.creditCard')}</option>
             <option value="cash">{t('accountTypes.cash')}</option>
             <option value="investment">{t('accountTypes.investment')}</option>
+            <option value="property">{t('accountTypes.property')}</option>
+            <option value="vehicle">{t('accountTypes.vehicle')}</option>
+            <option value="mortgage">{t('accountTypes.mortgage')}</option>
             <option value="other">{t('accountTypes.other')}</option>
           </select>
         </div>
+        {assetFieldsEdit}
       </div>
 
       <SheetFooter>

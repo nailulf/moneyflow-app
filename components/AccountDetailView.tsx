@@ -50,6 +50,9 @@ const ACCOUNT_TYPE_OPTIONS = [
   { value: 'CREDIT_CARD', label: 'Credit Card' },
   { value: 'CASH', label: 'Cash' },
   { value: 'INVESTMENT', label: 'Investment' },
+  { value: 'PROPERTY', label: 'Property' },
+  { value: 'VEHICLE', label: 'Vehicle' },
+  { value: 'MORTGAGE', label: 'Mortgage / KPR' },
   { value: 'OTHER', label: 'Other' },
 ] as const
 
@@ -83,7 +86,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
   const [editName, setEditName] = useState('')
   const [editBalance, setEditBalance] = useState<string>('')
   const [editCurrency, setEditCurrency] = useState('')
-  const [editType, setEditType] = useState<'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'>('BANK')
+  const [editType, setEditType] = useState<'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'>('BANK')
   const [editDescription, setEditDescription] = useState('')
   const [currencyConversionMode, setCurrencyConversionMode] = useState<'keep' | 'convert'>('keep')
   const [originalCurrency, setOriginalCurrency] = useState('')
@@ -131,7 +134,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
   // Real-time adjustment preview
   const currentBalance = account?.currentBalance ?? account?.balance ?? 0
   const parsedNewBalance = parseCurrencyAmount(adjustNewBalance)
-  const adjustmentDiff = isNaN(parsedNewBalance) ? null : parsedNewBalance - currentBalance
+  const adjustmentDiff = adjustNewBalance.trim() === '' ? null : parsedNewBalance - currentBalance
 
   useEffect(() => {
     if (!loading && accounts.length > 0) {

@@ -27,25 +27,27 @@ export interface AccountCategory {
   color: string
 }
 
+const LIABILITY_ACCOUNT_TYPES = new Set(['CREDIT_CARD', 'MORTGAGE'])
+
+function getAccountBalance(account: AccountWithBalance): number {
+  return account.currentBalance ?? account.balance ?? 0
+}
+
+function isLiabilityAccount(account: AccountWithBalance): boolean {
+  return LIABILITY_ACCOUNT_TYPES.has(account.type) || getAccountBalance(account) < 0
+}
+
 /**
  * Calculate the net worth from account balances
  * Credit cards and liabilities reduce net worth, assets increase it
  */
 export function calculateNetWorth(accounts: AccountWithBalance[]): number {
   return accounts.reduce((total, account) => {
-    switch (account.type) {
-      case 'CREDIT_CARD':
-        // Credit card balance is debt, so it reduces net worth
-        return total - account.currentBalance
-      case 'BANK':
-      case 'CASH':
-      case 'INVESTMENT':
-      case 'OTHER':
-        // These are assets, so they increase net worth
-        return total + account.currentBalance
-      default:
-        return total + account.currentBalance
+    const balance = getAccountBalance(account)
+    if (isLiabilityAccount(account)) {
+      return total - Math.abs(balance)
     }
+    return total + balance
   }, 0)
 }
 
@@ -92,12 +94,15 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
     CASH: [],
     BANK: [],
     INVESTMENT: [],
+    PROPERTY: [],
+    VEHICLE: [],
+    MORTGAGE: [],
     CREDIT_CARD: [],
     OTHER: []
   }
 
   accounts.forEach(account => {
-    if (accountGroups[account.type]) {
+    if (accountGroups[account.type] !== undefined) {
       accountGroups[account.type].push(account)
     } else {
       accountGroups.OTHER.push(account)
@@ -109,47 +114,105 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
 
   // Cash accounts
   if (accountGroups.CASH.length > 0) {
-    const total = accountGroups.CASH.reduce((sum, acc) => sum + (acc.currentBalance ?? acc.balance ?? 0), 0)
+    const totalRaw = accountGroups.CASH.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const isLiability = totalRaw < 0
+    const total = isLiability ? -Math.abs(totalRaw) : totalRaw
     categories.push({
       name: 'Cash',
       accounts: accountGroups.CASH,
       total,
-      percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
-      color: 'hsl(var(--success))'
+      percentage: totalNetWorth > 0
+        ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
+        : 0,
+      color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--success))'
     })
   }
 
   // Bank accounts
   if (accountGroups.BANK.length > 0) {
-    const total = accountGroups.BANK.reduce((sum, acc) => sum + (acc.currentBalance ?? acc.balance ?? 0), 0)
+    const totalRaw = accountGroups.BANK.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const isLiability = totalRaw < 0
+    const total = isLiability ? -Math.abs(totalRaw) : totalRaw
     categories.push({
       name: 'Bank Accounts',
       accounts: accountGroups.BANK,
       total,
-      percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
-      color: 'hsl(var(--primary))'
+      percentage: totalNetWorth > 0
+        ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
+        : 0,
+      color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
     })
   }
 
   // Investment accounts
   if (accountGroups.INVESTMENT.length > 0) {
-    const total = accountGroups.INVESTMENT.reduce((sum, acc) => sum + (acc.currentBalance ?? acc.balance ?? 0), 0)
+    const totalRaw = accountGroups.INVESTMENT.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const isLiability = totalRaw < 0
+    const total = isLiability ? -Math.abs(totalRaw) : totalRaw
     categories.push({
       name: 'Investments',
       accounts: accountGroups.INVESTMENT,
       total,
-      percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
-      color: 'hsl(var(--chart-2))'
+      percentage: totalNetWorth > 0
+        ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
+        : 0,
+      color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--chart-2))'
+    })
+  }
+
+  // Property accounts (assets)
+  if (accountGroups.PROPERTY.length > 0) {
+    const totalRaw = accountGroups.PROPERTY.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const isLiability = totalRaw < 0
+    const total = isLiability ? -Math.abs(totalRaw) : totalRaw
+    categories.push({
+      name: 'Property',
+      accounts: accountGroups.PROPERTY,
+      total,
+      percentage: totalNetWorth > 0
+        ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
+        : 0,
+      color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--chart-3))'
+    })
+  }
+
+  // Vehicle accounts (assets)
+  if (accountGroups.VEHICLE.length > 0) {
+    const totalRaw = accountGroups.VEHICLE.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const isLiability = totalRaw < 0
+    const total = isLiability ? -Math.abs(totalRaw) : totalRaw
+    categories.push({
+      name: 'Vehicles',
+      accounts: accountGroups.VEHICLE,
+      total,
+      percentage: totalNetWorth > 0
+        ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
+        : 0,
+      color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--chart-4))'
     })
   }
 
   // Credit cards (liabilities)
   if (accountGroups.CREDIT_CARD.length > 0) {
-    const total = accountGroups.CREDIT_CARD.reduce((sum, acc) => sum + (acc.currentBalance ?? acc.balance ?? 0), 0)
+    const totalRaw = accountGroups.CREDIT_CARD.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const total = -Math.abs(totalRaw)
     categories.push({
       name: 'Credit Cards',
       accounts: accountGroups.CREDIT_CARD,
-      total: -Math.abs(total), // Always negative since it's debt (handles both +/- stored values)
+      total,
+      percentage: totalNetWorth > 0 ? (Math.abs(total) / totalNetWorth) * 100 : 0,
+      color: 'hsl(var(--destructive))'
+    })
+  }
+
+  // Mortgage / KPR (liabilities)
+  if (accountGroups.MORTGAGE.length > 0) {
+    const totalRaw = accountGroups.MORTGAGE.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const total = -Math.abs(totalRaw)
+    categories.push({
+      name: 'Mortgage / KPR',
+      accounts: accountGroups.MORTGAGE,
+      total,
       percentage: totalNetWorth > 0 ? (Math.abs(total) / totalNetWorth) * 100 : 0,
       color: 'hsl(var(--destructive))'
     })
@@ -157,13 +220,17 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
 
   // Other accounts
   if (accountGroups.OTHER.length > 0) {
-    const total = accountGroups.OTHER.reduce((sum, acc) => sum + (acc.currentBalance ?? acc.balance ?? 0), 0)
+    const totalRaw = accountGroups.OTHER.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const isLiability = totalRaw < 0
+    const total = isLiability ? -Math.abs(totalRaw) : totalRaw
     categories.push({
       name: 'Other',
       accounts: accountGroups.OTHER,
       total,
-      percentage: totalNetWorth > 0 ? (total / totalNetWorth) * 100 : 0,
-      color: 'hsl(var(--muted-foreground))'
+      percentage: totalNetWorth > 0
+        ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
+        : 0,
+      color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))'
     })
   }
 
