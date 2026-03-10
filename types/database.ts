@@ -153,12 +153,17 @@ export interface Database {
           id: string
           user_id: string
           name: string
-          type: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
+          type: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
           balance: number
           currency: string
           is_default: boolean
           is_active: boolean
           description: string | null
+          property_type: 'HOUSE' | 'APARTMENT' | 'LAND' | null
+          asset_location: string | null
+          depreciation_rate: number | null
+          monthly_payment: number | null
+          mortgage_end_date: string | null
           created_at: string
           updated_at: string
         }
@@ -166,12 +171,17 @@ export interface Database {
           id?: string
           user_id: string
           name: string
-          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
+          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
           balance?: number
           currency?: string
           is_default?: boolean
           is_active?: boolean
           description?: string | null
+          property_type?: 'HOUSE' | 'APARTMENT' | 'LAND' | null
+          asset_location?: string | null
+          depreciation_rate?: number | null
+          monthly_payment?: number | null
+          mortgage_end_date?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -179,12 +189,17 @@ export interface Database {
           id?: string
           user_id?: string
           name?: string
-          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER'
+          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
           balance?: number
           currency?: string
           is_default?: boolean
           is_active?: boolean
           description?: string | null
+          property_type?: 'HOUSE' | 'APARTMENT' | 'LAND' | null
+          asset_location?: string | null
+          depreciation_rate?: number | null
+          monthly_payment?: number | null
+          mortgage_end_date?: string | null
           updated_at?: string
         }
       }

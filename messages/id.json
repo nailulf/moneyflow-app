@@ -218,6 +218,8 @@
     "activeGoals": "Tujuan Aktif",
     "completedGoals": "Tujuan Selesai",
     "savingsAndInvestment": "Akun Tabungan & Investasi",
+    "assetsAccounts": "Aset",
+    "liabilitiesAccounts": "Kewajiban",
     "otherAccounts": "Akun Lainnya",
     "noAccountsTitle": "Belum Ada Akun",
     "noAccountsDescription": "Buat akun pertama Anda untuk mulai melacak keuangan",
@@ -517,6 +519,9 @@
         "CREDIT_CARD": { "label": "Kartu Kredit", "description": "Akun kartu kredit" },
         "CASH": { "label": "Tunai", "description": "Uang tunai" },
         "INVESTMENT": { "label": "Investasi", "description": "Saham, obligasi, reksa dana" },
+        "PROPERTY": { "label": "Properti", "description": "Rumah, apartemen, atau tanah" },
+        "VEHICLE": { "label": "Kendaraan", "description": "Mobil, motor, dll." },
+        "MORTGAGE": { "label": "KPR / Kredit Properti", "description": "Cicilan rumah atau KPR" },
         "OTHER": { "label": "E-Wallet / Lainnya", "description": "GoPay, OVO, Dana, dll." }
       }
     },
@@ -581,7 +586,39 @@
       "creditCard": "Kartu Kredit",
       "cash": "Tunai",
       "investment": "Investasi",
+      "other": "Lainnya",
+      "property": "Properti",
+      "vehicle": "Kendaraan",
+      "mortgage": "KPR / Kredit Properti"
+    },
+    "groups": {
+      "savingsInvestment": "Tabungan & Investasi",
+      "assets": "Aset",
+      "liabilities": "Kewajiban",
       "other": "Lainnya"
+    },
+    "assetDetails": {
+      "propertyType": "Tipe Properti",
+      "propertyTypePlaceholder": "Pilih tipe properti",
+      "propertyTypes": {
+        "house": "Rumah",
+        "apartment": "Apartemen",
+        "land": "Tanah"
+      },
+      "location": "Lokasi (opsional)",
+      "locationPlaceholder": "mis., Jakarta Selatan",
+      "depreciationRate": "Penyusutan Tahunan (%)",
+      "depreciationRatePlaceholder": "15",
+      "depreciationRateHint": "Default 15% per tahun",
+      "monthlyPayment": "Cicilan Bulanan",
+      "monthlyPaymentPlaceholder": "mis., 3500000",
+      "mortgageEndDate": "Bulan Pelunasan",
+      "mortgageEndDateHint": "Bulan dan tahun cicilan terakhir Anda",
+      "balanceHint": {
+        "property": "Masukkan estimasi nilai properti saat ini",
+        "vehicle": "Masukkan estimasi nilai kendaraan saat ini",
+        "mortgage": "Masukkan sisa pokok pinjaman KPR"
+      }
     }
   },
   "accountDetail": {

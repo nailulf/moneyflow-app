@@ -83,7 +83,7 @@ export function AccountNavigation() {
           </Button>
         </div>
       </div>
-      <AccountManager open={open} onOpenChange={setOpen} />
+      <AccountManager open={open} onOpenChange={setOpen} defaultMode="create" />
     </div>
   )
 }

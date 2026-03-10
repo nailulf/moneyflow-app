@@ -10,6 +10,7 @@ import {
   Banknote,
   Home,
   Car,
+  Landmark,
   Coins,
   CreditCard,
 } from 'lucide-react'
@@ -81,7 +82,7 @@ function NetWorthTooltip({
   )
 }
 
-function getAccountIcon(type: string, name: string) {
+function getAccountIcon(type: string) {
   switch (type) {
     case 'CASH':
       return <Wallet className="h-4 w-4" />
@@ -91,11 +92,12 @@ function getAccountIcon(type: string, name: string) {
       return <Coins className="h-4 w-4" />
     case 'CREDIT_CARD':
       return <CreditCard className="h-4 w-4" />
-    case 'OTHER':
-      if (name.toLowerCase().includes('house') || name.toLowerCase().includes('home')) {
-        return <Home className="h-4 w-4" />
-      }
+    case 'PROPERTY':
+      return <Home className="h-4 w-4" />
+    case 'VEHICLE':
       return <Car className="h-4 w-4" />
+    case 'MORTGAGE':
+      return <Landmark className="h-4 w-4" />
     default:
       return <Wallet className="h-4 w-4" />
   }
@@ -111,7 +113,7 @@ function AccountRow({
     <div className="flex items-center justify-between py-1.5">
       <div className="flex items-center gap-3 min-w-0">
         <div className="flex items-center justify-center w-8 h-8 rounded-full border bg-muted shrink-0 text-muted-foreground">
-          {getAccountIcon(account.type, account.name)}
+          {getAccountIcon(account.type)}
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">{account.name}</p>
@@ -157,11 +159,9 @@ function CategoryGroup({
         </span>
       </div>
       <div className="space-y-0.5 pl-4 border-l border-border/50">
-        {category.accounts
-          .filter((acc) => (isLiability ? acc.type === 'CREDIT_CARD' : acc.type !== 'CREDIT_CARD'))
-          .map((account, i) => (
-            <AccountRow key={i} account={account} />
-          ))}
+        {category.accounts.map((account, i) => (
+          <AccountRow key={i} account={account} />
+        ))}
       </div>
     </div>
   )
@@ -218,13 +218,15 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
     : { amount: 0, percentage: 0 }
   const isPositiveChange = netWorthChange.amount >= 0
 
-  const assetsTotal = accountCategories.reduce((sum, cat) => sum + Math.max(0, cat.total), 0)
+  const liabilityAccountTypes = new Set(['CREDIT_CARD', 'MORTGAGE'])
+  const isLiabilityCategory = (category: AccountCategory) =>
+    category.accounts.some((account) => liabilityAccountTypes.has(account.type)) ||
+    category.total < 0
+  const assetCategories = accountCategories.filter((cat) => !isLiabilityCategory(cat))
+  const liabilityCategories = accountCategories.filter((cat) => isLiabilityCategory(cat))
+  const assetsTotal = assetCategories.reduce((sum, cat) => sum + Math.max(0, cat.total), 0)
   const liabilitiesTotal = Math.abs(
-    accountCategories.reduce((sum, cat) => sum + Math.min(0, cat.total), 0)
-  )
-  const assetCategories = accountCategories.filter((cat) => cat.total >= 0)
-  const liabilityCategories = accountCategories.filter(
-    (cat) => cat.accounts.length > 0 && cat.total < 0
+    liabilityCategories.reduce((sum, cat) => sum + Math.min(0, cat.total), 0)
   )
 
   const periodLabel =
