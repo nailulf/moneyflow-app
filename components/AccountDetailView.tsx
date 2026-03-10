@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecu
 import { Button } from '@/components/ui/atoms/button'
 import { ArrowLeft, CreditCard, Wallet, TrendingUp, Building2, Loader2, Edit, Trash2, Download, SlidersHorizontal } from 'lucide-react'
 import { useAccounts, AccountWithHistory } from '@/contexts/AccountContext'
-import { formatCurrency } from '@/lib/data-utils'
+import { formatCurrency, parseCurrencyAmount } from '@/lib/data-utils'
 import { GoalSection } from '@/components/features/goals'
 import { AccountDB, BalanceAdjustment } from '@/types/database'
 import { useAllTransactions } from '@/hooks/useTransactionsQuery'
@@ -130,7 +130,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
 
   // Real-time adjustment preview
   const currentBalance = account?.currentBalance ?? account?.balance ?? 0
-  const parsedNewBalance = parseFloat(adjustNewBalance)
+  const parsedNewBalance = parseCurrencyAmount(adjustNewBalance)
   const adjustmentDiff = isNaN(parsedNewBalance) ? null : parsedNewBalance - currentBalance
 
   useEffect(() => {
@@ -167,8 +167,8 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
 
   const handleUpdate = async () => {
     try {
-      const balanceValue = parseFloat(editBalance)
-      if (isNaN(balanceValue)) {
+      const balanceValue = parseCurrencyAmount(editBalance)
+      if (balanceValue === 0 && editBalance.trim() !== '' && editBalance.trim() !== '0') {
         toast.error('Please enter a valid balance amount')
         return
       }

@@ -10,7 +10,7 @@ import { Plus, CreditCard, Search, Loader2, Trash2, Edit, ExternalLink, ArrowLef
 import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { formatCurrency } from '@/lib/data-utils'
+import { formatCurrency, parseCurrencyAmount } from '@/lib/data-utils'
 import { Analytics } from '@/lib/analytics/amplitude'
 import { useIsMobile } from '@/hooks/use-mobile'
 
@@ -89,7 +89,7 @@ function AccountManagerInternal({
         user_id: userId,
         name: newAccountName.trim(),
         type: newAccountType.toUpperCase() as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER',
-        balance: parseFloat(newAccountBalance) || 0,
+        balance: parseCurrencyAmount(newAccountBalance),
         currency: 'USD',
         is_active: true,
         is_default: false,
