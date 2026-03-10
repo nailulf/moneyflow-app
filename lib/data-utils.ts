@@ -5,31 +5,90 @@ import { format, parseISO, startOfMonth, endOfMonth, eachMonthOfInterval, subMon
 // Default currency configuration
 export const DEFAULT_CURRENCY = 'IDR'
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  'IDR': 'Rp',
+  'USD': '$',
+  'EUR': '€',
+  'GBP': '£',
+  'JPY': '¥',
+}
+
+/**
+ * Parse a currency value from various string formats into a plain number.
+ *
+ * Handles:
+ *   - Raw numeric strings:        "100000000000"  → 100000000000
+ *   - IDR dot-thousands format:   "100.000.000"   → 100000000
+ *   - US comma-thousands format:  "100,000,000"   → 100000000
+ *   - Decimal amounts:            "100,000.50"    → 100000.5
+ *   - Currency symbols/prefixes:  "Rp 100.000"    → 100000
+ *   - Plain numbers:              100000000000    → 100000000000
+ *
+ * Returns 0 for empty, null, undefined, or unparseable input.
+ */
+export function parseCurrencyAmount(value: string | number | null | undefined): number {
+  if (value === null || value === undefined) return 0
+  if (typeof value === 'number') return isFinite(value) ? value : 0
+
+  const trimmed = value.trim()
+  if (!trimmed) return 0
+
+  // Strip currency symbols and letters, keep digits, dots, commas, minus
+  let s = trimmed.replace(/[^\d.,\-]/g, '')
+  if (!s) return 0
+
+  const dotCount = (s.match(/\./g) || []).length
+  const commaCount = (s.match(/,/g) || []).length
+
+  if (dotCount > 1) {
+    // Multiple dots → all are thousands separators (IDR style: "100.000.000")
+    s = s.replace(/\./g, '')
+  } else if (commaCount > 1) {
+    // Multiple commas → all are thousands separators ("100,000,000")
+    s = s.replace(/,/g, '')
+  } else if (dotCount === 1 && commaCount === 1) {
+    const dotPos = s.indexOf('.')
+    const commaPos = s.indexOf(',')
+    if (dotPos < commaPos) {
+      // "1.000,50" — dot is thousands, comma is decimal → "1000.50"
+      s = s.replace('.', '').replace(',', '.')
+    } else {
+      // "1,000.50" — comma is thousands, dot is decimal → "1000.50"
+      s = s.replace(',', '')
+    }
+  } else if (commaCount === 1) {
+    const afterComma = s.split(',')[1]
+    if (afterComma !== undefined && afterComma.length <= 2) {
+      // Likely decimal separator ("100,50" or "100,5") → "100.50"
+      s = s.replace(',', '.')
+    } else {
+      // Likely thousands separator ("1,000") → strip comma
+      s = s.replace(',', '')
+    }
+  }
+  // Single dot: already a valid float string ("100000.50")
+
+  const result = parseFloat(s)
+  return isNaN(result) ? 0 : result
+}
+
 // Currency formatting helper with support for multiple currencies
 export function formatCurrency(amount: number, currency: string = DEFAULT_CURRENCY): string {
-  const currencySymbols: Record<string, string> = {
-    'IDR': 'Rp',
-    'USD': '$',
-    'EUR': '€',
-    'GBP': '£',
-    'JPY': '¥'
-  }
-  
-  const symbol = currencySymbols[currency] || currency
-  
-  // Always show with 2 decimal places for all currencies including IDR
-  const formattedAmount = Math.abs(amount).toFixed(2)
-  
-  // For IDR, use Indonesian locale formatting with thousand separators
+  const symbol = CURRENCY_SYMBOLS[currency] || currency
+  const abs = Math.abs(amount)
+
   if (currency === 'IDR') {
-    return `${symbol} ${parseFloat(formattedAmount).toLocaleString('id-ID', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
+    return `${symbol} ${abs.toLocaleString('id-ID', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     })}`
   }
-  
-  // For other currencies, use standard formatting
-  return `${symbol}${formattedAmount}`
+
+  // All other currencies: en-US locale adds thousand separators and 2 decimal places
+  return `${symbol}${abs.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
 }
 
 /**
@@ -49,6 +108,7 @@ export function formatCurrencyCompact(amount: number, currency: string = DEFAULT
     'EUR': '€',
     'GBP': '£',
     'JPY': '¥',
+    'AED': 'Dhs'
   }
 
   const symbol = currencySymbols[currency] || currency
