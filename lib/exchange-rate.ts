@@ -25,7 +25,9 @@ export const SUPPORTED_CURRENCIES = [
   'SAR'
 ] as const
 
-const SUPPORTED_CURRENCY_SET = new Set(SUPPORTED_CURRENCIES)
+type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number]
+
+const SUPPORTED_CURRENCY_SET = new Set<SupportedCurrency>(SUPPORTED_CURRENCIES)
 
 const rateCache = new Map<string, CachedRate>()
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000 // 6 hours
@@ -78,9 +80,11 @@ async function fetchRateFromFawaz(from: string, to: string, dateStr: string): Pr
  * Uses mid-month (15th) as a monthly average approximation.
  * Falls back to 1:1 if the API is unavailable.
  */
-function normalizeCurrency(code: string): string {
+function normalizeCurrency(code: string): SupportedCurrency {
   const normalized = code.toUpperCase().trim()
-  return SUPPORTED_CURRENCY_SET.has(normalized) ? normalized as typeof SUPPORTED_CURRENCIES[number] : 'IDR'
+  return SUPPORTED_CURRENCY_SET.has(normalized as SupportedCurrency)
+    ? (normalized as SupportedCurrency)
+    : 'IDR'
 }
 
 export async function getExchangeRate(
