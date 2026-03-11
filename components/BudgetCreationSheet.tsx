@@ -464,6 +464,10 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                     <SelectItem value="EUR">EUR (€)</SelectItem>
                     <SelectItem value="GBP">GBP (£)</SelectItem>
                     <SelectItem value="JPY">JPY (¥)</SelectItem>
+                    <SelectItem value="SGD">SGD (S$)</SelectItem>
+                    <SelectItem value="MYR">MYR (RM)</SelectItem>
+                    <SelectItem value="AED">AED (Dhs)</SelectItem>
+                    <SelectItem value="SAR">SAR</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

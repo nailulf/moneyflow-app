@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient } from '@/lib/supabase'
 import { format, subDays, subWeeks, subMonths, subYears } from 'date-fns'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
+import { batchGetExchangeRates, lookupRate, SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
+
+const BASE_CURRENCY = 'IDR'
 
 export async function GET(request: NextRequest) {
   try {
@@ -120,43 +123,50 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Calculate historical net worth data points
-    const netWorthData = []
-
     const liabilityTypes = new Set(['CREDIT_CARD', 'MORTGAGE'])
 
+    // ── Pre-compute all data point dates so we can batch-fetch exchange rates ──
+    const allPointDates: Date[] = []
     for (let i = 0; i < dataPoints; i++) {
       let pointDate: Date
-
       switch (intervalType) {
-        case 'day':
-          pointDate = new Date(startDateTime.getTime() + (i * 24 * 60 * 60 * 1000))
-          break
-        case 'week':
-          pointDate = subWeeks(startDateTime, -i)
-          break
-        case 'month':
-          pointDate = subMonths(startDateTime, -i)
-          break
-        case 'year':
-          pointDate = subYears(startDateTime, -i)
-          break
-        default:
-          pointDate = new Date(startDateTime.getTime() + (i * 24 * 60 * 60 * 1000))
+        case 'day':   pointDate = new Date(startDateTime.getTime() + i * 24 * 60 * 60 * 1000); break
+        case 'week':  pointDate = subWeeks(startDateTime, -i); break
+        case 'month': pointDate = subMonths(startDateTime, -i); break
+        case 'year':  pointDate = subYears(startDateTime, -i); break
+        default:      pointDate = new Date(startDateTime.getTime() + i * 24 * 60 * 60 * 1000)
       }
-
       if (pointDate > endDateTime) break
+      allPointDates.push(pointDate)
+    }
+    // Always include the final "today" point for exchange rate coverage
+    allPointDates.push(endDateTime)
 
-      // Calculate net worth at this point in time
+    // ── Batch-fetch exchange rates for all non-IDR currencies × all months ──
+    const normalizeCurrency = (currency?: string) => {
+      const normalized = (currency || BASE_CURRENCY).toUpperCase()
+      return SUPPORTED_CURRENCIES.includes(normalized as (typeof SUPPORTED_CURRENCIES)[number])
+        ? normalized
+        : BASE_CURRENCY
+    }
+
+    const accountCurrencies = accounts.map((a) => normalizeCurrency(a.currency))
+    const exchangeRates = await batchGetExchangeRates(
+      accountCurrencies,
+      BASE_CURRENCY,
+      allPointDates
+    )
+
+    // ── Calculate historical net worth data points ──
+    const netWorthData = []
+
+    for (const pointDate of allPointDates.slice(0, -1)) { // exclude the extra endDateTime we added
       let totalNetWorth = 0
 
       for (const account of accounts) {
-        // Skip accounts that didn't exist yet at this point in time
         if (account.created_at && new Date(account.created_at) > pointDate) continue
 
         const accountTransactions = transactionsByAccount.get(account.id) || []
-
-        // Calculate account balance at this point in time
         const accountBalance = calculateAccountBalanceAtDate(
           accountTransactions,
           pointDate,
@@ -164,24 +174,32 @@ export async function GET(request: NextRequest) {
           account.balance || 0
         )
 
-        // For credit cards, negative balance is actually positive net worth (less debt)
+        // Convert to base currency (IDR) using the rate for this month
+        const currency = normalizeCurrency(account.currency)
+        const rate = lookupRate(exchangeRates, currency, BASE_CURRENCY, pointDate)
+        const balanceInBase = accountBalance * rate
+
         if (liabilityTypes.has(account.type)) {
-          totalNetWorth -= Math.abs(accountBalance)
+          totalNetWorth -= Math.abs(balanceInBase)
         } else {
-          totalNetWorth += accountBalance
+          totalNetWorth += balanceInBase
         }
       }
 
       netWorthData.push({
-        date: format(pointDate, intervalType === 'day' ? 'dd MMM yyyy' : intervalType === 'week' ? 'dd MMM yyyy' : intervalType === 'month' ? 'MMM yyyy' : 'yyyy'),
-        value: Math.round(totalNetWorth * 100) / 100 // Round to 2 decimal places
+        date: format(
+          pointDate,
+          intervalType === 'day' || intervalType === 'week' ? 'dd MMM yyyy'
+            : intervalType === 'month' ? 'MMM yyyy'
+            : 'yyyy'
+        ),
+        value: Math.round(totalNetWorth * 100) / 100,
       })
     }
 
-    // Get detailed account information with current balances using already fetched transactions
+    // ── Get detailed account information with current balances ──
     const accountsWithBalances = accounts.map((account) => {
       const accountTransactions = transactionsByAccount.get(account.id) || []
-
       const currentBalance = calculateAccountBalanceAtDate(
         accountTransactions,
         endDateTime,
@@ -189,19 +207,24 @@ export async function GET(request: NextRequest) {
         account.balance || 0
       )
 
+      const currency = normalizeCurrency(account.currency)
+      const rate = lookupRate(exchangeRates, currency, BASE_CURRENCY, endDateTime)
+
       return {
         ...account,
-        currentBalance
+        currentBalance,                          // Original currency — for display
+        currentBalanceInBase: currentBalance * rate, // IDR equivalent — for net worth math
+        baseCurrency: BASE_CURRENCY,
       }
     })
 
-    // Calculate current net worth from today's account balances (not last chart data point)
-    // This ensures the net worth matches Assets - Liabilities calculation
+    // ── Current net worth uses base-currency-converted balances ──
     const currentNetWorth = accountsWithBalances.reduce((total, account) => {
+      const balanceInBase = account.currentBalanceInBase ?? 0
       if (liabilityTypes.has(account.type)) {
-        return total - Math.abs(account.currentBalance)
+        return total - Math.abs(balanceInBase)
       }
-      return total + account.currentBalance
+      return total + balanceInBase
     }, 0)
 
     // Always append today as the final data point so it's visible and not cut off at the edge.

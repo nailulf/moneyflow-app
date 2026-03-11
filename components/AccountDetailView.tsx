@@ -43,6 +43,10 @@ const CURRENCY_OPTIONS = [
   { value: 'EUR', label: 'EUR - Euro' },
   { value: 'GBP', label: 'GBP - British Pound' },
   { value: 'JPY', label: 'JPY - Japanese Yen' },
+  { value: 'SGD', label: 'SGD - Singapore Dollar' },
+  { value: 'MYR', label: 'MYR - Malaysian Ringgit' },
+  { value: 'AED', label: 'AED - UAE Dirham' },
+  { value: 'SAR', label: 'SAR - Saudi Riyal' },
 ]
 
 const ACCOUNT_TYPE_OPTIONS = [

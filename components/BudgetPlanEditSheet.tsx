@@ -22,7 +22,7 @@ import {
 } from '@/lib/api/budget-plans'
 import type { CategoryDB } from '@/types/database'
 
-const CURRENCIES = ['IDR', 'USD', 'EUR', 'GBP', 'JPY']
+const CURRENCIES = ['IDR', 'USD', 'EUR', 'GBP', 'JPY', 'SGD', 'MYR', 'AED', 'SAR']
 
 interface BudgetPlanEditSheetProps {
   open: boolean

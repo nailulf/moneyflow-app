@@ -11,7 +11,13 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   'EUR': '€',
   'GBP': '£',
   'JPY': '¥',
+  'SGD': 'S$',
+  'MYR': 'RM',
+  'AED': 'Dhs',
+  'SAR': 'SR',
 }
+
+
 
 /**
  * Parse a currency value from various string formats into a plain number.

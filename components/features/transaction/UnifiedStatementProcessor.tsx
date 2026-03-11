@@ -771,6 +771,9 @@ export function UnifiedStatementProcessor({
                   <SelectItem value="USD">USD - US Dollar</SelectItem>
                   <SelectItem value="EUR">EUR - Euro</SelectItem>
                   <SelectItem value="SGD">SGD - Singapore Dollar</SelectItem>
+                  <SelectItem value="MYR">MYR - Malaysian Ringgit</SelectItem>
+                  <SelectItem value="AED">AED - UAE Dirham</SelectItem>
+                  <SelectItem value="SAR">SAR - Saudi Riyal</SelectItem>
                   <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
                   <SelectItem value="GBP">GBP - British Pound</SelectItem>
                   <SelectItem value="AUD">AUD - Australian Dollar</SelectItem>

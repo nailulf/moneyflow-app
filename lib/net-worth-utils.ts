@@ -7,6 +7,10 @@ export interface NetWorthDataPoint {
 
 export interface AccountWithBalance extends AccountDB {
   currentBalance: number
+  /** Balance converted to the base display currency (default: IDR). Set by the API. */
+  currentBalanceInBase?: number
+  /** The base currency used for net worth aggregation (e.g. 'IDR'). */
+  baseCurrency?: string
   percentageOfTotal?: number
 }
 
@@ -30,7 +34,9 @@ export interface AccountCategory {
 const LIABILITY_ACCOUNT_TYPES = new Set(['CREDIT_CARD', 'MORTGAGE'])
 
 function getAccountBalance(account: AccountWithBalance): number {
-  return account.currentBalance ?? account.balance ?? 0
+  // Prefer the base-currency-converted balance for net worth math.
+  // Fall back to currentBalance (raw) if no conversion is available.
+  return account.currentBalanceInBase ?? account.currentBalance ?? account.balance ?? 0
 }
 
 function isLiabilityAccount(account: AccountWithBalance): boolean {
