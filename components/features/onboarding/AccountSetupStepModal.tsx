@@ -58,7 +58,11 @@ const CURRENCY_OPTIONS = [
   { value: 'USD', label: 'USD - US Dollar' },
   { value: 'EUR', label: 'EUR - Euro' },
   { value: 'GBP', label: 'GBP - British Pound' },
-  { value: 'JPY', label: 'JPY - Japanese Yen' }
+  { value: 'JPY', label: 'JPY - Japanese Yen' },
+  { value: 'SGD', label: 'SGD - Singapore Dollar' },
+  { value: 'MYR', label: 'MYR - Malaysian Ringgit' },
+  { value: 'AED', label: 'AED - UAE Dirham' },
+  { value: 'SAR', label: 'SAR - Saudi Riyal' }
 ]
 
 export function AccountSetupStepModal() {

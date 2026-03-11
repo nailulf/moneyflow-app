@@ -37,7 +37,7 @@ const Progress = ({ value = 0, className = '' }: { value?: number; className?: s
   )
 }
 
-const CURRENCIES = ['IDR', 'USD', 'EUR', 'GBP', 'JPY']
+const CURRENCIES = ['IDR', 'USD', 'EUR', 'GBP', 'JPY', 'SGD', 'MYR', 'AED', 'SAR']
 
 interface BudgetOverviewCardProps {
   period: 'monthly' | 'yearly'

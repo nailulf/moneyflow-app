@@ -34,6 +34,10 @@ const CURRENCIES = [
   { value: 'USD', label: '🇺🇸 USD — US Dollar' },
   { value: 'EUR', label: '🇪🇺 EUR — Euro' },
   { value: 'SGD', label: '🇸🇬 SGD — Singapore Dollar' },
+  { value: 'MYR', label: '🇲🇾 MYR — Malaysian Ringgit' },
+  { value: 'JPY', label: '🇯🇵 JPY — Japanese Yen' },
+  { value: 'AED', label: '🇦🇪 AED — UAE Dirham' },
+  { value: 'SAR', label: '🇸🇦 SAR — Saudi Riyal' },
 ] as const
 
 const COUNTRIES = [
@@ -71,7 +75,7 @@ export default function RegisterPage() {
         .min(8, { message: t('errors.passwordTooShort') })
         .regex(/[0-9]/, { message: t('errors.passwordNeedsNumber') }),
       confirmPassword: z.string(),
-      currency: z.enum(['IDR', 'USD', 'EUR', 'SGD']),
+      currency: z.enum(['IDR', 'USD', 'EUR', 'SGD', 'MYR', 'JPY', 'AED', 'SAR']),
       country: z.string().min(1, { message: t('errors.selectCountry') }),
       goal: z.enum(['networth_tracking', 'expense_management', 'family_budget', 'saving_goals', 'freelance_income', 'debt_payoff']).optional(),
       verificationConsent: z.boolean(),

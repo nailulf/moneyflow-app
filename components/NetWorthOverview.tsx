@@ -106,9 +106,21 @@ function getAccountIcon(type: string) {
 function AccountRow({
   account,
 }: {
-  account: { name: string; type: string; currentBalance: number; created_at?: string }
+  account: {
+    name: string
+    type: string
+    currency?: string
+    currentBalance: number
+    currentBalanceInBase?: number
+    baseCurrency?: string
+    created_at?: string
+  }
 }) {
   const t = useTranslations('dashboard.netWorth')
+  const currency = account.currency || 'IDR'
+  const base = account.baseCurrency || 'IDR'
+  const showConversion = currency !== base && account.currentBalanceInBase !== undefined
+
   return (
     <div className="flex items-center justify-between py-1.5">
       <div className="flex items-center gap-3 min-w-0">
@@ -125,9 +137,16 @@ function AccountRow({
           </p>
         </div>
       </div>
-      <span className="text-sm font-medium tabular-nums shrink-0 ml-4">
-        {formatCurrency(Math.abs(account.currentBalance))}
-      </span>
+      <div className="text-right shrink-0 ml-4">
+        <span className="text-sm font-medium tabular-nums">
+          {formatCurrency(Math.abs(account.currentBalance), currency)}
+        </span>
+        {showConversion && (
+          <p className="text-xs text-muted-foreground tabular-nums">
+            ≈ {formatCurrency(Math.abs(account.currentBalanceInBase!), base)}
+          </p>
+        )}
+      </div>
     </div>
   )
 }
@@ -228,6 +247,8 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
   const liabilitiesTotal = Math.abs(
     liabilityCategories.reduce((sum, cat) => sum + Math.min(0, cat.total), 0)
   )
+  const netWorthSummary = netWorthData?.currentNetWorth ?? assetsTotal - liabilitiesTotal
+  const baseCurrency = netWorthData?.accounts?.[0]?.baseCurrency ?? 'IDR'
 
   const periodLabel =
     selectedPeriod === 'ALL'
@@ -286,6 +307,9 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
                 <>
                   <p className="text-2xl font-bold tracking-tight">
                     {formatCurrency(netWorthData.currentNetWorth)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Base currency: {baseCurrency}
                   </p>
                   <div
                     className={cn(
@@ -410,7 +434,7 @@ function NetWorthContent({ onAddAccount }: NetWorthOverviewProps) {
               <Skeleton className="h-5 w-20" />
             ) : (
               <p className="text-sm font-bold tabular-nums">
-                {formatCurrencyCompact(assetsTotal - liabilitiesTotal)}
+                {formatCurrencyCompact(netWorthSummary)}
               </p>
             )}
           </div>
