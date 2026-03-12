@@ -319,7 +319,8 @@
       "adding": "Adding...",
       "addButton": "Add Transaction",
       "updating": "Updating...",
-      "updateButton": "Update Transaction"
+      "updateButton": "Update Transaction",
+      "uploadProcess": "Upload & Process"
     },
     "confirmation": {
       "title": "Confirm Transaction Import",
@@ -515,14 +516,38 @@
       "creating": "Creating…",
       "continue": "Continue",
       "accountTypes": {
-        "BANK": { "label": "Bank Account", "description": "Checking or savings account" },
-        "CREDIT_CARD": { "label": "Credit Card", "description": "Credit card account" },
-        "CASH": { "label": "Cash", "description": "Cash on hand" },
-        "INVESTMENT": { "label": "Investment", "description": "Stocks, bonds, mutual funds" },
-        "PROPERTY": { "label": "Property", "description": "House, apartment, or land" },
-        "VEHICLE": { "label": "Vehicle", "description": "Car, motorcycle, etc." },
-        "MORTGAGE": { "label": "Mortgage / KPR", "description": "Home loan or mortgage" },
-        "OTHER": { "label": "E-Wallet / Other", "description": "GoPay, OVO, Dana, etc." }
+        "BANK": {
+          "label": "Bank Account",
+          "description": "Checking or savings account"
+        },
+        "CREDIT_CARD": {
+          "label": "Credit Card",
+          "description": "Credit card account"
+        },
+        "CASH": {
+          "label": "Cash",
+          "description": "Cash on hand"
+        },
+        "INVESTMENT": {
+          "label": "Investment",
+          "description": "Stocks, bonds, mutual funds"
+        },
+        "PROPERTY": {
+          "label": "Property",
+          "description": "House, apartment, or land"
+        },
+        "VEHICLE": {
+          "label": "Vehicle",
+          "description": "Car, motorcycle, etc."
+        },
+        "MORTGAGE": {
+          "label": "Mortgage / KPR",
+          "description": "Home loan or mortgage"
+        },
+        "OTHER": {
+          "label": "E-Wallet / Other",
+          "description": "GoPay, OVO, Dana, etc."
+        }
       }
     },
     "budgetSetup": {

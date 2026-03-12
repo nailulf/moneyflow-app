@@ -30,7 +30,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/molecules/dialog"
-import { SheetFooter } from "@/components/ui/organisms/sheet"
+// SheetFooter no longer rendered here — footer is lifted to the parent sheet
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,14 +56,20 @@ interface UnifiedStatementProcessorProps {
   onSuccess?: () => void
   onCancel?: () => void
   defaultAccountId?: string
+  /** Ref that the parent can call to trigger the upload */
+  uploadTriggerRef?: React.MutableRefObject<(() => void) | null>
+  /** Called whenever isUploading changes so the parent can update its footer button */
+  onUploadingChange?: (uploading: boolean) => void
 }
 
 type ViewState = 'UPLOAD' | 'REVIEW'
 
-export function UnifiedStatementProcessor({ 
+export function UnifiedStatementProcessor({
   onSuccess,
   onCancel,
-  defaultAccountId 
+  defaultAccountId,
+  uploadTriggerRef,
+  onUploadingChange,
 }: UnifiedStatementProcessorProps) {
   const tl = useTranslations('transactions.statementProcessor')
   const { user } = useAuth()
@@ -115,6 +121,16 @@ export function UnifiedStatementProcessor({
       if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl)
     }
   }, [imagePreviewUrl])
+
+  // Keep parent's uploadTriggerRef pointing to the latest handleUpload
+  useEffect(() => {
+    if (uploadTriggerRef) uploadTriggerRef.current = handleUpload
+  })
+
+  // Notify parent when upload loading state changes
+  useEffect(() => {
+    onUploadingChange?.(isUploading)
+  }, [isUploading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // -- UPLOAD HANDLERS --
 
@@ -560,10 +576,7 @@ export function UnifiedStatementProcessor({
 
   // -- RENDER HELPERS --
   const renderUploadState = () => (
-    <div className="space-y-4">
-    <div className='overflow-y-auto no-scrollbar space-y-2 min-h-[70dvh]'>
-      <div className="flex flex-col">
-        <div className="flex-1 space-y-6 p-4">
+    <div className="space-y-6 pb-4">
           <div
             className={cn(
               "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
@@ -695,32 +708,6 @@ export function UnifiedStatementProcessor({
 
           </div>
         </div>
-      </div>
-    </div>
-    <SheetFooter>
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => {
-          Analytics.track('Statement Upload Cancelled', {
-            has_selected_file: !!selectedFile
-          })
-          onCancel?.()
-        }}
-        className="flex-1"
-      >
-        {tl('cancel')}
-      </Button>
-      <Button
-        className="flex-1"
-        onClick={handleUpload}
-        disabled={!selectedFile || !selectedAccountId || isUploading}
-      >
-        {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-        {tl('uploadProcess')}
-      </Button>
-    </SheetFooter>
-    </div>
   )
 
   const renderReviewDialog = (): React.ReactElement => (
@@ -1099,11 +1086,7 @@ export function UnifiedStatementProcessor({
 
   return (
     <>
-      <Card className="w-full h-full border-0 shadow-none">
-        <CardContent className="p-0 h-full">
-          {renderUploadState()}
-        </CardContent>
-      </Card>
+      {renderUploadState()}
       {renderReviewDialog()}
     </>
   )

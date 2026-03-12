@@ -17,13 +17,13 @@ export const viewport: Viewport = {
 }
 
 export const metadata = {
-  title: 'MoneyFlow - Personal Finance Tracker',
+  title: 'Teman Tumbuh - Personal Finance Tracker',
   description: 'Track your expenses and manage your finances with ease',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'MoneyFlow',
+    title: 'Teman Tumbuh',
   },
   icons: {
     apple: '/icons/apple-touch-icon.png',

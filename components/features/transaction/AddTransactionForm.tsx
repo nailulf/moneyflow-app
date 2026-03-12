@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/atoms/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/molecules/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/organisms/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/molecules/tabs'
-import { Plus, Upload, Edit } from 'lucide-react'
+import { Plus, Upload, Edit, Loader2 } from 'lucide-react'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -38,6 +38,8 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
   const [isAnySelectOpen, setIsAnySelectOpen] = useState(false)
   const [suppressCloseUntil, setSuppressCloseUntil] = useState(0)
   const [activeTab, setActiveTab] = useState('manual')
+  const uploadTriggerRef = useRef<(() => void) | null>(null)
+  const [isUploadProcessing, setIsUploadProcessing] = useState(false)
 
   // Load user categories from shared context
   const { categories, loading: categoriesLoading, error: categoriesError, refreshCategories } = useCategories()
@@ -220,9 +222,10 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
           <SheetTitle>{t('addTitle')}</SheetTitle>
         </SheetHeader>
 
-        <div className={isMobile ? 'flex-1 min-h-0 flex flex-col px-4 pt-4' : 'flex-1 min-h-0 flex flex-col'}>
-          <Tabs defaultValue="manual" className="flex flex-col flex-1 min-h-0 w-full">
-            <TabsList className="grid w-full grid-cols-2 shrink-0">
+        {/* Single scrollable area — no flex chains through Radix internals */}
+        <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 pt-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="manual" className="flex items-center gap-2">
                 <Edit className="h-4 w-4" />
                 {t('manualEntry')}
@@ -232,10 +235,9 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                 {t('uploadPdf')}
               </TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="manual" className="flex flex-col flex-1 min-h-0 mt-4">
-              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
-                <div className='overflow-y-auto no-scrollbar space-y-2 flex-1 min-h-0'>
+
+            <TabsContent value="manual" className="mt-4">
+              <form id="add-transaction-form" onSubmit={handleSubmit(onSubmit)} className="space-y-2 pb-4">
                   <div className="space-y-2 grid grid-cols-7 items-center">
                     <label className="text-sm font-medium col-span-2">{t('date')}</label>
                     <div className='col-span-5'>
@@ -507,43 +509,59 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                       </div>
                     )}
                   </div>
-                </div>
-                <SheetFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      Analytics.track('Add Transaction Cancelled', {
-                        trigger: 'cancel_button'
-                      })
-                      setOpen(false)
-                    }}
-                    className="flex-1"
-                  >
-                    {t('cancel')}
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex-1"
-                  >
-                    {isSubmitting ? t('adding') : t('addButton')}
-                  </Button>
-                </SheetFooter>
               </form>
             </TabsContent>
-            
-            <TabsContent value="upload" className="flex-1 overflow-y-auto min-h-0 mt-4">
-                <UnifiedStatementProcessor 
-                  onSuccess={() => {
-                    onSuccess?.()
-                    setOpen(false)
-                  }}
-                  onCancel={() => setOpen(false)}
-                />
+
+            <TabsContent value="upload" className="mt-4">
+              <UnifiedStatementProcessor
+                onSuccess={() => {
+                  onSuccess?.()
+                  setOpen(false)
+                }}
+                onCancel={() => setOpen(false)}
+                uploadTriggerRef={uploadTriggerRef}
+                onUploadingChange={setIsUploadProcessing}
+              />
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Single footer anchored directly to SheetContent's flex column */}
+        <SheetFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              Analytics.track(
+                activeTab === 'manual' ? 'Add Transaction Cancelled' : 'Statement Upload Cancelled',
+                { trigger: 'cancel_button' }
+              )
+              setOpen(false)
+            }}
+          >
+            {t('cancel')}
+          </Button>
+          {activeTab === 'manual' ? (
+            <Button
+              type="submit"
+              form="add-transaction-form"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? t('adding') : t('addButton')}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={() => uploadTriggerRef.current?.()}
+              disabled={isUploadProcessing}
+            >
+              {isUploadProcessing
+                ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                : <Upload className="mr-2 h-4 w-4" />}
+              {t('uploadProcess')}
+            </Button>
+          )}
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   )
