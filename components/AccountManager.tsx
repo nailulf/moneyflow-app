@@ -93,6 +93,7 @@ function AccountManagerInternal({
   // New account form state
   const [newAccountName, setNewAccountName] = useState('')
   const [newAccountType, setNewAccountType] = useState('bank')
+  const [newAccountCurrency, setNewAccountCurrency] = useState('IDR')
   const [newAccountBalance, setNewAccountBalance] = useState('0')
   // Asset-specific fields (create)
   const [newPropertyType, setNewPropertyType] = useState<PropertyType | ''>('')
@@ -149,7 +150,7 @@ function AccountManagerInternal({
         name: newAccountName.trim(),
         type: accountType,
         balance: parseCurrencyAmount(newAccountBalance),
-        currency: 'IDR',
+        currency: newAccountCurrency,
         is_active: true,
         is_default: false,
         description: null,
@@ -170,6 +171,7 @@ function AccountManagerInternal({
       onAccountUpdated?.()
       setNewAccountName('')
       setNewAccountType('bank')
+      setNewAccountCurrency('IDR')
       setNewAccountBalance('0')
       setNewPropertyType('')
       setNewAssetLocation('')
@@ -260,6 +262,7 @@ function AccountManagerInternal({
   const openCreateMode = () => {
     setNewAccountName('')
     setNewAccountType('bank')
+    setNewAccountCurrency('IDR')
     setNewAccountBalance('0')
     setNewPropertyType('')
     setNewAssetLocation('')
@@ -634,6 +637,25 @@ function AccountManagerInternal({
             <option value="vehicle">{t('accountTypes.vehicle')}</option>
             <option value="mortgage">{t('accountTypes.mortgage')}</option>
             <option value="other">{t('accountTypes.other')}</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="account-currency" className="text-sm font-medium">{t('create.currency')}</label>
+          <select
+            id="account-currency"
+            value={newAccountCurrency}
+            onChange={(e) => setNewAccountCurrency(e.target.value)}
+            className={selectClass}
+          >
+            <option value="IDR">IDR — Indonesian Rupiah (Rp)</option>
+            <option value="USD">USD — US Dollar ($)</option>
+            <option value="EUR">EUR — Euro (€)</option>
+            <option value="GBP">GBP — British Pound (£)</option>
+            <option value="JPY">JPY — Japanese Yen (¥)</option>
+            <option value="SGD">SGD — Singapore Dollar (S$)</option>
+            <option value="MYR">MYR — Malaysian Ringgit (RM)</option>
+            <option value="AED">AED — UAE Dirham (Dhs)</option>
+            <option value="SAR">SAR — Saudi Riyal (SR)</option>
           </select>
         </div>
         {assetFieldsCreate}
