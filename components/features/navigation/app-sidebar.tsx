@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { useTranslations } from "next-intl"
 import {
   Home,
@@ -13,7 +14,6 @@ import {
   // Building,    // Hidden: Estate Planning
   // Landmark,    // Hidden: Equity
   // Scale,       // Hidden: Tax
-  GalleryVerticalEnd,
   Wallet,
 } from "lucide-react"
 
@@ -50,11 +50,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                <div className="flex aspect-square size-6 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                  <GalleryVerticalEnd className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-md overflow-hidden shrink-0">
+                  <Image
+                    src="/icons/icon_.png"
+                    alt="Teman Tumbuh"
+                    width={32}
+                    height={32}
+                    className="object-contain"
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">MoneyFlow</span>
+                  <span className="truncate font-semibold">Teman Tumbuh</span>
                   <span className="truncate text-xs">{t('sidebar.tagline')}</span>
                 </div>
               </Link>

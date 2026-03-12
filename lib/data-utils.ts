@@ -82,16 +82,17 @@ export function parseCurrencyAmount(value: string | number | null | undefined): 
 export function formatCurrency(amount: number, currency: string = DEFAULT_CURRENCY): string {
   const symbol = CURRENCY_SYMBOLS[currency] || currency
   const abs = Math.abs(amount)
+  const sign = amount < 0 ? '-' : ''
 
   if (currency === 'IDR') {
-    return `${symbol} ${abs.toLocaleString('id-ID', {
+    return `${sign}${symbol} ${abs.toLocaleString('id-ID', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`
   }
 
   // All other currencies: en-US locale adds thousand separators and 2 decimal places
-  return `${symbol}${abs.toLocaleString('en-US', {
+  return `${sign}${symbol}${abs.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`

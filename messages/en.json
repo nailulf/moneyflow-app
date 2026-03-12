@@ -559,6 +559,7 @@
       "description": "Create a new account to track your transactions.",
       "name": "Name",
       "type": "Type",
+      "currency": "Currency",
       "initialBalance": "Initial Balance",
       "namePlaceholder": "e.g., Chase Checking",
       "balancePlaceholder": "0.00",
