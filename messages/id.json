@@ -319,7 +319,8 @@
       "adding": "Menambahkan...",
       "addButton": "Tambah Transaksi",
       "updating": "Memperbarui...",
-      "updateButton": "Perbarui Transaksi"
+      "updateButton": "Perbarui Transaksi",
+      "uploadProcess": "Upload & Proses"
     },
     "confirmation": {
       "title": "Konfirmasi Import Transaksi",
@@ -515,14 +516,38 @@
       "creating": "Membuat…",
       "continue": "Lanjutkan",
       "accountTypes": {
-        "BANK": { "label": "Rekening Bank", "description": "Rekening giro atau tabungan" },
-        "CREDIT_CARD": { "label": "Kartu Kredit", "description": "Akun kartu kredit" },
-        "CASH": { "label": "Tunai", "description": "Uang tunai" },
-        "INVESTMENT": { "label": "Investasi", "description": "Saham, obligasi, reksa dana" },
-        "PROPERTY": { "label": "Properti", "description": "Rumah, apartemen, atau tanah" },
-        "VEHICLE": { "label": "Kendaraan", "description": "Mobil, motor, dll." },
-        "MORTGAGE": { "label": "KPR / Kredit Properti", "description": "Cicilan rumah atau KPR" },
-        "OTHER": { "label": "E-Wallet / Lainnya", "description": "GoPay, OVO, Dana, dll." }
+        "BANK": {
+          "label": "Rekening Bank",
+          "description": "Rekening giro atau tabungan"
+        },
+        "CREDIT_CARD": {
+          "label": "Kartu Kredit",
+          "description": "Akun kartu kredit"
+        },
+        "CASH": {
+          "label": "Tunai",
+          "description": "Uang tunai"
+        },
+        "INVESTMENT": {
+          "label": "Investasi",
+          "description": "Saham, obligasi, reksa dana"
+        },
+        "PROPERTY": {
+          "label": "Properti",
+          "description": "Rumah, apartemen, atau tanah"
+        },
+        "VEHICLE": {
+          "label": "Kendaraan",
+          "description": "Mobil, motor, dll."
+        },
+        "MORTGAGE": {
+          "label": "KPR / Kredit Properti",
+          "description": "Cicilan rumah atau KPR"
+        },
+        "OTHER": {
+          "label": "E-Wallet / Lainnya",
+          "description": "GoPay, OVO, Dana, dll."
+        }
       }
     },
     "budgetSetup": {

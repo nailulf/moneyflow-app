@@ -52,7 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link href="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-md overflow-hidden shrink-0">
                   <Image
-                    src="/icons/icon_.png"
+                    src="/icons/icon.png"
                     alt="Teman Tumbuh"
                     width={32}
                     height={32}

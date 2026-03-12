@@ -1,5 +1,6 @@
 
-import { GalleryVerticalEnd, Receipt, Banknote, WavesIcon, Coins, HelpingHand, Star } from "lucide-react"
+import Image from "next/image"
+import { Receipt, Banknote, WavesIcon, Coins, HelpingHand, Star } from "lucide-react"
 import { getTranslations } from 'next-intl/server'
 import { AuthLanguageToggle } from '@/components/auth/auth-language-toggle'
 
@@ -16,10 +17,10 @@ export default async function AuthLayout({
       <div className="flex flex-col gap-4 p-6 md:p-10 bg-auth-sidebar text-auth-sidebar-foreground dark">
         <div className="flex justify-between items-center">
           <a href="#" className="flex items-center gap-2 font-medium text-auth-sidebar-foreground">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-auth-accent text-auth-accent-foreground">
-              <GalleryVerticalEnd className="size-4" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-md overflow-hidden">
+              <Image src="/icons/icon_.png" alt="Teman Tumbuh" width={28} height={28} className="object-contain" />
             </div>
-            MoneyFlow
+            Teman Tumbuh
           </a>
           <AuthLanguageToggle />
         </div>

@@ -19,7 +19,8 @@ import { TransactionProvider } from '@/contexts/TransactionContext'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { OnboardingModal } from '@/components/features/onboarding/OnboardingModal'
-import { Loader2, GalleryVerticalEnd } from 'lucide-react'
+import Image from 'next/image'
+import { Loader2 } from 'lucide-react'
 import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'
 import { useLocale, useTranslations } from 'next-intl'
 import { preferences } from '@/lib/api/user-preferences'
@@ -101,8 +102,8 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
               <SidebarInset>
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4 md:hidden">
-              <div className="flex aspect-square size-6 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                <GalleryVerticalEnd className="size-4" />
+              <div className="flex aspect-square size-7 items-center justify-center rounded-md overflow-hidden">
+                <Image src="/icons/icon_.png" alt="Teman Tumbuh" width={28} height={28} className="object-contain" />
               </div>
             </div>
             <div className="hidden md:flex items-center gap-2 px-4">
