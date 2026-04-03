@@ -98,12 +98,15 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Get all transactions for all accounts in one query
+    // Get all transactions for all accounts in one query.
+    // We also need inbound transfers (where to_account_id matches) so we use
+    // an OR filter to capture both outbound and inbound sides.
     const accountIds = accounts.map(account => account.id)
+    const accountIdList = accountIds.map(id => `"${id}"`).join(',')
     const { data: allTransactions, error: transError } = await supabase
       .from('transactions')
-      .select('amount, type, date, account_id')
-      .in('account_id', accountIds)
+      .select('amount, type, date, account_id, to_account_id')
+      .or(`account_id.in.(${accountIdList}),to_account_id.in.(${accountIdList})`)
       .lte('date', endDateTime.toISOString())
       .order('date', { ascending: true })
 
@@ -112,14 +115,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 })
     }
 
-    // Group transactions by account for efficient lookup
-    const transactionsByAccount = new Map()
+    // Group transactions by account for efficient lookup.
+    // A TRANSFER transaction appears in BOTH the source and destination account sets
+    // so that calculateAccountBalanceAtDate can correctly subtract/add.
+    const transactionsByAccount = new Map<string, typeof allTransactions>()
     if (allTransactions) {
       for (const transaction of allTransactions) {
-        if (!transactionsByAccount.has(transaction.account_id)) {
-          transactionsByAccount.set(transaction.account_id, [])
+        // Add to source account's set
+        if (transaction.account_id && accountIds.includes(transaction.account_id)) {
+          if (!transactionsByAccount.has(transaction.account_id)) {
+            transactionsByAccount.set(transaction.account_id, [])
+          }
+          transactionsByAccount.get(transaction.account_id)!.push(transaction)
         }
-        transactionsByAccount.get(transaction.account_id).push(transaction)
+        // For transfers, also add to destination account's set
+        if (transaction.type === 'TRANSFER' && transaction.to_account_id && accountIds.includes(transaction.to_account_id)) {
+          if (!transactionsByAccount.has(transaction.to_account_id)) {
+            transactionsByAccount.set(transaction.to_account_id, [])
+          }
+          transactionsByAccount.get(transaction.to_account_id)!.push(transaction)
+        }
       }
     }
 
@@ -171,7 +186,8 @@ export async function GET(request: NextRequest) {
           accountTransactions,
           pointDate,
           account.type,
-          account.balance || 0
+          account.balance || 0,
+          account.id
         )
 
         // Convert to base currency (IDR) using the rate for this month
@@ -204,7 +220,8 @@ export async function GET(request: NextRequest) {
         accountTransactions,
         endDateTime,
         account.type,
-        account.balance || 0
+        account.balance || 0,
+        account.id
       )
 
       const currency = normalizeCurrency(account.currency)

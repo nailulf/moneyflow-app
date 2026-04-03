@@ -1,4 +1,13 @@
-import { AccountDB, Transaction } from '@/types/database'
+import { AccountDB } from '@/types/database'
+
+/** Minimal transaction shape needed for balance calculations. */
+export type BalanceTransaction = {
+  amount: number
+  type: 'INCOME' | 'EXPENSE' | 'TRANSFER'
+  date: string
+  account_id: string | null
+  to_account_id?: string | null
+}
 
 export interface NetWorthDataPoint {
   date: string
@@ -58,13 +67,19 @@ export function calculateNetWorth(accounts: AccountWithBalance[]): number {
 }
 
 /**
- * Calculate account balance at a specific point in time based on transactions
+ * Calculate account balance at a specific point in time based on transactions.
+ *
+ * For TRANSFER transactions:
+ *   - If the transaction's `account_id` matches `accountId` → money OUT (subtract)
+ *   - If the transaction's `to_account_id` matches `accountId` → money IN (add)
+ *   - Legacy transfers without `to_account_id` are skipped (no way to determine direction)
  */
 export function calculateAccountBalanceAtDate(
-  transactions: Transaction[],
+  transactions: BalanceTransaction[],
   targetDate: Date,
   accountType: AccountDB['type'] = 'BANK',
-  initialBalance: number = 0
+  initialBalance: number = 0,
+  accountId?: string
 ): number {
   const filteredTransactions = transactions.filter(
     transaction => new Date(transaction.date) <= targetDate
@@ -80,8 +95,16 @@ export function calculateAccountBalanceAtDate(
         balance -= transaction.amount
         break
       case 'TRANSFER':
-        // Transfer handling would need more complex logic to avoid double counting
-        // For now, we'll skip transfers in balance calculation
+        if (accountId && transaction.to_account_id) {
+          if (transaction.account_id === accountId) {
+            // This account is the source — money out
+            balance -= transaction.amount
+          } else if (transaction.to_account_id === accountId) {
+            // This account is the destination — money in
+            balance += transaction.amount
+          }
+        }
+        // Legacy transfers without to_account_id are skipped
         break
     }
   }

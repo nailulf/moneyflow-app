@@ -87,12 +87,13 @@ export async function POST(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Fetch ALL transactions for this account to compute the true current balance
+    // Fetch ALL transactions for this account to compute the true current balance.
+    // Include both outbound (account_id) and inbound transfers (to_account_id).
     const { data: transactions, error: txError } = await supabase
       .from('transactions')
-      .select('type, amount')
-      .eq('account_id', accountId)
+      .select('type, amount, account_id, to_account_id')
       .eq('user_id', user.id)
+      .or(`account_id.eq.${accountId},to_account_id.eq.${accountId}`)
 
     if (txError) {
       console.error('Error fetching transactions:', txError)
@@ -103,7 +104,11 @@ export async function POST(request: NextRequest, context: RouteParams) {
     const txEffect = (transactions ?? []).reduce((sum, tx) => {
       if (tx.type === 'INCOME') return sum + tx.amount
       if (tx.type === 'EXPENSE') return sum - tx.amount
-      return sum // TRANSFER excluded
+      if (tx.type === 'TRANSFER' && tx.to_account_id) {
+        if (tx.account_id === accountId) return sum - tx.amount   // outbound
+        if (tx.to_account_id === accountId) return sum + tx.amount // inbound
+      }
+      return sum
     }, 0)
     const currentBalance = account.balance + txEffect
 

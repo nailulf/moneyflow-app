@@ -11,6 +11,7 @@ export interface Database {
           type: 'INCOME' | 'EXPENSE' | 'TRANSFER'
           category_id: string
           account_id: string | null
+          to_account_id: string | null
           merchant: string | null
           notes: string | null
           tags: string[] | null
@@ -35,6 +36,7 @@ export interface Database {
           type: 'INCOME' | 'EXPENSE' | 'TRANSFER'
           category_id?: string
           account_id?: string | null
+          to_account_id?: string | null
           merchant?: string | null
           notes?: string | null
           tags?: string[] | null
@@ -59,6 +61,7 @@ export interface Database {
           type?: 'INCOME' | 'EXPENSE' | 'TRANSFER'
           category_id?: string
           account_id?: string | null
+          to_account_id?: string | null
           merchant?: string | null
           notes?: string | null
           tags?: string[] | null
