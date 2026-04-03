@@ -213,7 +213,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle single insertion (existing logic)
-    const { user_id: bodyUserId, date, description, amount, type, category_id, account_id, merchant, currency, notes, tags, is_recurring, recurring_frequency, recurring_end_date } = body
+    const { user_id: bodyUserId, date, description, amount, type, category_id, account_id, to_account_id, merchant, currency, notes, tags, is_recurring, recurring_frequency, recurring_end_date } = body
 
     if (!date || !description || !amount || !type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -229,6 +229,7 @@ export async function POST(request: NextRequest) {
         type,
         category_id,
         account_id,
+        to_account_id: type === 'TRANSFER' ? to_account_id : null,
         merchant,
         currency: currency || 'IDR',
         notes,

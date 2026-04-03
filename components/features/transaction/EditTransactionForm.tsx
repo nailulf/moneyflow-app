@@ -74,6 +74,7 @@ export function EditTransactionForm({
       type: 'EXPENSE',
       category_id:'',
       account_id: '',
+      to_account_id: null,
       merchant: '',
       currency: 'IDR',
       is_recurring: false,
@@ -92,6 +93,7 @@ export function EditTransactionForm({
         type: transaction.type,
         category_id: transaction.category_id,
         account_id: transaction.account_id || '',
+        to_account_id: transaction.to_account_id || null,
         merchant: transaction.merchant || '',
         currency: 'IDR',
         is_recurring: transaction.is_recurring || false,
@@ -109,6 +111,7 @@ export function EditTransactionForm({
 
   const selectedType = watch('type')
   const selectedCategoryId = watch('category_id')
+  const selectedAccountId = watch('account_id')
 
   const onSubmit = async (data: TransactionFormData) => {
     if (!transaction) return
@@ -137,7 +140,8 @@ export function EditTransactionForm({
         // Transform empty account_id to null to match database schema
         const transformedData = {
           ...data,
-          account_id: data.account_id === '' ? null : data.account_id
+          account_id: data.account_id === '' ? null : data.account_id,
+          to_account_id: data.type === 'TRANSFER' ? (data.to_account_id || null) : null,
         }
         await onTransactionUpdated(transaction.id, transformedData)
       }
@@ -353,6 +357,45 @@ export function EditTransactionForm({
               )}
             </div>
           </div>
+
+          {selectedType === 'TRANSFER' && (
+          <div className="space-y-2 grid grid-cols-7 items-center">
+            <label className="text-sm font-medium col-span-2">{t('toAccount')}</label>
+            <div className="col-span-5">
+              <Select
+                value={watch('to_account_id') || undefined}
+                onValueChange={(value) => {
+                  setSuppressCloseUntil(Date.now() + 500)
+                  setValue('to_account_id', value)
+                }}
+                disabled={accountsLoading}
+                onOpenChange={setIsAnySelectOpen}
+              >
+                <SelectTrigger className={cn("w-full", errors.to_account_id ? 'border-destructive' : '')}>
+                  <SelectValue placeholder={accountsLoading ? t('loadingShort') : t('selectToAccount')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {accounts.filter(a => a.id !== selectedAccountId).length > 0 ? (
+                    accounts
+                      .filter(a => a.id !== selectedAccountId)
+                      .map((account) => (
+                        <SelectItem key={account.id} value={account.id}>
+                          {account.name} ({account.type.toLowerCase().replace('_', ' ')})
+                        </SelectItem>
+                      ))
+                  ) : (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                      {t('noAccountsAvailable')}
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+              {errors.to_account_id && (
+                <p className="text-sm text-destructive">{errors.to_account_id.message}</p>
+              )}
+            </div>
+          </div>
+          )}
 
           <div className="space-y-2 grid grid-cols-7 items-center">
             <label className="text-sm font-medium col-span-2">{t('merchantOpt')}</label>
