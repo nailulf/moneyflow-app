@@ -17,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useTransactionMutations } from '@/hooks/useTransactionsQuery'
 import { UnifiedStatementProcessor } from '@/components/features/transaction/UnifiedStatementProcessor'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
@@ -115,6 +116,16 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
   const selectedCategoryId = watch('category_id')
   const isRecurring = watch('is_recurring')
   const selectedAccountId = watch('account_id')
+
+  // Sync currency from selected account
+  useEffect(() => {
+    if (selectedAccountId) {
+      const account = accounts.find(a => a.id === selectedAccountId)
+      if (account?.currency) {
+        setValue('currency', account.currency)
+      }
+    }
+  }, [selectedAccountId, accounts, setValue])
 
   // Reset category when type changes
   useEffect(() => {
@@ -454,6 +465,29 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
                     </div>
                   </div>
                   )}
+
+                  <div className="space-y-2 grid grid-cols-7 items-center">
+                    <label className="text-sm font-medium col-span-2">{t('currency')}</label>
+                    <div className='col-span-5'>
+                      <Select
+                        value={watch('currency') || 'IDR'}
+                        onValueChange={(value) => {
+                          setSuppressCloseUntil(Date.now() + 500)
+                          setValue('currency', value)
+                        }}
+                        onOpenChange={setIsAnySelectOpen}
+                      >
+                        <SelectTrigger className="w-full" data-testid="currency-select-trigger">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SUPPORTED_CURRENCIES.map((code) => (
+                            <SelectItem key={code} value={code}>{code}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
                   <div className="space-y-2 grid grid-cols-7 items-center">
                     <label className="text-sm font-medium col-span-2">{t('merchantOpt')}</label>

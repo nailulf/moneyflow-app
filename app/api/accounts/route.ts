@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       name,
       type: (type || 'BANK').toUpperCase(),
       balance: balance || 0.00,
-      currency: currency || 'USD',
+      currency: currency || 'IDR',
       is_default: is_default || false,
       is_active: true,
       description: description || null,

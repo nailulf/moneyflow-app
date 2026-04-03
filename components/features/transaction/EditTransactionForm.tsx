@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
@@ -95,7 +96,7 @@ export function EditTransactionForm({
         account_id: transaction.account_id || '',
         to_account_id: transaction.to_account_id || null,
         merchant: transaction.merchant || '',
-        currency: 'IDR',
+        currency: transaction.currency || 'IDR',
         is_recurring: transaction.is_recurring || false,
         recurring_frequency: transaction.recurring_frequency || 'monthly',
         recurring_end_date: transaction.recurring_end_date ? transaction.recurring_end_date.split('T')[0] : null
@@ -396,6 +397,29 @@ export function EditTransactionForm({
             </div>
           </div>
           )}
+
+          <div className="space-y-2 grid grid-cols-7 items-center">
+            <label className="text-sm font-medium col-span-2">{t('currency')}</label>
+            <div className="col-span-5">
+              <Select
+                value={watch('currency') || 'IDR'}
+                onValueChange={(value) => {
+                  setSuppressCloseUntil(Date.now() + 500)
+                  setValue('currency', value)
+                }}
+                onOpenChange={setIsAnySelectOpen}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPORTED_CURRENCIES.map((code) => (
+                    <SelectItem key={code} value={code}>{code}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <div className="space-y-2 grid grid-cols-7 items-center">
             <label className="text-sm font-medium col-span-2">{t('merchantOpt')}</label>
