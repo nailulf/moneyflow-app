@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/atoms/button'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
 import { Input } from '@/components/ui/atoms/input'
-import { Plus, CreditCard, Search, Loader2, Trash2, Edit, ExternalLink, ArrowLeft, Building2, Wallet, TrendingUp, Home, Car, Landmark } from 'lucide-react'
+import { Plus, CreditCard, Search, Loader2, Trash2, Edit, ArrowLeft, Building2, Wallet, TrendingUp, Home, Car, Landmark } from 'lucide-react'
 import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -105,6 +105,7 @@ function AccountManagerInternal({
   // Edit account form state
   const [editAccountName, setEditAccountName] = useState('')
   const [editAccountType, setEditAccountType] = useState('bank')
+  const [editAccountCurrency, setEditAccountCurrency] = useState('IDR')
   // Asset-specific fields (edit)
   const [editPropertyType, setEditPropertyType] = useState<PropertyType | ''>('')
   const [editAssetLocation, setEditAssetLocation] = useState('')
@@ -213,6 +214,7 @@ function AccountManagerInternal({
       await updateAccount(selectedAccountId, {
         name: editAccountName.trim(),
         type: accountType,
+        currency: editAccountCurrency,
         ...assetFields
       })
       Analytics.track('Account Updated', {
@@ -277,6 +279,7 @@ function AccountManagerInternal({
     setSelectedAccountId(account.id)
     setEditAccountName(account.name)
     setEditAccountType(account.type.toLowerCase())
+    setEditAccountCurrency(account.currency || 'IDR')
     setEditPropertyType((account.property_type as PropertyType) || '')
     setEditAssetLocation(account.asset_location || '')
     setEditDepreciationRate(account.depreciation_rate != null ? String(account.depreciation_rate) : '15')
@@ -369,7 +372,13 @@ function AccountManagerInternal({
                             const Icon = ACCOUNT_ICONS[account.type] || CreditCard
                             return (
                               <div key={account.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                                <div className="flex items-center space-x-3 min-w-0">
+                                <div
+                                  className="flex items-center space-x-3 min-w-0 flex-1 cursor-pointer"
+                                  onClick={() => {
+                                    setIsOpen(false)
+                                    router.push(`/accounts?accountId=${account.id}`)
+                                  }}
+                                >
                                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted shrink-0 text-muted-foreground">
                                     <Icon className="h-4 w-4" />
                                   </div>
@@ -381,7 +390,7 @@ function AccountManagerInternal({
                                       )}
                                     </div>
                                     <span className={`text-xs ${isLiability ? 'text-destructive' : (account.currentBalance ?? account.balance) >= 0 ? 'text-success' : 'text-destructive'}`}>
-                                      {formatCurrency(account.currentBalance ?? account.balance)}
+                                      {formatCurrency(account.currentBalance ?? account.balance, account.currency)}
                                     </span>
                                   </div>
                                 </div>
@@ -389,19 +398,10 @@ function AccountManagerInternal({
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => router.push(`/accounts?accountId=${account.id}`)}
-                                    className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
-                                    title="View Details"
-                                  >
-                                    <ExternalLink className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
                                     onClick={() => openEditMode(account)}
                                     className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
                                     disabled={isSubmitting}
-                                    title="Edit Account"
+                                    title={t('edit.title')}
                                   >
                                     <Edit className="h-4 w-4" />
                                   </Button>
@@ -412,7 +412,7 @@ function AccountManagerInternal({
                                       onClick={() => openDeleteMode(account.id)}
                                       className="h-11 w-11 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 sm:h-8 sm:w-8"
                                       disabled={isSubmitting}
-                                      title="Delete Account"
+                                      title={t('delete.title')}
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -725,6 +725,25 @@ function AccountManagerInternal({
             <option value="vehicle">{t('accountTypes.vehicle')}</option>
             <option value="mortgage">{t('accountTypes.mortgage')}</option>
             <option value="other">{t('accountTypes.other')}</option>
+          </select>
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="edit-account-currency" className="text-sm font-medium">{t('edit.currency')}</label>
+          <select
+            id="edit-account-currency"
+            value={editAccountCurrency}
+            onChange={(e) => setEditAccountCurrency(e.target.value)}
+            className={selectClass}
+          >
+            <option value="IDR">IDR — Indonesian Rupiah (Rp)</option>
+            <option value="USD">USD — US Dollar ($)</option>
+            <option value="EUR">EUR — Euro (€)</option>
+            <option value="GBP">GBP — British Pound (£)</option>
+            <option value="JPY">JPY — Japanese Yen (¥)</option>
+            <option value="SGD">SGD — Singapore Dollar (S$)</option>
+            <option value="MYR">MYR — Malaysian Ringgit (RM)</option>
+            <option value="AED">AED — UAE Dirham (Dhs)</option>
+            <option value="SAR">SAR — Saudi Riyal (SR)</option>
           </select>
         </div>
         {assetFieldsEdit}

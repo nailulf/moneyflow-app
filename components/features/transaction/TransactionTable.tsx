@@ -740,7 +740,7 @@ export function TransactionTable({
                                   ? 'text-success'
                                   : 'text-foreground'
                               }`}>
-                                {transaction.type === 'INCOME' ? '+' : ''}{formatCurrency(Math.abs(transaction.amount))}
+                                {transaction.type === 'INCOME' ? '+' : ''}{formatCurrency(Math.abs(transaction.amount), transaction.currency)}
                               </div>
                             </TableCell>
                             <TableCell className="hidden sm:table-cell py-4 px-2 lg:px-6">
@@ -863,7 +863,7 @@ export function TransactionTable({
               <br /><br />
               <strong>{t('confirmDelete.details')}</strong>
               <br />{t('confirmDelete.merchantLabel')}: {deleteConfirmDialog?.transaction.merchant}
-              <br />{t('confirmDelete.amountLabel')}: {deleteConfirmDialog?.transaction.amount ? formatCurrency(deleteConfirmDialog.transaction.amount) : t('confirmDelete.notAvailable')}
+              <br />{t('confirmDelete.amountLabel')}: {deleteConfirmDialog?.transaction.amount ? formatCurrency(deleteConfirmDialog.transaction.amount, deleteConfirmDialog.transaction.currency) : t('confirmDelete.notAvailable')}
               <br />{t('confirmDelete.dateLabel')}: {deleteConfirmDialog?.transaction.date ? new Date(deleteConfirmDialog.transaction.date).toLocaleDateString() : t('confirmDelete.notAvailable')}
             </DialogDescription>
           </DialogHeader>

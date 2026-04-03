@@ -304,6 +304,7 @@
       "selectAccount": "Pilih akun",
       "toAccount": "Ke Akun",
       "selectToAccount": "Pilih akun tujuan",
+      "currency": "Mata Uang",
       "noAccountsAvailable": "Tidak ada akun tersedia",
       "merchantOpt": "Merchant (Ops)",
       "merchantPlaceholder": "Masukkan nama merchant",
@@ -598,6 +599,7 @@
       "description": "Perbarui informasi akun.",
       "name": "Nama",
       "type": "Jenis",
+      "currency": "Mata Uang",
       "namePlaceholder": "Nama akun",
       "cancel": "Batal",
       "updateAccount": "Perbarui Akun"

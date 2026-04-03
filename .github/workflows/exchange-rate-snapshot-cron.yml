@@ -1,0 +1,53 @@
+name: Refresh Exchange Rate Snapshots
+
+on:
+  schedule:
+    # Weekly on Sunday at 03:00 UTC
+    - cron: "0 3 * * 0"
+  workflow_dispatch: # Allows manual triggering from GitHub UI
+
+jobs:
+  refresh-rates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch and store exchange rate snapshots
+        run: |
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "Error: APP_URL secret is not set"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "Error: CRON_SECRET secret is not set"
+            exit 1
+          fi
+
+          APP_URL="${{ secrets.APP_URL }}"
+          APP_URL="${APP_URL%/}"
+
+          echo "Sending request to: ${APP_URL}/api/exchange-rates/snapshot"
+
+          response=$(curl -X POST "${APP_URL}/api/exchange-rates/snapshot" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}" \
+            -s \
+            -L) || {
+            echo "Error: curl command failed"
+            exit 1
+          }
+
+          http_code=$(echo "$response" | tail -n 1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "HTTP Status: $http_code"
+          echo "Response Body:"
+          echo "$body"
+
+          if [ "$http_code" -ne 200 ]; then
+            echo "Error: Request failed with status $http_code"
+            exit 1
+          fi
+
+          echo "Successfully refreshed exchange rate snapshots"

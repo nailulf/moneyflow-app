@@ -42,13 +42,15 @@ async function fetchRateFromFrankfurter(from: string, to: string, dateStr: strin
     })
 
     if (!res.ok) {
+      console.error(`[ExchangeRate] Frankfurter returned ${res.status} for ${from}→${to} on ${dateStr}`)
       return null
     }
 
     const data = await res.json()
     const rate = data?.rates?.[to]
     return typeof rate === 'number' && Number.isFinite(rate) ? rate : null
-  } catch {
+  } catch (err) {
+    console.error(`[ExchangeRate] Frankfurter fetch failed for ${from}→${to}:`, err instanceof Error ? err.message : err)
     return null
   }
 }
@@ -64,13 +66,44 @@ async function fetchRateFromFawaz(from: string, to: string, dateStr: string): Pr
     })
 
     if (!res.ok) {
+      console.error(`[ExchangeRate] Fawaz returned ${res.status} for ${from}→${to} on ${dateStr}`)
       return null
     }
 
     const data = await res.json()
     const rate = data?.[fromLower]?.[toLower]
     return typeof rate === 'number' && Number.isFinite(rate) ? rate : null
-  } catch {
+  } catch (err) {
+    console.error(`[ExchangeRate] Fawaz fetch failed for ${from}→${to}:`, err instanceof Error ? err.message : err)
+    return null
+  }
+}
+
+/**
+ * Fallback: query the most recent snapshot from the DB.
+ * Returns null if no snapshot exists or DB is unavailable.
+ */
+async function fetchRateFromSnapshot(from: string, to: string): Promise<number | null> {
+  try {
+    // Dynamic import to avoid circular dependency issues at module load time
+    const { createServerComponentClient } = await import('@/lib/supabase')
+    const supabase = createServerComponentClient()
+
+    const { data, error } = await supabase
+      .from('exchange_rate_snapshots')
+      .select('rate')
+      .eq('from_currency', from)
+      .eq('to_currency', to)
+      .order('snapshot_date', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (error || !data) return null
+
+    const rate = Number(data.rate)
+    return Number.isFinite(rate) ? rate : null
+  } catch (err) {
+    console.error(`[ExchangeRate] DB snapshot lookup failed for ${from}→${to}:`, err instanceof Error ? err.message : err)
     return null
   }
 }
@@ -114,18 +147,37 @@ export async function getExchangeRate(
   }
 
   const dateStr = refDate.toISOString().slice(0, 10) // YYYY-MM-DD
+
+  // 1. Try Frankfurter API
   const primaryRate = await fetchRateFromFrankfurter(normalizedFrom, normalizedTo, dateStr)
   if (primaryRate !== null) {
     rateCache.set(cacheKey, { rate: primaryRate, fetchedAt: Date.now() })
     return primaryRate
   }
 
+  // 2. Try Fawaz API
   const fallbackRate = await fetchRateFromFawaz(normalizedFrom, normalizedTo, dateStr)
   if (fallbackRate !== null) {
     rateCache.set(cacheKey, { rate: fallbackRate, fetchedAt: Date.now() })
     return fallbackRate
   }
 
+  // 3. Use stale in-memory cache (expired TTL but better than nothing)
+  if (cached) {
+    console.warn(`[ExchangeRate] Using stale cached rate for ${cacheKey} (age: ${Math.round((Date.now() - cached.fetchedAt) / 60000)}min)`)
+    return cached.rate
+  }
+
+  // 4. Query DB snapshot (weekly baseline)
+  const snapshotRate = await fetchRateFromSnapshot(normalizedFrom, normalizedTo)
+  if (snapshotRate !== null) {
+    console.warn(`[ExchangeRate] Using DB snapshot rate for ${normalizedFrom}→${normalizedTo}`)
+    rateCache.set(cacheKey, { rate: snapshotRate, fetchedAt: Date.now() })
+    return snapshotRate
+  }
+
+  // 5. All sources exhausted — this should be very rare
+  console.error(`[ExchangeRate] ALL sources failed for ${normalizedFrom}→${normalizedTo}. Returning 1 (no conversion).`)
   return 1
 }
 

@@ -304,6 +304,7 @@
       "selectAccount": "Select account",
       "toAccount": "To Account",
       "selectToAccount": "Select destination account",
+      "currency": "Currency",
       "noAccountsAvailable": "No accounts available",
       "merchantOpt": "Merchant (Opt)",
       "merchantPlaceholder": "Enter merchant name",
@@ -598,6 +599,7 @@
       "description": "Update account information.",
       "name": "Name",
       "type": "Type",
+      "currency": "Currency",
       "namePlaceholder": "Account name",
       "cancel": "Cancel",
       "updateAccount": "Update Account"
