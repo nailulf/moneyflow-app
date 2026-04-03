@@ -75,21 +75,27 @@ export async function processRecurringTransactions(): Promise<ProcessingResult> 
           shouldRun = true
         }
       } else if (frequency === 'monthly') {
-        // Run if today is the same day of month as original date
-        // AND it's a different month than last processed
-        if (now.getDate() === originalDate.getDate()) {
+        // Run if today matches the original day of month, clamped to the
+        // last day of the current month (e.g. 31st → 28th in Feb).
+        const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+        const targetDay = Math.min(originalDate.getDate(), lastDayOfMonth)
+        if (now.getDate() === targetDay) {
           const isSameMonthAsLast = lastProcessed.getMonth() === now.getMonth() && lastProcessed.getFullYear() === now.getFullYear()
           if (!isSameMonthAsLast) {
             shouldRun = true
           }
         }
       } else if (frequency === 'yearly') {
-        // Run if today is same day and month as original
-        // AND different year than last processed
-        if (now.getDate() === originalDate.getDate() && now.getMonth() === originalDate.getMonth()) {
-          const isSameYearAsLast = lastProcessed.getFullYear() === now.getFullYear()
-          if (!isSameYearAsLast) {
-            shouldRun = true
+        // Run if today is same month as original, with day clamped to the
+        // last day of that month (e.g. Feb 29 → Feb 28 in non-leap years).
+        if (now.getMonth() === originalDate.getMonth()) {
+          const lastDayOfTargetMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+          const targetDay = Math.min(originalDate.getDate(), lastDayOfTargetMonth)
+          if (now.getDate() === targetDay) {
+            const isSameYearAsLast = lastProcessed.getFullYear() === now.getFullYear()
+            if (!isSameYearAsLast) {
+              shouldRun = true
+            }
           }
         }
       }
