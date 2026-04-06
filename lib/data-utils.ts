@@ -5,7 +5,7 @@ import { format, parseISO, startOfMonth, endOfMonth, eachMonthOfInterval, subMon
 // Default currency configuration
 export const DEFAULT_CURRENCY = 'IDR'
 
-const CURRENCY_SYMBOLS: Record<string, string> = {
+export const CURRENCY_SYMBOLS: Record<string, string> = {
   'IDR': 'Rp',
   'USD': '$',
   'EUR': '€',

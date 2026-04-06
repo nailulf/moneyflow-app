@@ -23,7 +23,11 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
   inputMode,
   ...props
 }, ref) => {
-  const currencySymbol = currency === 'IDR' ? 'Rp' : currency
+  const SYMBOLS: Record<string, string> = {
+    IDR: 'Rp', USD: '$', EUR: '€', GBP: '£', JPY: '¥',
+    SGD: 'S$', MYR: 'RM', AED: 'Dhs', SAR: 'SR',
+  }
+  const currencySymbol = SYMBOLS[currency] || currency
 
   const displayValue = value === 0 ? '' : formatIDR(value)
 
@@ -48,10 +52,9 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
         onChange={handleChange}
         placeholder={placeholder}
         className={cn(
-          'flex h-9 w-full rounded-md border border-input bg-transparent pl-10 pr-3 py-1 text-sm shadow-sm transition-colors',
-          'file:border-0 file:bg-transparent file:text-sm file:font-medium',
+          'flex h-10 lg:h-9 w-full rounded-md border border-input bg-transparent pl-10 pr-3 py-1 text-md leading-body-sm shadow-xs transition-colors',
           'placeholder:text-muted-foreground',
-          'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+          'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
           'disabled:cursor-not-allowed disabled:opacity-50',
           className
         )}

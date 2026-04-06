@@ -17,6 +17,8 @@ type InputType = React.ComponentProps<"input">["type"] | "amount"
 
 type InputProps = Omit<React.ComponentProps<"input">, "type"> & {
   type?: InputType
+  /** Currency code for amount inputs (e.g. 'USD', 'IDR'). Passed to CurrencyInput. */
+  currency?: string
 }
 
 const DatePickerInput = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
@@ -48,10 +50,11 @@ type AmountInputProps = Omit<React.ComponentProps<"input">, "type" | "value" | "
   onChange?: React.ChangeEventHandler<HTMLInputElement>
   name?: string
   className?: string
+  currency?: string
 }
 
 const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
-  ({ value, defaultValue, onChange, name, className, ...props }, ref) => {
+  ({ value, defaultValue, onChange, name, className, currency, ...props }, ref) => {
     // visibleInputRef points to the actual <input> inside CurrencyInput.
     // The forwarded `ref` is overridden below via useImperativeHandle to expose
     // the raw numeric value, preventing react-hook-form from reading the
@@ -123,6 +126,7 @@ const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
         onChange={handleCurrencyChange}
         name={name}
         className={className}
+        currency={currency}
         data-slot="input"
       />
     )
@@ -132,7 +136,7 @@ const AmountInput = React.forwardRef<HTMLInputElement, AmountInputProps>(
 AmountInput.displayName = "AmountInput"
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, onChange, value, defaultValue, name, ...props }, ref) => {
+  ({ className, type, onChange, value, defaultValue, name, currency, ...props }, ref) => {
     if (type === "amount") {
       return (
         <AmountInput
@@ -143,6 +147,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           onChange={onChange}
           name={name}
           className={className}
+          currency={currency}
         />
       )
     }

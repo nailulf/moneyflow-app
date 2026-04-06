@@ -26,7 +26,6 @@ import { formatCurrency, formatCurrencyCompact } from '@/lib/data-utils'
 import dynamic from 'next/dynamic'
 import { Skeleton } from '@/components/ui/atoms/skeleton'
 import { useAccounts } from '@/contexts/AccountContext'
-import { formatDistanceToNow } from 'date-fns'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTranslations } from 'next-intl'
 
@@ -129,12 +128,12 @@ function AccountRow({
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">{account.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {t('added')}{' '}
-            {account.created_at
-              ? formatDistanceToNow(new Date(account.created_at), { addSuffix: true })
-              : t('recently')}
-          </p>
+          {account.created_at &&
+            Date.now() - new Date(account.created_at).getTime() <= 7 * 24 * 60 * 60 * 1000 && (
+              <p className="text-[length:var(--font-size-xs)] leading-[var(--leading-caption)] text-muted-foreground">
+                {t('added')} {t('recently')}
+              </p>
+            )}
         </div>
       </div>
       <div className="text-right shrink-0 ml-4">
