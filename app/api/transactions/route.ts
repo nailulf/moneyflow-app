@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('category_id', categoryId)
     }
     if (accountId) {
-      query = query.eq('account_id', accountId)
+      query = query.or(`account_id.eq.${accountId},to_account_id.eq.${accountId}`)
     }
     if (merchant) {
       query = query.ilike('merchant', `%${merchant}%`)

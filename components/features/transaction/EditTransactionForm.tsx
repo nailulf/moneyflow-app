@@ -248,18 +248,41 @@ export function EditTransactionForm({
 
           <div className="space-y-2 grid grid-cols-7 items-center">
             <label className="text-sm font-medium col-span-2">{t('amount')}</label>
-            <div className="col-span-5">
-              <Input
-                type="amount"
-                step="0.01"
-                placeholder="0.00"
-                {...register('amount', { valueAsNumber: true })}
-                className={errors.amount ? 'border-destructive' : ''}
-              />
-              {errors.amount && (
-                <p className="text-sm text-destructive">{errors.amount.message}</p>
-              )}
+            <div className="col-span-5 flex gap-2">
+              <Select
+                value={watch('currency') || 'IDR'}
+                onValueChange={(value) => {
+                  setSuppressCloseUntil(Date.now() + 500)
+                  setValue('currency', value)
+                }}
+                onOpenChange={setIsAnySelectOpen}
+              >
+                <SelectTrigger className="w-[90px] shrink-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPORTED_CURRENCIES.map((code) => (
+                    <SelectItem key={code} value={code}>{code}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex-1">
+                <Input
+                  type="amount"
+                  step="0.01"
+                  placeholder="0"
+                  currency={watch('currency') || 'IDR'}
+                  {...register('amount', { valueAsNumber: true })}
+                  className={errors.amount ? 'border-destructive' : ''}
+                />
+              </div>
             </div>
+            {errors.amount && (
+              <div className="col-span-2" />
+            )}
+            {errors.amount && (
+              <p className="text-sm text-destructive col-span-5">{errors.amount.message}</p>
+            )}
           </div>
 
           <div className="space-y-2 grid grid-cols-7 items-center">
@@ -398,28 +421,6 @@ export function EditTransactionForm({
           </div>
           )}
 
-          <div className="space-y-2 grid grid-cols-7 items-center">
-            <label className="text-sm font-medium col-span-2">{t('currency')}</label>
-            <div className="col-span-5">
-              <Select
-                value={watch('currency') || 'IDR'}
-                onValueChange={(value) => {
-                  setSuppressCloseUntil(Date.now() + 500)
-                  setValue('currency', value)
-                }}
-                onOpenChange={setIsAnySelectOpen}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SUPPORTED_CURRENCIES.map((code) => (
-                    <SelectItem key={code} value={code}>{code}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
           <div className="space-y-2 grid grid-cols-7 items-center">
             <label className="text-sm font-medium col-span-2">{t('merchantOpt')}</label>

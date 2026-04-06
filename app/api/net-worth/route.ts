@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
     const accountIdList = accountIds.map(id => `"${id}"`).join(',')
     const { data: allTransactions, error: transError } = await supabase
       .from('transactions')
-      .select('amount, type, date, account_id, to_account_id')
+      .select('amount, type, date, account_id, to_account_id, currency')
       .or(`account_id.in.(${accountIdList}),to_account_id.in.(${accountIdList})`)
       .lte('date', endDateTime.toISOString())
       .order('date', { ascending: true })
@@ -172,6 +172,31 @@ export async function GET(request: NextRequest) {
       allPointDates
     )
 
+    // ── Build cross-rate maps for each account currency ──
+    // exchangeRates maps "FROM-YYYY-MM" → rate-to-IDR.
+    // For an account in currency X, we need rates from every other currency → X.
+    // Cross-rate: FROM→X = (FROM→IDR) / (X→IDR). If X is IDR, FROM→IDR directly.
+    function buildCrossRatesForAccount(acctCurrency: string, date: Date): Map<string, number> {
+      const crossRates = new Map<string, number>()
+      if (acctCurrency === BASE_CURRENCY) {
+        // Account is IDR: just use the batch rates directly (FROM→IDR)
+        for (const from of SUPPORTED_CURRENCIES) {
+          if (from === BASE_CURRENCY) continue
+          const rate = lookupRate(exchangeRates, from, BASE_CURRENCY, date)
+          crossRates.set(`${from}-${acctCurrency}`, rate)
+        }
+      } else {
+        // Account is non-IDR (e.g. USD): cross-rate FROM→USD = (FROM→IDR) / (USD→IDR)
+        const acctToBase = lookupRate(exchangeRates, acctCurrency, BASE_CURRENCY, date)
+        for (const from of SUPPORTED_CURRENCIES) {
+          if (from === acctCurrency) continue
+          const fromToBase = from === BASE_CURRENCY ? 1 : lookupRate(exchangeRates, from, BASE_CURRENCY, date)
+          crossRates.set(`${from}-${acctCurrency}`, acctToBase !== 0 ? fromToBase / acctToBase : 1)
+        }
+      }
+      return crossRates
+    }
+
     // ── Calculate historical net worth data points ──
     const netWorthData = []
 
@@ -181,13 +206,17 @@ export async function GET(request: NextRequest) {
       for (const account of accounts) {
         if (account.created_at && new Date(account.created_at) > pointDate) continue
 
+        const acctCurrency = normalizeCurrency(account.currency)
+        const crossRates = buildCrossRatesForAccount(acctCurrency, pointDate)
         const accountTransactions = transactionsByAccount.get(account.id) || []
         const accountBalance = calculateAccountBalanceAtDate(
           accountTransactions,
           pointDate,
           account.type,
           account.balance || 0,
-          account.id
+          account.id,
+          acctCurrency,
+          crossRates
         )
 
         // Convert to base currency (IDR) using the rate for this month
@@ -215,13 +244,17 @@ export async function GET(request: NextRequest) {
 
     // ── Get detailed account information with current balances ──
     const accountsWithBalances = accounts.map((account) => {
+      const acctCurrency = normalizeCurrency(account.currency)
+      const crossRates = buildCrossRatesForAccount(acctCurrency, endDateTime)
       const accountTransactions = transactionsByAccount.get(account.id) || []
       const currentBalance = calculateAccountBalanceAtDate(
         accountTransactions,
         endDateTime,
         account.type,
         account.balance || 0,
-        account.id
+        account.id,
+        acctCurrency,
+        crossRates
       )
 
       const currency = normalizeCurrency(account.currency)

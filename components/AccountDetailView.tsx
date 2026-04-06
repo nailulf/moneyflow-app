@@ -130,10 +130,14 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
     const txEffect = transactions.reduce((sum, t) => {
       if (t.type === 'INCOME') return sum + t.amount
       if (t.type === 'EXPENSE') return sum - t.amount
+      if (t.type === 'TRANSFER' && t.to_account_id) {
+        if (t.account_id === accountId) return sum - t.amount
+        if (t.to_account_id === accountId) return sum + t.amount
+      }
       return sum
     }, 0)
     return account.balance - txEffect - adjustmentTotal
-  }, [account, transactions, adjustmentTotal])
+  }, [account, transactions, adjustmentTotal, accountId])
 
   // Real-time adjustment preview
   const currentBalance = account?.currentBalance ?? account?.balance ?? 0

@@ -119,6 +119,17 @@ The app uses AI-powered statement parsing:
 
 ### Design System
 
+**Always use the design system CSS variables** defined in `app/globals.css` instead of Tailwind's default sizing utilities. These variables are responsive (mobile → tablet → desktop breakpoints).
+
+**Font sizes** — use `text-[length:var(--font-size-*)]` instead of `text-xs`, `text-sm`, etc.:
+- `--font-size-xs` (12px), `--font-size-sm` (14px), `--font-size-md`/`--font-size-lg` (16px)
+- `--font-size-xl` (18px), `--font-size-2xl` (20px), `--font-size-3xl` (24px), `--font-size-4xl` (32px)
+
+**Line heights** — use `leading-[var(--leading-*)]`:
+- Titles: `--leading-title-1` through `--leading-title-5`
+- Body: `--leading-body-lg`, `--leading-body-sm`
+- Caption: `--leading-caption`
+
 **Semantic Color System:**
 - Uses CSS variables (HSL format) defined in `app/globals.css`
 - Tailwind config extends with semantic tokens: `primary`, `secondary`, `destructive`, `success`, `warning`, `muted`, `accent`, `auth.*`

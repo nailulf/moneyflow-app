@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
+import { getExchangeRate, SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
+
+/**
+ * Build a Map of "FROM-TO" → rate for converting any supported currency
+ * to the target account currency. Uses live rates with DB snapshot fallback.
+ */
+async function buildCrossRateMap(targetCurrency: string): Promise<Map<string, number>> {
+  const rates = new Map<string, number>()
+  const others = SUPPORTED_CURRENCIES.filter(c => c !== targetCurrency)
+  await Promise.all(
+    others.map(async (from) => {
+      const rate = await getExchangeRate(from, targetCurrency)
+      rates.set(`${from}-${targetCurrency}`, rate)
+    })
+  )
+  return rates
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,12 +53,12 @@ export async function GET(request: NextRequest) {
       if (includeHistory || asOfDate) {
         const targetDate = asOfDate ? new Date(asOfDate) : new Date()
         
-        // Fetch transactions for this account
+        // Fetch transactions for this account (including inbound transfers)
         const { data: transactions, error: transactionError } = await supabase
           .from('transactions')
           .select('*')
-          .eq('account_id', accountId)
           .eq('user_id', user.id)
+          .or(`account_id.eq.${accountId},to_account_id.eq.${accountId}`)
           .lte('date', targetDate.toISOString())
           .order('date', { ascending: true })
 
@@ -50,8 +67,9 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 })
         }
 
-        // Calculate historical balance
-         const historicalBalance = calculateAccountBalanceAtDate(transactions || [], targetDate, account.type, account.balance)
+        // Calculate historical balance with cross-currency conversion
+         const crossRates = await buildCrossRateMap(account.currency || 'IDR')
+         const historicalBalance = calculateAccountBalanceAtDate(transactions || [], targetDate, account.type, account.balance, accountId, account.currency, crossRates)
         
         return NextResponse.json({
           ...account,
@@ -90,11 +108,12 @@ export async function GET(request: NextRequest) {
       const accountIds = accounts?.map(account => account.id) || []
       
       if (accountIds.length > 0) {
+        const accountIdList = accountIds.map(id => `"${id}"`).join(',')
         const { data: transactions, error: transactionError } = await supabase
           .from('transactions')
           .select('*')
-          .in('account_id', accountIds)
           .eq('user_id', user.id)
+          .or(`account_id.in.(${accountIdList}),to_account_id.in.(${accountIdList})`)
           .lte('date', targetDate.toISOString())
           .order('date', { ascending: true })
 
@@ -103,10 +122,21 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 })
         }
 
-        // Calculate historical balances for each account
+        // Calculate historical balances for each account with cross-currency conversion
+        // Build rate maps for each unique account currency
+        const uniqueAccountCurrencies = [...new Set(accounts?.map(a => a.currency || 'IDR') || [])]
+        const rateMaps = new Map<string, Map<string, number>>()
+        await Promise.all(
+          uniqueAccountCurrencies.map(async (cur) => {
+            rateMaps.set(cur, await buildCrossRateMap(cur))
+          })
+        )
+
+        // Include transactions where this account is either source or destination
          const accountsWithHistory = accounts?.map(account => {
-           const accountTransactions = transactions?.filter(t => t.account_id === account.id) || []
-           const historicalBalance = calculateAccountBalanceAtDate(accountTransactions, targetDate, account.type, account.balance)
+           const accountTransactions = transactions?.filter(t => t.account_id === account.id || t.to_account_id === account.id) || []
+           const acctCurrency = account.currency || 'IDR'
+           const historicalBalance = calculateAccountBalanceAtDate(accountTransactions, targetDate, account.type, account.balance, account.id, acctCurrency, rateMaps.get(acctCurrency))
           
           return {
             ...account,

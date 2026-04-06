@@ -7,6 +7,7 @@ export type BalanceTransaction = {
   date: string
   account_id: string | null
   to_account_id?: string | null
+  currency?: string | null
 }
 
 export interface NetWorthDataPoint {
@@ -73,38 +74,50 @@ export function calculateNetWorth(accounts: AccountWithBalance[]): number {
  *   - If the transaction's `account_id` matches `accountId` → money OUT (subtract)
  *   - If the transaction's `to_account_id` matches `accountId` → money IN (add)
  *   - Legacy transfers without `to_account_id` are skipped (no way to determine direction)
+ *
+ * Cross-currency: if `accountCurrency` is provided and a transaction has a different
+ * currency, the amount is converted using `currencyRates` (a map of "FROM-TO" → rate).
+ * If no rate is found, the raw amount is used (no conversion).
  */
 export function calculateAccountBalanceAtDate(
   transactions: BalanceTransaction[],
   targetDate: Date,
   accountType: AccountDB['type'] = 'BANK',
   initialBalance: number = 0,
-  accountId?: string
+  accountId?: string,
+  accountCurrency?: string,
+  currencyRates?: Map<string, number>
 ): number {
   const filteredTransactions = transactions.filter(
     transaction => new Date(transaction.date) <= targetDate
   )
 
+  const convert = (amount: number, txCurrency?: string | null): number => {
+    if (!accountCurrency || !currencyRates || !txCurrency || txCurrency === accountCurrency) {
+      return amount
+    }
+    const rate = currencyRates.get(`${txCurrency}-${accountCurrency}`)
+    return rate ? amount * rate : amount
+  }
+
   let balance = initialBalance
   for (const transaction of filteredTransactions) {
+    const amount = convert(transaction.amount, transaction.currency)
     switch (transaction.type) {
       case 'INCOME':
-        balance += transaction.amount
+        balance += amount
         break
       case 'EXPENSE':
-        balance -= transaction.amount
+        balance -= amount
         break
       case 'TRANSFER':
         if (accountId && transaction.to_account_id) {
           if (transaction.account_id === accountId) {
-            // This account is the source — money out
-            balance -= transaction.amount
+            balance -= amount
           } else if (transaction.to_account_id === accountId) {
-            // This account is the destination — money in
-            balance += transaction.amount
+            balance += amount
           }
         }
-        // Legacy transfers without to_account_id are skipped
         break
     }
   }
