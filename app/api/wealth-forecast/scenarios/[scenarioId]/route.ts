@@ -18,6 +18,7 @@ const ScenarioUpdateSchema = z.object({
   monthly_withdrawal: z.number().optional(),
   include_cashflow: z.boolean().optional(),
   is_default: z.boolean().optional(),
+  target_net_worth: z.number().min(0).optional(),
 })
 
 export async function PUT(request: NextRequest, context: RouteParams) {

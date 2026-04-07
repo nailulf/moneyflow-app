@@ -152,6 +152,9 @@ export async function GET(request: NextRequest) {
 
         if (catInsertError) {
           console.error('Error inserting snapshot categories:', catInsertError)
+          // Rollback: delete the snapshot we just created
+          await supabase.from('budget_snapshots').delete().eq('id', newSnapshot.id)
+          return NextResponse.json({ error: 'Failed to create snapshot categories' }, { status: 500 })
         }
       }
 
@@ -260,11 +263,6 @@ export async function GET(request: NextRequest) {
         .single()
 
       if (plan) {
-        await supabase
-          .from('budget_snapshot_categories')
-          .delete()
-          .eq('snapshot_id', snapshot.id)
-
         if (plan.budget_plan_categories?.length) {
           const snapCategories = plan.budget_plan_categories.map(
             (c: { category_id: string; allocated_amount: number }) => ({
@@ -274,9 +272,26 @@ export async function GET(request: NextRequest) {
             })
           )
 
+          // Upsert new/updated categories
           await supabase
             .from('budget_snapshot_categories')
-            .insert(snapCategories)
+            .upsert(snapCategories, { onConflict: 'snapshot_id,category_id' })
+
+          // Remove categories no longer in the plan
+          const planCategoryIds = plan.budget_plan_categories.map(
+            (c: { category_id: string }) => c.category_id
+          )
+          await supabase
+            .from('budget_snapshot_categories')
+            .delete()
+            .eq('snapshot_id', snapshot.id)
+            .not('category_id', 'in', `(${planCategoryIds.join(',')})`)
+        } else {
+          // Plan has no categories — clear snapshot categories
+          await supabase
+            .from('budget_snapshot_categories')
+            .delete()
+            .eq('snapshot_id', snapshot.id)
         }
 
         const { data: refreshedSnapshot } = await supabase

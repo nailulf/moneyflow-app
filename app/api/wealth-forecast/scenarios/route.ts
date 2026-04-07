@@ -14,6 +14,7 @@ const ScenarioSchema = z.object({
   monthly_withdrawal: z.number().optional(),
   include_cashflow: z.boolean().optional(),
   is_default: z.boolean().optional(),
+  target_net_worth: z.number().min(0).optional(),
 })
 
 export async function GET() {
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest) {
         monthly_withdrawal: body.monthly_withdrawal,
         include_cashflow: body.include_cashflow,
         is_default: shouldBeDefault,
+        target_net_worth: body.target_net_worth,
       })
       .select('*')
       .single()

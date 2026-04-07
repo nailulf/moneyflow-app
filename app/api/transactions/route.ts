@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Validate and sanitize each transaction
-      const validTransactions = []
+      const validTransactions: Array<Record<string, unknown>> = []
       const errors = []
       const warnings: string[] = []
 
@@ -171,11 +171,61 @@ export async function POST(request: NextRequest) {
       // For strict synchronization, we should probably fail or report back
       if (errors.length > 0) {
         console.error('[Bulk Import] Validation failed for some items:', errors)
-        return NextResponse.json({ 
-          error: 'Validation failed for some transactions', 
+        return NextResponse.json({
+          error: 'Validation failed for some transactions',
           details: errors,
-          warnings 
+          warnings
         }, { status: 400 })
+      }
+
+      // ── Transaction-level duplicate detection ──
+      const normalizeText = (v?: string | null) => (v || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+      const normalizeDateStr = (v?: string | null) => {
+        if (!v) return ''
+        const d = new Date(v)
+        return isNaN(d.getTime()) ? String(v) : d.toISOString().slice(0, 10)
+      }
+      const toKey = (date: string, amount: number, descriptor: string) => `${date}|${amount.toFixed(2)}|${descriptor}`
+
+      // Build date range from incoming transactions
+      const dates = validTransactions.map(t => normalizeDateStr(String(t.date || ''))).filter(Boolean).sort()
+      const minDate = dates[0]
+      const maxDate = dates[dates.length - 1]
+
+      // Collect unique account IDs to scope the dedup query
+      const accountIds = [...new Set(validTransactions.map(t => t.account_id).filter(Boolean))] as string[]
+
+      let duplicateCount = 0
+      if (minDate && maxDate && accountIds.length > 0) {
+        const { data: existing } = await supabase
+          .from('transactions')
+          .select('id, date, amount, description, merchant, account_id')
+          .eq('user_id', user.id)
+          .in('account_id', accountIds)
+          .gte('date', minDate)
+          .lte('date', maxDate)
+
+        if (existing && existing.length > 0) {
+          const existingMap = new Map<string, string>()
+          for (const ex of existing) {
+            const key = toKey(normalizeDateStr(ex.date), Number(ex.amount), normalizeText(ex.merchant || ex.description))
+            if (!existingMap.has(key)) existingMap.set(key, ex.id)
+          }
+
+          for (const tx of validTransactions) {
+            const key = toKey(normalizeDateStr(String(tx.date || '')), Number(tx.amount), normalizeText(String(tx.merchant || tx.description || '')))
+            const match = existingMap.get(key)
+            if (match) {
+              tx.is_duplicate = true
+              tx.duplicate_of = match
+              duplicateCount++
+            }
+          }
+        }
+      }
+
+      if (duplicateCount > 0) {
+        warnings.push(`${duplicateCount} transaction(s) detected as duplicates of existing records`)
       }
 
       const { data, error } = await supabase
@@ -200,10 +250,11 @@ export async function POST(request: NextRequest) {
         console.warn('[Bulk Import] Warnings:', warnings)
       }
 
-      return NextResponse.json({ 
-        success: true, 
-        count: data?.length || 0, 
+      return NextResponse.json({
+        success: true,
+        count: data?.length || 0,
         transactions: data,
+        duplicateCount,
         warnings,
         performance: {
           durationMs: duration,

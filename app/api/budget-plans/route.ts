@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create budget plan' }, { status: 500 })
     }
 
-    // 2. Create plan categories
+    // 2. Create plan categories — rollback plan if this fails
     if (categories && Array.isArray(categories) && categories.length > 0) {
       const planCategoriesData = categories.map((cat: { category_id: string; allocated_amount: number }) => ({
         plan_id: plan.id,
@@ -138,10 +138,13 @@ export async function POST(request: NextRequest) {
 
       if (catError) {
         console.error('Error creating plan categories:', catError)
+        await supabase.from('budget_plans').delete().eq('id', plan.id)
+        return NextResponse.json({ error: 'Failed to create plan categories' }, { status: 500 })
       }
     }
 
     // 3. Auto-create snapshot for current period (first-time setup)
+    // Snapshot failure is non-fatal — it will be auto-created on next GET
     const now = new Date()
     const currentYear = now.getFullYear()
     const currentMonth = now.getMonth() + 1
@@ -177,9 +180,13 @@ export async function POST(request: NextRequest) {
         allocated_amount: cat.allocated_amount,
       }))
 
-      await supabase
+      const { error: snapCatError } = await supabase
         .from('budget_snapshot_categories')
         .insert(snapshotCategoriesData)
+
+      if (snapCatError) {
+        console.error('Error creating snapshot categories (non-fatal):', snapCatError)
+      }
     }
 
     // 4. Return the complete plan
@@ -271,15 +278,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update budget plan' }, { status: 500 })
     }
 
-    // Full category replacement if categories provided
+    // Safe category replacement: insert new first, then delete old
     if (categories) {
-      // Delete all existing categories for this plan
-      await supabase
-        .from('budget_plan_categories')
-        .delete()
-        .eq('plan_id', id)
-
-      // Insert new categories
       if (categories.length > 0) {
         const planCategoriesData = categories.map((cat: { category_id: string; allocated_amount: number }) => ({
           plan_id: id,
@@ -287,14 +287,29 @@ export async function PUT(request: NextRequest) {
           allocated_amount: cat.allocated_amount,
         }))
 
+        // Upsert new categories (insert or update if category_id already exists for this plan)
         const { error: catError } = await supabase
           .from('budget_plan_categories')
-          .insert(planCategoriesData)
+          .upsert(planCategoriesData, { onConflict: 'plan_id,category_id' })
 
         if (catError) {
           console.error('Error replacing plan categories:', catError)
           return NextResponse.json({ error: 'Failed to update plan categories' }, { status: 500 })
         }
+
+        // Remove categories that are no longer in the new set
+        const newCategoryIds = categories.map((c: { category_id: string }) => c.category_id)
+        await supabase
+          .from('budget_plan_categories')
+          .delete()
+          .eq('plan_id', id)
+          .not('category_id', 'in', `(${newCategoryIds.join(',')})`)
+      } else {
+        // Empty categories array — delete all
+        await supabase
+          .from('budget_plan_categories')
+          .delete()
+          .eq('plan_id', id)
       }
     }
 

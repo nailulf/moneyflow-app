@@ -705,6 +705,7 @@ export interface Database {
           monthly_withdrawal: number
           include_cashflow: boolean
           is_default: boolean
+          target_net_worth: number
           created_at: string
           updated_at: string
         }
@@ -722,6 +723,7 @@ export interface Database {
           monthly_withdrawal?: number
           include_cashflow?: boolean
           is_default?: boolean
+          target_net_worth?: number
           created_at?: string
           updated_at?: string
         }
@@ -739,6 +741,7 @@ export interface Database {
           monthly_withdrawal?: number
           include_cashflow?: boolean
           is_default?: boolean
+          target_net_worth?: number
           updated_at?: string
         }
       }
@@ -747,8 +750,9 @@ export interface Database {
           id: string
           scenario_id: string
           user_id: string
+          name: string
           event_date: string
-          event_type: 'CONTRIBUTION' | 'WITHDRAWAL' | 'INCOME' | 'EXPENSE' | 'ADJUSTMENT'
+          event_type: 'WEDDING' | 'KIDS' | 'EDUCATION' | 'PROPERTY' | 'HAJJ' | 'VEHICLE' | 'RETIREMENT' | 'OTHER'
           amount: number
           note: string | null
           created_at: string
@@ -758,8 +762,9 @@ export interface Database {
           id?: string
           scenario_id: string
           user_id: string
+          name: string
           event_date: string
-          event_type: 'CONTRIBUTION' | 'WITHDRAWAL' | 'INCOME' | 'EXPENSE' | 'ADJUSTMENT'
+          event_type: 'WEDDING' | 'KIDS' | 'EDUCATION' | 'PROPERTY' | 'HAJJ' | 'VEHICLE' | 'RETIREMENT' | 'OTHER'
           amount: number
           note?: string | null
           created_at?: string
@@ -769,8 +774,9 @@ export interface Database {
           id?: string
           scenario_id?: string
           user_id?: string
+          name?: string
           event_date?: string
-          event_type?: 'CONTRIBUTION' | 'WITHDRAWAL' | 'INCOME' | 'EXPENSE' | 'ADJUSTMENT'
+          event_type?: 'WEDDING' | 'KIDS' | 'EDUCATION' | 'PROPERTY' | 'HAJJ' | 'VEHICLE' | 'RETIREMENT' | 'OTHER'
           amount?: number
           note?: string | null
           updated_at?: string

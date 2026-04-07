@@ -104,9 +104,9 @@ export async function POST(request: NextRequest) {
 
       if (categoriesError) {
         console.error('Error creating budget categories:', categoriesError)
-        // Note: We don't rollback the budget creation here, but we could return a warning
-        // or delete the budget if strict atomicity is required.
-        // For now, we'll log it and return the budget (user can edit categories later).
+        // Rollback: delete the budget we just created
+        await supabase.from('budgets').delete().eq('id', budget.id)
+        return NextResponse.json({ error: 'Failed to create budget categories' }, { status: 500 })
       }
     }
 

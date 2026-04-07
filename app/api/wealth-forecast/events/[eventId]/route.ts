@@ -8,9 +8,10 @@ interface RouteParams {
 
 const EventUpdateSchema = z.object({
   scenario_id: z.string().uuid().optional(),
+  name: z.string().min(1).optional(),
   event_date: z.string().optional(),
-  event_type: z.enum(['CONTRIBUTION', 'WITHDRAWAL', 'INCOME', 'EXPENSE', 'ADJUSTMENT']).optional(),
-  amount: z.number().optional(),
+  event_type: z.enum(['WEDDING', 'KIDS', 'EDUCATION', 'PROPERTY', 'HAJJ', 'VEHICLE', 'RETIREMENT', 'OTHER']).optional(),
+  amount: z.number().positive().optional(),
   note: z.string().nullable().optional(),
 })
 
