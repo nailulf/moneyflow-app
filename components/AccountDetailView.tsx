@@ -8,6 +8,8 @@ import { AccountNavigation } from '@/components/features/navigation/TopNavigatio
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
 import { Button } from '@/components/ui/atoms/button'
+import { AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts'
+import { ChartContainer } from '@/components/ui/organisms/chart'
 import { ArrowLeft, CreditCard, Wallet, TrendingUp, Building2, Loader2, Edit, Trash2, Download, SlidersHorizontal } from 'lucide-react'
 import { useAccounts, AccountWithHistory } from '@/contexts/AccountContext'
 import { formatCurrency, parseCurrencyAmount } from '@/lib/data-utils'
@@ -68,6 +70,29 @@ const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   OTHER: CreditCard
 }
 
+function BalanceTooltip({
+  active,
+  payload,
+  label,
+  currency,
+}: {
+  active?: boolean
+  payload?: { value: number }[]
+  label?: string
+  currency?: string
+}) {
+  if (!active || !payload?.length) return null
+  const formattedDate = label
+    ? new Date(label + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+    : ''
+  return (
+    <div className="rounded-xl border border-border/50 bg-background/95 backdrop-blur-sm px-3 py-2 shadow-xl">
+      <p className="text-xs text-muted-foreground mb-0.5">{formattedDate}</p>
+      <p className="text-sm font-bold text-foreground">{formatCurrency(payload[0].value, currency)}</p>
+    </div>
+  )
+}
+
 interface AccountDetailViewProps {
   accountId?: string
   isModal?: boolean
@@ -125,24 +150,111 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
     adjustments.reduce((sum, adj) => sum + adj.adjustment_amount, 0)
   ), [adjustments])
 
+  // Initial balance = DB stored balance minus manual adjustments.
+  // account.balance in the DB = original balance + cumulative adjustments.
+  // Transactions are applied on top by the API to get currentBalance.
   const initialBalance = useMemo(() => {
     if (!account) return 0
-    const txEffect = transactions.reduce((sum, t) => {
-      if (t.type === 'INCOME') return sum + t.amount
-      if (t.type === 'EXPENSE') return sum - t.amount
-      if (t.type === 'TRANSFER' && t.to_account_id) {
-        if (t.account_id === accountId) return sum - t.amount
-        if (t.to_account_id === accountId) return sum + t.amount
-      }
-      return sum
-    }, 0)
-    return account.balance - txEffect - adjustmentTotal
-  }, [account, transactions, adjustmentTotal, accountId])
+    return account.balance - adjustmentTotal
+  }, [account, adjustmentTotal])
 
   // Real-time adjustment preview
   const currentBalance = account?.currentBalance ?? account?.balance ?? 0
   const parsedNewBalance = parseCurrencyAmount(adjustNewBalance)
   const adjustmentDiff = adjustNewBalance.trim() === '' ? null : parsedNewBalance - currentBalance
+
+  // Balance history chart data.
+  // Uses all transactions (including cross-currency at face value) to show trends.
+  // The chart is anchored to initialBalance at start and currentBalance at end.
+  const balanceHistory = useMemo(() => {
+    if (!account) return []
+
+    const dateEffects = new Map<string, number>()
+
+    // Include all transactions
+    transactions.forEach(tx => {
+      let effect = 0
+      if (tx.type === 'INCOME') effect = tx.amount
+      else if (tx.type === 'EXPENSE') effect = -tx.amount
+      else if (tx.type === 'TRANSFER' && tx.to_account_id) {
+        if (tx.account_id === accountId) effect = -tx.amount
+        else if (tx.to_account_id === accountId) effect = tx.amount
+      }
+      if (effect !== 0) {
+        dateEffects.set(tx.date, (dateEffects.get(tx.date) || 0) + effect)
+      }
+    })
+
+    // Adjustments are always in account currency
+    adjustments.forEach(adj => {
+      dateEffects.set(adj.adjustment_date, (dateEffects.get(adj.adjustment_date) || 0) + adj.adjustment_amount)
+    })
+
+    const sortedDates = [...dateEffects.keys()].sort()
+    const currentBal = account.currentBalance ?? account.balance
+
+    // If no events, show flat line from creation to today
+    if (sortedDates.length === 0) {
+      const createdDate = account.created_at
+        ? new Date(account.created_at).toISOString().slice(0, 10)
+        : null
+      const today = new Date().toISOString().slice(0, 10)
+      if (createdDate) {
+        return [
+          { date: createdDate, balance: initialBalance },
+          { date: today, balance: currentBal },
+        ]
+      }
+      return []
+    }
+
+    // Start from initial balance and walk forward
+    let balance = initialBalance
+    const points: { date: string; balance: number }[] = []
+
+    // Always start with initial balance at creation
+    const createdDate = account.created_at
+      ? new Date(account.created_at).toISOString().slice(0, 10)
+      : sortedDates[0]
+    if (createdDate) {
+      points.push({ date: createdDate, balance })
+    }
+
+    // Walk through events chronologically
+    sortedDates.forEach(date => {
+      balance += dateEffects.get(date)!
+      points.push({ date, balance })
+    })
+
+    // Anchor to today with API-computed current balance (most accurate)
+    const today = new Date().toISOString().slice(0, 10)
+    const lastPointDate = points[points.length - 1]?.date
+    if (!lastPointDate || lastPointDate < today) {
+      points.push({ date: today, balance: currentBal })
+    } else if (lastPointDate === today) {
+      // Override last point with API value for accuracy
+      points[points.length - 1].balance = currentBal
+    }
+
+    // De-duplicate consecutive points on the same date (keep first and last)
+    const deduped: typeof points = []
+    for (let i = 0; i < points.length; i++) {
+      const prev = deduped[deduped.length - 1]
+      const next = points[i + 1]
+      if (!prev || prev.date !== points[i].date || !next || next.date !== points[i].date) {
+        deduped.push(points[i])
+      }
+    }
+
+    return deduped
+  }, [account, transactions, adjustments, accountId, initialBalance])
+
+  const chartConfig = {
+    balance: {
+      label: t('chart.title'),
+      color: 'hsl(var(--chart-1))',
+    },
+  }
 
   useEffect(() => {
     if (!loading && accounts.length > 0) {
@@ -347,6 +459,71 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
               <TabsContent value="overview">
                 {/* Goal Section - only for bank and investment accounts */}
                 {canHaveGoal && <GoalSection account={account} />}
+
+                {/* Balance History Chart */}
+                {balanceHistory.length > 1 && (
+                  <Card className={canHaveGoal ? 'mt-6' : ''}>
+                    <CardHeader>
+                      <CardTitle className="text-lg leading-title-5">{t('chart.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-[200px]">
+                        <ChartContainer config={chartConfig} className="h-full w-full">
+                          <AreaChart data={balanceHistory} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id={`balanceGradient-${accountId}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.35} />
+                                <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <XAxis
+                              dataKey="date"
+                              tickLine={false}
+                              axisLine={false}
+                              tickMargin={10}
+                              minTickGap={40}
+                              interval="preserveStartEnd"
+                              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                              tickFormatter={(value) => {
+                                const date = new Date(value + 'T00:00:00')
+                                return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                              }}
+                            />
+                            <YAxis
+                              hide
+                              domain={([dataMin, dataMax]: [number, number]) => {
+                                const padding = Math.max((dataMax - dataMin) * 0.1, dataMax * 0.02)
+                                return [Math.max(0, dataMin - padding), dataMax + padding]
+                              }}
+                            />
+                            <Tooltip
+                              content={<BalanceTooltip currency={account.currency} />}
+                              cursor={{
+                                stroke: 'hsl(var(--border))',
+                                strokeWidth: 1,
+                                strokeDasharray: '4 2',
+                              }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="balance"
+                              stroke="hsl(var(--chart-1))"
+                              strokeWidth={2}
+                              fill={`url(#balanceGradient-${accountId})`}
+                              dot={false}
+                              activeDot={{
+                                r: 4,
+                                strokeWidth: 2,
+                                stroke: 'hsl(var(--background))',
+                                fill: 'hsl(var(--chart-1))',
+                              }}
+                            />
+                          </AreaChart>
+                        </ChartContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Account Info */}
                 <Card className="mt-6">

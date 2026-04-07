@@ -714,6 +714,9 @@
     },
     "adjustments": {
       "title": "Riwayat Saldo"
+    },
+    "chart": {
+      "title": "Perubahan Saldo"
     }
   },
   "dashboard": {
