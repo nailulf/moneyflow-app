@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getExchangeRate, SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
 
 interface RouteParams {
   params: Promise<{ accountId: string }>
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest, context: RouteParams) {
     // Include both outbound (account_id) and inbound transfers (to_account_id).
     const { data: transactions, error: txError } = await supabase
       .from('transactions')
-      .select('type, amount, account_id, to_account_id')
+      .select('type, amount, account_id, to_account_id, currency')
       .eq('user_id', user.id)
       .or(`account_id.eq.${accountId},to_account_id.eq.${accountId}`)
 
@@ -100,13 +101,36 @@ export async function POST(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ error: 'Failed to compute current balance' }, { status: 500 })
     }
 
+    // Build cross-currency rate map for this account's currency
+    const acctCurrency = account.currency || 'IDR'
+    const crossRates = new Map<string, number>()
+    const foreignCurrencies = [...new Set(
+      (transactions ?? [])
+        .map(tx => tx.currency)
+        .filter((c): c is string => !!c && c !== acctCurrency)
+    )]
+    if (foreignCurrencies.length > 0) {
+      await Promise.all(foreignCurrencies.map(async (from) => {
+        const rate = await getExchangeRate(from, acctCurrency)
+        crossRates.set(`${from}-${acctCurrency}`, rate)
+      }))
+    }
+
+    // Convert transaction amount to account currency if needed
+    const convert = (amount: number, txCurrency?: string) => {
+      if (!txCurrency || txCurrency === acctCurrency) return amount
+      const rate = crossRates.get(`${txCurrency}-${acctCurrency}`)
+      return rate ? amount * rate : amount
+    }
+
     // Compute current displayed balance = account.balance + sum(all tx effects)
     const txEffect = (transactions ?? []).reduce((sum, tx) => {
-      if (tx.type === 'INCOME') return sum + tx.amount
-      if (tx.type === 'EXPENSE') return sum - tx.amount
+      const amount = convert(tx.amount, tx.currency)
+      if (tx.type === 'INCOME') return sum + amount
+      if (tx.type === 'EXPENSE') return sum - amount
       if (tx.type === 'TRANSFER' && tx.to_account_id) {
-        if (tx.account_id === accountId) return sum - tx.amount   // outbound
-        if (tx.to_account_id === accountId) return sum + tx.amount // inbound
+        if (tx.account_id === accountId) return sum - amount
+        if (tx.to_account_id === accountId) return sum + amount
       }
       return sum
     }, 0)

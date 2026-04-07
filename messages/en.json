@@ -714,6 +714,9 @@
     },
     "adjustments": {
       "title": "Balance History"
+    },
+    "chart": {
+      "title": "Balance Over Time"
     }
   },
   "dashboard": {
