@@ -536,7 +536,12 @@ export function UnifiedStatementProcessor({
         totalAmount: transactionsToImport.reduce((sum, t) => sum + Math.abs(t.amount), 0)
       })
 
-      toast.success(`Successfully imported ${importedCount} transactions`)
+      const dupCount = result.duplicateCount || result.summary?.duplicateCount || 0
+      if (dupCount > 0) {
+        toast.warning(`Imported ${importedCount} transactions (${dupCount} marked as duplicates)`)
+      } else {
+        toast.success(`Successfully imported ${importedCount} transactions`)
+      }
 
       if (onSuccess) onSuccess()
 

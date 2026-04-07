@@ -4,9 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 
 const EventSchema = z.object({
   scenario_id: z.string().uuid(),
+  name: z.string().min(1),
   event_date: z.string(),
-  event_type: z.enum(['CONTRIBUTION', 'WITHDRAWAL', 'INCOME', 'EXPENSE', 'ADJUSTMENT']),
-  amount: z.number(),
+  event_type: z.enum(['WEDDING', 'KIDS', 'EDUCATION', 'PROPERTY', 'HAJJ', 'VEHICLE', 'RETIREMENT', 'OTHER']),
+  amount: z.number().positive(),
   note: z.string().nullable().optional(),
 })
 
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: user.id,
         scenario_id: body.scenario_id,
+        name: body.name,
         event_date: body.event_date,
         event_type: body.event_type,
         amount: body.amount,
