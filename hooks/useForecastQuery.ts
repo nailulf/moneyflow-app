@@ -50,18 +50,86 @@ async function fetchNetWorth(userId: string): Promise<NetWorthResult> {
   return { currentNetWorth: data.currentNetWorth ?? 0, historicalData: data.netWorthData }
 }
 
-async function fetchMonthlyCashflow(): Promise<{ median: number; monthsUsed: number }> {
-  const response = await fetch('/api/transactions/monthly?months=12', { cache: 'no-store' })
-  if (!response.ok) return { median: 0, monthsUsed: 0 }
-  const data = (await response.json()) as MonthlyCashflowResponse
-  const allMonths = data.monthlyData ?? []
-  const withData = allMonths.filter((m) => m.transactionCount > 0)
-  const source = withData.length >= 2 ? withData : allMonths
-  if (source.length === 0) return { median: 0, monthsUsed: 0 }
-  return { median: medianOf(source.map((m) => m.netCashFlow)), monthsUsed: source.length }
+type CashflowResult = {
+  median: number
+  monthsUsed: number
+  annualIncome: number
+  annualExpenses: number
+}
+
+async function fetchMonthlyCashflow(): Promise<CashflowResult> {
+  // Query Supabase directly to avoid API route auth issues
+  const { createClient } = await import('@/lib/supabase/client')
+  const supabase = createClient()
+
+  const now = new Date()
+  const startDate = new Date(now)
+  startDate.setMonth(startDate.getMonth() - 12)
+  startDate.setDate(1)
+
+  const { data: transactions } = await supabase
+    .from('transactions')
+    .select('date, amount, type')
+    .gte('date', startDate.toISOString().split('T')[0])
+    .lte('date', now.toISOString().split('T')[0])
+    .in('type', ['INCOME', 'EXPENSE'])
+    .order('date', { ascending: true })
+
+  if (!transactions || transactions.length === 0) {
+    return { median: 0, monthsUsed: 0, annualIncome: 0, annualExpenses: 0 }
+  }
+
+  // Aggregate by month
+  const monthlyMap = new Map<string, { income: number; expenses: number; count: number }>()
+  for (const t of transactions) {
+    const d = new Date(t.date)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const entry = monthlyMap.get(key) ?? { income: 0, expenses: 0, count: 0 }
+    const amount = Math.abs(t.amount)
+    if (t.type === 'INCOME') entry.income += amount
+    else if (t.type === 'EXPENSE') entry.expenses += amount
+    entry.count++
+    monthlyMap.set(key, entry)
+  }
+
+  const months = Array.from(monthlyMap.values())
+  const withData = months.filter((m) => m.count > 0)
+  const source = withData.length >= 2 ? withData : months
+  if (source.length === 0) {
+    return { median: 0, monthsUsed: 0, annualIncome: 0, annualExpenses: 0 }
+  }
+
+  const avgMonthlyIncome = medianOf(source.map((m) => m.income))
+  const avgMonthlyExpenses = medianOf(source.map((m) => m.expenses))
+
+  return {
+    median: medianOf(source.map((m) => m.income - m.expenses)),
+    monthsUsed: source.length,
+    annualIncome: avgMonthlyIncome * 12,
+    annualExpenses: avgMonthlyExpenses * 12,
+  }
+}
+
+async function fetchUserDOB(): Promise<string | null> {
+  // Query Supabase directly — user_settings has RLS scoped to auth.uid()
+  const { createClient } = await import('@/lib/supabase/client')
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('user_settings')
+    .select('date_of_birth')
+    .maybeSingle()
+  return data?.date_of_birth ?? null
 }
 
 // --- Query hooks ---
+
+export function useForecastUserDOB() {
+  return useQuery({
+    queryKey: ['forecast', 'dob'],
+    queryFn: fetchUserDOB,
+    staleTime: 5 * 60 * 1000, // 5 minutes — DOB rarely changes
+  })
+}
 
 export function useForecastScenarios() {
   return useQuery({
@@ -165,6 +233,8 @@ export function useCreateEvent() {
       event_type: string
       amount: number
       note: string | null
+      details?: Record<string, unknown>
+      is_enabled?: boolean
     }) => {
       const response = await fetch('/api/wealth-forecast/events', {
         method: 'POST',
@@ -176,6 +246,53 @@ export function useCreateEvent() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.forecastEvents(variables.scenario_id) })
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+}
+
+export function useUpdateEvent(scenarioId: string | null) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ eventId, ...data }: {
+      eventId: string
+      name?: string
+      event_date?: string
+      event_type?: string
+      amount?: number
+      note?: string | null
+      details?: Record<string, unknown>
+      is_enabled?: boolean
+    }) => {
+      const response = await fetch(`/api/wealth-forecast/events/${eventId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!response.ok) throw new Error('Failed to update event')
+      return (await response.json()) as ForecastEvent
+    },
+    onSuccess: () => {
+      if (scenarioId) queryClient.invalidateQueries({ queryKey: queryKeys.forecastEvents(scenarioId) })
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+}
+
+export function useToggleEvent(scenarioId: string | null) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ eventId, is_enabled }: { eventId: string; is_enabled: boolean }) => {
+      const response = await fetch(`/api/wealth-forecast/events/${eventId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_enabled }),
+      })
+      if (!response.ok) throw new Error('Failed to toggle event')
+      return (await response.json()) as ForecastEvent
+    },
+    onSuccess: () => {
+      if (scenarioId) queryClient.invalidateQueries({ queryKey: queryKeys.forecastEvents(scenarioId) })
     },
     onError: (error: Error) => toast.error(error.message),
   })

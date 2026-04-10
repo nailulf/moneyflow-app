@@ -14,15 +14,16 @@ UPDATE public.wealth_forecast_events
 ALTER TABLE public.wealth_forecast_events
   ALTER COLUMN name SET NOT NULL;
 
--- Drop old CHECK constraint and add new one with life-event categories
+-- Drop old CHECK constraint
 ALTER TABLE public.wealth_forecast_events
   DROP CONSTRAINT IF EXISTS wealth_forecast_events_event_type_check;
 
-ALTER TABLE public.wealth_forecast_events
-  ADD CONSTRAINT wealth_forecast_events_event_type_check
-  CHECK (event_type IN ('WEDDING', 'KIDS', 'EDUCATION', 'PROPERTY', 'HAJJ', 'VEHICLE', 'RETIREMENT', 'OTHER'));
-
--- Migrate old event_type values to OTHER
+-- Migrate old event_type values to OTHER BEFORE adding the new constraint
 UPDATE public.wealth_forecast_events
   SET event_type = 'OTHER'
   WHERE event_type NOT IN ('WEDDING', 'KIDS', 'EDUCATION', 'PROPERTY', 'HAJJ', 'VEHICLE', 'RETIREMENT', 'OTHER');
+
+-- Now add the new constraint (all rows already comply)
+ALTER TABLE public.wealth_forecast_events
+  ADD CONSTRAINT wealth_forecast_events_event_type_check
+  CHECK (event_type IN ('WEDDING', 'KIDS', 'EDUCATION', 'PROPERTY', 'HAJJ', 'VEHICLE', 'RETIREMENT', 'OTHER'));

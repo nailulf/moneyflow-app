@@ -11,8 +11,10 @@ const EventUpdateSchema = z.object({
   name: z.string().min(1).optional(),
   event_date: z.string().optional(),
   event_type: z.enum(['WEDDING', 'KIDS', 'EDUCATION', 'PROPERTY', 'HAJJ', 'VEHICLE', 'RETIREMENT', 'OTHER']).optional(),
-  amount: z.number().positive().optional(),
+  amount: z.number().nonnegative().optional(),
   note: z.string().nullable().optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
+  is_enabled: z.boolean().optional(),
 })
 
 export async function PUT(request: NextRequest, context: RouteParams) {
@@ -40,9 +42,20 @@ export async function PUT(request: NextRequest, context: RouteParams) {
       }
     }
 
+    // Build update payload — only include fields that were actually provided
+    const updatePayload: Record<string, unknown> = {}
+    if (body.name !== undefined) updatePayload.name = body.name
+    if (body.event_date !== undefined) updatePayload.event_date = body.event_date
+    if (body.event_type !== undefined) updatePayload.event_type = body.event_type
+    if (body.amount !== undefined) updatePayload.amount = body.amount
+    if (body.note !== undefined) updatePayload.note = body.note
+    if (body.scenario_id !== undefined) updatePayload.scenario_id = body.scenario_id
+    if (body.details !== undefined) updatePayload.details = body.details
+    if (body.is_enabled !== undefined) updatePayload.is_enabled = body.is_enabled
+
     const { data, error } = await supabase
       .from('wealth_forecast_events')
-      .update(body)
+      .update(updatePayload)
       .eq('id', eventId)
       .eq('user_id', user.id)
       .select('*')

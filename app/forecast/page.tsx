@@ -1,9 +1,20 @@
 "use client"
 
 import { useEffect, useMemo, useState, type ReactElement } from "react"
-import { addMonths } from "date-fns"
+
+import { Info, MoreVertical } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import { PageLayout, TopContent, ContentWrapper, MainContent, SideContent } from "@/components/PageLayout"
+import { PageLayout, TopContent } from "@/components/PageLayout"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/molecules/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/molecules/tabs"
+import { Button } from "@/components/ui/atoms/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/molecules/select"
 import { formatCurrency } from "@/lib/data-utils"
 import {
   type ScenarioDraft,
@@ -13,34 +24,34 @@ import {
 } from "@/lib/forecast/types"
 import {
   getMonthKey,
-  calculateRealMonthlyRate,
-  runMonteCarlo,
   computeSuccessRate,
   computeCAGR,
 } from "@/lib/forecast/engine"
-import { useForecastEngine } from "@/hooks/useForecastEngine"
 import {
   useForecastScenarios,
   useForecastEvents,
   useForecastNetWorth,
   useForecastCashflow,
+  useForecastUserDOB,
   useSaveScenario,
   useCreateScenario,
   useDeleteScenario,
   useCreateEvent,
   useDeleteEvent,
+  useToggleEvent,
 } from "@/hooks/useForecastQuery"
-import { ForecastStatsBar } from "@/components/features/forecast/ForecastStatsBar"
-import { ForecastChart } from "@/components/features/forecast/ForecastChart"
-import { ScenarioSettings } from "@/components/features/forecast/ScenarioSettings"
-import { ScenarioComparison } from "@/components/features/forecast/ScenarioComparison"
-import { EventSchedule } from "@/components/features/forecast/EventSchedule"
-import { InsightsPanel } from "@/components/features/forecast/InsightsPanel"
+import { buildEventImpactMap } from "@/lib/forecast/event-impact"
+import { useForecastEngine } from "@/hooks/useForecastEngine"
+import { ForecastChart, type ForecastChartView } from "@/components/features/forecast/ForecastChart"
+import { ForecastSummary } from "@/components/features/forecast/ForecastSummary"
+import { CustomizeSheet } from "@/components/features/forecast/CustomizeSheet"
 
 export default function ForecastPage(): ReactElement {
   const { user } = useAuth()
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null)
   const [scenarioDraft, setScenarioDraft] = useState<ScenarioDraft | null>(null)
+  const [chartView, setChartView] = useState<ForecastChartView>("net-worth")
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   // --- React Query data ---
   const { data: scenarios = [], isLoading: scenariosLoading } = useForecastScenarios()
@@ -48,10 +59,12 @@ export default function ForecastPage(): ReactElement {
   const { data: netWorthData } = useForecastNetWorth(user?.id)
   const netWorth = netWorthData?.currentNetWorth ?? null
   const { data: cashflowData } = useForecastCashflow()
+  const { data: userDOB } = useForecastUserDOB()
   const monthlyCashflow = cashflowData?.median ?? 0
   const cashflowMonthsUsed = cashflowData?.monthsUsed ?? 0
+  const baseAnnualIncome = cashflowData?.annualIncome ?? 0
+  const baseAnnualExpenses = cashflowData?.annualExpenses ?? 0
 
-  // Compute CAGR from historical data (6+ months required)
   const computedCAGR = useMemo(() => {
     if (!netWorthData?.historicalData) return null
     return computeCAGR(netWorthData.historicalData)
@@ -63,8 +76,9 @@ export default function ForecastPage(): ReactElement {
   const deleteScenario = useDeleteScenario()
   const createEvent = useCreateEvent()
   const deleteEvent = useDeleteEvent(selectedScenarioId)
+  const toggleEvent = useToggleEvent(selectedScenarioId)
 
-  // Auto-select scenario when data loads
+  // Auto-select scenario
   const selectedScenario = useMemo(() => {
     if (!selectedScenarioId) return null
     return scenarios.find((s) => s.id === selectedScenarioId) ?? null
@@ -72,8 +86,8 @@ export default function ForecastPage(): ReactElement {
 
   useEffect(() => {
     if (scenarios.length > 0 && !selectedScenarioId) {
-      const defaultScenario = scenarios.find((s) => s.is_default) ?? scenarios[0]
-      setSelectedScenarioId(defaultScenario?.id ?? null)
+      const def = scenarios.find((s) => s.is_default) ?? scenarios[0]
+      setSelectedScenarioId(def?.id ?? null)
     }
   }, [scenarios, selectedScenarioId])
 
@@ -84,66 +98,56 @@ export default function ForecastPage(): ReactElement {
   // --- Derived computation ---
 
   const eventMap = useMemo(() => {
-    const map = new Map<string, number>()
-    for (const event of events) {
-      const key = getMonthKey(new Date(event.event_date))
-      // All life events are costs — subtracted from net worth
-      map.set(key, (map.get(key) ?? 0) - Number(event.amount))
-    }
-    return map
-  }, [events])
+    if (!scenarioDraft) return new Map<string, number>()
+    const startYear = new Date(scenarioDraft.start_date).getFullYear()
+    return buildEventImpactMap(events, startYear, scenarioDraft.horizon_years, scenarioDraft.inflation_rate)
+  }, [events, scenarioDraft])
 
   const eventsByMonth = useMemo(() => {
     const map = new Map<string, string[]>()
     for (const event of events) {
-      const key = getMonthKey(new Date(event.event_date))
-      map.set(key, [...(map.get(key) ?? []), event.event_type])
+      if (event.is_enabled === false) continue
+      const exactKey = getMonthKey(new Date(event.event_date))
+      const janKey = `${new Date(event.event_date).getFullYear()}-01`
+      // Index by both exact month and January so dots/tooltips show on either
+      for (const key of new Set([exactKey, janKey])) {
+        map.set(key, [...(map.get(key) ?? []), event.event_type])
+      }
     }
     return map
   }, [events])
 
+  const eventDetailsByMonth = useMemo(() => {
+    const map = new Map<string, { name: string; type: string; amount: number }[]>()
+    for (const event of events) {
+      if (event.is_enabled === false) continue
+      const exactKey = getMonthKey(new Date(event.event_date))
+      const janKey = `${new Date(event.event_date).getFullYear()}-01`
+      for (const key of new Set([exactKey, janKey])) {
+        const existing = map.get(key) ?? []
+        // Avoid duplicates if exact month IS January
+        if (key === janKey && exactKey === janKey && existing.some((e) => e.name === event.name)) continue
+        existing.push({ name: event.name, type: event.event_type, amount: Number(event.amount) })
+        map.set(key, existing)
+      }
+    }
+    return map
+  }, [events])
+
+  // Find retirement event date for the engine
+  const retirementDateISO = useMemo(() => {
+    const retEvent = events.find((e) => e.event_type === "RETIREMENT" && e.is_enabled !== false)
+    return retEvent ? retEvent.event_date : null
+  }, [events])
+
   const { projection, mcFinalValues, isComputing } = useForecastEngine(
-    scenarioDraft, netWorth ?? null, monthlyCashflow, eventMap, eventsByMonth,
+    scenarioDraft, netWorth ?? null, monthlyCashflow, eventMap, eventsByMonth, userDOB, eventDetailsByMonth, retirementDateISO,
   )
 
   const successRate = useMemo(() => {
     if (!mcFinalValues || !scenarioDraft) return null
     return computeSuccessRate(mcFinalValues, scenarioDraft.target_net_worth)
   }, [mcFinalValues, scenarioDraft])
-
-  const comparisonRows = useMemo<ComparisonRow[]>(() => {
-    if (netWorth === null) return []
-    return scenarios.map((scenario) => {
-      const months = Math.max(1, scenario.horizon_years * 12)
-      const baseDate = new Date(scenario.start_date)
-      const inflationRate = Number(scenario.inflation_rate)
-      const meanMonthly = calculateRealMonthlyRate(Number(scenario.expected_annual_return), inflationRate)
-      const volatilityMonthly = Number(scenario.annual_volatility) / Math.sqrt(12)
-      const baseCashflow =
-        Number(scenario.monthly_contribution) - Number(scenario.monthly_withdrawal) +
-        (scenario.include_cashflow ? monthlyCashflow : 0)
-      const scenarioEventMap = scenario.id === selectedScenarioId ? eventMap : new Map<string, number>()
-
-      let value = netWorth
-      for (let i = 1; i <= months; i += 1) {
-        const monthDate = addMonths(baseDate, i)
-        const rawEvent = scenarioEventMap.get(getMonthKey(monthDate)) ?? 0
-        const eventAdj = rawEvent !== 0 ? rawEvent * Math.pow(1 + inflationRate, i / 12) : 0
-        value = value * (1 + meanMonthly) + baseCashflow + eventAdj
-      }
-
-      const target = Number(scenario.target_net_worth)
-      const { finalValues } = runMonteCarlo(netWorth, months, meanMonthly, volatilityMonthly, baseCashflow, scenarioEventMap, baseDate, 200, inflationRate)
-
-      return {
-        id: scenario.id,
-        name: scenario.name,
-        endValue: value,
-        isDefault: scenario.is_default,
-        successRate: computeSuccessRate(finalValues, target),
-      }
-    })
-  }, [scenarios, netWorth, monthlyCashflow, eventMap, selectedScenarioId])
 
   const insights = useMemo(() => {
     if (!projection || !scenarioDraft || netWorth === null) return []
@@ -164,15 +168,12 @@ export default function ForecastPage(): ReactElement {
     if (scenarioDraft.include_cashflow && monthlyCashflow < 0) {
       notes.push(
         cashflowMonthsUsed >= 2
-          ? `Negative median cashflow (${cashflowMonthsUsed}-month sample) drags the forecast. Improve cashflow or disable cashflow inclusion.`
-          : "Negative average cashflow drags the forecast. Improve cashflow or disable cashflow inclusion.",
+          ? `Negative median cashflow (${cashflowMonthsUsed}-month sample) drags the forecast.`
+          : "Negative average cashflow drags the forecast.",
       )
     }
     if (scenarioDraft.annual_volatility > 0.2) {
       notes.push("High volatility increases downside risk. Balance allocations to smooth returns.")
-    }
-    if (scenarioDraft.horizon_years < 5) {
-      notes.push("Short horizons magnify market timing risk. Consider extending the horizon.")
     }
     if (notes.length === 0) {
       notes.push("Scenario is on track. Keep monitoring contributions and adjust if goals change.")
@@ -194,8 +195,13 @@ export default function ForecastPage(): ReactElement {
     event_type: string
     amount: number
     note: string | null
+    details?: Record<string, unknown>
   }): Promise<void> => {
     await createEvent.mutateAsync(payload)
+  }
+
+  const handleToggleEvent = async (eventId: string, is_enabled: boolean): Promise<void> => {
+    await toggleEvent.mutateAsync({ eventId, is_enabled })
   }
 
   const handleCreateScenario = async (): Promise<void> => {
@@ -225,55 +231,95 @@ export default function ForecastPage(): ReactElement {
     <div className="flex flex-col h-full">
       <PageLayout>
         <TopContent>
-          <ForecastStatsBar
-            netWorth={netWorth}
-            projection={projection}
-            successRate={successRate}
-            cashflowMonthsUsed={cashflowMonthsUsed}
-          />
-        </TopContent>
-        <ContentWrapper>
-          <MainContent>
-            <div className="space-y-6">
+          <Card className="rounded-lg shadow-sm">
+            {/* Header: scenario dropdown + actions */}
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+              <div className="flex items-center gap-2">
+                <Select
+                  value={selectedScenarioId ?? undefined}
+                  onValueChange={setSelectedScenarioId}
+                >
+                  <SelectTrigger className="w-auto min-w-[160px] border-none shadow-none font-semibold text-base">
+                    <SelectValue placeholder="Select scenario" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {scenarios.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Info className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* Tab toggle + CTA */}
+              <div className="flex items-center justify-between">
+                <Tabs
+                  value={chartView}
+                  onValueChange={(v) => setChartView(v as ForecastChartView)}
+                >
+                  <TabsList>
+                    <TabsTrigger value="net-worth">Net Worth</TabsTrigger>
+                    <TabsTrigger value="cash-flow">Cash Flow</TabsTrigger>
+                    <TabsTrigger value="simulation">Simulation</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <Button onClick={() => setSheetOpen(true)}>
+                  Add events or customize
+                </Button>
+              </div>
+
+              {/* Chart area */}
               <ForecastChart
+                view={chartView}
                 projection={projection}
                 isLoading={scenariosLoading || isComputing}
+                netWorth={netWorth}
                 scenarioDraft={scenarioDraft}
                 monthlyCashflow={monthlyCashflow}
-                eventMap={eventMap}
+                baseAnnualIncome={baseAnnualIncome}
+                baseAnnualExpenses={baseAnnualExpenses}
+                events={events}
                 successRate={successRate}
               />
-              <ScenarioSettings
-                scenarios={scenarios}
-                selectedScenarioId={selectedScenarioId}
-                scenarioDraft={scenarioDraft}
-                isSaving={saveScenario.isPending}
-                monthlyCashflow={monthlyCashflow}
-                cashflowMonthsUsed={cashflowMonthsUsed}
-                computedCAGR={computedCAGR}
-                onSelectScenario={setSelectedScenarioId}
-                onDraftChange={setScenarioDraft}
-                onSave={handleScenarioSave}
-                onCreate={handleCreateScenario}
-                onDuplicate={handleDuplicateScenario}
-                onDelete={handleDeleteScenario}
-              />
-            </div>
-          </MainContent>
-          <SideContent>
-            <div className="space-y-4">
-              <ScenarioComparison rows={comparisonRows} selectedScenarioId={selectedScenarioId} />
-              <EventSchedule
-                events={events}
-                selectedScenarioId={selectedScenarioId}
-                onSubmit={handleEventSubmit}
-                onDelete={handleDeleteEvent}
-              />
-              <InsightsPanel insights={insights} />
-            </div>
-          </SideContent>
-        </ContentWrapper>
+
+              {/* Summary strip */}
+              <ForecastSummary insights={insights} />
+            </CardContent>
+          </Card>
+        </TopContent>
       </PageLayout>
+
+      {/* Customize Sheet */}
+      <CustomizeSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        scenarios={scenarios}
+        selectedScenarioId={selectedScenarioId}
+        scenarioDraft={scenarioDraft}
+        isSaving={saveScenario.isPending}
+        monthlyCashflow={monthlyCashflow}
+        cashflowMonthsUsed={cashflowMonthsUsed}
+        computedCAGR={computedCAGR}
+        onSelectScenario={setSelectedScenarioId}
+        onDraftChange={setScenarioDraft}
+        onSave={handleScenarioSave}
+        onCreate={handleCreateScenario}
+        onDuplicate={handleDuplicateScenario}
+        onDelete={handleDeleteScenario}
+        events={events}
+        onEventSubmit={handleEventSubmit}
+        onEventDelete={handleDeleteEvent}
+        onEventToggle={handleToggleEvent}
+      />
     </div>
   )
 }

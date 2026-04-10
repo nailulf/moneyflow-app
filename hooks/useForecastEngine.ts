@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState, useMemo } from 'react'
 import type { ProjectionPoint, ScenarioDraft } from '@/lib/forecast/types'
-import { getMonthKey } from '@/lib/forecast/engine'
 
 type WorkerOutput = {
   percentiles: {
     date: string
+    ageLabel: string
     monthKey: string
     p10: number
     p25: number
@@ -32,6 +32,9 @@ export function useForecastEngine(
   monthlyCashflow: number,
   eventMap: Map<string, number>,
   eventsByMonth: Map<string, string[]>,
+  dob?: string | null,
+  eventDetailsByMonth?: Map<string, { name: string; type: string; amount: number }[]>,
+  retirementDateISO?: string | null,
 ): ForecastEngineResult {
   const workerRef = useRef<Worker | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -41,20 +44,17 @@ export function useForecastEngine(
     isComputing: false,
   })
 
-  // Serialize eventMap for dependency tracking
   const eventMapSerialized = useMemo(
     () => JSON.stringify(Array.from(eventMap.entries())),
     [eventMap]
   )
 
   useEffect(() => {
-    // Create worker
     try {
       workerRef.current = new Worker(
         new URL('@/lib/forecast/simulation.worker.ts', import.meta.url)
       )
     } catch {
-      // Worker creation may fail in SSR or unsupported environments
       workerRef.current = null
     }
     return () => {
@@ -70,18 +70,16 @@ export function useForecastEngine(
       return
     }
 
-    // Debounce the computation
     if (debounceRef.current) clearTimeout(debounceRef.current)
-
     setResult((prev) => ({ ...prev, isComputing: true }))
 
     debounceRef.current = setTimeout(() => {
       const worker = workerRef.current
       if (!worker) {
-        // Fallback: run synchronously if worker is unavailable
         const { computeProjection } = require('@/lib/forecast/engine')
+        const dobDate = dob ? new Date(dob) : null
         const { projection, mcFinalValues } = computeProjection(
-          scenarioDraft, netWorth, monthlyCashflow, eventMap, eventsByMonth
+          scenarioDraft, netWorth, monthlyCashflow, eventMap, eventsByMonth, dobDate, eventDetailsByMonth, retirementDateISO
         )
         setResult({ projection, mcFinalValues, isComputing: false })
         return
@@ -100,11 +98,14 @@ export function useForecastEngine(
         const { percentiles, finalValues } = e.data
         const points: ProjectionPoint[] = percentiles.map((p) => ({
           ...p,
-          hasEvent: eventMap.has(p.monthKey),
+          hasEvent: eventsByMonth.has(p.monthKey),
           eventTypes: eventsByMonth.get(p.monthKey) ?? [],
+          eventDetails: eventDetailsByMonth?.get(p.monthKey) ?? [],
         }))
         setResult({ projection: points, mcFinalValues: finalValues, isComputing: false })
       }
+
+      const postRetirementCashflow = -Number(scenarioDraft.monthly_withdrawal)
 
       worker.postMessage({
         netWorth,
@@ -112,14 +113,17 @@ export function useForecastEngine(
         meanMonthly,
         volatilityMonthly,
         baseCashflow,
+        postRetirementCashflow,
+        retirementDateISO: retirementDateISO ?? null,
         eventEntries: Array.from(eventMap.entries()),
         baseDateISO: scenarioDraft.start_date,
         simulations: 500,
         inflationRate,
+        dobISO: dob ?? null,
       })
     }, DEBOUNCE_MS)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scenarioDraft, netWorth, monthlyCashflow, eventMapSerialized])
+  }, [scenarioDraft, netWorth, monthlyCashflow, eventMapSerialized, dob, retirementDateISO])
 
   return result
 }

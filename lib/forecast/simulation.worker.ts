@@ -7,15 +7,19 @@ type MonteCarloInput = {
   meanMonthly: number
   volatilityMonthly: number
   baseCashflow: number
+  postRetirementCashflow: number
+  retirementDateISO: string | null
   eventEntries: [string, number][]
   baseDateISO: string
   simulations: number
   inflationRate: number
+  dobISO: string | null
 }
 
 type MonteCarloOutput = {
   percentiles: {
     date: string
+    ageLabel: string
     monthKey: string
     p10: number
     p25: number
@@ -57,6 +61,17 @@ function getMonthKey(date: Date): string {
   return `${date.getFullYear()}-${m < 10 ? "0" : ""}${m}`
 }
 
+function getAgeLabel(baseDate: Date, monthOffset: number, dob: Date | null): string {
+  if (monthOffset === 0) return "TODAY"
+  const target = addMonthsSimple(baseDate, monthOffset)
+  if (dob) {
+    const age = target.getFullYear() - dob.getFullYear() -
+      (target.getMonth() < dob.getMonth() || (target.getMonth() === dob.getMonth() && target.getDate() < dob.getDate()) ? 1 : 0)
+    return `AGE ${age}`
+  }
+  return `YEAR ${Math.ceil(monthOffset / 12)}`
+}
+
 self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
   const {
     netWorth,
@@ -64,14 +79,26 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
     meanMonthly,
     volatilityMonthly,
     baseCashflow,
+    postRetirementCashflow,
+    retirementDateISO,
     eventEntries,
     baseDateISO,
     simulations,
     inflationRate,
+    dobISO,
   } = e.data
 
   const baseDate = new Date(baseDateISO)
+  const dob = dobISO ? new Date(dobISO) : null
   const eventMap = new Map<string, number>(eventEntries)
+
+  // Compute retirement month offset
+  let retirementMonth: number | null = null
+  if (retirementDateISO) {
+    const retDate = new Date(retirementDateISO)
+    const diffMs = retDate.getTime() - baseDate.getTime()
+    retirementMonth = Math.max(1, Math.round(diffMs / (30.44 * 24 * 60 * 60 * 1000)))
+  }
 
   // Deterministic path
   const deterministicSeries: number[] = []
@@ -81,7 +108,8 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
     const monthDate = addMonthsSimple(baseDate, i)
     const rawEvent = eventMap.get(getMonthKey(monthDate)) ?? 0
     const eventAdj = rawEvent !== 0 ? rawEvent * Math.pow(1 + inflationRate, i / 12) : 0
-    deterministicValue = deterministicValue * (1 + meanMonthly) + baseCashflow + eventAdj
+    const cashflow = (retirementMonth !== null && i >= retirementMonth) ? postRetirementCashflow : baseCashflow
+    deterministicValue = deterministicValue * (1 + meanMonthly) + cashflow + eventAdj
     deterministicSeries.push(deterministicValue)
   }
 
@@ -96,7 +124,8 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
       const monthDate = addMonthsSimple(baseDate, i)
       const rawEvent = eventMap.get(getMonthKey(monthDate)) ?? 0
       const eventAdj = rawEvent !== 0 ? rawEvent * Math.pow(1 + inflationRate, i / 12) : 0
-      const monthlyFlow = baseCashflow + eventAdj
+      const cashflow = (retirementMonth !== null && i >= retirementMonth) ? postRetirementCashflow : baseCashflow
+      const monthlyFlow = cashflow + eventAdj
       const shock = randomNormal()
       const monthlyReturn = meanMonthly + volatilityMonthly * shock
       value = value * (1 + monthlyReturn) + monthlyFlow
@@ -112,6 +141,7 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
     const values = series[i]
     percentiles.push({
       date: formatDate(monthDate),
+      ageLabel: getAgeLabel(baseDate, i, dob),
       monthKey: getMonthKey(monthDate),
       p10: percentile(values, 0.1),
       p25: percentile(values, 0.25),
