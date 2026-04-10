@@ -216,8 +216,8 @@ export function EditTransactionForm({
         <SheetHeader>
           <SheetTitle>{t('editTitle')}</SheetTitle>
         </SheetHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className={isMobile ? 'flex flex-col flex-1 min-h-0 px-4 pt-4' : 'flex flex-col flex-1 min-h-0'}>
-          <div className="overflow-y-auto no-scrollbar space-y-2 flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 pt-4">
+          <form id="edit-transaction-form" onSubmit={handleSubmit(onSubmit)} className="space-y-2 pb-4">
           <div className="space-y-2 grid grid-cols-7 items-center">
             <label className="text-sm font-medium col-span-2">{t('date')}</label>
             <div className="col-span-5">
@@ -520,32 +520,31 @@ export function EditTransactionForm({
               </div>
             )}
           </div>
-          </div>
+          </form>
+        </div>
 
-          <SheetFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                Analytics.track('Edit Transaction Cancelled', {
-                  transaction_id: transaction?.id,
-                  transaction_type: transaction?.type
-                })
-                onOpenChange(false)
-              }}
-              className="flex-1"
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? t('updating') : t('updateButton')}
-            </Button>
-          </SheetFooter>
-        </form>
+        <SheetFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              Analytics.track('Edit Transaction Cancelled', {
+                transaction_id: transaction?.id,
+                transaction_type: transaction?.type
+              })
+              onOpenChange(false)
+            }}
+          >
+            {t('cancel')}
+          </Button>
+          <Button
+            type="submit"
+            form="edit-transaction-form"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? t('updating') : t('updateButton')}
+          </Button>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   )

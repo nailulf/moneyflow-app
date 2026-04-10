@@ -336,6 +336,7 @@ export interface Database {
           forecast_default_return: number
           forecast_default_volatility: number
           forecast_default_inflation: number
+          date_of_birth: string | null
           extras: Record<string, unknown>
           created_at: string
           updated_at: string
@@ -354,6 +355,7 @@ export interface Database {
           forecast_default_return?: number
           forecast_default_volatility?: number
           forecast_default_inflation?: number
+          date_of_birth?: string | null
           extras?: Record<string, unknown>
           created_at?: string
           updated_at?: string
@@ -371,6 +373,7 @@ export interface Database {
           forecast_default_return?: number
           forecast_default_volatility?: number
           forecast_default_inflation?: number
+          date_of_birth?: string | null
           extras?: Record<string, unknown>
           updated_at?: string
         }
@@ -755,6 +758,8 @@ export interface Database {
           event_type: 'WEDDING' | 'KIDS' | 'EDUCATION' | 'PROPERTY' | 'HAJJ' | 'VEHICLE' | 'RETIREMENT' | 'OTHER'
           amount: number
           note: string | null
+          details: Record<string, unknown>
+          is_enabled: boolean
           created_at: string
           updated_at: string
         }
@@ -767,6 +772,8 @@ export interface Database {
           event_type: 'WEDDING' | 'KIDS' | 'EDUCATION' | 'PROPERTY' | 'HAJJ' | 'VEHICLE' | 'RETIREMENT' | 'OTHER'
           amount: number
           note?: string | null
+          details?: Record<string, unknown>
+          is_enabled?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -779,6 +786,8 @@ export interface Database {
           event_type?: 'WEDDING' | 'KIDS' | 'EDUCATION' | 'PROPERTY' | 'HAJJ' | 'VEHICLE' | 'RETIREMENT' | 'OTHER'
           amount?: number
           note?: string | null
+          details?: Record<string, unknown>
+          is_enabled?: boolean
           updated_at?: string
         }
       }

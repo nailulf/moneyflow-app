@@ -13,6 +13,7 @@ import {
   Landmark,
   Coins,
   CreditCard,
+  ChevronDown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -157,10 +158,22 @@ function CategoryGroup({
   category: AccountCategory
   isLiability: boolean
 }) {
+  const [open, setOpen] = useState(false)
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex items-center justify-between w-full mb-2 group cursor-pointer"
+      >
         <div className="flex items-center gap-2">
+          <ChevronDown
+            className={cn(
+              'h-3.5 w-3.5 text-muted-foreground transition-transform duration-200',
+              !open && '-rotate-90'
+            )}
+          />
           <div
             className="w-2 h-2 rounded-full shrink-0"
             style={{ backgroundColor: category.color }}
@@ -175,12 +188,14 @@ function CategoryGroup({
         <span className={cn('text-sm font-semibold tabular-nums', isLiability ? 'text-destructive' : '')}>
           {formatCurrencyCompact(Math.abs(category.total))}
         </span>
-      </div>
-      <div className="space-y-0.5 pl-4 border-l border-border/50">
-        {category.accounts.map((account, i) => (
-          <AccountRow key={i} account={account} />
-        ))}
-      </div>
+      </button>
+      {open && (
+        <div className="space-y-0.5 pl-4 ml-[7px] border-l border-border/50">
+          {category.accounts.map((account, i) => (
+            <AccountRow key={i} account={account} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

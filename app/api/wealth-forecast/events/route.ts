@@ -7,8 +7,10 @@ const EventSchema = z.object({
   name: z.string().min(1),
   event_date: z.string(),
   event_type: z.enum(['WEDDING', 'KIDS', 'EDUCATION', 'PROPERTY', 'HAJJ', 'VEHICLE', 'RETIREMENT', 'OTHER']),
-  amount: z.number().positive(),
+  amount: z.number().nonnegative(),
   note: z.string().nullable().optional(),
+  details: z.record(z.string(), z.unknown()).optional().default({}),
+  is_enabled: z.boolean().optional().default(true),
 })
 
 export async function GET(request: NextRequest) {
@@ -67,17 +69,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Scenario not found' }, { status: 404 })
     }
 
+    const insertPayload: Record<string, unknown> = {
+      user_id: user.id,
+      scenario_id: body.scenario_id,
+      name: body.name,
+      event_date: body.event_date,
+      event_type: body.event_type,
+      amount: body.amount,
+      note: body.note ?? null,
+    }
+    // Include new columns only if provided (backward-compatible with pre-044 DBs)
+    if (body.details && Object.keys(body.details).length > 0) insertPayload.details = body.details
+    if (body.is_enabled !== undefined && body.is_enabled !== true) insertPayload.is_enabled = body.is_enabled
+
     const { data: event, error } = await supabase
       .from('wealth_forecast_events')
-      .insert({
-        user_id: user.id,
-        scenario_id: body.scenario_id,
-        name: body.name,
-        event_date: body.event_date,
-        event_type: body.event_type,
-        amount: body.amount,
-        note: body.note ?? null,
-      })
+      .insert(insertPayload)
       .select('*')
       .single()
 
