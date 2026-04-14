@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, type ReactElement } from "react"
+import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/atoms/input"
 import { Label } from "@/components/ui/atoms/label"
 import { Button } from "@/components/ui/atoms/button"
@@ -10,12 +11,13 @@ import {
 import { Switch } from "@/components/ui/atoms/switch"
 import { formatCurrency } from "@/lib/data-utils"
 import { computeAnnualMortgagePayment } from "@/lib/forecast/event-impact"
-import type { LifeEventCategory } from "@/lib/forecast/types"
+import type { ForecastEvent, LifeEventCategory } from "@/lib/forecast/types"
 import { LIFE_EVENT_CATEGORIES } from "@/lib/forecast/types"
 
 interface EventDetailFormProps {
   eventType: LifeEventCategory
   scenarioId: string
+  existingEvent?: ForecastEvent | null
   onSubmit: (payload: {
     scenario_id: string
     name: string
@@ -25,32 +27,55 @@ interface EventDetailFormProps {
     note: string | null
     details: Record<string, unknown>
   }) => Promise<void>
+  onUpdate?: (eventId: string, payload: {
+    name: string
+    event_date: string
+    amount: number
+    details: Record<string, unknown>
+  }) => Promise<void>
   onBack: () => void
 }
 
 const currentYear = new Date().getFullYear()
 
-export function EventDetailForm({ eventType, scenarioId, onSubmit, onBack }: EventDetailFormProps): ReactElement {
+function num(v: unknown, fallback: number): number {
+  return typeof v === "number" && !Number.isNaN(v) ? v : fallback
+}
+
+export function EventDetailForm({ eventType, scenarioId, existingEvent, onSubmit, onUpdate, onBack }: EventDetailFormProps): ReactElement {
+  const t = useTranslations("forecast.events")
+  const tCat = useTranslations("forecast.categories")
   const category = LIFE_EVENT_CATEGORIES.find((c) => c.value === eventType)!
-  const [name, setName] = useState(category.templateLabel)
-  const [year, setYear] = useState(currentYear + 1)
+  const templateLabel = tCat(`${eventType}.template`)
+  const isEdit = !!existingEvent
+  const details = (existingEvent?.details ?? {}) as Record<string, unknown>
+
+  const [name, setName] = useState(existingEvent?.name ?? templateLabel)
+  const [year, setYear] = useState(
+    existingEvent ? new Date(existingEvent.event_date).getFullYear() : currentYear + 1,
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Category-specific state
-  const [homePrice, setHomePrice] = useState(0)
-  const [paymentType, setPaymentType] = useState<"loan" | "cash">("loan")
-  const [downPaymentPct, setDownPaymentPct] = useState(20)
-  const [loanTermYears, setLoanTermYears] = useState(30)
-  const [interestRate, setInterestRate] = useState(6.5)
+  const initialPriceKey = eventType === "VEHICLE" ? "price" : "home_price"
+  const [homePrice, setHomePrice] = useState(num(details[initialPriceKey], 0))
+  const [paymentType, setPaymentType] = useState<"loan" | "cash">(
+    (details.payment_type as "loan" | "cash") ?? "loan",
+  )
+  const [downPaymentPct, setDownPaymentPct] = useState(num(details.down_payment_pct, 20))
+  const [loanTermYears, setLoanTermYears] = useState(num(details.loan_term_years, 30))
+  const [interestRate, setInterestRate] = useState(
+    typeof details.interest_rate === "number" ? (details.interest_rate as number) * 100 : 6.5,
+  )
 
-  const [totalCost, setTotalCost] = useState(0)
-  const [annualCost, setAnnualCost] = useState(0)
-  const [endAge, setEndAge] = useState(18)
-  const [annualTuition, setAnnualTuition] = useState(0)
-  const [durationYears, setDurationYears] = useState(4)
+  const [totalCost, setTotalCost] = useState(num(details.total_cost, 0))
+  const [annualCost, setAnnualCost] = useState(num(details.annual_cost, 0))
+  const [endAge, setEndAge] = useState(num(details.end_age, 18))
+  const [annualTuition, setAnnualTuition] = useState(num(details.annual_tuition, 0))
+  const [durationYears, setDurationYears] = useState(num(details.duration_years, 4))
 
-  const [isRecurring, setIsRecurring] = useState(false)
-  const [recurringYears, setRecurringYears] = useState(1)
+  const [isRecurring, setIsRecurring] = useState(Boolean(details.is_recurring))
+  const [recurringYears, setRecurringYears] = useState(num(details.recurring_years, 1))
 
   const handleSubmit = async () => {
     setIsSubmitting(true)
@@ -88,15 +113,24 @@ export function EventDetailForm({ eventType, scenarioId, onSubmit, onBack }: Eve
         break
     }
 
-    await onSubmit({
-      scenario_id: scenarioId,
-      name,
-      event_date: `${year}-01-01`,
-      event_type: eventType,
-      amount,
-      note: null,
-      details,
-    })
+    if (isEdit && existingEvent && onUpdate) {
+      await onUpdate(existingEvent.id, {
+        name,
+        event_date: `${year}-01-01`,
+        amount,
+        details,
+      })
+    } else {
+      await onSubmit({
+        scenario_id: scenarioId,
+        name,
+        event_date: `${year}-01-01`,
+        event_type: eventType,
+        amount,
+        note: null,
+        details,
+      })
+    }
     setIsSubmitting(false)
   }
 
@@ -115,19 +149,19 @@ export function EventDetailForm({ eventType, scenarioId, onSubmit, onBack }: Eve
           <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <path d={category.icon} />
           </svg>
-          <span className="font-semibold">{category.templateLabel}</span>
+          <span className="font-semibold">{templateLabel}</span>
         </div>
       </div>
 
       {/* Event title */}
       <div className="space-y-1.5">
-        <Label>Event title</Label>
+        <Label>{t("eventTitle")}</Label>
         <Input value={name} onChange={(e) => setName(e.target.value)} />
       </div>
 
       {/* Year */}
       <div className="space-y-1.5">
-        <Label>{eventType === "PROPERTY" ? "Purchase year" : "Year"}</Label>
+        <Label>{eventType === "PROPERTY" ? t("purchaseYear") : t("year")}</Label>
         <Input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} min={currentYear} />
       </div>
 
@@ -135,45 +169,55 @@ export function EventDetailForm({ eventType, scenarioId, onSubmit, onBack }: Eve
       {(eventType === "PROPERTY" || eventType === "VEHICLE") && (
         <>
           <div className="space-y-1.5">
-            <Label>{eventType === "PROPERTY" ? "Home price" : "Vehicle price"}</Label>
+            <Label>{eventType === "PROPERTY" ? t("homePrice") : t("vehiclePrice")}</Label>
             <Input type="number" value={homePrice} onChange={(e) => setHomePrice(Number(e.target.value))} min={0} />
           </div>
           <div className="space-y-1.5">
-            <Label>Payment type</Label>
+            <Label>{t("paymentType")}</Label>
             <Select value={paymentType} onValueChange={(v) => setPaymentType(v as "loan" | "cash")}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="loan">Loan</SelectItem>
-                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="loan">{t("loan")}</SelectItem>
+                <SelectItem value="cash">{t("cash")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {paymentType === "loan" && (
             <>
               <div className="space-y-1.5">
-                <Label>Down payment (%)</Label>
+                <Label>{t("downPayment")}</Label>
                 <Input type="number" value={downPaymentPct} onChange={(e) => setDownPaymentPct(Number(e.target.value))} min={0} max={100} />
               </div>
               <div className="space-y-1.5">
-                <Label>Loan term</Label>
+                <Label>{t("loanTerm")}</Label>
                 <Select value={String(loanTermYears)} onValueChange={(v) => setLoanTermYears(Number(v))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {eventType === "PROPERTY" ? (
-                      <><SelectItem value="15">15 years</SelectItem><SelectItem value="20">20 years</SelectItem><SelectItem value="25">25 years</SelectItem><SelectItem value="30">30 years</SelectItem></>
+                      <>
+                        <SelectItem value="15">{t("years", { n: 15 })}</SelectItem>
+                        <SelectItem value="20">{t("years", { n: 20 })}</SelectItem>
+                        <SelectItem value="25">{t("years", { n: 25 })}</SelectItem>
+                        <SelectItem value="30">{t("years", { n: 30 })}</SelectItem>
+                      </>
                     ) : (
-                      <><SelectItem value="3">3 years</SelectItem><SelectItem value="4">4 years</SelectItem><SelectItem value="5">5 years</SelectItem><SelectItem value="7">7 years</SelectItem></>
+                      <>
+                        <SelectItem value="3">{t("years", { n: 3 })}</SelectItem>
+                        <SelectItem value="4">{t("years", { n: 4 })}</SelectItem>
+                        <SelectItem value="5">{t("years", { n: 5 })}</SelectItem>
+                        <SelectItem value="7">{t("years", { n: 7 })}</SelectItem>
+                      </>
                     )}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Interest rate (%)</Label>
+                <Label>{t("interestRate")}</Label>
                 <Input type="number" step="0.1" value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value))} min={0} />
               </div>
               {monthlyMortgage > 0 && (
                 <div className="rounded-lg bg-muted/50 px-3 py-2">
-                  <p className="text-xs text-muted-foreground">Estimated monthly payment</p>
+                  <p className="text-xs text-muted-foreground">{t("estMonthlyPayment")}</p>
                   <p className="text-sm font-semibold">{formatCurrency(monthlyMortgage)}</p>
                 </div>
               )}
@@ -184,7 +228,7 @@ export function EventDetailForm({ eventType, scenarioId, onSubmit, onBack }: Eve
 
       {(eventType === "WEDDING" || eventType === "HAJJ") && (
         <div className="space-y-1.5">
-          <Label>Total cost</Label>
+          <Label>{t("totalCost")}</Label>
           <Input type="number" value={totalCost} onChange={(e) => setTotalCost(Number(e.target.value))} min={0} />
         </div>
       )}
@@ -192,12 +236,12 @@ export function EventDetailForm({ eventType, scenarioId, onSubmit, onBack }: Eve
       {eventType === "KIDS" && (
         <>
           <div className="space-y-1.5">
-            <Label>Annual cost</Label>
+            <Label>{t("annualCost")}</Label>
             <Input type="number" value={annualCost} onChange={(e) => setAnnualCost(Number(e.target.value))} min={0} />
-            <p className="text-xs text-muted-foreground">Estimated yearly cost of raising a child.</p>
+            <p className="text-xs text-muted-foreground">{t("annualCostHint")}</p>
           </div>
           <div className="space-y-1.5">
-            <Label>Until age</Label>
+            <Label>{t("untilAge")}</Label>
             <Input type="number" value={endAge} onChange={(e) => setEndAge(Number(e.target.value))} min={1} max={30} />
           </div>
         </>
@@ -206,11 +250,11 @@ export function EventDetailForm({ eventType, scenarioId, onSubmit, onBack }: Eve
       {eventType === "EDUCATION" && (
         <>
           <div className="space-y-1.5">
-            <Label>Annual tuition</Label>
+            <Label>{t("annualTuition")}</Label>
             <Input type="number" value={annualTuition} onChange={(e) => setAnnualTuition(Number(e.target.value))} min={0} />
           </div>
           <div className="space-y-1.5">
-            <Label>Duration (years)</Label>
+            <Label>{t("duration")}</Label>
             <Input type="number" value={durationYears} onChange={(e) => setDurationYears(Number(e.target.value))} min={1} max={10} />
           </div>
         </>
@@ -219,16 +263,16 @@ export function EventDetailForm({ eventType, scenarioId, onSubmit, onBack }: Eve
       {eventType === "OTHER" && (
         <>
           <div className="space-y-1.5">
-            <Label>Total cost</Label>
+            <Label>{t("totalCost")}</Label>
             <Input type="number" value={totalCost} onChange={(e) => setTotalCost(Number(e.target.value))} min={0} />
           </div>
           <div className="flex items-center justify-between rounded-lg border border-border/60 px-3 py-2">
-            <Label>Recurring</Label>
+            <Label>{t("recurring")}</Label>
             <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
           </div>
           {isRecurring && (
             <div className="space-y-1.5">
-              <Label>Number of years</Label>
+              <Label>{t("numberOfYears")}</Label>
               <Input type="number" value={recurringYears} onChange={(e) => setRecurringYears(Number(e.target.value))} min={1} />
             </div>
           )}
@@ -236,7 +280,7 @@ export function EventDetailForm({ eventType, scenarioId, onSubmit, onBack }: Eve
       )}
 
       <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting || !name}>
-        {isSubmitting ? "Saving..." : "Save"}
+        {isSubmitting ? t("saving") : t("save")}
       </Button>
     </div>
   )
