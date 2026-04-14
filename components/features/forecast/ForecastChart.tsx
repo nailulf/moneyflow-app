@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, type ReactElement } from "react"
+import { useTranslations } from "next-intl"
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, ReferenceLine, Line,
 } from "recharts"
@@ -21,12 +22,20 @@ const EVENT_ICON_MAP = Object.fromEntries(
   LIFE_EVENT_CATEGORIES.map((c) => [c.value, c.icon])
 ) as Record<string, string>
 
-function getCategoryLabel(type: string): string {
-  return LIFE_EVENT_CATEGORIES.find((c) => c.value === type)?.label ?? type
+function useCategoryLabel(): (type: string) => string {
+  const tCat = useTranslations("forecast.categories")
+  return (type: string) => {
+    if (LIFE_EVENT_CATEGORIES.some((c) => c.value === type)) {
+      return tCat(`${type}.label`)
+    }
+    return type
+  }
 }
 
 // Shared event section rendered inside tooltips when the hovered point has events
 function EventTooltipSection({ details }: { details: EventDetail[] }): ReactElement {
+  const t = useTranslations("forecast.chart")
+  const getCategoryLabel = useCategoryLabel()
   if (details.length === 0) return <></>
   return (
     <div className="border-t border-border/50 mt-2 pt-2 space-y-1">
@@ -41,7 +50,7 @@ function EventTooltipSection({ details }: { details: EventDetail[] }): ReactElem
         )
       })}
       <div className="flex items-center justify-between text-xs">
-        <span className="text-muted-foreground">Event cost</span>
+        <span className="text-muted-foreground">{t("eventCost")}</span>
         <span className="font-medium text-destructive">
           {formatCurrency(details.reduce((s, d) => s + d.amount, 0))}
         </span>
@@ -55,6 +64,7 @@ function NetWorthTooltip({ active, payload }: {
   active?: boolean
   payload?: Array<{ payload: ProjectionPoint; value: number }>
 }): ReactElement | null {
+  const t = useTranslations("forecast.chart")
   if (!active || !payload?.length) return null
   const point = payload[0].payload
   return (
@@ -62,7 +72,7 @@ function NetWorthTooltip({ active, payload }: {
       <p className="text-xs font-medium text-foreground">{point.ageLabel}</p>
       <p className="text-xs text-muted-foreground mb-1.5">{point.date}</p>
       <div className="flex items-center justify-between gap-4">
-        <span className="text-xs text-muted-foreground">Net Worth</span>
+        <span className="text-xs text-muted-foreground">{t("netWorth")}</span>
         <span className="text-xs font-semibold tabular-nums">{formatCurrency(point.deterministic)}</span>
       </div>
       <EventTooltipSection details={point.eventDetails} />
@@ -75,13 +85,14 @@ function SimulationTooltip({ active, payload }: {
   active?: boolean
   payload?: Array<{ payload: ProjectionPoint; value: number }>
 }): ReactElement | null {
+  const t = useTranslations("forecast.chart")
   if (!active || !payload?.length) return null
   const point = payload[0].payload
   const rows: { label: string; value: string }[] = [
-    { label: "Top range", value: `${formatCurrencyCompact(point.p75)} to ${formatCurrencyCompact(point.p90)}` },
-    { label: "Mid range", value: `${formatCurrencyCompact(point.p25)} to ${formatCurrencyCompact(point.p75)}` },
-    { label: "Median", value: formatCurrency(point.p50) },
-    { label: "Bottom range", value: `${formatCurrencyCompact(point.p10)} to ${formatCurrencyCompact(point.p25)}` },
+    { label: t("topRange"), value: `${formatCurrencyCompact(point.p75)} – ${formatCurrencyCompact(point.p90)}` },
+    { label: t("midRange"), value: `${formatCurrencyCompact(point.p25)} – ${formatCurrencyCompact(point.p75)}` },
+    { label: t("median"), value: formatCurrency(point.p50) },
+    { label: t("bottomRange"), value: `${formatCurrencyCompact(point.p10)} – ${formatCurrencyCompact(point.p25)}` },
   ]
   return (
     <div className="rounded-xl border border-border/50 bg-background/95 backdrop-blur-sm px-3 py-2.5 shadow-xl min-w-[200px]">
@@ -105,6 +116,7 @@ function CashFlowTooltip({ active, payload }: {
   active?: boolean
   payload?: Array<{ payload: AnnualCashFlowPoint; value: number; name: string }>
 }): ReactElement | null {
+  const t = useTranslations("forecast.chart")
   if (!active || !payload?.length) return null
   const point = payload[0].payload
   return (
@@ -115,14 +127,14 @@ function CashFlowTooltip({ active, payload }: {
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "hsl(var(--success, 142 71% 45%))" }} />
-            <span className="text-xs text-muted-foreground">Income</span>
+            <span className="text-xs text-muted-foreground">{t("income")}</span>
           </div>
           <span className="text-xs font-semibold tabular-nums">{formatCurrency(point.income)}</span>
         </div>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "hsl(0 84% 60%)" }} />
-            <span className="text-xs text-muted-foreground">Expense</span>
+            <span className="text-xs text-muted-foreground">{t("expense")}</span>
           </div>
           <span className="text-xs font-semibold tabular-nums">{formatCurrency(Math.abs(point.expense))}</span>
         </div>
@@ -234,6 +246,7 @@ function EventDot(props: {
 
 // Renders event markers as vertical reference lines with icon labels at the top
 function EventReferenceLines({ events, xKey }: { events: ForecastEvent[]; xKey: string }): ReactElement {
+  const getCategoryLabel = useCategoryLabel()
   // Group events by year for bar charts (xKey = ageLabel matching the bar data)
   return (
     <>
@@ -308,6 +321,7 @@ interface NetWorthViewProps {
 }
 
 function NetWorthView({ projection, netWorth, events }: NetWorthViewProps): ReactElement {
+  const t = useTranslations("forecast.chart")
   const chartData = useMemo(() => downsampleProjection(projection), [projection])
   const finalPoint = projection[projection.length - 1]
   const delta = finalPoint.deterministic - netWorth
@@ -317,12 +331,12 @@ function NetWorthView({ projection, netWorth, events }: NetWorthViewProps): Reac
     <div>
       <div className="flex items-start justify-between mb-6">
         <div>
-          <p className="text-xs text-muted-foreground">Current net worth</p>
+          <p className="text-xs text-muted-foreground">{t("currentNetWorth")}</p>
           <p className="text-2xl font-bold">{formatCurrency(netWorth)}</p>
         </div>
         <div className="text-right">
           <p className="text-xs text-muted-foreground">
-            Future net worth at {finalPoint.ageLabel.toLowerCase().replace("age ", "")}
+            {t("futureNetWorthAt", { age: finalPoint.ageLabel.toLowerCase().replace("age ", "") })}
           </p>
           <p className="text-2xl font-bold">{formatCurrency(finalPoint.deterministic)}</p>
           <p className={`text-sm ${delta >= 0 ? "text-success" : "text-destructive"}`}>
@@ -390,6 +404,7 @@ interface CashFlowViewProps {
 }
 
 function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, monthlyCashflow, events }: CashFlowViewProps): ReactElement {
+  const t = useTranslations("forecast.chart")
   const inflationRate = scenarioDraft.inflation_rate
 
   const annualData = useMemo<AnnualCashFlowPoint[]>(() => {
@@ -442,7 +457,7 @@ function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, mon
       const eventItems: CashFlowEventItem[] = impact?.items ?? []
 
       points.push({
-        ageLabel: y === 0 ? "TODAY" : `YEAR ${y + 1}`,
+        ageLabel: y === 0 ? t("today") : t("yearN", { n: y + 1 }),
         year: currentYear,
         income: yearIncome,
         expense: -yearExpense,
@@ -451,7 +466,7 @@ function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, mon
       })
     }
     return points
-  }, [scenarioDraft, baseAnnualIncome, baseAnnualExpenses, monthlyCashflow, events, inflationRate])
+  }, [scenarioDraft, baseAnnualIncome, baseAnnualExpenses, monthlyCashflow, events, inflationRate, t])
 
   const retirementIndex = annualData.findIndex((d) => d.hasRetirement)
   const preRetire = retirementIndex >= 0 ? annualData.slice(0, retirementIndex) : annualData
@@ -465,13 +480,13 @@ function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, mon
     <div>
       <div className="flex items-start justify-between mb-6">
         <div>
-          <p className="text-xs text-muted-foreground">{retirementIndex >= 0 ? "Pre-retire" : "Average"}</p>
-          <p className="text-2xl font-bold">{formatCurrency(Math.abs(preRetireNet))} avg/year</p>
+          <p className="text-xs text-muted-foreground">{retirementIndex >= 0 ? t("preRetire") : t("average")}</p>
+          <p className="text-2xl font-bold">{t("avgPerYear", { amount: formatCurrency(Math.abs(preRetireNet)) })}</p>
         </div>
         {retirementIndex >= 0 && (
           <div className="text-right">
-            <p className="text-xs text-muted-foreground">Post-retire</p>
-            <p className="text-2xl font-bold">{formatCurrency(postRetireNet)} avg/year</p>
+            <p className="text-xs text-muted-foreground">{t("postRetire")}</p>
+            <p className="text-2xl font-bold">{t("avgPerYear", { amount: formatCurrency(postRetireNet) })}</p>
             <p className="text-sm text-destructive">
               {formatCurrency(postRetireNet - preRetireNet)} ({Math.round(((postRetireNet - preRetireNet) / Math.abs(preRetireNet || 1)) * 100)}%)
             </p>
@@ -518,33 +533,39 @@ interface SimulationViewProps {
 }
 
 function SimulationView({ projection, successRate, targetNetWorth, scenarioDraft, events }: SimulationViewProps): ReactElement {
+  const t = useTranslations("forecast.chart")
   const chartData = useMemo(() => downsampleProjection(projection), [projection])
   const finalPoint = projection[projection.length - 1]
   const horizonAge = finalPoint.ageLabel
   const realReturn = ((scenarioDraft.expected_annual_return - scenarioDraft.inflation_rate) * 100).toFixed(2)
+  const rate = successRate ?? 0
 
   return (
     <div>
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div>
-          <p className="text-xs text-muted-foreground">Chance of success</p>
-          <p className="text-2xl font-bold">{successRate ?? 0}%</p>
+          <p className="text-xs text-muted-foreground">{t("chanceOfSuccess")}</p>
+          <p className="text-2xl font-bold">{rate}%</p>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            After factoring in your events, you {(successRate ?? 0) >= 50 ? "meet or exceed" : "may not reach"} your target net worth in {successRate ?? 0}% of the simulations.
+            {rate >= 50
+              ? t("successDescriptionHigh", { rate })
+              : t("successDescriptionLow", { rate })}
           </p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">Median net worth at {horizonAge.toLowerCase().replace("age ", "")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("medianNetWorthAt", { age: horizonAge.toLowerCase().replace("age ", "") })}
+          </p>
           <p className="text-2xl font-bold">{formatCurrency(finalPoint.p50)}</p>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            Most outcomes are concentrated around {formatCurrency(finalPoint.p50)}, the median result.
+            {t("medianDescription", { amount: formatCurrency(finalPoint.p50) })}
           </p>
         </div>
         <div>
-          <p className="text-xs text-muted-foreground">Average projected annual return</p>
+          <p className="text-xs text-muted-foreground">{t("avgProjectedReturn")}</p>
           <p className="text-2xl font-bold">{realReturn}%</p>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            Projected to grow at <strong>{realReturn}% per year</strong> for {scenarioDraft.horizon_years} years, adjusted for inflation.
+            {t("returnDescription", { rate: realReturn, years: scenarioDraft.horizon_years })}
           </p>
         </div>
       </div>
@@ -620,10 +641,11 @@ export function ForecastChart({
   events,
   successRate,
 }: ForecastChartProps): ReactElement {
+  const t = useTranslations("forecast.chart")
   if (isLoading || !projection || !scenarioDraft || netWorth === null) {
     return (
       <div className="h-96 flex items-center justify-center text-sm text-muted-foreground">
-        {isLoading ? "Computing projection..." : "No projection available"}
+        {isLoading ? t("computing") : t("noProjection")}
       </div>
     )
   }

@@ -1,6 +1,7 @@
 "use client"
 
 import type { Dispatch, ReactElement, SetStateAction } from "react"
+import { useTranslations } from "next-intl"
 import {
   Sheet,
   SheetContent,
@@ -42,6 +43,12 @@ interface CustomizeSheetProps {
     note: string | null
     details?: Record<string, unknown>
   }) => Promise<void>
+  onEventUpdate?: (eventId: string, payload: {
+    name: string
+    event_date: string
+    amount: number
+    details: Record<string, unknown>
+  }) => Promise<void>
   onEventDelete: (eventId: string) => Promise<void>
   onEventToggle?: (eventId: string, is_enabled: boolean) => Promise<void>
 }
@@ -64,29 +71,32 @@ export function CustomizeSheet({
   onDelete,
   events,
   onEventSubmit,
+  onEventUpdate,
   onEventDelete,
   onEventToggle,
 }: CustomizeSheetProps): ReactElement {
+  const t = useTranslations("forecast.customize")
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Customize Forecast</SheetTitle>
+          <SheetTitle>{t("title")}</SheetTitle>
           <SheetDescription>
-            Add life events and adjust scenario settings.
+            {t("description")}
           </SheetDescription>
         </SheetHeader>
         <div className="px-4 pb-6">
           <Tabs defaultValue="events" className="mt-4">
             <TabsList className="w-full">
-              <TabsTrigger value="events" className="flex-1">Life Events</TabsTrigger>
-              <TabsTrigger value="settings" className="flex-1">Settings</TabsTrigger>
+              <TabsTrigger value="events" className="flex-1">{t("tabEvents")}</TabsTrigger>
+              <TabsTrigger value="settings" className="flex-1">{t("tabSettings")}</TabsTrigger>
             </TabsList>
             <TabsContent value="events" className="mt-4">
               <EventSchedule
                 events={events}
                 selectedScenarioId={selectedScenarioId}
                 onSubmit={onEventSubmit}
+                onUpdate={onEventUpdate}
                 onDelete={onEventDelete}
                 onToggle={onEventToggle}
               />

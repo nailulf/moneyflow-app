@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactElement } from "react"
 
+import { useTranslations } from "next-intl"
 import { Info, MoreVertical } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { PageLayout, TopContent } from "@/components/PageLayout"
@@ -37,6 +38,7 @@ import {
   useCreateScenario,
   useDeleteScenario,
   useCreateEvent,
+  useUpdateEvent,
   useDeleteEvent,
   useToggleEvent,
 } from "@/hooks/useForecastQuery"
@@ -45,9 +47,11 @@ import { useForecastEngine } from "@/hooks/useForecastEngine"
 import { ForecastChart, type ForecastChartView } from "@/components/features/forecast/ForecastChart"
 import { ForecastSummary } from "@/components/features/forecast/ForecastSummary"
 import { CustomizeSheet } from "@/components/features/forecast/CustomizeSheet"
+import { SimulationTable } from "@/components/features/forecast/SimulationTable"
 
 export default function ForecastPage(): ReactElement {
   const { user } = useAuth()
+  const t = useTranslations("forecast")
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null)
   const [scenarioDraft, setScenarioDraft] = useState<ScenarioDraft | null>(null)
   const [chartView, setChartView] = useState<ForecastChartView>("net-worth")
@@ -75,6 +79,7 @@ export default function ForecastPage(): ReactElement {
   const createScenario = useCreateScenario()
   const deleteScenario = useDeleteScenario()
   const createEvent = useCreateEvent()
+  const updateEvent = useUpdateEvent(selectedScenarioId)
   const deleteEvent = useDeleteEvent(selectedScenarioId)
   const toggleEvent = useToggleEvent(selectedScenarioId)
 
@@ -155,31 +160,31 @@ export default function ForecastPage(): ReactElement {
     const notes: string[] = []
 
     const targetLabel = scenarioDraft.target_net_worth > 0
-      ? `above target (${formatCurrency(scenarioDraft.target_net_worth)})`
-      : "positive"
+      ? t("insights.targetAbove", { amount: formatCurrency(scenarioDraft.target_net_worth) })
+      : t("insights.targetPositive")
     if (successRate !== null && successRate < 50) {
-      notes.push(`Less than half of simulated paths end ${targetLabel}. Review return assumptions or increase contributions.`)
+      notes.push(t("insights.lowSuccess", { targetLabel }))
     } else if (successRate !== null && successRate >= 90) {
-      notes.push(`Strong forecast: 90%+ of simulations end ${targetLabel} at the horizon.`)
+      notes.push(t("insights.highSuccess", { targetLabel }))
     }
     if (finalPoint.p50 < netWorth) {
-      notes.push("Projected median wealth ends below today. Consider increasing contributions or reducing withdrawals.")
+      notes.push(t("insights.belowToday"))
     }
     if (scenarioDraft.include_cashflow && monthlyCashflow < 0) {
       notes.push(
         cashflowMonthsUsed >= 2
-          ? `Negative median cashflow (${cashflowMonthsUsed}-month sample) drags the forecast.`
-          : "Negative average cashflow drags the forecast.",
+          ? t("insights.negativeCashflowMonths", { months: cashflowMonthsUsed })
+          : t("insights.negativeCashflow"),
       )
     }
     if (scenarioDraft.annual_volatility > 0.2) {
-      notes.push("High volatility increases downside risk. Balance allocations to smooth returns.")
+      notes.push(t("insights.highVolatility"))
     }
     if (notes.length === 0) {
-      notes.push("Scenario is on track. Keep monitoring contributions and adjust if goals change.")
+      notes.push(t("insights.onTrack"))
     }
     return notes
-  }, [projection, scenarioDraft, netWorth, monthlyCashflow, cashflowMonthsUsed, successRate])
+  }, [projection, scenarioDraft, netWorth, monthlyCashflow, cashflowMonthsUsed, successRate, t])
 
   // --- Handlers ---
 
@@ -198,6 +203,18 @@ export default function ForecastPage(): ReactElement {
     details?: Record<string, unknown>
   }): Promise<void> => {
     await createEvent.mutateAsync(payload)
+  }
+
+  const handleEventUpdate = async (
+    eventId: string,
+    payload: {
+      name: string
+      event_date: string
+      amount: number
+      details: Record<string, unknown>
+    },
+  ): Promise<void> => {
+    await updateEvent.mutateAsync({ eventId, ...payload })
   }
 
   const handleToggleEvent = async (eventId: string, is_enabled: boolean): Promise<void> => {
@@ -240,7 +257,7 @@ export default function ForecastPage(): ReactElement {
                   onValueChange={setSelectedScenarioId}
                 >
                   <SelectTrigger className="w-auto min-w-[160px] border-none shadow-none font-semibold text-base">
-                    <SelectValue placeholder="Select scenario" />
+                    <SelectValue placeholder={t("settings.selectScenario")} />
                   </SelectTrigger>
                   <SelectContent>
                     {scenarios.map((s) => (
@@ -267,13 +284,13 @@ export default function ForecastPage(): ReactElement {
                   onValueChange={(v) => setChartView(v as ForecastChartView)}
                 >
                   <TabsList>
-                    <TabsTrigger value="net-worth">Net Worth</TabsTrigger>
-                    <TabsTrigger value="cash-flow">Cash Flow</TabsTrigger>
-                    <TabsTrigger value="simulation">Simulation</TabsTrigger>
+                    <TabsTrigger value="net-worth">{t("tabs.netWorth")}</TabsTrigger>
+                    <TabsTrigger value="cash-flow">{t("tabs.cashFlow")}</TabsTrigger>
+                    <TabsTrigger value="simulation">{t("tabs.simulation")}</TabsTrigger>
                   </TabsList>
                 </Tabs>
                 <Button onClick={() => setSheetOpen(true)}>
-                  Add events or customize
+                  {t("addEventsCustomize")}
                 </Button>
               </div>
 
@@ -295,6 +312,8 @@ export default function ForecastPage(): ReactElement {
               <ForecastSummary insights={insights} />
             </CardContent>
           </Card>
+
+          <SimulationTable />
         </TopContent>
       </PageLayout>
 
@@ -317,6 +336,7 @@ export default function ForecastPage(): ReactElement {
         onDelete={handleDeleteScenario}
         events={events}
         onEventSubmit={handleEventSubmit}
+        onEventUpdate={handleEventUpdate}
         onEventDelete={handleDeleteEvent}
         onEventToggle={handleToggleEvent}
       />
