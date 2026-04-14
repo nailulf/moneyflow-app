@@ -133,7 +133,9 @@ export async function processRecurringTransactions(): Promise<ProcessingResult> 
         continue
       }
 
-      // Update the original recurring transaction's last_processed_date
+      // Update the original recurring transaction's last_processed_date.
+      // If this fails, the next cron run would re-process and create a duplicate,
+      // so we roll back the inserted transaction to keep things consistent.
       const { error: updateError } = await supabase
         .from('transactions')
         .update({ last_processed_date: new Date().toISOString() })
@@ -141,14 +143,32 @@ export async function processRecurringTransactions(): Promise<ProcessingResult> 
 
       if (updateError) {
         console.error(`Error updating last_processed_date for transaction ${transaction.id}:`, updateError)
-        errors.push({ transactionId: transaction.id, error: updateError.message })
-      } else {
-        processedTransactions.push({
-          originalId: transaction.id,
-          newTransactionId: newTransactionData.id,
-          nextDate: now.toISOString().split('T')[0]
+        // Rollback: delete the newly inserted transaction so it's not orphaned
+        const { error: rollbackError } = await supabase
+          .from('transactions')
+          .delete()
+          .eq('id', newTransactionData.id)
+
+        if (rollbackError) {
+          // Rollback failed — log loudly so ops can clean up manually
+          console.error(
+            `[CRITICAL] Failed to roll back transaction ${newTransactionData.id} after last_processed_date update failed. Manual cleanup needed.`,
+            rollbackError
+          )
+        }
+
+        errors.push({
+          transactionId: transaction.id,
+          error: `Update failed, rolled back new transaction ${newTransactionData.id}: ${updateError.message}`
         })
+        continue
       }
+
+      processedTransactions.push({
+        originalId: transaction.id,
+        newTransactionId: newTransactionData.id,
+        nextDate: now.toISOString().split('T')[0]
+      })
     } catch (error) {
       console.error(`Error processing recurring transaction ${transaction.id}:`, error)
       errors.push({ transactionId: transaction.id, error: error instanceof Error ? error.message : 'Unknown error' })
