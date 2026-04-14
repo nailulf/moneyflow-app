@@ -1,18 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
-    const period = searchParams.get('period')
-
-    if (!userId || !period) {
-      return NextResponse.json({ error: 'userId and period are required' }, { status: 400 })
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { searchParams } = new URL(request.url)
+    const paramUserId = searchParams.get('userId')
+    const period = searchParams.get('period')
+
+    if (!period) {
+      return NextResponse.json({ error: 'period is required' }, { status: 400 })
+    }
+    if (paramUserId && paramUserId !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    const userId = user.id
+
     const oppositePeriod = period === 'monthly' ? 'yearly' : 'monthly'
-    const supabase = createServerComponentClient()
 
     // Get category IDs already in the opposite period's plan
     const { data: usedCategories } = await supabase

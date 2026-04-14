@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import type { UserOnboardingDB } from '@/types/database'
 
 /**
@@ -8,19 +8,18 @@ import type { UserOnboardingDB } from '@/types/database'
  */
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
-    const { userId, summary } = body
-
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+    const { userId: bodyUserId, summary } = body
+    if (bodyUserId && bodyUserId !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
-    }
-
-    const supabase = createServerComponentClient()
+    const userId = user.id
 
     // Get current onboarding state to calculate duration
     const { data: currentState } = await supabase

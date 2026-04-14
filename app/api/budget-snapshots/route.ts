@@ -1,23 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
+    const paramUserId = searchParams.get('userId')
     const period = searchParams.get('period')
     const year = searchParams.get('year')
     const month = searchParams.get('month')
 
-    if (!userId || !period || !year) {
-      return NextResponse.json({ error: 'userId, period, and year are required' }, { status: 400 })
+    if (!period || !year) {
+      return NextResponse.json({ error: 'period and year are required' }, { status: 400 })
     }
+
+    if (paramUserId && paramUserId !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const userId = user.id
 
     if (period === 'monthly' && !month) {
       return NextResponse.json({ error: 'month is required for monthly snapshots' }, { status: 400 })
     }
-
-    const supabase = createServerComponentClient()
     const yearNum = parseInt(year)
     const monthNum = month ? parseInt(month) : null
     const now = new Date()

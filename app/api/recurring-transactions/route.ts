@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import { processRecurringTransactions } from '@/lib/recurring-processor'
 
 // This endpoint processes recurring transactions and generates new ones
@@ -45,28 +45,32 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('API Error:', error)
-    return NextResponse.json({
-      error: error instanceof Error ? error.message : 'Internal server error',
-      details: error instanceof Error ? error.stack : undefined
-    }, { status: 500 })
+    // Do not leak stack traces or internal error messages to the client
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-// GET endpoint for manual testing and status checking
+// GET endpoint for manual testing and status checking.
+// Requires an authenticated user — only returns their own recurring transactions.
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const test = searchParams.get('test')
-    
+
     if (test === 'true') {
-      // Return information about recurring transactions that would be processed
-      const supabase = createServerComponentClient()
+      const supabase = await createClient()
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+
       const now = new Date()
       now.setHours(12, 0, 0, 0)
-      
+
       const { data: recurringTransactions, error } = await supabase
         .from('transactions')
         .select('id, description, date, amount, type, last_processed_date, recurring_frequency, recurring_end_date')
+        .eq('user_id', user.id)
         .eq('is_recurring', true)
       
       if (error) {

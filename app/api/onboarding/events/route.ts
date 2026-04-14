@@ -1,32 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import type { OnboardingEventDB, OnboardingEventInsert } from '@/types/database'
 
-/**
- * GET /api/onboarding/events
- * Fetches onboarding events for a user (for analytics/debugging)
- */
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
+    const paramUserId = searchParams.get('userId')
+    if (paramUserId && paramUserId !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     const limit = parseInt(searchParams.get('limit') || '50', 10)
-
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
-    }
-
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
-    }
-
-    const supabase = createServerComponentClient()
 
     const { data, error } = await supabase
       .from('onboarding_events')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(limit)
 
@@ -42,34 +36,31 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/**
- * POST /api/onboarding/events
- * Logs an onboarding event
- */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { userId, eventType, phase, step, metadata } = body
-
-    if (!userId || !eventType) {
-      return NextResponse.json({ error: 'User ID and event type are required' }, { status: 400 })
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Validate event type
+    const body = await request.json()
+    const { userId: bodyUserId, eventType, phase, step, metadata } = body
+
+    if (bodyUserId && bodyUserId !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    if (!eventType) {
+      return NextResponse.json({ error: 'Event type is required' }, { status: 400 })
+    }
+
     const validEventTypes = ['phase_started', 'phase_completed', 'step_completed', 'skipped', 'resumed', 'completed']
     if (!validEventTypes.includes(eventType)) {
       return NextResponse.json({ error: 'Invalid event type' }, { status: 400 })
     }
 
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
-    }
-
-    const supabase = createServerComponentClient()
-
     const eventData: OnboardingEventInsert = {
-      user_id: userId,
+      user_id: user.id,
       event_type: eventType,
       phase: phase || null,
       step: step !== undefined ? step : null,
