@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
-    const period = searchParams.get('period')
-
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 })
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabase = createServerComponentClient()
+    const { searchParams } = new URL(request.url)
+    const paramUserId = searchParams.get('userId')
+    const period = searchParams.get('period')
+
+    if (paramUserId && paramUserId !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     let query = supabase
       .from('budget_plans')
@@ -28,7 +32,7 @@ export async function GET(request: NextRequest) {
           )
         )
       `)
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
 
     if (period) {
       query = query.eq('period', period)
@@ -55,24 +59,28 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { userId, period, total_amount, currency, categories } = body
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (!userId || !period || total_amount === undefined) {
-      return NextResponse.json({ error: 'Missing required fields: userId, period, total_amount' }, { status: 400 })
+    const body = await request.json()
+    const { period, total_amount, currency, categories } = body
+
+    if (!period || total_amount === undefined) {
+      return NextResponse.json({ error: 'Missing required fields: period, total_amount' }, { status: 400 })
     }
 
     if (!['monthly', 'yearly'].includes(period)) {
       return NextResponse.json({ error: 'period must be "monthly" or "yearly"' }, { status: 400 })
     }
 
-    const supabase = createServerComponentClient()
-
     // Check if a plan already exists for this period
     const { data: existing } = await supabase
       .from('budget_plans')
       .select('id')
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .eq('period', period)
       .single()
 
@@ -94,7 +102,7 @@ export async function POST(request: NextRequest) {
           category_id,
           budget_plans!inner (period)
         `)
-        .eq('budget_plans.user_id', userId)
+        .eq('budget_plans.user_id', user.id)
         .eq('budget_plans.period', oppositePeriod)
         .in('category_id', categoryIds)
 
@@ -111,7 +119,7 @@ export async function POST(request: NextRequest) {
     const { data: plan, error: planError } = await supabase
       .from('budget_plans')
       .insert({
-        user_id: userId,
+        user_id: user.id,
         period,
         total_amount,
         currency: currency || 'IDR',
@@ -138,7 +146,7 @@ export async function POST(request: NextRequest) {
 
       if (catError) {
         console.error('Error creating plan categories:', catError)
-        await supabase.from('budget_plans').delete().eq('id', plan.id)
+        await supabase.from('budget_plans').delete().eq('id', plan.id).eq('user_id', user.id)
         return NextResponse.json({ error: 'Failed to create plan categories' }, { status: 500 })
       }
     }
@@ -158,7 +166,7 @@ export async function POST(request: NextRequest) {
       currency: string
       status: string
     } = {
-      user_id: userId,
+      user_id: user.id,
       period,
       year: currentYear,
       month: period === 'monthly' ? currentMonth : null,
@@ -206,6 +214,7 @@ export async function POST(request: NextRequest) {
         )
       `)
       .eq('id', plan.id)
+      .eq('user_id', user.id)
       .single()
 
     return NextResponse.json(completePlan || plan)
@@ -217,6 +226,12 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { id, total_amount, currency, categories } = body
 
@@ -224,17 +239,15 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Plan id is required' }, { status: 400 })
     }
 
-    const supabase = createServerComponentClient()
-
-    // Fetch the existing plan to get user_id and period
+    // Fetch the existing plan and verify ownership
     const { data: existingPlan, error: fetchError } = await supabase
       .from('budget_plans')
       .select('*')
       .eq('id', id)
       .single()
 
-    if (fetchError || !existingPlan) {
-      return NextResponse.json({ error: 'Budget plan not found' }, { status: 404 })
+    if (fetchError || !existingPlan || existingPlan.user_id !== user.id) {
+      return NextResponse.json({ error: 'Budget plan not found or access denied' }, { status: 404 })
     }
 
     // Validate cross-plan category exclusivity for new categories
@@ -272,6 +285,7 @@ export async function PUT(request: NextRequest) {
       .from('budget_plans')
       .update(updateData)
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (updateError) {
       console.error('Error updating budget plan:', updateError)
@@ -330,6 +344,7 @@ export async function PUT(request: NextRequest) {
         )
       `)
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     return NextResponse.json(completePlan)

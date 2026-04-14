@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import { format, subDays, subWeeks, subMonths, subYears } from 'date-fns'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 import { batchGetExchangeRates, lookupRate, SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
@@ -8,21 +8,22 @@ const BASE_CURRENCY = 'IDR'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
+    const paramUserId = searchParams.get('userId')
     const period = searchParams.get('period') || '1M' // 1W, 1M, 3M, 1Y, 5Y, ALL
     const endDate = searchParams.get('endDate') || new Date().toISOString()
 
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+    if (paramUserId && paramUserId !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Check environment variables
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
-    }
-
-    const supabase = createServerComponentClient()
+    const userId = user.id
     const endDateTime = new Date(endDate)
 
     // Calculate start date based on period

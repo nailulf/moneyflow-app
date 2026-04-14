@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { parseReceiptWithAI } from '@/lib/receipt-parser'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -10,10 +10,16 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File
     const useAI = formData.get('useAI') === 'true'
-    const userId = formData.get('userId') as string
+    const userId = user.id
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -74,20 +80,17 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Fetch user categories
+    // Fetch user categories (authenticated user only)
     let availableCategories: { id: string; name: string }[] = []
-    if (userId) {
-      try {
-        const supabase = createServerComponentClient()
-        const { data: categories } = await supabase
-          .from('categories')
-          .select('id, name')
-          .eq('user_id', userId)
-          .eq('is_active', true)
-        if (categories) availableCategories = categories
-      } catch (error) {
-        console.warn('Failed to fetch user categories', error)
-      }
+    try {
+      const { data: categories } = await supabase
+        .from('categories')
+        .select('id, name')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+      if (categories) availableCategories = categories
+    } catch (error) {
+      console.warn('Failed to fetch user categories', error)
     }
 
     try {
