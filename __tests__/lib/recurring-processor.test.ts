@@ -6,52 +6,54 @@
  * (e.g. a 31st-of-month recurring fires on Feb 28).
  */
 
-// Mock the Supabase client before importing the processor
-const mockSelect = jest.fn()
-const mockInsert = jest.fn()
-const mockUpdate = jest.fn()
-const mockEq = jest.fn()
-const mockSingle = jest.fn()
-
-const buildChain = () => ({
-  select: mockSelect,
-  insert: mockInsert,
-  update: mockUpdate,
-  eq: mockEq,
-  single: mockSingle,
-})
+// Mutable mock state — tests update these before calling the processor
+let mockTransactions: any[] = []
+let mockInsertError: any = null
+let mockUpdateError: any = null
+let mockDeleteError: any = null
+const mockInsertedRows: any[] = []
+const mockDeletedIds: string[] = []
 
 jest.mock('../../lib/supabase', () => ({
   createServerComponentClient: () => ({
     from: (table: string) => {
-      if (table === 'transactions') {
-        return {
-          select: jest.fn().mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-              data: mockTransactions,
-              error: null,
-            }),
-          }),
-          insert: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({
-                data: { id: 'new-tx-id' },
-                error: null,
-              }),
-            }),
-          }),
-          update: jest.fn().mockReturnValue({
-            eq: jest.fn().mockResolvedValue({ error: null }),
-          }),
-        }
+      if (table !== 'transactions') {
+        return {} as any
       }
-      return buildChain()
+      return {
+        // SELECT — returns mockTransactions for the initial fetch
+        select: () => ({
+          eq: () => ({
+            data: mockTransactions,
+            error: null,
+          }),
+        }),
+        // INSERT — can be configured to fail via mockInsertError
+        insert: (row: any) => ({
+          select: () => ({
+            single: async () => {
+              if (mockInsertError) return { data: null, error: mockInsertError }
+              const inserted = { id: `new-tx-${mockInsertedRows.length + 1}`, ...row }
+              mockInsertedRows.push(inserted)
+              return { data: inserted, error: null }
+            },
+          }),
+        }),
+        // UPDATE — can be configured to fail via mockUpdateError
+        update: () => ({
+          eq: async () => ({ error: mockUpdateError }),
+        }),
+        // DELETE — can be configured to fail via mockDeleteError; records deleted ids
+        delete: () => ({
+          eq: async (_col: string, id: string) => {
+            mockDeletedIds.push(id)
+            return { error: mockDeleteError }
+          },
+        }),
+      }
     },
   }),
 }))
-
-// We'll set this before each test to control what the processor sees
-let mockTransactions: any[] = []
 
 import { processRecurringTransactions } from '../../lib/recurring-processor'
 
@@ -80,6 +82,11 @@ describe('Recurring Processor — month-end clamping', () => {
   beforeEach(() => {
     jest.useFakeTimers()
     mockTransactions = []
+    mockInsertError = null
+    mockUpdateError = null
+    mockDeleteError = null
+    mockInsertedRows.length = 0
+    mockDeletedIds.length = 0
   })
 
   afterEach(() => {
@@ -244,5 +251,85 @@ describe('Recurring Processor — month-end clamping', () => {
     const result = await processRecurringTransactions()
     const processed = result.processedTransactions.find(t => t.originalId === 'yearly-tx-1')
     expect(processed).toBeUndefined()
+  })
+
+  // ─── Rollback on partial failure (BUG-009) ────────────────────────────
+
+  it('rollback: deletes inserted transaction if last_processed_date update fails', async () => {
+    jest.setSystemTime(new Date(2026, 1, 28, 12, 0, 0))
+
+    mockTransactions = [
+      makeRecurringTransaction({
+        date: '2026-01-31',
+        last_processed_date: '2026-01-31',
+        recurring_frequency: 'monthly',
+      }),
+    ]
+
+    // Simulate a transient DB failure on the update step
+    mockUpdateError = { message: 'transient db error' }
+
+    const result = await processRecurringTransactions()
+
+    // A transaction was inserted...
+    expect(mockInsertedRows.length).toBe(1)
+    // ...and then rolled back via delete
+    expect(mockDeletedIds).toContain(mockInsertedRows[0].id)
+    // Not counted as processed
+    expect(result.processedTransactions.length).toBe(0)
+    // Surfaced as an error
+    expect(result.errors.length).toBe(1)
+    expect(result.errors[0].error).toContain('rolled back')
+  })
+
+  it('rollback: logs critical error if rollback delete also fails', async () => {
+    jest.setSystemTime(new Date(2026, 1, 28, 12, 0, 0))
+
+    mockTransactions = [
+      makeRecurringTransaction({
+        date: '2026-01-31',
+        last_processed_date: '2026-01-31',
+        recurring_frequency: 'monthly',
+      }),
+    ]
+
+    mockUpdateError = { message: 'update failed' }
+    mockDeleteError = { message: 'delete also failed' }
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    const result = await processRecurringTransactions()
+
+    // Insert + rollback attempt both happened
+    expect(mockInsertedRows.length).toBe(1)
+    expect(mockDeletedIds.length).toBe(1)
+    // Critical log about the orphaned transaction
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[CRITICAL] Failed to roll back'),
+      expect.any(Object)
+    )
+    // Still surfaced as an error
+    expect(result.errors.length).toBe(1)
+
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('rollback: no rollback happens when update succeeds', async () => {
+    jest.setSystemTime(new Date(2026, 1, 28, 12, 0, 0))
+
+    mockTransactions = [
+      makeRecurringTransaction({
+        date: '2026-01-31',
+        last_processed_date: '2026-01-31',
+        recurring_frequency: 'monthly',
+      }),
+    ]
+
+    const result = await processRecurringTransactions()
+
+    expect(mockInsertedRows.length).toBe(1)
+    expect(mockDeletedIds.length).toBe(0)
+    expect(result.processedTransactions.length).toBe(1)
+    expect(result.errors.length).toBe(0)
   })
 })
