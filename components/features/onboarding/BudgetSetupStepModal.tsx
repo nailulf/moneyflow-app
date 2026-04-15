@@ -16,7 +16,6 @@ import {
   ArrowLeft,
   Loader2,
   Check,
-  AlertCircle,
 } from 'lucide-react'
 
 export function BudgetSetupStepModal() {
@@ -28,53 +27,127 @@ export function BudgetSetupStepModal() {
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
   const [monthlyIncome, setMonthlyIncome] = useState('')
+  const [incomeError, setIncomeError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const selectedTemplate = templates?.find(t => t.id === selectedTemplateId)
 
+  // Validate monthly income: must be a finite number, 0 <= x <= 1e12.
+  // Returns null when valid, or a translated error message.
+  const validateIncome = (raw: string): string | null => {
+    if (!raw.trim()) return null // empty is handled by the disabled state
+    const parsed = Number(raw)
+    if (!Number.isFinite(parsed)) return t('errors.incomeInvalid')
+    if (parsed < 0) return t('errors.incomeMin')
+    if (parsed > 1_000_000_000_000) return t('errors.incomeMax')
+    return null
+  }
+
+  const handleIncomeChange = (value: string) => {
+    setMonthlyIncome(value)
+    setIncomeError(validateIncome(value))
+  }
+
+  const isIncomeValid = monthlyIncome.trim().length > 0 && incomeError === null
+
+  // Heuristic split of expense categories into needs vs wants. The user's
+  // categories don't carry a "needs"/"wants" tag, so we use canonical names
+  // (matching the template seed in migration 024) as a hint and fall back to
+  // an even split if the user has renamed/replaced everything. This keeps
+  // the allocation faithful to whatever categories the user actually has,
+  // which is the whole point of pulling from the categories step.
+  const NEEDS_HINTS = [
+    'Food & Dining', 'Food and Eating', 'Groceries', 'Transportation', 'Bills & Utilities',
+    'Bills', 'Utilities', 'Healthcare', 'Health', 'Health & Fitness', 'Education', 'Housing',
+    'Rent', 'Mortgage', 'Insurance',
+  ]
+  const WANTS_HINTS = [
+    'Shopping', 'Entertainment', 'Travel', 'Personal Care', 'Hobbies', 'Dining Out',
+    'Subscriptions', 'Gifts',
+  ]
+
+  const expenseCategories = categories.filter(c => c.group_type === 'EXPENSE')
+  const transferCategories = categories.filter(c => c.group_type === 'TRANSFER')
+
+  const matchByName = (haystack: typeof expenseCategories, hints: string[]) => {
+    const lc = hints.map(h => h.toLowerCase())
+    return haystack.filter(c => lc.includes(c.name.toLowerCase()))
+  }
+
+  // Resolve which categories receive each bucket's allocation. Falls back
+  // to "all expense categories" when no canonical hint matches so the
+  // allocation total always equals the income (no silently-dropped %).
+  const resolveBucket = (bucket: 'needs' | 'wants' | 'savings') => {
+    if (bucket === 'savings') {
+      // Prefer transfer categories (Savings transfer etc.). If the user
+      // deleted them all, fall back to expense categories so the savings
+      // % still gets allocated somewhere visible.
+      return transferCategories.length > 0 ? transferCategories : expenseCategories
+    }
+    const hints = bucket === 'needs' ? NEEDS_HINTS : WANTS_HINTS
+    const matched = matchByName(expenseCategories, hints)
+    if (matched.length > 0) return matched
+    // No canonical match — distribute across all expense categories. This
+    // is the "user customised everything" path.
+    return expenseCategories
+  }
+
+  // Distribute each bucket's amount evenly across its resolved categories.
+  // Tracks any rounding remainder and pushes it onto the last category in
+  // the bucket so the per-bucket total exactly equals (income * pct / 100).
   const calculateAllocations = () => {
     if (!selectedTemplate || !monthlyIncome) return {}
-
     const income = parseFloat(monthlyIncome) || 0
+    if (!income) return {}
+
     const allocations: Record<string, number> = {}
-
     const templateAllocations = selectedTemplate.allocations as { needs: number; wants: number; savings: number }
-    const categoryMappings = selectedTemplate.category_mappings as Record<string, string[]>
 
-    Object.entries(categoryMappings).forEach(([key, categoryNames]) => {
-      const percentage = templateAllocations[key as keyof typeof templateAllocations] || 0
-      const totalForGroup = (income * percentage) / 100
-      const perCategory = totalForGroup / categoryNames.length
+    ;(['needs', 'wants', 'savings'] as const).forEach(bucket => {
+      const percentage = templateAllocations[bucket] || 0
+      const groupTotal = Math.round((income * percentage) / 100)
+      const targets = resolveBucket(bucket)
+      if (targets.length === 0 || groupTotal === 0) return
 
-      categoryNames.forEach(name => {
-        const category = categories.find(c => c.name === name)
-        if (category) {
-          allocations[category.id] = Math.round(perCategory)
-        }
+      const per = Math.floor(groupTotal / targets.length)
+      const remainder = groupTotal - per * targets.length
+
+      targets.forEach((category, i) => {
+        const previous = allocations[category.id] ?? 0
+        // The same category may receive funds from multiple buckets when
+        // hints overlap (e.g. an expense fallback for savings). Sum them.
+        const share = per + (i === targets.length - 1 ? remainder : 0)
+        allocations[category.id] = previous + share
       })
     })
 
     return allocations
   }
 
-  // Build per-group preview data for display
+  // Build per-group preview rows. Each row mirrors what calculateAllocations
+  // does so the preview list reflects the actual categories that will be
+  // funded — not a stale list from the template seed.
   const getGroupBreakdown = () => {
     if (!selectedTemplate || !monthlyIncome) return []
     const income = parseFloat(monthlyIncome) || 0
     const templateAllocations = selectedTemplate.allocations as { needs: number; wants: number; savings: number }
-    const categoryMappings = selectedTemplate.category_mappings as Record<string, string[]>
 
-    return Object.entries(categoryMappings).map(([key, categoryNames]) => {
-      const percentage = templateAllocations[key as keyof typeof templateAllocations] || 0
+    return (['needs', 'wants', 'savings'] as const).map(bucket => {
+      const percentage = templateAllocations[bucket] || 0
       const groupTotal = Math.round((income * percentage) / 100)
-      const perCategory = categoryNames.length > 0 ? Math.round(groupTotal / categoryNames.length) : 0
+      const targets = resolveBucket(bucket)
+      const per = targets.length > 0 ? Math.floor(groupTotal / targets.length) : 0
+      const remainder = targets.length > 0 ? groupTotal - per * targets.length : 0
 
-      const matched = categoryNames.map(name => ({
-        name,
-        category: categories.find(c => c.name === name),
-      }))
-
-      return { key, percentage, groupTotal, perCategory, matched }
+      return {
+        key: bucket,
+        percentage,
+        groupTotal,
+        targets: targets.map((category, i) => ({
+          category,
+          amount: per + (i === targets.length - 1 ? remainder : 0),
+        })),
+      }
     })
   }
 
@@ -83,10 +156,15 @@ export function BudgetSetupStepModal() {
   const income = parseFloat(monthlyIncome) || 0
   const allocationPercentage = income > 0 ? Math.round((totalAllocated / income) * 100) : 0
   const groupBreakdown = getGroupBreakdown()
-  const hasUnmatched = groupBreakdown.some(g => g.matched.some(m => !m.category))
 
   const handleCreateBudget = async () => {
     if (!user?.id) return
+
+    const validationError = validateIncome(monthlyIncome)
+    if (validationError || !monthlyIncome.trim()) {
+      setIncomeError(validationError ?? t('errors.incomeRequired'))
+      return
+    }
 
     setIsSubmitting(true)
 
@@ -162,10 +240,6 @@ export function BudgetSetupStepModal() {
     }
   }
 
-  const handleSkipBudget = async () => {
-    await goToPhase('completed')
-  }
-
   const handleBack = async () => {
     await prevPhase()
   }
@@ -179,7 +253,9 @@ export function BudgetSetupStepModal() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    // Flex column owning its own scrollable body + pinned footer.
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-4 pr-1">
       {/* Monthly Income */}
       <div className="space-y-1.5">
         <Label htmlFor="income">{t('monthlyIncomeLabel')}</Label>
@@ -187,18 +263,28 @@ export function BudgetSetupStepModal() {
           id="income"
           type="number"
           inputMode="numeric"
+          min={0}
+          max={1_000_000_000_000}
+          step="any"
           placeholder={t('incomePlaceholder')}
           value={monthlyIncome}
-          onChange={(e) => setMonthlyIncome(e.target.value)}
+          onChange={(e) => handleIncomeChange(e.target.value)}
           disabled={isSubmitting}
-          className="h-11"
+          aria-invalid={incomeError !== null}
+          aria-describedby={incomeError ? 'income-error' : undefined}
+          className={cn('h-11', incomeError && 'border-destructive focus-visible:ring-destructive')}
         />
+        {incomeError && (
+          <p id="income-error" className="text-xs text-destructive">
+            {incomeError}
+          </p>
+        )}
       </div>
 
       {/* Budget Templates */}
       <div className="space-y-1.5">
         <Label>{t('chooseBudgetTemplate')}</Label>
-        <div className="space-y-2 max-h-44 overflow-y-auto pr-0.5">
+        <div className="space-y-2">
           {templates?.map((template) => {
             const templateAllocations = template.allocations as { needs: number; wants: number; savings: number }
             const isSelected = selectedTemplateId === template.id
@@ -250,7 +336,7 @@ export function BudgetSetupStepModal() {
           </p>
 
           <div className="space-y-3 pt-1 border-t border-border/50">
-            {groupBreakdown.map(({ key, percentage, groupTotal, perCategory, matched }) => (
+            {groupBreakdown.map(({ key, percentage, groupTotal, targets }) => (
               <div key={key}>
                 <div className="flex items-center justify-between text-xs mb-1">
                   <span className="font-semibold capitalize text-foreground">
@@ -261,61 +347,47 @@ export function BudgetSetupStepModal() {
                   </span>
                 </div>
                 <div className="space-y-0.5 pl-2">
-                  {matched.map(({ name, category }) => (
-                    <div
-                      key={name}
-                      className="flex items-center justify-between text-xs"
-                    >
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        {category ? (
+                  {targets.length === 0 ? (
+                    <p className="text-xs text-muted-foreground italic">
+                      No matching categories — add one in the previous step
+                    </p>
+                  ) : (
+                    targets.map(({ category, amount }) => (
+                      <div
+                        key={category.id}
+                        className="flex items-center justify-between text-xs"
+                      >
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <div
                             className="w-2 h-2 rounded-full shrink-0"
                             style={{ backgroundColor: category.color }}
                           />
-                        ) : (
-                          <AlertCircle className="h-2.5 w-2.5 shrink-0 text-amber-500" />
-                        )}
-                        <span className={cn('truncate text-muted-foreground', !category && 'line-through')}>
-                          {name}
+                          <span className="truncate text-muted-foreground">
+                            {category.name}
+                          </span>
+                        </div>
+                        <span className="text-muted-foreground shrink-0 pl-2">
+                          Rp {amount.toLocaleString('id-ID')}
                         </span>
                       </div>
-                      {category && (
-                        <span className="text-muted-foreground shrink-0 pl-2">
-                          Rp {perCategory.toLocaleString('id-ID')}
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             ))}
           </div>
-
-          {hasUnmatched && (
-            <p className="text-xs text-amber-600 flex items-center gap-1 pt-1">
-              <AlertCircle className="h-3 w-3 shrink-0" />
-              Some categories weren&apos;t found and will be skipped
-            </p>
-          )}
         </div>
       )}
 
       <p className="text-xs text-muted-foreground text-center">
         {t('editNote')}
       </p>
+      </div>
 
-      {/* Actions — stacks vertically on mobile, row on sm+ */}
-      <div className="flex flex-col-reverse gap-2 border-t pt-3 sm:flex-row sm:justify-between">
-        <Button
-          variant="ghost"
-          onClick={handleSkipBudget}
-          disabled={isSubmitting || loading}
-          size="sm"
-          className="w-full sm:w-auto"
-        >
-          {t('skipBudget')}
-        </Button>
-
+      {/* Footer — pinned to the bottom of the dialog. No skip per design
+          (pen frame tGz7F has Back + Create only — see GZaJY / RlVZ2).
+          Welcome and Completion still expose skip text links. */}
+      <div className="flex flex-col-reverse gap-2 border-t pt-3 mt-3 sm:flex-row sm:justify-end">
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -328,7 +400,7 @@ export function BudgetSetupStepModal() {
           </Button>
           <Button
             onClick={handleCreateBudget}
-            disabled={isSubmitting || loading || !selectedTemplateId || !monthlyIncome}
+            disabled={isSubmitting || loading || !selectedTemplateId || !isIncomeValid}
             className="gap-2 flex-1 sm:flex-none"
           >
             {isSubmitting ? (

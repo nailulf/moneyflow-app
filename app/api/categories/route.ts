@@ -91,6 +91,43 @@ export async function POST(request: NextRequest) {
       group_type: group_type || 'EXPENSE'
     }
 
+    // Revive an existing soft-deleted row with the same (user, name, group)
+    // before attempting an insert. The unique constraint covers all rows
+    // (active or not), so a fresh insert would otherwise collide with a
+    // category the user previously deleted. Migration 047 makes the index
+    // partial, but this fallback keeps the API working before/after that
+    // migration is applied.
+    const { data: existingInactive } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('name', insertData.name)
+      .eq('group_type', insertData.group_type)
+      .eq('is_active', false)
+      .maybeSingle()
+
+    if (existingInactive?.id) {
+      const { data: revived, error: reviveError } = await supabase
+        .from('categories')
+        .update({
+          is_active: true,
+          color: insertData.color,
+          is_custom: insertData.is_custom,
+          category_group_id: insertData.category_group_id,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingInactive.id)
+        .eq('user_id', user.id)
+        .select()
+        .single()
+
+      if (reviveError) {
+        console.error('Error reviving soft-deleted category:', reviveError)
+        return NextResponse.json({ error: 'Failed to create category' }, { status: 500 })
+      }
+      return NextResponse.json(revived)
+    }
+
     const { data, error } = await supabase
       .from('categories')
       .insert(insertData)
@@ -99,6 +136,15 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating category:', error)
+
+      // Friendlier message for the unique-name collision so the UI can show
+      // "name already in use" instead of a generic 500.
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { error: 'A category with this name already exists in this group' },
+          { status: 409 }
+        )
+      }
 
       // If category_group_id column doesn't exist, try without it
       if (error.message?.includes('column "category_group_id" of relation "categories" does not exist')) {
@@ -154,10 +200,11 @@ export async function PUT(request: NextRequest) {
 
     delete updates.user_id
 
-    // Verify ownership
+    // Verify ownership and grab the row's group_type so we can free up
+    // soft-deleted slot squatters if a rename collides.
     const { data: existing } = await supabase
       .from('categories')
-      .select('user_id')
+      .select('user_id, group_type')
       .eq('id', id)
       .single()
 
@@ -165,19 +212,60 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Category not found or access denied' }, { status: 404 })
     }
 
-    const { data, error } = await supabase
-      .from('categories')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .select()
-      .single()
+    const performUpdate = async () =>
+      supabase
+        .from('categories')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single()
+
+    let { data, error } = await performUpdate()
+
+    // Collision recovery: the unique constraint on migration 001 covers all
+    // rows including soft-deleted ones. If the user is renaming a category
+    // to a name that's currently held by an inactive row, free the slot by
+    // tombstoning the squatter's name (appending the row id) and retry.
+    // Migration 047 makes this path unreachable on databases that ran it.
+    if (error && error.code === '23505' && typeof updates.name === 'string') {
+      const { data: squatter } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', updates.name)
+        .eq('group_type', existing.group_type)
+        .eq('is_active', false)
+        .neq('id', id)
+        .maybeSingle()
+
+      if (squatter?.id) {
+        await supabase
+          .from('categories')
+          .update({
+            name: `${updates.name} (deleted ${squatter.id.slice(0, 8)})`,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', squatter.id)
+          .eq('user_id', user.id)
+
+        ;({ data, error } = await performUpdate())
+      }
+    }
 
     if (error) {
       console.error('Error updating category:', error)
+      // Friendlier message for the unique-name collision so the UI can show
+      // "name already in use" instead of a generic 500.
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { error: 'A category with this name already exists in this group' },
+          { status: 409 }
+        )
+      }
       return NextResponse.json({ error: 'Failed to update category' }, { status: 500 })
     }
 

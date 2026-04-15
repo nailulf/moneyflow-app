@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import NetWorthOverview from '@/components/NetWorthOverview'
-import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
+import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { OnboardingBanner } from '@/components/features/onboarding'
 import { FinancialGoalsSection } from '@/components/features/goals'
 import { BudgetStatus } from '@/components/BudgetStatus'
@@ -33,8 +33,10 @@ export default function Home() {
 
   return (
      <div className="flex flex-col h-full">
-      {/* <OnboardingBanner /> */}
       <PageLayout>
+        <TopContent>
+          <OnboardingBanner />
+        </TopContent>
         <ContentWrapper>
           <MainContent>
             <NetWorthOverview />

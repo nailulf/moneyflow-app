@@ -6,6 +6,28 @@ const requestCache = new Map<string, Promise<CategoryDB[]>>()
 const dataCache = new Map<string, { data: CategoryDB[], timestamp: number }>()
 const CACHE_DURATION = 30000 // 30 seconds
 
+// Mutation-time helper: drop cached category lists so the next read goes
+// straight to the network. React Query's invalidateQueries doesn't reach
+// into this in-memory cache, so callers must invoke this themselves after
+// any update/delete that the user expects to see reflected in the UI.
+export function invalidateCategoriesCache(userId?: string) {
+  if (userId) {
+    dataCache.delete(`categories-${userId}`)
+    requestCache.delete(`categories-${userId}`)
+    return
+  }
+  for (const key of Array.from(dataCache.keys())) {
+    if (key.startsWith('categories-')) {
+      dataCache.delete(key)
+    }
+  }
+  for (const key of Array.from(requestCache.keys())) {
+    if (key.startsWith('categories-')) {
+      requestCache.delete(key)
+    }
+  }
+}
+
 // Get all categories for a user with deduplication and caching
 export async function getUserCategories(userId: string): Promise<CategoryDB[]> {
   const cacheKey = `categories-${userId}`

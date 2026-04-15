@@ -5,38 +5,17 @@ import { useTranslations } from 'next-intl'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { Analytics } from '@/lib/analytics/amplitude'
-import { OnboardingProgressCircle } from './OnboardingProgressCircle'
-import { OnboardingStepItem, StepStatus } from './OnboardingStepItem'
 import { WelcomeScreen } from './WelcomeScreen'
 import { AccountSetupStepModal } from './AccountSetupStepModal'
 import { CategoriesStepModal } from './CategoriesStepModal'
 import { BudgetSetupStepModal } from './BudgetSetupStepModal'
 import { CompletionView } from './CompletionView'
-import { Button } from '@/components/ui/atoms/button'
+import { cn } from '@/lib/utils'
 import type { OnboardingPhase } from '@/types/database'
-import { DialogFooter } from '@/components/ui/molecules/dialog'
 
-const ONBOARDING_STEP_DEFS = [
-  { id: 'account_setup', phase: 'account_setup' as OnboardingPhase, stepNumber: 1 },
-  { id: 'categories',    phase: 'categories'    as OnboardingPhase, stepNumber: 2 },
-  { id: 'budget_setup',  phase: 'budget_setup'  as OnboardingPhase, stepNumber: 3 },
-]
-
-const PHASE_ORDER: OnboardingPhase[] = ['welcome', 'account_setup', 'categories', 'budget_setup', 'completed']
-
-function getStepStatus(stepPhase: OnboardingPhase, currentPhase: OnboardingPhase): StepStatus {
-  const stepIndex = PHASE_ORDER.indexOf(stepPhase)
-  const currentIndex = PHASE_ORDER.indexOf(currentPhase)
-
-  if (stepIndex < currentIndex) return 'completed'
-  if (stepIndex === currentIndex) return 'current'
-  return 'pending'
-}
-
-function getCompletedStepsCount(currentPhase: OnboardingPhase): number {
-  const currentIndex = PHASE_ORDER.indexOf(currentPhase)
-  return Math.max(0, currentIndex - 1)
-}
+// Ordered phases that participate in the progress-dot header.
+// welcome + completed are rendered as full-screen views without the shell.
+const STEP_PHASES: OnboardingPhase[] = ['account_setup', 'categories', 'budget_setup']
 
 function WelcomeView() {
   const { user } = useAuth()
@@ -58,89 +37,81 @@ function WelcomeView() {
     closeModal()
   }
 
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there'
+  const userName = user?.user_metadata?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'there'
 
   return <WelcomeScreen userName={userName} onStart={handleStart} onSkip={handleSkip} />
 }
 
 export function OnboardingModalContent() {
   const t = useTranslations('onboarding')
-  const { currentPhase, skip, closeModal, loading } = useOnboarding()
+  const { currentPhase } = useOnboarding()
 
-  const handleSkipSetup = async () => {
-    await skip('Skipped from onboarding modal')
-    closeModal()
-  }
-
-  // Welcome phase — show full welcome screen inside the modal
+  // Welcome phase — full welcome view, no shell decoration
   if (currentPhase === 'welcome' || currentPhase === null) {
     return <WelcomeView />
   }
 
+  // Completion phase — full completion view, no shell decoration
   if (currentPhase === 'completed') {
     return <CompletionView />
   }
 
-  const completedCount = getCompletedStepsCount(currentPhase)
-  const totalSteps = ONBOARDING_STEP_DEFS.length
+  const stepIndex = STEP_PHASES.indexOf(currentPhase as OnboardingPhase)
+  // totalSteps includes the completion marker so the "X of 4" copy matches
+  // the dashboard banner-card count (welcome → account → categories → budget → done).
+  const totalSteps = STEP_PHASES.length + 1
+  const currentStepNumber = stepIndex + 1
 
-  const onboardingSteps = ONBOARDING_STEP_DEFS.map(def => ({
-    ...def,
-    title: t(`steps.${def.id === 'account_setup' ? 'accountSetup' : def.id === 'budget_setup' ? 'budgetSetup' : 'categories'}.title`),
-    description: t(`steps.${def.id === 'account_setup' ? 'accountSetup' : def.id === 'budget_setup' ? 'budgetSetup' : 'categories'}.description`),
-  }))
+  const phaseToKey = (phase: OnboardingPhase) =>
+    phase === 'account_setup'
+      ? 'accountSetup'
+      : phase === 'budget_setup'
+        ? 'budgetSetup'
+        : 'categories'
+
+  const stepKey = phaseToKey(currentPhase as OnboardingPhase)
+  const stepTitle = t(`steps.${stepKey}.title`)
+  const stepDescription = t(`steps.${stepKey}.description`)
 
   return (
-    <div className="flex flex-col max-h-[80svh]">
-      {/* Header with progress */}
-      <div className="flex items-center gap-4 pb-4 border-b">
-        <OnboardingProgressCircle
-          current={completedCount}
-          total={totalSteps}
-          size={56}
-        />
-        <div>
-          <h2 className="text-lg font-semibold">{t('modal.title')}</h2>
-          <p className="text-sm text-muted-foreground">
-            {t('modal.progress', { completed: completedCount, total: totalSteps })}
-          </p>
+    // Fill the parent DialogContent so every step renders at the same height.
+    // The Dialog has `overflow-hidden` and a fixed sm:h-[85svh], so this
+    // wrapper just needs to span the full available area and let the body
+    // scroll internally.
+    <div className="flex flex-col h-full min-h-0">
+      {/* Header — dot progress + step label. No back button here because each
+          step component owns its own back/continue CTAs in the footer. */}
+      <div className="flex items-center justify-between gap-3 pb-4 border-b">
+        <div className="flex items-center gap-1.5">
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <span
+              key={i}
+              className={cn(
+                'h-2 w-2 rounded-full transition-colors',
+                i < currentStepNumber ? 'bg-primary' : 'bg-border'
+              )}
+              aria-hidden
+            />
+          ))}
         </div>
+        <p className="text-xs font-medium text-muted-foreground">
+          {t('modal.stepOf', { current: currentStepNumber, total: totalSteps })}
+        </p>
       </div>
 
-      {/* Steps list with content */}
-      <div className="flex-1 overflow-y-auto py-2">
-        {onboardingSteps.map((step) => {
-          const status = getStepStatus(step.phase, currentPhase)
-          const isCurrent = status === 'current'
-
-          return (
-            <OnboardingStepItem
-              key={step.id}
-              title={step.title}
-              description={step.description}
-              status={status}
-              stepNumber={step.stepNumber}
-              isExpanded={isCurrent}
-            >
-              {isCurrent && step.phase === 'account_setup' && <AccountSetupStepModal />}
-              {isCurrent && step.phase === 'categories' && <CategoriesStepModal />}
-              {isCurrent && step.phase === 'budget_setup' && <BudgetSetupStepModal />}
-            </OnboardingStepItem>
-          )
-        })}
+      {/* Title + subtitle — replaces the accordion step list */}
+      <div className="pt-4 pb-3">
+        <h2 className="text-xl font-bold text-foreground sm:text-2xl">{stepTitle}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{stepDescription}</p>
       </div>
 
-      
-      {/* Footer with skip option */}
-      <div className="pt-4 border-t">
-        <Button
-          variant="ghost"
-          onClick={handleSkipSetup}
-          disabled={loading}
-          className="w-full text-muted-foreground"
-        >
-          {t('modal.skipSetup')}
-        </Button>
+      {/* Active step content — each step is a flex column that owns its own
+          scrollable body + pinned footer, so the CTAs always sit at the
+          bottom of the dialog regardless of content length. */}
+      <div className="flex-1 min-h-0 flex flex-col">
+        {currentPhase === 'account_setup' && <AccountSetupStepModal />}
+        {currentPhase === 'categories' && <CategoriesStepModal />}
+        {currentPhase === 'budget_setup' && <BudgetSetupStepModal />}
       </div>
     </div>
   )

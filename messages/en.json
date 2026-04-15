@@ -434,6 +434,7 @@
     "modal": {
       "title": "Complete your setup",
       "progress": "{completed} of {total} complete",
+      "stepOf": "Step {current} of {total}",
       "skipSetup": "Skip setup for now",
       "srTitle": "Complete your setup"
     },
@@ -456,9 +457,14 @@
       "pending": "Pending"
     },
     "welcome": {
-      "heading": "Welcome to MoneyFlow, {name}!",
-      "tagline": "Your Personal Finance Companion",
+      "heading": "Welcome, {name} 👋",
+      "tagline": "In 3 minutes, we'll set up your first account and budget.",
       "helpIntro": "We'll help you:",
+      "bullets": {
+        "account": "Add your first account · 60s",
+        "categories": "Pick spending categories · 60s",
+        "budget": "Set a simple budget · 60s"
+      },
       "features": {
         "track": {
           "title": "Track expenses across all accounts",
@@ -480,8 +486,9 @@
     },
     "completion": {
       "finishing": "Finishing setup...",
-      "title": "You're All Set!",
-      "description": "Your MoneyFlow workspace is ready to use",
+      "titleWithName": "You're all set, {name}! 🎉",
+      "title": "You're all set! 🎉",
+      "description": "Your workspace is ready. Now let's do the one thing that makes this app useful:",
       "summary": {
         "title": "Setup Summary",
         "accountCreated": "{count} account created",
@@ -491,11 +498,20 @@
         "budgetCreated": "Budget created",
         "budgetReady": "Budget ready (create when you want)"
       },
+      "firstExpense": {
+        "title": "Record your first expense",
+        "subtitle": "Takes under 30 seconds"
+      },
+      "addFirstExpense": "Add first expense",
+      "skipToDashboard": "Skip for now · go to dashboard",
       "goToDashboard": "Go to Dashboard"
     },
     "accountSetup": {
       "accountTypeLabel": "Account Type *",
       "selectAccountType": "Select account type",
+      "moreTypes": "More types…",
+      "autoFilledFromBank": "Auto-filled from bank selection",
+      "currencyFromRegistration": "Using the currency from your registration",
       "bankInstitution": "Bank / Institution",
       "optional": "(optional)",
       "searchBanks": "Search banks & e-wallets…",
@@ -551,10 +567,37 @@
           "label": "E-Wallet / Other",
           "description": "GoPay, OVO, Dana, etc."
         }
+      },
+      "assetDetails": {
+        "propertyType": "Property Type",
+        "propertyTypePlaceholder": "Select property type",
+        "propertyTypes": {
+          "house": "House",
+          "apartment": "Apartment",
+          "land": "Land"
+        },
+        "location": "Location (optional)",
+        "locationPlaceholder": "e.g., Jakarta Selatan",
+        "depreciationRate": "Annual Depreciation Rate (%)",
+        "depreciationRatePlaceholder": "15",
+        "depreciationRateHint": "Default 15% per year",
+        "monthlyPayment": "Monthly Payment",
+        "mortgageEndDate": "Final Payment Month",
+        "mortgageEndDateHint": "The month and year of your last mortgage payment",
+        "balanceLabel": {
+          "property": "Current Value",
+          "vehicle": "Current Value",
+          "mortgage": "Outstanding Balance"
+        },
+        "balanceHint": {
+          "property": "Enter the current estimated value of the property",
+          "vehicle": "Enter the current estimated value of the vehicle",
+          "mortgage": "Enter the outstanding (remaining) mortgage balance"
+        }
       }
     },
     "budgetSetup": {
-      "monthlyIncomeLabel": "Monthly Income (optional)",
+      "monthlyIncomeLabel": "Monthly Income (after tax)",
       "incomePlaceholder": "e.g., 10000000",
       "chooseBudgetTemplate": "Choose a Budget Template",
       "needs": "Needs",
@@ -566,7 +609,13 @@
       "skipBudget": "Skip budget",
       "back": "Back",
       "creating": "Creating...",
-      "createBudget": "Create Budget"
+      "createBudget": "Create Budget",
+      "errors": {
+        "incomeRequired": "Enter your monthly income",
+        "incomeInvalid": "Enter a valid number",
+        "incomeMin": "Income must be 0 or greater",
+        "incomeMax": "That amount is too large"
+      }
     }
   },
   "accountManager": {
@@ -754,6 +803,38 @@
       },
       "completeSetup": "Complete Setup",
       "maybeLater": "Maybe Later"
+    },
+    "activationBanner": {
+      "ariaLabel": "Activation checklist",
+      "greeting": "Welcome, {name} 👋",
+      "greetingFallback": "Welcome 👋",
+      "subtitle": "Here are a few things you can do this week to get the most out of your dashboard.",
+      "title": "Get set up",
+      "progress": "{completed} of {total} complete · unlocks your insights",
+      "dismiss": "Dismiss",
+      "steps": {
+        "nextStep": "Next step",
+        "firstExpense": {
+          "title": "Record first expense",
+          "subtitle": "Start tracking your spending",
+          "done": "Done"
+        },
+        "categories": {
+          "title": "Add 4 more this week",
+          "subtitle": "Build up your history",
+          "done": "Done"
+        },
+        "firstGoal": {
+          "title": "Set your first goal",
+          "subtitle": "Emergency, vacation, or anything",
+          "done": "Done"
+        },
+        "uploadStatement": {
+          "title": "Upload a bank statement",
+          "subtitle": "Auto-import transactions",
+          "done": "Done"
+        }
+      }
     },
     "goals": {
       "title": "Financial Goals",

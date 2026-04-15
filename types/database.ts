@@ -337,6 +337,7 @@ export interface Database {
           forecast_default_volatility: number
           forecast_default_inflation: number
           date_of_birth: string | null
+          activation_banner_dismissed_at: string | null
           extras: Record<string, unknown>
           created_at: string
           updated_at: string
@@ -356,6 +357,7 @@ export interface Database {
           forecast_default_volatility?: number
           forecast_default_inflation?: number
           date_of_birth?: string | null
+          activation_banner_dismissed_at?: string | null
           extras?: Record<string, unknown>
           created_at?: string
           updated_at?: string
@@ -374,6 +376,7 @@ export interface Database {
           forecast_default_volatility?: number
           forecast_default_inflation?: number
           date_of_birth?: string | null
+          activation_banner_dismissed_at?: string | null
           extras?: Record<string, unknown>
           updated_at?: string
         }

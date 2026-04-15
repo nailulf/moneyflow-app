@@ -434,6 +434,7 @@
     "modal": {
       "title": "Selesaikan pengaturan",
       "progress": "{completed} dari {total} selesai",
+      "stepOf": "Langkah {current} dari {total}",
       "skipSetup": "Lewati pengaturan untuk sekarang",
       "srTitle": "Selesaikan pengaturan"
     },
@@ -456,9 +457,14 @@
       "pending": "Menunggu"
     },
     "welcome": {
-      "heading": "Selamat datang di MoneyFlow, {name}!",
-      "tagline": "Teman Keuangan Pribadi Anda",
+      "heading": "Halo, {name} 👋",
+      "tagline": "Dalam 3 menit, kami akan menyiapkan akun dan anggaran pertama Anda.",
       "helpIntro": "Kami akan membantu Anda:",
+      "bullets": {
+        "account": "Tambah akun pertama Anda · 60d",
+        "categories": "Pilih kategori pengeluaran · 60d",
+        "budget": "Atur anggaran sederhana · 60d"
+      },
       "features": {
         "track": {
           "title": "Lacak pengeluaran di semua akun",
@@ -480,8 +486,9 @@
     },
     "completion": {
       "finishing": "Menyelesaikan pengaturan...",
-      "title": "Semuanya Siap!",
-      "description": "Ruang kerja MoneyFlow Anda siap digunakan",
+      "titleWithName": "Semuanya siap, {name}! 🎉",
+      "title": "Semuanya siap! 🎉",
+      "description": "Ruang kerja Anda sudah siap. Sekarang lakukan satu hal yang membuat aplikasi ini berguna:",
       "summary": {
         "title": "Ringkasan Pengaturan",
         "accountCreated": "{count} akun dibuat",
@@ -491,11 +498,20 @@
         "budgetCreated": "Anggaran dibuat",
         "budgetReady": "Anggaran siap (buat kapan saja)"
       },
+      "firstExpense": {
+        "title": "Catat pengeluaran pertama Anda",
+        "subtitle": "Kurang dari 30 detik"
+      },
+      "addFirstExpense": "Tambah pengeluaran pertama",
+      "skipToDashboard": "Nanti saja · ke dasbor",
       "goToDashboard": "Pergi ke Dasbor"
     },
     "accountSetup": {
       "accountTypeLabel": "Jenis Akun *",
       "selectAccountType": "Pilih jenis akun",
+      "moreTypes": "Jenis lainnya…",
+      "autoFilledFromBank": "Otomatis terisi dari pilihan bank",
+      "currencyFromRegistration": "Menggunakan mata uang dari pendaftaran Anda",
       "bankInstitution": "Bank / Institusi",
       "optional": "(opsional)",
       "searchBanks": "Cari bank & e-wallet…",
@@ -551,10 +567,37 @@
           "label": "E-Wallet / Lainnya",
           "description": "GoPay, OVO, Dana, dll."
         }
+      },
+      "assetDetails": {
+        "propertyType": "Jenis Properti",
+        "propertyTypePlaceholder": "Pilih jenis properti",
+        "propertyTypes": {
+          "house": "Rumah",
+          "apartment": "Apartemen",
+          "land": "Tanah"
+        },
+        "location": "Lokasi (opsional)",
+        "locationPlaceholder": "mis., Jakarta Selatan",
+        "depreciationRate": "Tingkat Penyusutan Tahunan (%)",
+        "depreciationRatePlaceholder": "15",
+        "depreciationRateHint": "Default 15% per tahun",
+        "monthlyPayment": "Cicilan Bulanan",
+        "mortgageEndDate": "Bulan Pembayaran Terakhir",
+        "mortgageEndDateHint": "Bulan dan tahun pembayaran KPR terakhir Anda",
+        "balanceLabel": {
+          "property": "Nilai Saat Ini",
+          "vehicle": "Nilai Saat Ini",
+          "mortgage": "Saldo Tersisa"
+        },
+        "balanceHint": {
+          "property": "Masukkan perkiraan nilai properti saat ini",
+          "vehicle": "Masukkan perkiraan nilai kendaraan saat ini",
+          "mortgage": "Masukkan saldo KPR yang tersisa"
+        }
       }
     },
     "budgetSetup": {
-      "monthlyIncomeLabel": "Pendapatan Bulanan (opsional)",
+      "monthlyIncomeLabel": "Pendapatan Bulanan (setelah pajak)",
       "incomePlaceholder": "mis., 10000000",
       "chooseBudgetTemplate": "Pilih Template Anggaran",
       "needs": "Kebutuhan",
@@ -566,7 +609,13 @@
       "skipBudget": "Lewati anggaran",
       "back": "Kembali",
       "creating": "Membuat...",
-      "createBudget": "Buat Anggaran"
+      "createBudget": "Buat Anggaran",
+      "errors": {
+        "incomeRequired": "Masukkan pendapatan bulanan Anda",
+        "incomeInvalid": "Masukkan angka yang valid",
+        "incomeMin": "Pendapatan harus 0 atau lebih",
+        "incomeMax": "Jumlah tersebut terlalu besar"
+      }
     }
   },
   "accountManager": {
@@ -754,6 +803,38 @@
       },
       "completeSetup": "Selesaikan Pengaturan",
       "maybeLater": "Nanti Saja"
+    },
+    "activationBanner": {
+      "ariaLabel": "Daftar aktivasi",
+      "greeting": "Halo, {name} 👋",
+      "greetingFallback": "Halo 👋",
+      "subtitle": "Berikut beberapa hal yang bisa Anda lakukan minggu ini untuk memaksimalkan dasbor Anda.",
+      "title": "Siapkan dasbor",
+      "progress": "{completed} dari {total} selesai · buka wawasan Anda",
+      "dismiss": "Tutup",
+      "steps": {
+        "nextStep": "Langkah berikutnya",
+        "firstExpense": {
+          "title": "Catat pengeluaran pertama",
+          "subtitle": "Mulai melacak pengeluaran",
+          "done": "Selesai"
+        },
+        "categories": {
+          "title": "Tambah 4 lagi minggu ini",
+          "subtitle": "Bangun riwayat Anda",
+          "done": "Selesai"
+        },
+        "firstGoal": {
+          "title": "Buat tujuan pertama",
+          "subtitle": "Darurat, liburan, atau apa pun",
+          "done": "Selesai"
+        },
+        "uploadStatement": {
+          "title": "Unggah rekening koran",
+          "subtitle": "Impor transaksi otomatis",
+          "done": "Selesai"
+        }
+      }
     },
     "goals": {
       "title": "Tujuan Keuangan",
