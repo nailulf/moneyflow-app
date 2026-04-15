@@ -25,15 +25,25 @@ import { cn } from '@/lib/utils'
 interface AddTransactionFormProps {
   onSuccess?: () => void
   trigger?: React.ReactNode
+  // Optional controlled-open mode. When `open` is provided the parent owns the
+  // open state (e.g. onboarding completion prompting a first transaction).
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormProps) {
+export function AddTransactionForm({ onSuccess, trigger, open: controlledOpen, onOpenChange }: AddTransactionFormProps) {
   const t = useTranslations('transactions.form')
   const { user } = useAuth()
   const userId = user?.id || ''
   const isMobile = useIsMobile()
   const mutations = useTransactionMutations(userId)
-  const [open, setOpen] = useState(false)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : uncontrolledOpen
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setUncontrolledOpen(next)
+    onOpenChange?.(next)
+  }
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentDate, setCurrentDate] = useState('')
   const [isAnySelectOpen, setIsAnySelectOpen] = useState(false)
@@ -221,14 +231,19 @@ export function AddTransactionForm({ onSuccess, trigger }: AddTransactionFormPro
         }
       }}
     >
-      <SheetTrigger asChild>
-        {trigger || (
-          <Button className="gap-2" data-testid="add-transaction-trigger">
-            <Plus className="h-4 w-4" />
-            {t('addTrigger')}
-          </Button>
-        )}
-      </SheetTrigger>
+      {/* In controlled-open mode (parent owns the open state) we skip the
+          trigger entirely so there's no orphan button rendered next to the
+          parent's own CTA. Uncontrolled callers still get the default trigger. */}
+      {!isControlled && (
+        <SheetTrigger asChild>
+          {trigger || (
+            <Button className="gap-2" data-testid="add-transaction-trigger">
+              <Plus className="h-4 w-4" />
+              {t('addTrigger')}
+            </Button>
+          )}
+        </SheetTrigger>
+      )}
       <SheetContent
         side={isMobile ? 'bottom' : 'right'}
         className={isMobile ? 'rounded-t-2xl overflow-hidden' : 'w-full sm:max-w-md'}

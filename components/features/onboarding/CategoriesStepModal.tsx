@@ -12,53 +12,173 @@ import {
   Loader2,
   Pencil,
   Check,
-  X
+  X,
+  Trash2,
+  Plus,
+  Utensils,
+  Car,
+  ShoppingBag,
+  Film,
+  Receipt,
+  HeartPulse,
+  GraduationCap,
+  Plane,
+  Package,
+  Banknote,
+  Briefcase,
+  TrendingUp,
+  ArrowLeftRight,
+  PiggyBank,
+  CreditCard,
 } from 'lucide-react'
 import { CategoryDB } from '@/types/database'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAutoRefresh } from '@/hooks/useDataRefresh'
+import { invalidateCategoriesCache } from '@/lib/api/categories'
+import { cn } from '@/lib/utils'
 
-const CATEGORY_ICONS: Record<string, string> = {
-  'Food & Dining': '🍽️',
-  'Transportation': '🚙',
-  'Shopping': '🛒',
-  'Entertainment': '🎮',
-  'Bills & Utilities': '🧾',
-  'Healthcare': '❤️',
-  'Education': '📚',
-  'Travel': '🧳',
-  'Other': '📎',
-  'Income': '💵',
-  'Transfer': '➡️',
-  'Savings transfer': '🏷️',
-  'Credit card payment': '💳'
+// Render a flat Lucide icon for a given category. We can't alias a dynamic
+// component during render (the lint rule `react-hooks/static-components`
+// flags it) so we render each icon literal inside a switch.
+function CategoryIcon({ name, groupType, className }: { name: string, groupType: string, className?: string }) {
+  switch (name) {
+    case 'Food & Dining':
+      return <Utensils className={className} />
+    case 'Transportation':
+      return <Car className={className} />
+    case 'Shopping':
+      return <ShoppingBag className={className} />
+    case 'Entertainment':
+      return <Film className={className} />
+    case 'Bills & Utilities':
+      return <Receipt className={className} />
+    case 'Healthcare':
+      return <HeartPulse className={className} />
+    case 'Education':
+      return <GraduationCap className={className} />
+    case 'Travel':
+      return <Plane className={className} />
+    case 'Income':
+      return <Banknote className={className} />
+    case 'Salary':
+      return <Briefcase className={className} />
+    case 'Investment':
+      return <TrendingUp className={className} />
+    case 'Transfer':
+      return <ArrowLeftRight className={className} />
+    case 'Savings transfer':
+      return <PiggyBank className={className} />
+    case 'Credit card payment':
+      return <CreditCard className={className} />
+    default:
+      // Fallback per group type when the name isn't in the table above
+      if (groupType === 'INCOME') return <Banknote className={className} />
+      if (groupType === 'TRANSFER') return <ArrowLeftRight className={className} />
+      return <Package className={className} />
+  }
 }
 
-function getIconForCategory(name: string, groupType: string): string {
-  // Check exact match first
-  if (CATEGORY_ICONS[name]) {
-    return CATEGORY_ICONS[name]
+interface AddCategoryTileProps {
+  groupType: 'EXPENSE' | 'INCOME' | 'TRANSFER'
+  categoryGroupId: string | null
+  onAdd: (name: string, groupType: 'EXPENSE' | 'INCOME' | 'TRANSFER', categoryGroupId: string | null) => Promise<void>
+  isBusy: boolean
+}
+
+function AddCategoryTile({ groupType, categoryGroupId, onAdd, isBusy }: AddCategoryTileProps) {
+  const [isAdding, setIsAdding] = useState(false)
+  const [value, setValue] = useState('')
+
+  const handleConfirm = async () => {
+    if (!value.trim()) {
+      setIsAdding(false)
+      return
+    }
+    await onAdd(value.trim(), groupType, categoryGroupId)
+    setValue('')
+    setIsAdding(false)
   }
-  // Default icons by group type
-  switch (groupType) {
-    case 'EXPENSE':
-      return '📋'
-    case 'INCOME':
-      return '💵'
-    case 'TRANSFER':
-      return '🔄'
-    default:
-      return '📋'
+
+  const handleCancel = () => {
+    setValue('')
+    setIsAdding(false)
   }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleConfirm()
+    } else if (e.key === 'Escape') {
+      handleCancel()
+    }
+  }
+
+  if (isAdding) {
+    return (
+      <div className="flex items-center gap-2 p-2 rounded-md border-2 border-dashed border-primary/50 bg-primary/5 text-sm">
+        <Plus className="h-4 w-4 shrink-0 text-primary" />
+        <Input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Category name"
+          className="h-7 text-sm flex-1"
+          autoFocus
+          disabled={isBusy}
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={handleConfirm}
+          disabled={isBusy || !value.trim()}
+          aria-label="Save"
+        >
+          {isBusy ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <Check className="h-3 w-3 text-success" />
+          )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={handleCancel}
+          disabled={isBusy}
+          aria-label="Cancel"
+        >
+          <X className="h-3 w-3 text-destructive" />
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setIsAdding(true)}
+      disabled={isBusy}
+      className={cn(
+        'flex items-center justify-center gap-1.5 p-2 rounded-md border-2 border-dashed border-border text-sm text-muted-foreground transition-colors',
+        'hover:border-primary/60 hover:text-primary hover:bg-primary/5',
+        'disabled:cursor-not-allowed disabled:opacity-50'
+      )}
+    >
+      <Plus className="h-3.5 w-3.5" />
+      <span>Add new</span>
+    </button>
+  )
 }
 
 interface EditableCategoryProps {
   category: CategoryDB
   onSave: (id: string, newName: string) => Promise<void>
-  isUpdating: boolean
+  onDelete: (id: string) => Promise<void>
+  isBusy: boolean
+  disableDelete: boolean
 }
 
-function EditableCategory({ category, onSave, isUpdating }: EditableCategoryProps) {
+function EditableCategory({ category, onSave, onDelete, isBusy, disableDelete }: EditableCategoryProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(category.name)
 
@@ -85,26 +205,27 @@ function EditableCategory({ category, onSave, isUpdating }: EditableCategoryProp
   if (isEditing) {
     return (
       <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 text-sm">
-        <span>{getIconForCategory(category.name, category.group_type)}</span>
+        <CategoryIcon name={category.name} groupType={category.group_type} className="h-4 w-4 shrink-0 text-muted-foreground" />
         <Input
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}
           className="h-7 text-sm flex-1"
           autoFocus
-          disabled={isUpdating}
+          disabled={isBusy}
         />
         <Button
           variant="ghost"
           size="sm"
           className="h-7 w-7 p-0"
           onClick={handleSave}
-          disabled={isUpdating || !editValue.trim()}
+          disabled={isBusy || !editValue.trim()}
+          aria-label="Save"
         >
-          {isUpdating ? (
+          {isBusy ? (
             <Loader2 className="h-3 w-3 animate-spin" />
           ) : (
-            <Check className="h-3 w-3 text-green-600" />
+            <Check className="h-3 w-3 text-success" />
           )}
         </Button>
         <Button
@@ -112,7 +233,8 @@ function EditableCategory({ category, onSave, isUpdating }: EditableCategoryProp
           size="sm"
           className="h-7 w-7 p-0"
           onClick={handleCancel}
-          disabled={isUpdating}
+          disabled={isBusy}
+          aria-label="Cancel"
         >
           <X className="h-3 w-3 text-destructive" />
         </Button>
@@ -121,31 +243,60 @@ function EditableCategory({ category, onSave, isUpdating }: EditableCategoryProp
   }
 
   return (
-    <div
-      className="flex items-center gap-2 p-2 rounded-md bg-muted/50 text-sm group cursor-pointer hover:bg-muted"
-      onClick={() => setIsEditing(true)}
-    >
-      <span>{getIconForCategory(category.name, category.group_type)}</span>
-      <span className="truncate flex-1">{category.name}</span>
-      <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+    <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 text-sm hover:bg-muted transition-colors">
+      <CategoryIcon name={category.name} groupType={category.group_type} className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <button
+        type="button"
+        onClick={() => setIsEditing(true)}
+        className="flex-1 text-left truncate hover:underline"
+      >
+        {category.name}
+      </button>
+      <button
+        type="button"
+        onClick={() => setIsEditing(true)}
+        disabled={isBusy}
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Rename category"
+        title="Rename"
+      >
+        <Pencil className="h-3 w-3" />
+      </button>
+      <button
+        type="button"
+        onClick={() => onDelete(category.id)}
+        disabled={isBusy || disableDelete}
+        className={cn(
+          'flex h-6 w-6 shrink-0 items-center justify-center rounded',
+          'text-muted-foreground hover:text-destructive hover:bg-destructive/10',
+          (isBusy || disableDelete) && 'cursor-not-allowed opacity-30 hover:bg-transparent hover:text-muted-foreground'
+        )}
+        aria-label="Remove category"
+        title={disableDelete ? 'At least one category must remain in this group' : 'Remove'}
+      >
+        <Trash2 className="h-3 w-3" />
+      </button>
     </div>
   )
 }
 
 export function CategoriesStepModal() {
   const { user } = useAuth()
-  const { nextPhase, prevPhase, loading, isPreviewMode } = useOnboarding()
+  const { nextPhase, prevPhase, loading } = useOnboarding()
   const { categories, loading: categoriesLoading, refreshCategories } = useCategories()
   const { onCategoryChange } = useAutoRefresh(user?.id)
-  const [isUpdating, setIsUpdating] = useState(false)
+  const [isBusy, setIsBusy] = useState(false)
+  // Track which category id is in-flight so we can fade it out optimistically
+  // and avoid the "deleted but still visible" limbo while the refetch lands.
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
-  const expenseCategories = categories.filter(c => c.group_type === 'EXPENSE')
-  const incomeCategories = categories.filter(c => c.group_type === 'INCOME')
-  const transferCategories = categories.filter(c => c.group_type === 'TRANSFER')
+  const visibleCategories = categories.filter(c => c.id !== pendingDeleteId)
+  const expenseCategories = visibleCategories.filter(c => c.group_type === 'EXPENSE')
+  const incomeCategories = visibleCategories.filter(c => c.group_type === 'INCOME')
+  const transferCategories = visibleCategories.filter(c => c.group_type === 'TRANSFER')
 
   const handleUpdateCategory = async (categoryId: string, newName: string) => {
-    if (isPreviewMode) return
-    setIsUpdating(true)
+    setIsBusy(true)
     try {
       const response = await fetch('/api/categories', {
         method: 'PUT',
@@ -159,15 +310,84 @@ export function CategoriesStepModal() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update category')
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.error || 'Failed to update category')
       }
 
+      // Drop the in-memory cache in lib/api/categories.ts before refetching;
+      // React Query alone won't bust it.
+      invalidateCategoriesCache(user?.id)
       await refreshCategories()
-      onCategoryChange() // Refresh related data across the app
+      onCategoryChange()
     } catch (error) {
       console.error('Failed to update category:', error)
     } finally {
-      setIsUpdating(false)
+      setIsBusy(false)
+    }
+  }
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    // Optimistic remove: hide the row immediately so the user sees instant
+    // feedback. We restore it on error.
+    setPendingDeleteId(categoryId)
+    setIsBusy(true)
+    try {
+      // The route reads `category_id` from query params (see app/api/categories/route.ts:200).
+      const response = await fetch(`/api/categories?category_id=${categoryId}`, {
+        method: 'DELETE',
+      })
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.error || 'Failed to delete category')
+      }
+      // Bust the lib/api in-memory cache, then ask React Query to refetch the
+      // authoritative list. Without the cache bust the refetch returns stale
+      // data and the deleted row reappears.
+      invalidateCategoriesCache(user?.id)
+      await refreshCategories()
+      onCategoryChange()
+    } catch (error) {
+      console.error('Failed to delete category:', error)
+      // Restore the row so the user can retry instead of being left in limbo.
+      setPendingDeleteId(null)
+    } finally {
+      setIsBusy(false)
+      // Clear the optimistic marker after the refetch lands. If the refetch
+      // succeeded the category is gone from `categories` already; if not,
+      // the early `setPendingDeleteId(null)` above handled it.
+      setPendingDeleteId(null)
+    }
+  }
+
+  const handleAddCategory = async (
+    name: string,
+    groupType: 'EXPENSE' | 'INCOME' | 'TRANSFER',
+    categoryGroupId: string | null
+  ) => {
+    if (!name.trim()) return
+    setIsBusy(true)
+    try {
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          group_type: groupType,
+          category_group_id: categoryGroupId,
+          is_custom: true,
+        }),
+      })
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        throw new Error(body.error || 'Failed to add category')
+      }
+      invalidateCategoriesCache(user?.id)
+      await refreshCategories()
+      onCategoryChange()
+    } catch (error) {
+      console.error('Failed to add category:', error)
+    } finally {
+      setIsBusy(false)
     }
   }
 
@@ -187,72 +407,69 @@ export function CategoriesStepModal() {
     )
   }
 
+  // Guard: never let the user delete the last category in a group. Keeping
+  // at least one per group ensures the app still works downstream (budgets,
+  // transaction form default pickers, etc.).
+  const renderGroup = (
+    list: CategoryDB[],
+    label: string,
+    subtitle: string,
+    badgeClass: string,
+    groupType: 'EXPENSE' | 'INCOME' | 'TRANSFER'
+  ) => {
+    // Derive the parent category_group_id from any existing category in the
+    // group. Falls back to null if the group is empty (extremely unlikely
+    // since we soft-delete and seed at least one row per group).
+    const categoryGroupId = list[0]?.category_group_id ?? null
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Badge className={badgeClass}>{label}</Badge>
+          <span className="text-sm text-muted-foreground">{subtitle}</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {list.map((category) => (
+            <EditableCategory
+              key={category.id}
+              category={category}
+              onSave={handleUpdateCategory}
+              onDelete={handleDeleteCategory}
+              isBusy={isBusy}
+              disableDelete={list.length <= 1}
+            />
+          ))}
+          <AddCategoryTile
+            groupType={groupType}
+            categoryGroupId={categoryGroupId}
+            onAdd={handleAddCategory}
+            isBusy={isBusy}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-4">
-      {/* Expense Categories */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Badge variant="destructive" className="text-xs">Expense</Badge>
-          <span className="text-sm text-muted-foreground">Categories for spending</span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {expenseCategories.map((category) => (
-            <EditableCategory
-              key={category.id}
-              category={category}
-              onSave={handleUpdateCategory}
-              isUpdating={isUpdating}
-            />
-          ))}
-        </div>
+    // Flex column owning its own scrollable body + pinned footer so CTAs
+    // always sit at the bottom of the dialog.
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
+        {renderGroup(expenseCategories, 'Expense', 'Categories for spending', 'bg-destructive text-destructive-foreground text-xs', 'EXPENSE')}
+        {renderGroup(incomeCategories, 'Income', 'Categories for earnings', 'bg-success text-success-foreground text-xs', 'INCOME')}
+        {renderGroup(transferCategories, 'Transfer', 'Categories for moving money', 'bg-secondary text-secondary-foreground text-xs', 'TRANSFER')}
+
+        <p className="text-xs text-muted-foreground text-center">
+          Click a category to rename it, or hover for the remove button. You can
+          also add new ones from Settings later.
+        </p>
       </div>
 
-      {/* Income Categories */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Badge className="bg-green-500 text-xs">Income</Badge>
-          <span className="text-sm text-muted-foreground">Categories for earnings</span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {incomeCategories.map((category) => (
-            <EditableCategory
-              key={category.id}
-              category={category}
-              onSave={handleUpdateCategory}
-              isUpdating={isUpdating}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Transfer Categories */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="text-xs">Transfer</Badge>
-          <span className="text-sm text-muted-foreground">Categories for moving money</span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {transferCategories.map((category) => (
-            <EditableCategory
-              key={category.id}
-              category={category}
-              onSave={handleUpdateCategory}
-              isUpdating={isUpdating}
-            />
-          ))}
-        </div>
-      </div>
-
-      <p className="text-xs text-muted-foreground text-center">
-        Click on any category to rename it. You can also manage categories anytime from Settings.
-      </p>
-
-      {/* Actions */}
-      <div className="flex gap-3 justify-end pt-2">
+      {/* Footer — pinned to the bottom of the dialog */}
+      <div className="flex gap-3 justify-end pt-3 mt-3 border-t">
         <Button
           variant="outline"
           onClick={handleBack}
-          disabled={loading || isUpdating}
+          disabled={loading || isBusy}
           className="gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -260,7 +477,7 @@ export function CategoriesStepModal() {
         </Button>
         <Button
           onClick={handleContinue}
-          disabled={loading || isUpdating}
+          disabled={loading || isBusy}
           className="gap-2"
         >
           Continue

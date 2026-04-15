@@ -99,4 +99,17 @@ export const preferences = {
   async setUserGoal(userId: string, goal: string): Promise<void> {
     await upsertSettings(userId, { user_goal: goal })
   },
+
+  async getActivationBannerDismissedAt(userId: string): Promise<string | null> {
+    const s = await getSettings(userId)
+    return s?.activation_banner_dismissed_at || null
+  },
+
+  async dismissActivationBanner(userId: string): Promise<void> {
+    await upsertSettings(userId, { activation_banner_dismissed_at: new Date().toISOString() })
+  },
+
+  async resetActivationBannerDismissed(userId: string): Promise<void> {
+    await upsertSettings(userId, { activation_banner_dismissed_at: null })
+  },
 }

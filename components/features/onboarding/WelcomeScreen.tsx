@@ -2,13 +2,13 @@
 
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/atoms/button'
-import { Card, CardContent } from '@/components/ui/molecules/card'
 import {
   Wallet,
-  PieChart,
-  TrendingUp,
+  Tag,
+  Target,
+  Sparkles,
   ArrowRight,
-  Clock
+  Clock,
 } from 'lucide-react'
 import { DialogFooter } from '@/components/ui/molecules/dialog'
 
@@ -21,61 +21,65 @@ interface WelcomeScreenProps {
 export function WelcomeScreen({ userName, onStart, onSkip }: WelcomeScreenProps) {
   const t = useTranslations('onboarding.welcome')
 
-  const features = [
-    { icon: Wallet,    titleKey: 'features.track.title',    descKey: 'features.track.description' },
-    { icon: PieChart,  titleKey: 'features.budgets.title',  descKey: 'features.budgets.description' },
-    { icon: TrendingUp, titleKey: 'features.insights.title', descKey: 'features.insights.description' },
+  // The redesigned welcome screen lists the concrete setup steps (not app
+  // features) so users understand what they're committing to in the 3 minutes.
+  const bullets = [
+    { icon: Wallet, labelKey: 'bullets.account' as const },
+    { icon: Tag, labelKey: 'bullets.categories' as const },
+    { icon: Target, labelKey: 'bullets.budget' as const },
   ]
 
   return (
-    <div className="max-w-2xl mx-auto text-center space-y-8 py-8">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-xl md:text-3xl font-bold text-gray-900">
-          {t('heading', { name: userName })}
-        </h1>
-        <p className="text-md text-gray-600">
-          {t('tagline')}
+    // Fill the parent DialogContent so welcome matches the other steps' height.
+    // Body grows; footer stays pinned at the bottom.
+    <div className="flex flex-col h-full min-h-0">
+      {/* Hero — warm yellow block with the sparkles icon, matches Pencil frame eYGBK */}
+      <div className="relative mx-[-1rem] sm:mx-[-1.5rem] mb-6 flex h-48 shrink-0 items-center justify-center overflow-hidden bg-[#F6F8D5]">
+        <div className="flex h-28 w-28 items-center justify-center rounded-full bg-[#B8E4D6]">
+          <Sparkles className="h-10 w-10 text-primary" strokeWidth={2.5} />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-1">
+        {/* Greeting */}
+        <div className="space-y-1.5">
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+            {t('heading', { name: userName })}
+          </h1>
+          <p className="text-sm text-muted-foreground sm:text-base">
+            {t('tagline')}
+          </p>
+        </div>
+
+        {/* Bullets — setup steps with per-item duration */}
+        <ul className="mt-6 space-y-3 border-t border-border pt-5">
+          {bullets.map(({ icon: Icon, labelKey }) => (
+            <li key={labelKey} className="flex items-center gap-3 text-sm">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
+                <Icon className="h-4 w-4 text-primary" />
+              </span>
+              <span className="text-foreground">{t(labelKey)}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Duration reassurance */}
+        <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Clock className="h-3.5 w-3.5" />
+          {t('setupTime')}
         </p>
       </div>
 
-      {/* Features */}
-      <div className="space-y-2">
-        {/* <p className="text-lg text-gray-700 font-medium">
-          {t('helpIntro')}
-        </p> */}
-        <div className="grid gap-4 text-left">
-          {features.map((feature, index) => (
-            <Card key={index} className="border-none bottom-b shadow-sm bg-white/80">
-              <CardContent className="flex items-start gap-4 p-2">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <feature.icon className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">{t(feature.titleKey as Parameters<typeof t>[0])}</h3>
-                  <p className="text-sm text-gray-600">{t(feature.descKey as Parameters<typeof t>[0])}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      <DialogFooter>
+        <div className="mt-4 flex w-full flex-col items-center gap-2 pt-2 sm:flex-row-reverse sm:justify-start">
+          <Button onClick={onStart} className="w-full gap-2 sm:w-auto">
+            {t('startSetup')}
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" onClick={onSkip} className="text-muted-foreground">
+            {t('skipForNow')}
+          </Button>
         </div>
-      </div>
-        <DialogFooter>
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button size="lg" onClick={onStart} className="gap-2">
-              {t('startSetup')}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="ghost" onClick={onSkip}>
-              {t('skipForNow')}
-            </Button>
-          </div>
-
-          {/* Skip note */}
-          <p className="text-sm text-muted-foreground">
-            {t('skipNote')}
-          </p>
       </DialogFooter>
     </div>
   )

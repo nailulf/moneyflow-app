@@ -6,6 +6,7 @@ import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { preferences } from '@/lib/api/user-preferences'
 import { CurrencyInput } from '@/components/ui/atoms/currency-input'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
@@ -32,6 +33,7 @@ import {
   ArrowRight,
   Loader2,
   Check,
+  CheckCircle2,
   ChevronsUpDown,
   X,
   Home,
@@ -41,6 +43,9 @@ import {
 import { cn } from '@/lib/utils'
 import { INDONESIAN_BANKS, type BankOption } from '@/lib/constants/banks'
 import { DialogFooter } from '@/components/ui/molecules/dialog'
+
+type PropertyType = 'HOUSE' | 'APARTMENT' | 'LAND'
+const ASSET_ACCOUNT_TYPES = new Set(['PROPERTY', 'VEHICLE', 'MORTGAGE'])
 
 const ACCOUNT_TYPES = [
   { value: 'BANK', label: 'Bank Account', icon: Banknote, description: 'Checking or savings account' },
@@ -52,6 +57,19 @@ const ACCOUNT_TYPES = [
   { value: 'MORTGAGE', label: 'Mortgage / KPR', icon: Landmark, description: 'Home loan or mortgage' },
   { value: 'OTHER', label: 'E-Wallet / Other', icon: Smartphone, description: 'GoPay, OVO, Dana, etc.' }
 ]
+
+// Display order for the account-type tile grid. All types are tappable cards;
+// no dropdown fallback.
+const TYPE_CARD_ORDER = [
+  'BANK',
+  'CASH',
+  'CREDIT_CARD',
+  'INVESTMENT',
+  'PROPERTY',
+  'VEHICLE',
+  'MORTGAGE',
+  'OTHER',
+] as const
 
 const CURRENCY_OPTIONS = [
   { value: 'IDR', label: 'IDR - Indonesian Rupiah' },
@@ -69,11 +87,12 @@ export function AccountSetupStepModal() {
   const t = useTranslations('onboarding.accountSetup')
   const { user } = useAuth()
   const { nextPhase, setWizardData, isPreviewMode } = useOnboarding()
-  const { createAccount } = useAccounts()
+  const { createAccount, deleteAccount } = useAccounts()
 
   const [accountName, setAccountName] = useState('')
   const [accountType, setAccountType] = useState<string>('BANK')
   const [currency, setCurrency] = useState('IDR')
+  const [currencyPrefilled, setCurrencyPrefilled] = useState(false)
   const [balance, setBalance] = useState<number>(0)
   const [selectedBank, setSelectedBank] = useState<BankOption | null>(null)
   const [bankSearch, setBankSearch] = useState('')
@@ -81,12 +100,45 @@ export function AccountSetupStepModal() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Asset-specific fields — mirror AccountManager so onboarding captures the
+  // same data shape. Kept as local state so each type renders only the fields
+  // it needs; defaults match AccountManager (15% depreciation).
+  const [propertyType, setPropertyType] = useState<PropertyType | ''>('')
+  const [assetLocation, setAssetLocation] = useState('')
+  const [depreciationRate, setDepreciationRate] = useState('15')
+  const [monthlyPayment, setMonthlyPayment] = useState<number>(0)
+  const [mortgageEndDate, setMortgageEndDate] = useState('')
+
   useEffect(() => {
     Analytics.track('onboarding_account_setup_viewed', {
       phase: 'account_setup',
       timestamp: new Date().toISOString()
     })
   }, [])
+
+  // Pre-fill currency from user_settings.default_currency (set at registration)
+  useEffect(() => {
+    if (!user?.id) return
+    let cancelled = false
+    preferences
+      .getCurrency(user.id)
+      .then(registered => {
+        if (cancelled) return
+        if (registered && registered !== 'IDR') {
+          setCurrency(registered)
+          setCurrencyPrefilled(true)
+        } else if (registered === 'IDR') {
+          // Still show the hint if the user explicitly chose IDR on registration
+          setCurrencyPrefilled(true)
+        }
+      })
+      .catch(() => {
+        // Silent fallback — IDR default already set
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id])
 
   useEffect(() => {
     if (accountType === 'BANK' || accountType === 'OTHER') {
@@ -110,7 +162,11 @@ export function AccountSetupStepModal() {
 
   const handleBankSelect = (bank: BankOption) => {
     setSelectedBank(bank)
-    setAccountName(bank.name)
+    // Auto-fill the account name from the selected bank so users don't need
+    // to retype it (matches redesign "Auto-filled from bank selection" hint).
+    if (!accountName.trim()) {
+      setAccountName(bank.name)
+    }
     setBankSearch('')
     setIsBankPopoverOpen(false)
   }
@@ -145,30 +201,49 @@ export function AccountSetupStepModal() {
     setIsSubmitting(true)
     setError(null)
 
-    try {
-      const accountData = {
-        user_id: user.id,
-        name: accountName.trim(),
-        type: accountType as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE',
-        balance,
-        currency,
-        is_active: true,
-        is_default: true,
-        description: selectedBank ? selectedBank.name : null,
-        property_type: null,
-        asset_location: null,
-        depreciation_rate: null,
-        monthly_payment: null,
-        mortgage_end_date: null,
-      }
+    const accountData = {
+      user_id: user.id,
+      name: accountName.trim(),
+      type: accountType as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE',
+      balance,
+      currency,
+      is_active: true,
+      is_default: true,
+      description: selectedBank ? selectedBank.name : null,
+      // Asset-specific fields — only populated when the type needs them so
+      // we don't stash stale state from a previous type selection.
+      property_type: accountType === 'PROPERTY' ? (propertyType || null) : null,
+      asset_location: accountType === 'PROPERTY' ? (assetLocation.trim() || null) : null,
+      depreciation_rate:
+        accountType === 'VEHICLE'
+          ? (parseFloat(depreciationRate) || 15)
+          : null,
+      monthly_payment:
+        accountType === 'MORTGAGE' && monthlyPayment > 0 ? monthlyPayment : null,
+      mortgage_end_date:
+        accountType === 'MORTGAGE' && mortgageEndDate ? mortgageEndDate : null,
+    }
 
-      if (isPreviewMode) {
+    if (isPreviewMode) {
+      try {
         setWizardData({ account: accountData })
         await nextPhase()
-        return
+      } catch (err) {
+        console.error('Error advancing phase in preview:', err)
+        setError(t('errors.failedToCreate'))
+      } finally {
+        setIsSubmitting(false)
       }
+      return
+    }
 
-      await createAccount(accountData)
+    // Atomic-ish flow with rollback: if nextPhase fails after the account was
+    // created, delete the orphan account so the user can retry cleanly on the
+    // same step without a stuck half-created record.
+    let createdAccountId: string | null = null
+    try {
+      const created = await createAccount(accountData)
+      createdAccountId = created?.id ?? null
       setWizardData({ account: accountData })
 
       Analytics.track('onboarding_account_created', {
@@ -187,52 +262,61 @@ export function AccountSetupStepModal() {
         error_message: err instanceof Error ? err.message : 'Unknown error',
         timestamp: new Date().toISOString()
       })
+
+      // Roll back a successfully created account if the phase advance failed.
+      if (createdAccountId) {
+        try {
+          await deleteAccount(createdAccountId)
+        } catch (rollbackErr) {
+          console.warn('Rollback of orphan account failed:', rollbackErr)
+        }
+      }
+
       setError(t('errors.failedToCreate'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleSkipStep = async () => {
-    Analytics.track('onboarding_step_skipped', {
-      phase: 'account_setup',
-      timestamp: new Date().toISOString()
-    })
-    await nextPhase()
-  }
-
-  const selectedType = ACCOUNT_TYPES.find(t => t.value === accountType)
   const selectedBankId = selectedBank?.id
 
   return (
-    <div className="space-y-2">
-      {/* Account Type */}
+    // Flex column owning its own scrollable body + pinned footer.
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
+      {/* Account Type — all types rendered as tappable tiles */}
       <div className="space-y-2">
-        <Label htmlFor="accountType">{t('accountTypeLabel')}</Label>
-        <Select
-          value={accountType}
-          onValueChange={setAccountType}
-          disabled={isSubmitting}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t('selectAccountType')} />
-          </SelectTrigger>
-          <SelectContent>
-            {ACCOUNT_TYPES.map((type) => (
-              <SelectItem key={type.value} value={type.value}>
-                <div className="flex items-center gap-2">
-                  <type.icon className="h-4 w-4" />
-                  <span>{t(`accountTypes.${type.value}.label` as Parameters<typeof t>[0])}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {selectedType && (
-          <p className="text-xs text-muted-foreground">
-            {t(`accountTypes.${selectedType.value}.description` as Parameters<typeof t>[0])}
-          </p>
-        )}
+        <Label>{t('accountTypeLabel')}</Label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {TYPE_CARD_ORDER.map(value => {
+            const type = ACCOUNT_TYPES.find(t => t.value === value)!
+            const Icon = type.icon
+            const isSelected = accountType === value
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setAccountType(value)}
+                disabled={isSubmitting}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-2 rounded-xl border-2 px-3 py-3 transition-colors min-h-[84px] text-center',
+                  isSelected
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border bg-background text-muted-foreground hover:border-primary/40'
+                )}
+                aria-pressed={isSelected}
+              >
+                <Icon className={cn('h-5 w-5', isSelected ? 'text-primary' : 'text-muted-foreground')} />
+                <span className="text-xs font-semibold leading-tight">
+                  {t(`accountTypes.${value}.label` as Parameters<typeof t>[0])}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t(`accountTypes.${accountType}.description` as Parameters<typeof t>[0])}
+        </p>
       </div>
       {(accountType === 'BANK' || accountType === 'OTHER') && (
         <div className="space-y-2">
@@ -364,13 +448,101 @@ export function AccountSetupStepModal() {
         {accountName.trim().length > 0 && accountName.trim().length < 3 && (
           <p className="text-xs text-destructive">{t('atLeast3Chars')}</p>
         )}
+        {selectedBank && accountName === selectedBank.name && (
+          <p className="flex items-center gap-1.5 text-xs text-success">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            {t('autoFilledFromBank')}
+          </p>
+        )}
       </div>
+
+      {/* Asset-specific fields — same inputs as AccountManager so the data
+          captured during onboarding matches what users can edit later. */}
+      {accountType === 'PROPERTY' && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="property-type">{t('assetDetails.propertyType')}</Label>
+            <Select
+              value={propertyType || undefined}
+              onValueChange={(v) => setPropertyType(v as PropertyType)}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger id="property-type">
+                <SelectValue placeholder={t('assetDetails.propertyTypePlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="HOUSE">{t('assetDetails.propertyTypes.house')}</SelectItem>
+                <SelectItem value="APARTMENT">{t('assetDetails.propertyTypes.apartment')}</SelectItem>
+                <SelectItem value="LAND">{t('assetDetails.propertyTypes.land')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="asset-location">{t('assetDetails.location')}</Label>
+            <Input
+              id="asset-location"
+              value={assetLocation}
+              onChange={(e) => setAssetLocation(e.target.value)}
+              placeholder={t('assetDetails.locationPlaceholder')}
+              disabled={isSubmitting}
+            />
+          </div>
+        </>
+      )}
+
+      {accountType === 'VEHICLE' && (
+        <div className="space-y-2">
+          <Label htmlFor="depreciation-rate">{t('assetDetails.depreciationRate')}</Label>
+          <Input
+            id="depreciation-rate"
+            type="number"
+            min="0"
+            max="100"
+            step="0.5"
+            value={depreciationRate}
+            onChange={(e) => setDepreciationRate(e.target.value)}
+            placeholder={t('assetDetails.depreciationRatePlaceholder')}
+            disabled={isSubmitting}
+          />
+          <p className="text-xs text-muted-foreground">{t('assetDetails.depreciationRateHint')}</p>
+        </div>
+      )}
+
+      {accountType === 'MORTGAGE' && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="monthly-payment">{t('assetDetails.monthlyPayment')}</Label>
+            <CurrencyInput
+              id="monthly-payment"
+              value={monthlyPayment}
+              onChange={setMonthlyPayment}
+              currency={currency}
+              placeholder="0"
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="mortgage-end-date">{t('assetDetails.mortgageEndDate')}</Label>
+            <Input
+              id="mortgage-end-date"
+              type="month"
+              value={mortgageEndDate ? mortgageEndDate.slice(0, 7) : ''}
+              onChange={(e) => setMortgageEndDate(e.target.value ? `${e.target.value}-01` : '')}
+              disabled={isSubmitting}
+            />
+            <p className="text-xs text-muted-foreground">{t('assetDetails.mortgageEndDateHint')}</p>
+          </div>
+        </>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="currency">{t('currencyLabel')}</Label>
         <Select
           value={currency}
-          onValueChange={setCurrency}
+          onValueChange={(v) => {
+            setCurrency(v)
+            setCurrencyPrefilled(false)
+          }}
           disabled={isSubmitting}
         >
           <SelectTrigger>
@@ -384,13 +556,26 @@ export function AccountSetupStepModal() {
             ))}
           </SelectContent>
         </Select>
+        {currencyPrefilled && (
+          <p className="flex items-center gap-1.5 text-xs text-success">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            {t('currencyFromRegistration')}
+          </p>
+        )}
       </div>
 
-      {/* Starting Balance */}
+      {/* Starting Balance — label & helper copy depend on the account type so
+          asset accounts explain "current value" vs. "outstanding balance". */}
       <div className="space-y-2">
         <Label htmlFor="balance">
-          {t('startingBalance')}{' '}
-          <span className="text-muted-foreground font-normal">{t('optional')}</span>
+          {accountType === 'PROPERTY' || accountType === 'VEHICLE' || accountType === 'MORTGAGE'
+            ? t(
+                `assetDetails.balanceLabel.${accountType.toLowerCase() as 'property' | 'vehicle' | 'mortgage'}`
+              )
+            : t('startingBalance')}{' '}
+          {!ASSET_ACCOUNT_TYPES.has(accountType) && (
+            <span className="text-muted-foreground font-normal">{t('optional')}</span>
+          )}
         </Label>
         <CurrencyInput
           id="balance"
@@ -401,7 +586,11 @@ export function AccountSetupStepModal() {
           disabled={isSubmitting}
         />
         <p className="text-xs text-muted-foreground">
-          {t('balanceNote')}
+          {accountType === 'PROPERTY' || accountType === 'VEHICLE' || accountType === 'MORTGAGE'
+            ? t(
+                `assetDetails.balanceHint.${accountType.toLowerCase() as 'property' | 'vehicle' | 'mortgage'}`
+              )
+            : t('balanceNote')}
         </p>
       </div>
 
@@ -409,35 +598,30 @@ export function AccountSetupStepModal() {
       {error && (
         <p className="text-sm text-destructive">{error}</p>
       )}
-      <DialogFooter>
-      {/* Actions */}
-        <div className="flex gap-3 justify-end pt-2">
-          <Button
-            variant="outline"
-            onClick={handleSkipStep}
-            disabled={isSubmitting}
-          >
-            {t('skip')}
-          </Button>
-          <Button
-            onClick={handleCreateAccount}
-            disabled={isSubmitting || !accountName.trim() || accountName.trim().length < 3}
-            className="gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                {t('creating')}
-              </>
-            ) : (
-              <>
-                {t('continue')}
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </Button>
-        </div>
-      </DialogFooter>
+      </div>
+
+      {/* Footer — pinned to the bottom of the dialog. No skip per design
+          (pen frame qBGbD has Back + Continue only — see GMeBQ / JyBux).
+          Welcome and Completion still expose skip text links. */}
+      <div className="flex gap-3 justify-end pt-3 mt-3 border-t">
+        <Button
+          onClick={handleCreateAccount}
+          disabled={isSubmitting || !accountName.trim() || accountName.trim().length < 3}
+          className="gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {t('creating')}
+            </>
+          ) : (
+            <>
+              {t('continue')}
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   )
 }
