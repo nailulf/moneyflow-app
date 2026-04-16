@@ -196,7 +196,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
             ] = await Promise.all([
               supabase.from('accounts').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
               supabase.from('categories').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-              supabase.from('budgets').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+              supabase.from('budget_plans').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
             ])
 
             const hasAccounts = (accountCount ?? 0) > 0

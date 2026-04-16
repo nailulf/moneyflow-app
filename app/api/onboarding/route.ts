@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId),
         supabase
-          .from('budgets')
+          .from('budget_plans')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId),
       ])
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId),
         supabase
-          .from('budgets')
+          .from('budget_plans')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', userId),
       ])
