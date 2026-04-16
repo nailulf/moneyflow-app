@@ -15,17 +15,24 @@ export function CompletionView() {
   const [isCompleting, setIsCompleting] = useState(!state?.is_completed)
   // Ref-based dedupe so StrictMode double-invokes don't fire complete() twice.
   const hasFiredRef = useRef(false)
+  // Keep a stable ref to `complete` so the effect below never re-runs when
+  // the context recreates the callback (e.g. after setWizardData changes
+  // wizardData). Without this, the cleanup cancels the in-flight promise's
+  // .finally() and safety timer, while hasFiredRef blocks re-firing — leaving
+  // the spinner stuck forever.
+  const completeRef = useRef(complete)
+  useEffect(() => { completeRef.current = complete })
 
   // Fire complete() exactly once on mount (unless onboarding was already
   // marked completed by an earlier flow). We don't depend on the context
   // `loading` flag for the spinner gate — that flag flips for every
   // unrelated context op and used to leave us spinning forever.
   useEffect(() => {
-    if (hasFiredRef.current) return
     if (state?.is_completed) {
       setIsCompleting(false)
       return
     }
+    if (hasFiredRef.current) return
     hasFiredRef.current = true
 
     let cancelled = false
@@ -36,7 +43,7 @@ export function CompletionView() {
       if (!cancelled) setIsCompleting(false)
     }, 5000)
 
-    complete()
+    completeRef.current()
       .catch((err) => {
         console.error('Error completing onboarding:', err)
       })
@@ -48,7 +55,7 @@ export function CompletionView() {
       cancelled = true
       clearTimeout(safetyTimer)
     }
-  }, [complete, state?.is_completed])
+  }, [state?.is_completed])
 
   const handleAddFirstExpense = () => {
     closeModal()
