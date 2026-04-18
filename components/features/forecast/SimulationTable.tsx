@@ -3,7 +3,6 @@
 import { Fragment, useMemo, useState, type ReactElement } from "react"
 import { useTranslations } from "next-intl"
 import { ChevronRight, HelpCircle } from "lucide-react"
-import { useAuth } from "@/contexts/AuthContext"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/molecules/card"
 import {
   Tooltip,
@@ -12,120 +11,28 @@ import {
   TooltipTrigger,
 } from "@/components/ui/molecules/tooltip"
 import { formatCurrency } from "@/lib/data-utils"
-import {
-  useForecastScenarios,
-  useForecastEvents,
-  useForecastNetWorth,
-  useForecastCashflow,
-} from "@/hooks/useForecastQuery"
-import { buildDraft } from "@/lib/forecast/types"
-import { computeEventYearlyImpacts } from "@/lib/forecast/event-impact"
+import type { ForecastEvent } from "@/lib/forecast/types"
+import type { YearlySimulationRow, YearlySimulationParams } from "@/hooks/useYearlySimulation"
 
-export function SimulationTable(): ReactElement {
+interface SimulationTableProps {
+  rows: YearlySimulationRow[]
+  params: YearlySimulationParams
+  events: ForecastEvent[]
+}
+
+export function SimulationTable({ rows, params, events }: SimulationTableProps): ReactElement {
   const t = useTranslations("forecast.simulationTable")
-  const { user } = useAuth()
   const [expanded, setExpanded] = useState<Set<number>>(new Set())
-  const { data: scenarios = [] } = useForecastScenarios()
-  const defaultScenario = scenarios.find((s) => s.is_default) ?? scenarios[0]
-  const { data: events = [] } = useForecastEvents(defaultScenario?.id ?? null)
-  const { data: netWorthData } = useForecastNetWorth(user?.id)
-  const { data: cashflowData } = useForecastCashflow()
 
-  const netWorth = netWorthData?.currentNetWorth ?? 0
-  const annualIncome = cashflowData?.annualIncome ?? 0
-  const annualExpenses = cashflowData?.annualExpenses ?? 0
-
-  const draft = defaultScenario ? buildDraft(defaultScenario) : null
-  const inflationRate = draft?.inflation_rate ?? 0.03
-  const annualReturn = draft?.expected_annual_return ?? 0.07
-  const horizonYears = draft?.horizon_years ?? 50
-  const monthlyContribution = draft?.monthly_contribution ?? 0
-  const monthlyWithdrawal = draft?.monthly_withdrawal ?? 0
-
-  const realMonthlyRate = Math.pow((1 + annualReturn) / (1 + inflationRate), 1 / 12) - 1
-  const startYear = draft ? new Date(draft.start_date).getFullYear() : new Date().getFullYear()
-
-  const yearOneIncome = annualIncome + monthlyContribution * 12
-  const yearOneExpense = annualExpenses + monthlyWithdrawal * 12
-
-  const retirementEvent = events.find((e) => e.event_type === "RETIREMENT" && e.is_enabled !== false)
-  const retirementYear = retirementEvent ? new Date(retirementEvent.event_date).getFullYear() : null
-
-  const eventImpacts = useMemo(() => {
-    const allImpacts = new Map<number, { income: number; expense: number; labels: string[] }>()
-    for (const event of events) {
-      if (event.is_enabled === false) continue
-      const impacts = computeEventYearlyImpacts(event, startYear, horizonYears, inflationRate)
-      for (const [year, { income, expense }] of impacts) {
-        const existing = allImpacts.get(year) ?? { income: 0, expense: 0, labels: [] }
-        existing.income += income
-        existing.expense += expense
-        if (!existing.labels.includes(event.name)) existing.labels.push(event.name)
-        allImpacts.set(year, existing)
-      }
-    }
-    return allImpacts
-  }, [events, startYear, horizonYears, inflationRate])
-
-  const rows = useMemo(() => {
-    const result: {
-      year: number
-      yearIndex: number
-      inflationFactor: number
-      income: number
-      expense: number
-      eventIncome: number
-      eventExpense: number
-      eventLabels: string[]
-      netCashflow: number
-      startNW: number
-      investmentReturn: number
-      endNW: number
-      isRetired: boolean
-    }[] = []
-
-    let nw = netWorth
-    for (let y = 0; y < Math.min(horizonYears, 50); y++) {
-      const currentYear = startYear + y
-      const inflationFactor = Math.pow(1 + inflationRate, y)
-      const isRetired = retirementYear !== null && currentYear >= retirementYear
-
-      const baseIncome = isRetired ? 0 : yearOneIncome * inflationFactor
-      const baseExpense = yearOneExpense * inflationFactor
-
-      const ei = eventImpacts.get(currentYear)
-      const eventIncome = ei?.income ?? 0
-      const eventExpense = ei?.expense ?? 0
-      const eventLabels = ei?.labels ?? []
-
-      const totalIncome = baseIncome + eventIncome
-      const totalExpense = baseExpense + eventExpense
-      const netCashflow = totalIncome - totalExpense
-
-      const startNW = nw
-      const investmentReturn = startNW * annualReturn
-      const endNW = startNW + investmentReturn + netCashflow
-
-      result.push({
-        year: currentYear,
-        yearIndex: y,
-        inflationFactor,
-        income: totalIncome,
-        expense: totalExpense,
-        eventIncome,
-        eventExpense,
-        eventLabels,
-        netCashflow,
-        startNW,
-        investmentReturn,
-        endNW,
-        isRetired,
-      })
-
-      nw = endNW
-    }
-    return result
-  }, [netWorth, yearOneIncome, yearOneExpense, inflationRate, annualReturn, horizonYears, startYear, retirementYear, eventImpacts])
+  const {
+    netWorth,
+    annualReturn,
+    inflationRate,
+    yearOneIncome,
+    yearOneExpense,
+    retirementYear,
+    nominalMonthlyRate,
+  } = params
 
   const buckets = useMemo(() => {
     const BUCKET_SIZE = 5
@@ -220,8 +127,8 @@ export function SimulationTable(): ReactElement {
             <p className="font-semibold">{(inflationRate * 100).toFixed(1)}%</p>
           </div>
           <div className="rounded-lg border p-3">
-            <p className="text-xs text-muted-foreground">{t("realMonthlyRate")}</p>
-            <p className="font-semibold">{(realMonthlyRate * 100).toFixed(3)}%</p>
+            <p className="text-xs text-muted-foreground">{t("nominalMonthlyRate")}</p>
+            <p className="font-semibold">{(nominalMonthlyRate * 100).toFixed(3)}%</p>
           </div>
           <div className="rounded-lg border p-3">
             <p className="text-xs text-muted-foreground">{t("year1Income")}</p>

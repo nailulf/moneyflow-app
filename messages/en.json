@@ -980,7 +980,7 @@
       "startingNetWorth": "Starting Net Worth",
       "annualReturn": "Annual Return",
       "inflationRate": "Inflation Rate",
-      "realMonthlyRate": "Real Monthly Rate",
+      "nominalMonthlyRate": "Nominal Monthly Rate",
       "year1Income": "Year 1 Income",
       "year1Expense": "Year 1 Expense",
       "retirementYear": "Retirement Year",
