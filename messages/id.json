@@ -980,7 +980,7 @@
       "startingNetWorth": "Kekayaan Bersih Awal",
       "annualReturn": "Imbal Hasil Tahunan",
       "inflationRate": "Tingkat Inflasi",
-      "realMonthlyRate": "Tingkat Bulanan Riil",
+      "nominalMonthlyRate": "Tingkat Bulanan Nominal",
       "year1Income": "Pemasukan Tahun 1",
       "year1Expense": "Pengeluaran Tahun 1",
       "retirementYear": "Tahun Pensiun",

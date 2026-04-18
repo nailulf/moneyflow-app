@@ -21,6 +21,9 @@ export function getAgeLabel(baseDate: Date, monthOffset: number, dob: Date | nul
 export const calculateRealMonthlyRate = (annualReturn: number, annualInflation: number): number =>
   Math.pow((1 + annualReturn) / (1 + annualInflation), 1 / 12) - 1
 
+export const calculateNominalMonthlyRate = (annualReturn: number): number =>
+  Math.pow(1 + annualReturn, 1 / 12) - 1
+
 export const randomNormal = (): number => {
   let u = 0
   let v = 0
@@ -49,8 +52,8 @@ export const runMonteCarlo = (
   months: number,
   meanMonthly: number,
   volatilityMonthly: number,
-  baseCashflow: number,
-  postRetirementCashflow: number,
+  monthlyIncome: number,
+  monthlyExpense: number,
   retirementMonth: number | null,
   eventMap: Map<string, number>,
   baseDate: Date,
@@ -64,15 +67,13 @@ export const runMonteCarlo = (
     series[0].push(value)
     for (let i = 1; i <= months; i += 1) {
       const monthDate = addMonths(baseDate, i)
-      const rawEvent = eventMap.get(getMonthKey(monthDate)) ?? 0
-      const eventAdjustment = rawEvent !== 0
-        ? rawEvent * Math.pow(1 + inflationRate, i / 12)
-        : 0
-      // After retirement: no income contributions, only expenses against asset returns
-      const cashflow = (retirementMonth !== null && i >= retirementMonth)
-        ? postRetirementCashflow
-        : baseCashflow
-      const monthlyFlow = cashflow + eventAdjustment
+      const eventAdjustment = eventMap.get(getMonthKey(monthDate)) ?? 0
+      const inflationFactor = Math.pow(1 + inflationRate, i / 12)
+      const income = (retirementMonth !== null && i >= retirementMonth)
+        ? 0
+        : monthlyIncome * inflationFactor
+      const expense = monthlyExpense * inflationFactor
+      const monthlyFlow = income - expense + eventAdjustment
       const shock = randomNormal()
       const monthlyReturn = meanMonthly + volatilityMonthly * shock
       value = value * (1 + monthlyReturn) + monthlyFlow
@@ -86,7 +87,8 @@ export const runMonteCarlo = (
 export function computeProjection(
   scenarioDraft: ScenarioDraft,
   netWorth: number,
-  monthlyCashflow: number,
+  monthlyIncomeBase: number,
+  monthlyExpenseBase: number,
   eventMap: Map<string, number>,
   eventsByMonth: Map<string, string[]>,
   dob?: Date | null,
@@ -96,20 +98,17 @@ export function computeProjection(
   const months = Math.max(1, scenarioDraft.horizon_years * 12)
   const baseDate = new Date(scenarioDraft.start_date)
   const inflationRate = scenarioDraft.inflation_rate
-  const meanMonthly = calculateRealMonthlyRate(
-    scenarioDraft.expected_annual_return,
-    inflationRate
+  const meanMonthly = calculateNominalMonthlyRate(
+    scenarioDraft.expected_annual_return
   )
   const volatilityMonthly = Number(scenarioDraft.annual_volatility) / Math.sqrt(12)
 
-  // Pre-retirement: income (contributions + cashflow) minus expenses (withdrawals)
-  const baseCashflow =
-    Number(scenarioDraft.monthly_contribution) -
-    Number(scenarioDraft.monthly_withdrawal) +
-    (scenarioDraft.include_cashflow ? monthlyCashflow : 0)
-
-  // Post-retirement: no income, only expenses drain assets
-  const postRetirementCashflow = -Number(scenarioDraft.monthly_withdrawal)
+  // Monthly income = cashflow income (if enabled) + contributions
+  // Monthly expense = cashflow expenses (if enabled) + withdrawals
+  const monthlyIncome = (scenarioDraft.include_cashflow ? monthlyIncomeBase : 0) +
+    Number(scenarioDraft.monthly_contribution)
+  const monthlyExpense = (scenarioDraft.include_cashflow ? monthlyExpenseBase : 0) +
+    Number(scenarioDraft.monthly_withdrawal)
 
   // Compute retirement month offset from scenario start
   let retirementMonth: number | null = null
@@ -125,14 +124,13 @@ export function computeProjection(
   deterministicSeries.push(deterministicValue)
   for (let i = 1; i <= months; i += 1) {
     const monthDate = addMonths(baseDate, i)
-    const rawEvent = eventMap.get(getMonthKey(monthDate)) ?? 0
-    const eventAdjustment = rawEvent !== 0
-      ? rawEvent * Math.pow(1 + inflationRate, i / 12)
-      : 0
-    const cashflow = (retirementMonth !== null && i >= retirementMonth)
-      ? postRetirementCashflow
-      : baseCashflow
-    const monthlyFlow = cashflow + eventAdjustment
+    const eventAdjustment = eventMap.get(getMonthKey(monthDate)) ?? 0
+    const inflationFactor = Math.pow(1 + inflationRate, i / 12)
+    const income = (retirementMonth !== null && i >= retirementMonth)
+      ? 0
+      : monthlyIncome * inflationFactor
+    const expense = monthlyExpense * inflationFactor
+    const monthlyFlow = income - expense + eventAdjustment
     deterministicValue = deterministicValue * (1 + meanMonthly) + monthlyFlow
     deterministicSeries.push(deterministicValue)
   }
@@ -144,8 +142,8 @@ export function computeProjection(
     months,
     meanMonthly,
     volatilityMonthly,
-    baseCashflow,
-    postRetirementCashflow,
+    monthlyIncome,
+    monthlyExpense,
     retirementMonth,
     eventMap,
     baseDate,

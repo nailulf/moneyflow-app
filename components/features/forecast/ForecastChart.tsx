@@ -8,7 +8,6 @@ import {
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/organisms/chart"
 import { formatCurrency, formatCurrencyCompact } from "@/lib/data-utils"
@@ -75,6 +74,12 @@ function NetWorthTooltip({ active, payload }: {
         <span className="text-xs text-muted-foreground">{t("netWorth")}</span>
         <span className="text-xs font-semibold tabular-nums">{formatCurrency(point.deterministic)}</span>
       </div>
+      {point.eventSpending != null && point.eventSpending > 0 && (
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-xs text-muted-foreground">{t("eventCost")}</span>
+          <span className="text-xs font-medium tabular-nums text-destructive">{formatCurrency(point.eventSpending)}</span>
+        </div>
+      )}
       <EventTooltipSection details={point.eventDetails} />
     </div>
   )
@@ -619,6 +624,7 @@ export type ForecastChartView = "net-worth" | "cash-flow" | "simulation"
 interface ForecastChartProps {
   view: ForecastChartView
   projection: ProjectionPoint[] | null
+  yearlyProjection?: ProjectionPoint[] | null
   isLoading: boolean
   netWorth: number | null
   scenarioDraft: ScenarioDraft | null
@@ -632,6 +638,7 @@ interface ForecastChartProps {
 export function ForecastChart({
   view,
   projection,
+  yearlyProjection,
   isLoading,
   netWorth,
   scenarioDraft,
@@ -651,7 +658,8 @@ export function ForecastChart({
   }
 
   if (view === "net-worth") {
-    return <NetWorthView projection={projection} netWorth={netWorth} events={events} />
+    const nwData = yearlyProjection ?? projection
+    return <NetWorthView projection={nwData} netWorth={netWorth} events={events} />
   }
   if (view === "cash-flow") {
     return <CashFlowView scenarioDraft={scenarioDraft} baseAnnualIncome={baseAnnualIncome} baseAnnualExpenses={baseAnnualExpenses} monthlyCashflow={monthlyCashflow} events={events} />

@@ -130,6 +130,7 @@ export type ProjectionPoint = {
   hasEvent: boolean
   eventTypes: string[]
   eventDetails: EventDetail[]
+  eventSpending?: number
 }
 
 export type ScenarioDraft = {

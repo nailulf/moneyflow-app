@@ -29,7 +29,8 @@ const DEBOUNCE_MS = 500
 export function useForecastEngine(
   scenarioDraft: ScenarioDraft | null,
   netWorth: number | null,
-  monthlyCashflow: number,
+  monthlyIncomeBase: number,
+  monthlyExpenseBase: number,
   eventMap: Map<string, number>,
   eventsByMonth: Map<string, string[]>,
   dob?: string | null,
@@ -75,11 +76,18 @@ export function useForecastEngine(
 
     debounceRef.current = setTimeout(() => {
       const worker = workerRef.current
+
+      // Compute income/expense: base cashflow + contributions/withdrawals
+      const monthlyIncome = (scenarioDraft.include_cashflow ? monthlyIncomeBase : 0) +
+        Number(scenarioDraft.monthly_contribution)
+      const monthlyExpense = (scenarioDraft.include_cashflow ? monthlyExpenseBase : 0) +
+        Number(scenarioDraft.monthly_withdrawal)
+
       if (!worker) {
         const { computeProjection } = require('@/lib/forecast/engine')
         const dobDate = dob ? new Date(dob) : null
         const { projection, mcFinalValues } = computeProjection(
-          scenarioDraft, netWorth, monthlyCashflow, eventMap, eventsByMonth, dobDate, eventDetailsByMonth, retirementDateISO
+          scenarioDraft, netWorth, monthlyIncomeBase, monthlyExpenseBase, eventMap, eventsByMonth, dobDate, eventDetailsByMonth, retirementDateISO
         )
         setResult({ projection, mcFinalValues, isComputing: false })
         return
@@ -87,12 +95,8 @@ export function useForecastEngine(
 
       const inflationRate = scenarioDraft.inflation_rate
       const meanMonthly =
-        Math.pow((1 + scenarioDraft.expected_annual_return) / (1 + inflationRate), 1 / 12) - 1
+        Math.pow(1 + scenarioDraft.expected_annual_return, 1 / 12) - 1
       const volatilityMonthly = Number(scenarioDraft.annual_volatility) / Math.sqrt(12)
-      const baseCashflow =
-        Number(scenarioDraft.monthly_contribution) -
-        Number(scenarioDraft.monthly_withdrawal) +
-        (scenarioDraft.include_cashflow ? monthlyCashflow : 0)
 
       worker.onmessage = (e: MessageEvent<WorkerOutput>) => {
         const { percentiles, finalValues } = e.data
@@ -105,15 +109,13 @@ export function useForecastEngine(
         setResult({ projection: points, mcFinalValues: finalValues, isComputing: false })
       }
 
-      const postRetirementCashflow = -Number(scenarioDraft.monthly_withdrawal)
-
       worker.postMessage({
         netWorth,
         months: Math.max(1, scenarioDraft.horizon_years * 12),
         meanMonthly,
         volatilityMonthly,
-        baseCashflow,
-        postRetirementCashflow,
+        monthlyIncome,
+        monthlyExpense,
         retirementDateISO: retirementDateISO ?? null,
         eventEntries: Array.from(eventMap.entries()),
         baseDateISO: scenarioDraft.start_date,
@@ -123,7 +125,7 @@ export function useForecastEngine(
       })
     }, DEBOUNCE_MS)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scenarioDraft, netWorth, monthlyCashflow, eventMapSerialized, dob, retirementDateISO])
+  }, [scenarioDraft, netWorth, monthlyIncomeBase, monthlyExpenseBase, eventMapSerialized, dob, retirementDateISO])
 
   return result
 }

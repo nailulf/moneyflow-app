@@ -48,6 +48,7 @@ import { ForecastChart, type ForecastChartView } from "@/components/features/for
 import { ForecastSummary } from "@/components/features/forecast/ForecastSummary"
 import { CustomizeSheet } from "@/components/features/forecast/CustomizeSheet"
 import { SimulationTable } from "@/components/features/forecast/SimulationTable"
+import { useYearlySimulation, yearlyRowsToProjection } from "@/hooks/useYearlySimulation"
 
 export default function ForecastPage(): ReactElement {
   const { user } = useAuth()
@@ -68,6 +69,15 @@ export default function ForecastPage(): ReactElement {
   const cashflowMonthsUsed = cashflowData?.monthsUsed ?? 0
   const baseAnnualIncome = cashflowData?.annualIncome ?? 0
   const baseAnnualExpenses = cashflowData?.annualExpenses ?? 0
+  const monthlyIncomeBase = baseAnnualIncome / 12
+  const monthlyExpenseBase = baseAnnualExpenses / 12
+
+  // --- Shared yearly simulation (single source of truth for NW chart + table) ---
+  const { rows: yearlyRows, params: yearlyParams, events: yearlyEvents } = useYearlySimulation()
+  const yearlyProjection = useMemo(
+    () => yearlyRows.length > 0 ? yearlyRowsToProjection(yearlyRows) : null,
+    [yearlyRows]
+  )
 
   const computedCAGR = useMemo(() => {
     if (!netWorthData?.historicalData) return null
@@ -146,7 +156,7 @@ export default function ForecastPage(): ReactElement {
   }, [events])
 
   const { projection, mcFinalValues, isComputing } = useForecastEngine(
-    scenarioDraft, netWorth ?? null, monthlyCashflow, eventMap, eventsByMonth, userDOB, eventDetailsByMonth, retirementDateISO,
+    scenarioDraft, netWorth ?? null, monthlyIncomeBase, monthlyExpenseBase, eventMap, eventsByMonth, userDOB, eventDetailsByMonth, retirementDateISO,
   )
 
   const successRate = useMemo(() => {
@@ -298,6 +308,7 @@ export default function ForecastPage(): ReactElement {
               <ForecastChart
                 view={chartView}
                 projection={projection}
+                yearlyProjection={yearlyProjection}
                 isLoading={scenariosLoading || isComputing}
                 netWorth={netWorth}
                 scenarioDraft={scenarioDraft}
@@ -313,7 +324,7 @@ export default function ForecastPage(): ReactElement {
             </CardContent>
           </Card>
 
-          <SimulationTable />
+          <SimulationTable rows={yearlyRows} params={yearlyParams} events={yearlyEvents} />
         </TopContent>
       </PageLayout>
 

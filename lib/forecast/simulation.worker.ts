@@ -6,8 +6,8 @@ type MonteCarloInput = {
   months: number
   meanMonthly: number
   volatilityMonthly: number
-  baseCashflow: number
-  postRetirementCashflow: number
+  monthlyIncome: number
+  monthlyExpense: number
   retirementDateISO: string | null
   eventEntries: [string, number][]
   baseDateISO: string
@@ -78,8 +78,8 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
     months,
     meanMonthly,
     volatilityMonthly,
-    baseCashflow,
-    postRetirementCashflow,
+    monthlyIncome,
+    monthlyExpense,
     retirementDateISO,
     eventEntries,
     baseDateISO,
@@ -106,10 +106,11 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
   deterministicSeries.push(deterministicValue)
   for (let i = 1; i <= months; i += 1) {
     const monthDate = addMonthsSimple(baseDate, i)
-    const rawEvent = eventMap.get(getMonthKey(monthDate)) ?? 0
-    const eventAdj = rawEvent !== 0 ? rawEvent * Math.pow(1 + inflationRate, i / 12) : 0
-    const cashflow = (retirementMonth !== null && i >= retirementMonth) ? postRetirementCashflow : baseCashflow
-    deterministicValue = deterministicValue * (1 + meanMonthly) + cashflow + eventAdj
+    const eventAdj = eventMap.get(getMonthKey(monthDate)) ?? 0
+    const inflationFactor = Math.pow(1 + inflationRate, i / 12)
+    const income = (retirementMonth !== null && i >= retirementMonth) ? 0 : monthlyIncome * inflationFactor
+    const expense = monthlyExpense * inflationFactor
+    deterministicValue = deterministicValue * (1 + meanMonthly) + income - expense + eventAdj
     deterministicSeries.push(deterministicValue)
   }
 
@@ -122,10 +123,11 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
     series[0].push(value)
     for (let i = 1; i <= months; i += 1) {
       const monthDate = addMonthsSimple(baseDate, i)
-      const rawEvent = eventMap.get(getMonthKey(monthDate)) ?? 0
-      const eventAdj = rawEvent !== 0 ? rawEvent * Math.pow(1 + inflationRate, i / 12) : 0
-      const cashflow = (retirementMonth !== null && i >= retirementMonth) ? postRetirementCashflow : baseCashflow
-      const monthlyFlow = cashflow + eventAdj
+      const eventAdj = eventMap.get(getMonthKey(monthDate)) ?? 0
+      const inflationFactor = Math.pow(1 + inflationRate, i / 12)
+      const income = (retirementMonth !== null && i >= retirementMonth) ? 0 : monthlyIncome * inflationFactor
+      const expense = monthlyExpense * inflationFactor
+      const monthlyFlow = income - expense + eventAdj
       const shock = randomNormal()
       const monthlyReturn = meanMonthly + volatilityMonthly * shock
       value = value * (1 + monthlyReturn) + monthlyFlow
