@@ -55,6 +55,10 @@ describe('filterTransactions', () => {
     expect(filterTransactions(list, { ...base, amountMin: 100 }).map(t => t.id)).toEqual(['big'])
     expect(filterTransactions(list, { ...base, amountMax: 100 }).map(t => t.id)).toEqual(['small'])
   })
+  it('does not drop the first day of the month (timezone-proof)', () => {
+    const list = [tx({ id: 'first', date: '2025-06-01' })]
+    expect(filterTransactions(list, base).map(t => t.id)).toEqual(['first'])
+  })
 })
 
 describe('groupByDate', () => {
