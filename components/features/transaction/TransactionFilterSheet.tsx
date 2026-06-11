@@ -30,7 +30,8 @@ export function TransactionFilterSheet({ open, onOpenChange, categories, account
       setDraftCats(filters.categoryIds); setDraftAccts(filters.accountIds)
       setMin(filters.amountMin?.toString() ?? ''); setMax(filters.amountMax?.toString() ?? '')
     }
-  }, [open, filters])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   const toggle = (arr: string[], id: string) => (arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id])
   const chip = (active: boolean) =>
@@ -56,7 +57,7 @@ export function TransactionFilterSheet({ open, onOpenChange, categories, account
             <p className="mb-2 text-sm font-medium text-foreground">{t('categories')}</p>
             <div className="flex flex-wrap gap-2">
               {categories.map((c) => (
-                <button key={c.id} type="button" className={chip(draftCats.includes(c.id))} onClick={() => setDraftCats((a) => toggle(a, c.id))}>{c.name}</button>
+                <button key={c.id} type="button" aria-pressed={draftCats.includes(c.id)} className={chip(draftCats.includes(c.id))} onClick={() => setDraftCats((a) => toggle(a, c.id))}>{c.name}</button>
               ))}
             </div>
           </div>
@@ -64,13 +65,13 @@ export function TransactionFilterSheet({ open, onOpenChange, categories, account
             <p className="mb-2 text-sm font-medium text-foreground">{t('accounts')}</p>
             <div className="flex flex-wrap gap-2">
               {accounts.map((a) => (
-                <button key={a.id} type="button" className={chip(draftAccts.includes(a.id))} onClick={() => setDraftAccts((x) => toggle(x, a.id))}>{a.name}</button>
+                <button key={a.id} type="button" aria-pressed={draftAccts.includes(a.id)} className={chip(draftAccts.includes(a.id))} onClick={() => setDraftAccts((x) => toggle(x, a.id))}>{a.name}</button>
               ))}
             </div>
           </div>
           <div className="flex gap-3">
-            <Input inputMode="numeric" placeholder={t('amountMin')} value={min} onChange={(e) => setMin(e.target.value.replace(/[^0-9]/g, ''))} />
-            <Input inputMode="numeric" placeholder={t('amountMax')} value={max} onChange={(e) => setMax(e.target.value.replace(/[^0-9]/g, ''))} />
+            <Input inputMode="numeric" aria-label={t('amountMin')} placeholder={t('amountMin')} value={min} onChange={(e) => setMin(e.target.value.replace(/[^0-9]/g, ''))} />
+            <Input inputMode="numeric" aria-label={t('amountMax')} placeholder={t('amountMax')} value={max} onChange={(e) => setMax(e.target.value.replace(/[^0-9]/g, ''))} />
           </div>
           <div className="flex gap-3">
             <Button variant="outline" className="flex-1" onClick={reset}>{t('reset')}</Button>
