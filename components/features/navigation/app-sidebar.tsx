@@ -15,6 +15,8 @@ import {
   // Landmark,    // Hidden: Equity
   // Scale,       // Hidden: Tax
   Wallet,
+  Receipt,
+  PiggyBank,
 } from "lucide-react"
 
 import { NavMain } from "./nav-main"
@@ -35,6 +37,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navMain = [
     { title: t('items.dashboard'), url: "/", icon: Home, isActive: true },
     { title: t('items.accounts'), url: "/accounts", icon: Wallet },
+    { title: t('items.transactions'), url: "/transactions", icon: Receipt },
+    { title: t('items.budget'), url: "/budget", icon: PiggyBank },
     { title: t('items.spending'), url: "/spending", icon: DollarSign },
     { title: t('items.portfolio'), url: "/portfolio", icon: PieChart },
     { title: t('items.forecast'), url: "/forecast", icon: Binoculars },
