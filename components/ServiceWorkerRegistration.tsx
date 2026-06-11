@@ -1,31 +1,37 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Serwist } from '@serwist/window'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 
 export function ServiceWorkerRegistration() {
   const t = useTranslations('pwa')
+  const tRef = useRef(t)
+
+  useEffect(() => {
+    tRef.current = t
+  })
+
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
-    const serwist = new Serwist('/sw.js', { scope: '/' })
+    const sw = new Serwist('/sw.js', { scope: '/' })
 
-    serwist.addEventListener('waiting', () => {
-      toast(t('updateAvailable'), {
+    sw.addEventListener('waiting', () => {
+      toast(tRef.current('updateAvailable'), {
         duration: Infinity,
         action: {
-          label: t('reload'),
+          label: tRef.current('reload'),
           onClick: () => {
-            serwist.addEventListener('controlling', () => window.location.reload())
-            void serwist.messageSkipWaiting()
+            sw.addEventListener('controlling', () => window.location.reload())
+            void sw.messageSkipWaiting()
           },
         },
       })
     })
 
-    void serwist.register()
-  }, [t])
+    void sw.register()
+  }, [])
 
   return null
 }
