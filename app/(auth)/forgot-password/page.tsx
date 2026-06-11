@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createClient } from '@/lib/supabase/client'
+import { getSiteUrl } from '@/lib/utils/site-url'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
 import { Label } from '@/components/ui/atoms/label'
@@ -46,7 +47,7 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/account/reset-password`,
+        redirectTo: `${getSiteUrl()}/auth/callback?next=/account/reset-password`,
       })
 
       if (error) {

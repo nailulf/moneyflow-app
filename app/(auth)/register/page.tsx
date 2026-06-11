@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createClient } from '@/lib/supabase/client'
+import { getSiteUrl } from '@/lib/utils/site-url'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
 import { Label } from '@/components/ui/atoms/label'
@@ -130,7 +131,7 @@ export default function RegisterPage() {
         options: {
           // Point the verification link to our PKCE callback handler so the
           // code can be exchanged for a session and preferences written.
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${getSiteUrl()}/auth/callback`,
           data: {
             full_name: data.fullName,
             role: 'user',

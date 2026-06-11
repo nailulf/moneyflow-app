@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { getSiteUrl } from '@/lib/utils/site-url'
 import { Button } from '@/components/ui/atoms/button'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -50,7 +51,7 @@ export function SocialLoginButtons() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${getSiteUrl()}/auth/callback`,
       },
     })
     if (error) {
