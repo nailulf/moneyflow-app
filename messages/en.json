@@ -418,7 +418,14 @@
       "advice": "Advice",
       "home": "Home",
       "spend": "Spend",
-      "invest": "Invest"
+      "invest": "Invest",
+      "wallets": "Wallets",
+      "budget": "Budget",
+      "transactions": "Transactions",
+      "equity": "Equity",
+      "charts": "Charts",
+      "more": "More",
+      "comingSoon": "Coming soon"
     },
     "topNav": {
       "overview": "Overview",

@@ -418,7 +418,14 @@
       "advice": "Saran",
       "home": "Beranda",
       "spend": "Belanja",
-      "invest": "Investasi"
+      "invest": "Investasi",
+      "wallets": "Dompet",
+      "budget": "Anggaran",
+      "transactions": "Transaksi",
+      "equity": "Ekuitas",
+      "charts": "Grafik",
+      "more": "Lainnya",
+      "comingSoon": "Segera hadir"
     },
     "topNav": {
       "overview": "Ringkasan",
