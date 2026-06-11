@@ -35,6 +35,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/organisms/sidebar"
 import { useAuth } from '@/contexts/AuthContext'
+import { NavMoreItems } from './nav-more-items'
 import { Analytics } from '@/lib/analytics/amplitude'
 import { CategoryManager } from '@/components/CategoryManager'
 import { AccountManager } from '@/components/AccountManager'
@@ -55,6 +56,7 @@ export function NavUser({
   const router = useRouter()
   const locale = useLocale()
   const t = useTranslations('nav')
+  const tItems = useTranslations('navigation.items')
   const [menuOpen, setMenuOpen] = useState(false)
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
   const [accountManagerOpen, setAccountManagerOpen] = useState(false)
@@ -143,6 +145,13 @@ export function NavUser({
                   <Bell />
                   {t('notifications')}
                 </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="px-2 py-1 text-xs font-normal text-muted-foreground">
+                {tItems('more')}
+              </DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <NavMoreItems />
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
