@@ -403,6 +403,20 @@
       "discardDescription": "Are you sure you want to close? Unsaved progress will be lost.",
       "discardCancel": "Cancel",
       "discardConfirm": "Discard"
+    },
+    "screen": {
+      "title": "Transactions",
+      "searchPlaceholder": "Search transactions",
+      "tabs": { "all": "All", "income": "Income", "expense": "Expense", "transfer": "Transfer" },
+      "summary": { "income": "Income", "expense": "Exp" },
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "uncategorized": "Uncategorized",
+      "noAccount": "No account",
+      "empty": "No transactions",
+      "emptyFiltered": "No transactions match your filters",
+      "reset": "Reset",
+      "filter": { "title": "Filters", "categories": "Categories", "accounts": "Accounts", "amountMin": "Min amount", "amountMax": "Max amount", "apply": "Apply", "reset": "Reset" }
     }
   },
   "navigation": {

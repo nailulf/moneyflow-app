@@ -403,6 +403,20 @@
       "discardDescription": "Apakah Anda yakin ingin menutup? Progres yang belum disimpan akan hilang.",
       "discardCancel": "Batal",
       "discardConfirm": "Buang"
+    },
+    "screen": {
+      "title": "Transaksi",
+      "searchPlaceholder": "Cari transaksi",
+      "tabs": { "all": "Semua", "income": "Pemasukan", "expense": "Pengeluaran", "transfer": "Transfer" },
+      "summary": { "income": "Masuk", "expense": "Keluar" },
+      "today": "Hari ini",
+      "yesterday": "Kemarin",
+      "uncategorized": "Tanpa kategori",
+      "noAccount": "Tanpa akun",
+      "empty": "Belum ada transaksi",
+      "emptyFiltered": "Tidak ada transaksi yang cocok dengan filter",
+      "reset": "Atur ulang",
+      "filter": { "title": "Filter", "categories": "Kategori", "accounts": "Akun", "amountMin": "Jumlah min", "amountMax": "Jumlah maks", "apply": "Terapkan", "reset": "Atur ulang" }
     }
   },
   "navigation": {
