@@ -16,8 +16,9 @@ export function filterTransactions(txns: Transaction[], f: TransactionFilters): 
   const q = f.search.trim().toLowerCase()
   return txns.filter((t) => {
     if (f.type !== 'ALL' && t.type !== f.type) return false
-    const d = new Date(t.date)
-    if (d.getFullYear() !== f.month.year || d.getMonth() !== f.month.month) return false
+    const tyear = Number(t.date.slice(0, 4))
+    const tmonth = Number(t.date.slice(5, 7)) - 1 // 0-11, from the YYYY-MM-DD string (timezone-proof)
+    if (tyear !== f.month.year || tmonth !== f.month.month) return false
     if (q) {
       const hay = `${t.merchant ?? ''} ${t.description ?? ''} ${t.notes ?? ''}`.toLowerCase()
       if (!hay.includes(q)) return false
@@ -41,6 +42,10 @@ export interface TransactionGroup {
   items: Transaction[]
 }
 
+/**
+ * Groups transactions by calendar day (YYYY-MM-DD), newest day first.
+ * Within a day, items keep their input order (the caller controls intra-day ordering).
+ */
 export function groupByDate(txns: Transaction[]): TransactionGroup[] {
   const sorted = [...txns].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
   const map = new Map<string, Transaction[]>()
