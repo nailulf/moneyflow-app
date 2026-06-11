@@ -28,8 +28,8 @@ export function MobileBottomNav() {
         href={item.url}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'flex flex-1 items-center justify-center gap-1.5 rounded-full py-2 transition-colors',
-          active ? 'bg-primary/10 text-primary' : 'flex-col gap-0.5 text-muted-foreground'
+          'flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full py-2 transition-colors',
+          active ? 'flex-row gap-1.5 bg-primary/10 text-primary' : 'text-muted-foreground'
         )}
       >
         <item.icon className="h-5 w-5 shrink-0" />
@@ -51,7 +51,7 @@ export function MobileBottomNav() {
           trigger={
             <button
               type="button"
-              aria-label="Add Transaction"
+              aria-label={t('addTransaction')}
               className="mx-1 flex h-14 w-14 shrink-0 -translate-y-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform active:scale-95"
             >
               <Plus className="h-7 w-7" />
