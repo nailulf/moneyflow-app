@@ -15,8 +15,12 @@ const serwist = new Serwist({
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: [
-    // Never cache authenticated/financial API responses.
+    // Never cache authenticated/financial GET /api/* responses (Serwist does not route non-GET).
     { matcher: ({ url }) => url.pathname.startsWith('/api/'), handler: new NetworkOnly() },
+    // Never PERSIST authenticated HTML documents or RSC payloads — prevents serving one user's
+    // cached page to another on a shared device. Offline navigations still fall back to /offline.
+    { matcher: ({ request }) => request.destination === 'document', handler: new NetworkOnly() },
+    { matcher: ({ request }) => request.headers.get('RSC') === '1', handler: new NetworkOnly() },
     ...defaultCache,
   ],
   fallbacks: {
