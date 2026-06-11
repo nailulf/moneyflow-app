@@ -15,6 +15,15 @@ export function ServiceWorkerRegistration() {
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
+
+    // Production-only. In dev the SW intercepts Next's HMR/RSC navigations and causes reload
+    // loops, so we never register it here — and we unregister any worker left over from a prior
+    // prod build or session so it stops controlling the page.
+    if (process.env.NODE_ENV !== 'production') {
+      navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister()))
+      return
+    }
+
     const sw = new Serwist('/sw.js', { scope: '/' })
 
     sw.addEventListener('waiting', () => {
