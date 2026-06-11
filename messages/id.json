@@ -998,5 +998,12 @@
       "columnEndNW": "KB Akhir",
       "retire": "(pensiun)"
     }
+  },
+  "pwa": {
+    "updateAvailable": "Versi baru tersedia",
+    "reload": "Muat ulang",
+    "installTitle": "Instal Teman Tumbuh untuk akses cepat.",
+    "install": "Instal",
+    "dismiss": "Tutup"
   }
 }
