@@ -17,6 +17,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "types": [
+      "@serwist/next/typings"
+    ],
     "plugins": [
       {
         "name": "next"
@@ -38,6 +41,7 @@
   ],
   "exclude": [
     "node_modules",
-    "__tests__/e2e/**"
+    "__tests__/e2e/**",
+    "app/sw.ts"
   ]
 }
