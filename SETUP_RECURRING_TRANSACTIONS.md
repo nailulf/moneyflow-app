@@ -62,12 +62,12 @@ Or simply push a new commit to trigger a deployment.
 
 ### Step 5: Commit and Push the GitHub Actions Workflow
 
-The workflow file has already been created at `.github/workflows/recurring-transactions.yml`.
+The workflow file has already been created at `.github/workflows/recurring-transactions-cron.yml`.
 
 Commit and push these changes:
 
 ```bash
-git add .github/workflows/recurring-transactions.yml
+git add .github/workflows/recurring-transactions-cron.yml
 git add vercel.json
 git commit -m "feat: add GitHub Actions workflow for recurring transactions"
 git push
@@ -112,20 +112,20 @@ To test if recurring transactions are being created:
    - `recurring_frequency`: `daily` (for quick testing)
    - `date`: Today's date
 
-2. Wait for the next scheduled run (midnight UTC) or manually trigger the workflow
+2. Wait for the next scheduled run (02:00 UTC) or manually trigger the workflow
 
 3. Check your transactions to see if a new one was created
 
 ## Scheduled Execution
 
-The workflow is scheduled to run daily at **00:00 UTC (midnight)**.
+The workflow is scheduled to run daily at **02:00 UTC**.
 
-To change the schedule, edit `.github/workflows/recurring-transactions.yml` and modify the cron expression:
+To change the schedule, edit `.github/workflows/recurring-transactions-cron.yml` and modify the cron expression:
 
 ```yaml
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
+    - cron: '0 2 * * *'  # Daily at 02:00 UTC
 ```
 
 Common cron schedules:
@@ -168,7 +168,7 @@ Common cron schedules:
 
 **Check**:
 1. GitHub Actions is enabled in your repository settings
-2. The workflow file is in the correct location: `.github/workflows/recurring-transactions.yml`
+2. The workflow file is in the correct location: `.github/workflows/recurring-transactions-cron.yml`
 3. The YAML syntax is valid
 
 ## Monitoring

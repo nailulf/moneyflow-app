@@ -24,13 +24,13 @@ The system automatically processes recurring transactions and creates new transa
 
 ### 3. Cron Job Configuration
 
-**Schedule**: `0 0 * * *` (Daily at midnight UTC)
-**File**: `.github/workflows/recurring-transactions.yml`
+**Schedule**: `0 2 * * *` (Daily at 02:00 UTC)
+**File**: `.github/workflows/recurring-transactions-cron.yml`
 **Method**: GitHub Actions (free, works on all Vercel plans)
 
 ## How It Works
 
-1. **Daily Trigger**: GitHub Actions workflow calls the API endpoint daily at midnight UTC
+1. **Daily Trigger**: GitHub Actions workflow calls the API endpoint daily at 02:00 UTC
 2. **Transaction Identification**: System finds all recurring transactions that need processing based on their frequency (daily, weekly, monthly, yearly)
 3. **Date Calculation**: Calculates if the transaction should run today based on the original transaction date and frequency
 4. **New Transaction Creation**: Creates a new transaction with the same details but updated date
@@ -64,7 +64,7 @@ In your GitHub repository settings (Settings → Secrets and variables → Actio
 
 ### 4. Enable GitHub Actions
 
-GitHub Actions should be enabled by default. The workflow file at `.github/workflows/recurring-transactions.yml` will run automatically daily at midnight UTC.
+GitHub Actions should be enabled by default. The workflow file at `.github/workflows/recurring-transactions-cron.yml` will run automatically daily at 02:00 UTC.
 
 ### 5. Manual Testing
 
