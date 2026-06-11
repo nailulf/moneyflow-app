@@ -12,4 +12,8 @@ describe('getSiteUrl', () => {
     process.env.NEXT_PUBLIC_SITE_URL = 'https://app.temantumbuh.com/'
     expect(getSiteUrl()).toBe('https://app.temantumbuh.com')
   })
+  it('falls back to window.location.origin when env is unset', () => {
+    delete process.env.NEXT_PUBLIC_SITE_URL
+    expect(getSiteUrl()).toBe(window.location.origin)
+  })
 })
