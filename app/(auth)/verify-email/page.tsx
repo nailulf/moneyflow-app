@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/atoms/button'
 import { createClient } from '@/lib/supabase/client'
+import { getSiteUrl } from '@/lib/utils/site-url'
 import { toast } from 'sonner'
 import { Loader2, Mail, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -41,7 +42,7 @@ function VerifyEmailContent() {
         type: 'signup',
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${getSiteUrl()}/auth/callback`,
         },
       })
 
