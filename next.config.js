@@ -3,6 +3,8 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 const withSerwist = require('@serwist/next').default({
   swSrc: 'app/sw.ts',
   swDest: 'public/sw.js',
+  // Production-only: in `next dev` the SW intercepts HMR/RSC navigations and causes reload loops.
+  disable: process.env.NODE_ENV === 'development',
 })
 
 /** @type {import('next').NextConfig} */
