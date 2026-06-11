@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
+import { InstallPrompt } from '@/components/InstallPrompt'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -46,6 +47,7 @@ export default async function RootLayout({
             <LayoutWrapper>{children}</LayoutWrapper>
           </ErrorBoundary>
           <ServiceWorkerRegistration />
+          <InstallPrompt />
           <SpeedInsights />
           <Analytics />
         </NextIntlClientProvider>
