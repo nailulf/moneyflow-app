@@ -31,6 +31,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
+> **📐 Backend/SSR rebuild blueprint:** For a deep, current map of the backend — full database
+> schema, auth/sessions/RLS, the complete API surface + SSR coupling map, domain logic &
+> business invariants, and jobs/integrations — see [`docs/architecture/`](docs/architecture/README.md).
+> Read it before any backend extraction, shared-mobile-API, or rebuild work.
+
 ### Directory Structure
 
 ```
@@ -74,15 +79,19 @@ All Supabase clients are typed with `Database` type from `types/database.ts`.
 
 ### Database Schema
 
-Core tables:
-- `transactions` - Financial transactions with categorization, recurring support
-- `categories` - User categories (linked to category_groups)
-- `category_groups` - Category groupings (EXPENSE, INCOME, TRANSFER)
-- `budgets` - Budget definitions (monthly/yearly)
-- `budget_categories` - Budget allocations per category
-- `accounts` - User financial accounts
-- `statements` - Uploaded bank statement metadata
-- `user_preferences` - User preference key-value store
+Core tables (full schema, RLS, triggers & invariants in [`docs/architecture/01-data-model.md`](docs/architecture/01-data-model.md)):
+- `transactions` - Financial transactions (categorization, recurring, transfers via `to_account_id`)
+- `categories` / `category_groups` - User categories and their groupings (EXPENSE, INCOME, TRANSFER)
+- `accounts` - Financial accounts & physical assets (BANK, CREDIT_CARD, CASH, INVESTMENT, PROPERTY, VEHICLE, MORTGAGE)
+- `budget_plans` / `budget_plan_categories` - **Current** budget model (one rolling plan per period type)
+- `budget_snapshots` / `budget_snapshot_categories` - Point-in-time budget archives (immutable; INSERT+SELECT only)
+- `budgets` / `budget_categories` - **Legacy** budget tables (still present; superseded by budget plans/snapshots)
+- `statements` - Uploaded bank statement metadata (file bytes are never persisted)
+- `financial_goals` - Per-account savings goals (one per account)
+- `wealth_forecast_scenarios` / `wealth_forecast_events` - Net-worth forecasting inputs
+- `account_balance_adjustments` - Immutable manual balance-correction audit log
+- `user_settings` - **Wide** per-user settings table (replaced the legacy `user_preferences` EAV table in migration 030)
+- `user_onboarding` / `onboarding_events` - Onboarding state and funnel events
 
 ### State Management Architecture
 
@@ -119,21 +128,51 @@ The app uses AI-powered statement parsing:
 
 ### Design System
 
-**Always use the design system CSS variables** defined in `app/globals.css` instead of Tailwind's default sizing utilities. These variables are responsive (mobile → tablet → desktop breakpoints).
+Tokens are defined as HSL CSS variables in `app/globals.css` and exposed as Tailwind utilities in
+`tailwind.config.js`. **Always style with these semantic tokens — never hardcoded Tailwind colors
+(`text-red-600`), hex codes, or arbitrary px.** The font/line-height tokens are responsive
+(mobile → tablet ≥640px → desktop ≥1024px). For frontend work, the **[moneyflow-frontend skill](.claude/skills/moneyflow-frontend/SKILL.md)**
+auto-applies these rules; the exhaustive token dump (dark mode, charts, sidebar) lives in its
+[`references/design-system.md`](.claude/skills/moneyflow-frontend/references/design-system.md).
 
-**Font sizes** — use `text-[length:var(--font-size-*)]` instead of `text-xs`, `text-sm`, etc.:
-- `--font-size-xs` (12px), `--font-size-sm` (14px), `--font-size-md`/`--font-size-lg` (16px)
-- `--font-size-xl` (18px), `--font-size-2xl` (20px), `--font-size-3xl` (24px), `--font-size-4xl` (32px)
+**Brand palette** (hardcoded hex on auth pages via `auth.*` tokens; mirrored by the semantic system):
+`#205781` deep blue (= `primary`) · `#98D2C0` mint (= `accent`) · `#F6F8D5` pale yellow (`auth.card`).
 
-**Line heights** — use `leading-[var(--leading-*)]`:
-- Titles: `--leading-title-1` through `--leading-title-5`
-- Body: `--leading-body-lg`, `--leading-body-sm`
-- Caption: `--leading-caption`
+**Color map** — semantic token (Tailwind class) → `H S% L%` light / dark → use:
 
-**Semantic Color System:**
-- Uses CSS variables (HSL format) defined in `app/globals.css`
-- Tailwind config extends with semantic tokens: `primary`, `secondary`, `destructive`, `success`, `warning`, `muted`, `accent`, `auth.*`
-- Auth pages use dedicated `auth.*` color palette (see `PRODUCT_REQUIREMENTS.md`)
+| Token | Light | Dark | Use (≈hex light) |
+|---|---|---|---|
+| `background` / `foreground` | `0 0% 100%` / `222 84% 4.9%` | inverted | page bg / text (`#FFF` / `#020817`) |
+| `card`, `popover` (+`-foreground`) | = background pair | = background pair | surfaces |
+| `primary` (+`-foreground`) | `206 60% 31.6%` | `161 39% 71%` | brand actions (`#205781`; mint in dark) |
+| `secondary` | `186 33% 46%` | same | muted teal |
+| `accent` | `161 39% 71%` | `206 60% 31.6%` | highlights (`#98D2C0`; blue in dark) |
+| `muted` / `muted-foreground` | `210 40% 96%` / `215 16% 47%` | `217 33% 17.5%` / `215 20% 65%` | subtle bg / secondary text (`#64748B`) |
+| `destructive` | `0 84% 60%` | same | errors/expense (`#EF4444`) |
+| `success` | `142 76% 36%` | `142 71% 45%` | income/positive (`#16A34A`) |
+| `warning` | ⚠ **undefined** | `48 96% 53%` | ⚠ light-mode gap (`#FACC15` dark only) |
+| `border` / `input` / `ring` | `214 32% 91%` / `…` / `206 60% 31.6%` | `217 33% 17.5%` / `…` / `161 39% 71%` | borders/focus (`#E2E8F0`) |
+| `chart-1`…`chart-5` | data-viz palette | separate dark palette | charts: `hsl(var(--chart-N))` |
+
+**Font map** — `text-{token}` (px at mobile / tablet / desktop). Tokens carry **no** bundled
+line-height — always pair with a `leading-*` class:
+
+| Class | Mobile | Tablet | Desktop |  | Class | px |
+|---|---|---|---|---|---|---|
+| `text-xs` | 12 | 12 | 12 |  | `leading-title-1` | 40/48/56 |
+| `text-sm` | 14 | 14 | 14 |  | `leading-title-2` | 32/36/40 |
+| `text-md` | 16 | 16 | 16 |  | `leading-title-3` | 28/30/32 |
+| `text-lg` | 16 | 17 | 18 |  | `leading-title-4`/`-5` | 24/26/28 |
+| `text-xl` | 18 | 20 | 20 |  | `leading-body-lg` | 24 |
+| `text-2xl` | 20 | 22 | 24 |  | `leading-body-sm` | 20 |
+| `text-3xl` | 24 | 28 | 32 |  | `leading-caption` | 20 |
+| `text-4xl` | 32 | 40 | 48 |  | | |
+
+(The `text-[length:var(--font-size-*)]` / `leading-[var(--leading-*)]` arbitrary-value forms are
+equivalent but the utility classes above are the live convention.)
+
+**Other rules:** icons via `lucide-react` (never emojis); hover/active states use semantic tokens
+with opacity (`hover:bg-muted/50`, `hover:bg-destructive/10`); dark mode is `class`-based (`.dark`).
 
 **Component Library:**
 - All UI components in `components/ui/` follow Radix UI patterns
@@ -154,7 +193,7 @@ Transactions support recurring patterns with:
 - `recurring_frequency`: 'daily' | 'weekly' | 'monthly' | 'yearly'
 - `recurring_end_date` and `last_processed_date` fields
 - Processing logic in `lib/recurring-processor.ts`
-- **Automated via GitHub Actions**: `.github/workflows/recurring-transactions.yml` runs daily at midnight UTC
+- **Automated via GitHub Actions**: `.github/workflows/recurring-transactions-cron.yml` runs daily at 02:00 UTC (sibling crons: `budget-snapshots-cron.yml` monthly, `exchange-rate-snapshot-cron.yml` weekly)
 - API endpoint: `POST /api/recurring-transactions` (requires `CRON_SECRET` authorization)
 - See `RECURRING_TRANSACTIONS.md` for detailed setup and troubleshooting
 
