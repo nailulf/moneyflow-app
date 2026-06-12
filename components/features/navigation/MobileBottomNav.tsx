@@ -28,33 +28,35 @@ export function MobileBottomNav() {
         href={item.url}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'flex flex-1 flex-col items-center justify-center gap-0.5 rounded-full py-2 transition-colors',
-          active ? 'flex-row gap-1.5 bg-primary/10 text-primary' : 'text-muted-foreground'
+          'flex flex-col items-center gap-0.5 rounded-[20px] px-3 py-[5px] transition-colors',
+          active ? 'bg-selected text-selected-foreground' : 'text-muted-foreground'
         )}
       >
         <item.icon className="h-5 w-5 shrink-0" />
-        <span className="text-[11px] font-medium leading-none">{item.title}</span>
+        <span className={cn('text-[11px] leading-none', active ? 'font-semibold' : 'font-medium')}>
+          {item.title}
+        </span>
       </Link>
     )
   }
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 px-3 pt-2 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 px-4 md:hidden"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
     >
-      <div className="relative flex items-center justify-between gap-1 rounded-2xl border border-border/40 bg-background/95 px-2 py-1.5 shadow-lg shadow-black/10 backdrop-blur-xl">
+      <div className="flex h-14 items-center justify-between gap-0.5 rounded-[28px] bg-card/95 p-1.5 shadow-floating backdrop-blur-xl">
         {navItems.slice(0, 2).map(renderTab)}
 
-        {/* Center FAB — opens the existing Add-Transaction sheet */}
+        {/* Center add button — sits inside the bar, opens the Add-Transaction sheet */}
         <AddTransactionForm
           trigger={
             <button
               type="button"
               aria-label={t('addTransaction')}
-              className="mx-1 flex h-14 w-14 shrink-0 -translate-y-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform active:scale-95"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95"
             >
-              <Plus className="h-7 w-7" />
+              <Plus className="h-6 w-6" />
             </button>
           }
         />

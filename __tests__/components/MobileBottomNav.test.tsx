@@ -27,4 +27,22 @@ describe('MobileBottomNav', () => {
     expect(screen.getByRole('link', { name: /budget/i })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('link', { name: /home/i })).not.toHaveAttribute('aria-current')
   })
+
+  it('styles the active tab with the selected tint pill', () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/accounts')
+    render(<MobileBottomNav />)
+    const active = screen.getByRole('link', { name: /wallets/i })
+    expect(active.className).toContain('bg-selected')
+    expect(active.className).toContain('text-selected-foreground')
+    const inactive = screen.getByRole('link', { name: /home/i })
+    expect(inactive.className).not.toContain('bg-selected')
+  })
+
+  it('keeps every tab label visible regardless of active state', () => {
+    ;(usePathname as jest.Mock).mockReturnValue('/')
+    render(<MobileBottomNav />)
+    for (const label of ['home', 'wallets', 'budget', 'portfolio']) {
+      expect(screen.getByText(label)).toBeVisible()
+    }
+  })
 })
