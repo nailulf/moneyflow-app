@@ -35,34 +35,34 @@
     --leading-body-sm: 1.25rem;  /* 20px */
     --leading-caption: 1.25rem;  /* 20px */
 
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 213.3 36% 95.1%;
+    --foreground: 222.2 47.4% 11.2%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222.2 47.4% 11.2%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 206 60.2% 31.6%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --primary: 209.7 59.7% 31.2%;
     --primary-foreground: 210 40% 98%;
     --secondary: 186.2 33.1% 46.3%;
     --secondary-foreground: 210 40% 98%;
     --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 161.4 38.7% 71%;
-    --accent-foreground: 206 60.2% 31.6%;
+    --accent-foreground: 209.7 59.7% 31.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --success: 142 76% 36%;
     --success-foreground: 355.7 100% 97.3%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 206 60.2% 31.6%;
+    --ring: 209.7 59.7% 31.2%;
     --radius: 0.5rem;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 206 60.2% 31.6%;
+    --sidebar-primary: 209.7 59.7% 31.2%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 161.4 38.7% 71%;
-    --sidebar-accent-foreground: 206 60.2% 31.6%;
+    --sidebar-accent-foreground: 209.7 59.7% 31.2%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     --chart-1: 212.79, 100%, 66.84%;
@@ -70,6 +70,30 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    /* Mobile visual foundations (design: spending-page.pen, DESIGN SYSTEM frame) */
+    /* Shadows (raw box-shadow values, not HSL triples) */
+    --shadow-card: 0 2px 10px hsl(222 47% 11% / 0.05);
+    --shadow-floating: 0 4px 20px hsl(222 47% 11% / 0.15);
+    /* Selected tint (#EBF3FD on #20507F) */
+    --selected: 213 82% 96%;
+    --selected-foreground: 209.7 59.7% 31.2%;
+    /* Hero gradient palette (#0D253D → #1D5499, 135°) */
+    --hero-from: 210 65% 14.5%;
+    --hero-to: 213 68% 35.7%;
+    --hero-foreground: 0 0% 100%;
+    --hero-muted: 207 51% 83%;          /* #BFD7EA */
+    --hero-success: 142 69% 58%;        /* #4ADE80 */
+    --hero-danger: 351 95% 71%;         /* #FB7185 */
+    --chart-bar: 209 44% 43%;           /* #3D6F9E */
+    /* Category tint pairs (FG on soft BG) */
+    --tint-blue-fg: 209.7 59.7% 31.2%;  --tint-blue-bg: 213 82% 96%;
+    --tint-green-fg: 142 76% 36%;       --tint-green-bg: 138 76% 97%;
+    --tint-orange-fg: 21 90% 48%;       --tint-orange-bg: 33 100% 96%;
+    --tint-pink-fg: 333 71% 51%;        --tint-pink-bg: 327 73% 97%;
+    --tint-teal-fg: 163 51% 36%;        --tint-teal-bg: 159 44% 94%;
+    --tint-purple-fg: 256 49% 54%;      --tint-purple-bg: 257 64% 96%;
+    --tint-slate-fg: 215 16% 47%;       --tint-slate-bg: 210 40% 96%;
+    --tint-amber-fg: 38 92% 50%;        --tint-amber-bg: 45 90% 96%;
   }
 
   .dark {
@@ -80,12 +104,12 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
     --primary: 161.4 38.7% 71%;
-    --primary-foreground: 206 60.2% 31.6%;
+    --primary-foreground: 209.7 59.7% 31.2%;
     --secondary: 186.2 33.1% 46.3%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 206 60.2% 31.6%;
+    --accent: 209.7 59.7% 31.2%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -99,8 +123,8 @@
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 161.4 38.7% 71%;
-    --sidebar-primary-foreground: 206 60.2% 31.6%;
-    --sidebar-accent: 206 60.2% 31.6%;
+    --sidebar-primary-foreground: 209.7 59.7% 31.2%;
+    --sidebar-accent: 209.7 59.7% 31.2%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
@@ -109,6 +133,26 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    /* Mobile visual foundations — dark */
+    --shadow-card: 0 0 0 1px hsl(217 33% 17.5%);          /* border-ring instead of drop shadow */
+    --shadow-floating: 0 4px 20px hsl(0 0% 0% / 0.5);
+    --selected: 213 50% 16%;
+    --selected-foreground: 161.4 38.7% 71%;                /* = dark primary (mint) */
+    --hero-from: 210 65% 14.5%;                            /* navy hero unchanged in dark */
+    --hero-to: 213 68% 35.7%;
+    --hero-foreground: 0 0% 100%;
+    --hero-muted: 207 51% 83%;
+    --hero-success: 142 69% 58%;
+    --hero-danger: 351 95% 71%;
+    --chart-bar: 209 50% 60%;
+    --tint-blue-fg: 210 60% 72%;    --tint-blue-bg: 213 45% 16%;
+    --tint-green-fg: 142 60% 65%;   --tint-green-bg: 142 40% 14%;
+    --tint-orange-fg: 21 90% 65%;   --tint-orange-bg: 21 50% 14%;
+    --tint-pink-fg: 333 70% 70%;    --tint-pink-bg: 333 40% 15%;
+    --tint-teal-fg: 163 45% 62%;    --tint-teal-bg: 163 35% 13%;
+    --tint-purple-fg: 256 55% 75%;  --tint-purple-bg: 256 35% 17%;
+    --tint-slate-fg: 215 20% 65%;   --tint-slate-bg: 217 33% 17.5%;
+    --tint-amber-fg: 38 92% 60%;    --tint-amber-bg: 38 50% 14%;
   }
 
   /* =============================================
