@@ -40,6 +40,17 @@ import BudgetCreatePage from '@/app/budget/create/page'
 describe('BudgetCreatePage (monthly)', () => {
   beforeEach(() => jest.clearAllMocks())
 
+  it('disables preview CTA when category is added with amount 0', async () => {
+    render(<BudgetCreatePage />)
+    // advance past entry step
+    fireEvent.click(screen.getByRole('button', { name: /next/ }))
+    // open picker and add a category (amount stays 0)
+    fireEvent.click(await screen.findByRole('button', { name: /amounts\.addCategory/ }))
+    fireEvent.click(await screen.findByRole('button', { name: /Food & Dining/ }))
+    // amount is 0 → preview CTA must be disabled
+    expect(screen.getByRole('button', { name: /amounts\.preview/ })).toBeDisabled()
+  })
+
   it('walks entry → amounts → preview → submits the plan → created', async () => {
     createBudgetPlan.mockResolvedValue({ id: 'p1' })
     render(<BudgetCreatePage />)

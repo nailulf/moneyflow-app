@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import { TriangleAlert, ArrowRight } from 'lucide-react'
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/organisms/sheet'
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/organisms/sheet'
 import { formatCurrencyCompact } from '@/lib/data-utils'
 import type { PlanDiffRow } from '@/lib/budget-screen-utils'
 
@@ -42,7 +42,7 @@ export function ConfirmChangesSheet({ open, diff, currency, pending, onApply, on
               </li>
             ))}
           </ul>
-          <p className="rounded-xl bg-tint-amber-bg p-3 text-xs leading-caption text-tint-amber-fg">{t('confirm.effect')}</p>
+          <SheetDescription className="rounded-xl bg-tint-amber-bg p-3 text-xs leading-caption text-tint-amber-fg">{t('confirm.effect')}</SheetDescription>
           <div className="flex gap-2">
             <button type="button" onClick={onCancel}
               className="h-[52px] flex-1 rounded-[14px] bg-muted text-md leading-body-lg font-semibold text-foreground">

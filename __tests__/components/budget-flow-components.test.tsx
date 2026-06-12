@@ -32,7 +32,7 @@ describe('BudgetAmountsEditor', () => {
     const onAmountChange = jest.fn()
     render(
       <BudgetAmountsEditor
-        rows={rows as never}
+        rows={rows}
         suggestions={new Map([['c1', 575_000]])}
         suggestionsOn
         onToggleSuggestions={() => {}}

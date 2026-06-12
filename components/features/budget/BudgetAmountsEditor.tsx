@@ -6,11 +6,16 @@ import { Plus, X } from 'lucide-react'
 import { Switch } from '@/components/ui/atoms/switch'
 import { getCategoryIcon, getCategoryTint } from '@/lib/category-style'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/data-utils'
-import type { BudgetCategoryAllocation } from '@/lib/budget-allocation'
 import { cn } from '@/lib/utils'
 
+interface EditorRow {
+  category_id: string
+  category_name: string
+  allocated_amount: number
+}
+
 interface BudgetAmountsEditorProps {
-  rows: BudgetCategoryAllocation[]
+  rows: EditorRow[]
   suggestions: Map<string, number>
   suggestionsOn: boolean
   onToggleSuggestions: (on: boolean) => void
@@ -43,7 +48,7 @@ export function BudgetAmountsEditor({
               </span>
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate text-sm leading-body-sm font-semibold text-foreground">{row.category_name}</span>
-                {suggestion !== undefined && (
+                {suggestionsOn && suggestion !== undefined && (
                   <span className="text-tiny text-muted-foreground">
                     {t('amounts.suggested', { amount: formatCurrencyCompact(suggestion, currency) })}
                   </span>
