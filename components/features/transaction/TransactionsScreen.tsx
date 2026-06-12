@@ -6,8 +6,9 @@ import { useTranslations } from 'next-intl'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
-import { useAllTransactions } from '@/hooks/useTransactionsQuery'
+import { useAllTransactions, useTransactionMutations } from '@/hooks/useTransactionsQuery'
 import { EditTransactionForm } from '@/components/features/transaction/EditTransactionForm'
+import type { TransactionFormData } from '@/lib/validations'
 import { Input } from '@/components/ui/atoms/input'
 import type { Transaction } from '@/types/database'
 import { filterTransactions, groupByDate, summarize, type TransactionFilters } from '@/lib/transaction-filters'
@@ -25,6 +26,7 @@ export function TransactionsScreen() {
   const t = useTranslations('transactions.screen')
   const { user } = useAuth()
   const { transactions, isLoading } = useAllTransactions({ userId: user?.id ?? '' })
+  const { update } = useTransactionMutations(user?.id ?? '')
   const { categories, getCategoryName, getCategoryColor } = useCategories()
   const { accounts } = useAccounts()
 
@@ -35,6 +37,11 @@ export function TransactionsScreen() {
   const [showSearch, setShowSearch] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
   const [editing, setEditing] = useState<Transaction | null>(null)
+
+  const handleTransactionUpdated = async (id: string, data: Partial<TransactionFormData>) => {
+    await update({ id, data })
+    setEditing(null)
+  }
 
   const filtered = useMemo(() => filterTransactions(transactions, filters), [transactions, filters])
   const groups = useMemo(() => groupByDate(filtered), [filtered])
@@ -50,7 +57,7 @@ export function TransactionsScreen() {
       <header className="flex items-center justify-between">
         <h1 className="text-2xl leading-title-3 font-bold text-foreground">{t('title')}</h1>
         <div className="flex items-center gap-1">
-          <button type="button" aria-label={t('searchPlaceholder')} onClick={() => setShowSearch((s) => !s)} className="rounded-full p-2 text-muted-foreground hover:bg-muted"><Search className="size-5" /></button>
+          <button type="button" aria-label={t('searchPlaceholder')} onClick={() => setShowSearch((s) => { if (s) setFilters((f) => ({ ...f, search: '' })); return !s })} className="rounded-full p-2 text-muted-foreground hover:bg-muted"><Search className="size-5" /></button>
           <button type="button" aria-label={t('filter.title')} onClick={() => setFilterOpen(true)} className="relative rounded-full p-2 text-muted-foreground hover:bg-muted">
             <SlidersHorizontal className="size-5" />
             {activeFilterCount > 0 && <span className="absolute right-1 top-1 size-2 rounded-full bg-primary" />}
@@ -86,7 +93,7 @@ export function TransactionsScreen() {
         onApply={(next) => setFilters((f) => ({ ...f, ...next }))}
       />
 
-      <EditTransactionForm transaction={editing} open={editing != null} onOpenChange={(o) => { if (!o) setEditing(null) }} />
+      <EditTransactionForm transaction={editing} open={editing != null} onOpenChange={(o) => { if (!o) setEditing(null) }} onTransactionUpdated={handleTransactionUpdated} />
     </div>
   )
 }
