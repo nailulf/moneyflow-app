@@ -134,7 +134,7 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     /* Mobile visual foundations — dark */
-    --shadow-card: 0 0 0 1px hsl(217 33% 17.5%);          /* border-ring instead of drop shadow */
+    --shadow-card: 0 0 0 1px hsl(var(--border));          /* border-ring instead of drop shadow */
     --shadow-floating: 0 4px 20px hsl(0 0% 0% / 0.5);
     --selected: 213 50% 16%;
     --selected-foreground: 161.4 38.7% 71%;                /* = dark primary (mint) */
