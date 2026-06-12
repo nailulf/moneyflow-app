@@ -53,6 +53,7 @@ export function BudgetCard({ monthLabel, spent, total, currency }: BudgetCardPro
               </span>
             </p>
             <div className="mt-2.5 h-3 overflow-hidden rounded-md bg-border" role="progressbar"
+              aria-label={t('budget.used', { pct })}
               aria-valuenow={Math.min(pct, 100)} aria-valuemin={0} aria-valuemax={100}>
               <div
                 className={cn('h-full rounded-md', over ? 'bg-destructive' : 'bg-primary')}
