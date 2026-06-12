@@ -590,9 +590,10 @@
           "label": "Mortgage / KPR",
           "description": "Home loan or mortgage"
         },
+        "DIGITAL_WALLET": { "label": "Digital Wallet", "description": "GoPay, OVO, Dana, etc." },
         "OTHER": {
-          "label": "E-Wallet / Other",
-          "description": "GoPay, OVO, Dana, etc."
+          "label": "Other",
+          "description": "Anything else"
         }
       },
       "assetDetails": {
@@ -695,7 +696,7 @@
       "other": "Other",
       "property": "Property",
       "vehicle": "Vehicle",
-      "mortgage": "Mortgage / KPR"
+      "mortgage": "Mortgage / KPR", "digitalWallet": "Digital Wallet"
     },
     "groups": {
       "savingsInvestment": "Savings & Investment",

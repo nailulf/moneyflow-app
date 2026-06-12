@@ -590,9 +590,10 @@
           "label": "KPR / Kredit Properti",
           "description": "Cicilan rumah atau KPR"
         },
+        "DIGITAL_WALLET": { "label": "Dompet Digital", "description": "GoPay, OVO, Dana, dll." },
         "OTHER": {
-          "label": "E-Wallet / Lainnya",
-          "description": "GoPay, OVO, Dana, dll."
+          "label": "Lainnya",
+          "description": "Akun lainnya"
         }
       },
       "assetDetails": {
@@ -695,7 +696,7 @@
       "other": "Lainnya",
       "property": "Properti",
       "vehicle": "Kendaraan",
-      "mortgage": "KPR / Kredit Properti"
+      "mortgage": "KPR / Kredit Properti", "digitalWallet": "Dompet Digital"
     },
     "groups": {
       "savingsInvestment": "Tabungan & Investasi",

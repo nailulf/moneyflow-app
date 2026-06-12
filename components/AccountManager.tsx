@@ -644,6 +644,7 @@ function AccountManagerInternal({
             <option value="credit_card">{t('accountTypes.creditCard')}</option>
             <option value="cash">{t('accountTypes.cash')}</option>
             <option value="investment">{t('accountTypes.investment')}</option>
+            <option value="digital_wallet">{t('accountTypes.digitalWallet')}</option>
             <option value="property">{t('accountTypes.property')}</option>
             <option value="vehicle">{t('accountTypes.vehicle')}</option>
             <option value="mortgage">{t('accountTypes.mortgage')}</option>
@@ -732,6 +733,7 @@ function AccountManagerInternal({
             <option value="credit_card">{t('accountTypes.creditCard')}</option>
             <option value="cash">{t('accountTypes.cash')}</option>
             <option value="investment">{t('accountTypes.investment')}</option>
+            <option value="digital_wallet">{t('accountTypes.digitalWallet')}</option>
             <option value="property">{t('accountTypes.property')}</option>
             <option value="vehicle">{t('accountTypes.vehicle')}</option>
             <option value="mortgage">{t('accountTypes.mortgage')}</option>
