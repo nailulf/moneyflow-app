@@ -159,7 +159,7 @@ export interface Database {
           id: string
           user_id: string
           name: string
-          type: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
+          type: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance: number
           currency: string
           is_default: boolean
@@ -170,6 +170,16 @@ export interface Database {
           depreciation_rate: number | null
           monthly_payment: number | null
           mortgage_end_date: string | null
+          purchase_date: string | null
+          credit_limit: number | null
+          statement_day: number | null
+          due_day: number | null
+          vehicle_type: 'CAR' | 'MOTORCYCLE' | 'TRUCK' | null
+          broker: string | null
+          interest_rate: number | null
+          loan_term_months: number | null
+          down_payment: number | null
+          investment_goal: string | null
           created_at: string
           updated_at: string
         }
@@ -177,7 +187,7 @@ export interface Database {
           id?: string
           user_id: string
           name: string
-          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
+          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance?: number
           currency?: string
           is_default?: boolean
@@ -188,6 +198,16 @@ export interface Database {
           depreciation_rate?: number | null
           monthly_payment?: number | null
           mortgage_end_date?: string | null
+          purchase_date?: string | null
+          credit_limit?: number | null
+          statement_day?: number | null
+          due_day?: number | null
+          vehicle_type?: 'CAR' | 'MOTORCYCLE' | 'TRUCK' | null
+          broker?: string | null
+          interest_rate?: number | null
+          loan_term_months?: number | null
+          down_payment?: number | null
+          investment_goal?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -195,7 +215,7 @@ export interface Database {
           id?: string
           user_id?: string
           name?: string
-          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
+          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance?: number
           currency?: string
           is_default?: boolean
@@ -206,6 +226,16 @@ export interface Database {
           depreciation_rate?: number | null
           monthly_payment?: number | null
           mortgage_end_date?: string | null
+          purchase_date?: string | null
+          credit_limit?: number | null
+          statement_day?: number | null
+          due_day?: number | null
+          vehicle_type?: 'CAR' | 'MOTORCYCLE' | 'TRUCK' | null
+          broker?: string | null
+          interest_rate?: number | null
+          loan_term_months?: number | null
+          down_payment?: number | null
+          investment_goal?: string | null
           updated_at?: string
         }
       }

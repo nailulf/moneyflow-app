@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/atoms/button'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
 import { Input } from '@/components/ui/atoms/input'
-import { Plus, CreditCard, Search, Loader2, Trash2, Edit, ArrowLeft, Building2, Wallet, TrendingUp, Home, Car, Landmark } from 'lucide-react'
+import { Plus, CreditCard, Search, Loader2, Trash2, Edit, ArrowLeft, Building2, Wallet, TrendingUp, Home, Car, Landmark, Smartphone } from 'lucide-react'
 import { AccountDB } from '@/types/database'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -15,7 +15,7 @@ import { Analytics } from '@/lib/analytics/amplitude'
 import { useIsMobile } from '@/hooks/use-mobile'
 
 type Mode = 'list' | 'create' | 'edit' | 'delete'
-type AccountType = 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
+type AccountType = 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
 type PropertyType = 'HOUSE' | 'APARTMENT' | 'LAND'
 
 const ASSET_TYPES: AccountType[] = ['PROPERTY', 'VEHICLE', 'MORTGAGE']
@@ -29,6 +29,7 @@ const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   VEHICLE: Car,
   MORTGAGE: Landmark,
   OTHER: CreditCard,
+  DIGITAL_WALLET: Smartphone,
 }
 
 type AccountGroup = { labelKey: string; types: AccountType[] }
@@ -36,7 +37,7 @@ const ACCOUNT_GROUPS: AccountGroup[] = [
   { labelKey: 'groups.savingsInvestment', types: ['BANK', 'INVESTMENT'] },
   { labelKey: 'groups.assets',            types: ['PROPERTY', 'VEHICLE'] },
   { labelKey: 'groups.liabilities',       types: ['MORTGAGE'] },
-  { labelKey: 'groups.other',             types: ['CASH', 'CREDIT_CARD', 'OTHER'] },
+  { labelKey: 'groups.other',             types: ['CASH', 'CREDIT_CARD', 'OTHER', 'DIGITAL_WALLET'] },
 ]
 
 const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -84,7 +85,7 @@ function AccountManagerInternal({
     if (isOpen && defaultMode) {
       if (defaultMode === 'create') openCreateMode()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [isOpen])
   const [searchTerm, setSearchTerm] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -160,6 +161,16 @@ function AccountManagerInternal({
         depreciation_rate: null,
         monthly_payment: null,
         mortgage_end_date: null,
+        purchase_date: null,
+        credit_limit: null,
+        statement_day: null,
+        due_day: null,
+        vehicle_type: null,
+        broker: null,
+        interest_rate: null,
+        loan_term_months: null,
+        down_payment: null,
+        investment_goal: null,
         ...assetFields,
       })
       Analytics.track('Account Created', {

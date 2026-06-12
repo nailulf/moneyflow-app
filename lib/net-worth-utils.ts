@@ -135,6 +135,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
   const accountGroups: { [key: string]: AccountWithBalance[] } = {
     CASH: [],
     BANK: [],
+    DIGITAL_WALLET: [],
     INVESTMENT: [],
     PROPERTY: [],
     VEHICLE: [],
@@ -183,6 +184,22 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
         ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
         : 0,
       color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
+    })
+  }
+
+  // Digital wallets
+  if (accountGroups.DIGITAL_WALLET.length > 0) {
+    const totalRaw = accountGroups.DIGITAL_WALLET.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const isLiability = totalRaw < 0
+    const total = isLiability ? -Math.abs(totalRaw) : totalRaw
+    categories.push({
+      name: 'Digital Wallets',
+      accounts: accountGroups.DIGITAL_WALLET,
+      total,
+      percentage: totalNetWorth > 0
+        ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
+        : 0,
+      color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--success))'
     })
   }
 
