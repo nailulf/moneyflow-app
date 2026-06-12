@@ -1158,6 +1158,52 @@
     },
     "empty": "Belum ada akun — tambahkan yang pertama."
   },
+  "budgetCreate": {
+    "createTitle": "Buat Anggaran",
+    "editTitle": "Ubah Anggaran",
+    "stepOf": "{step} dari {total}",
+    "periodType": { "monthly": "Bulanan", "monthlyHint": "Atur batas per kategori tiap bulan", "yearly": "Tahunan", "yearlyHint": "Rencanakan pengeluaran besar tahunan" },
+    "income": "Pemasukan periode ini: {amount}",
+    "startFrom": {
+      "title": "Mulai dari",
+      "copy": "Salin dari periode lalu",
+      "copyHint": "Belum ada anggaran sebelumnya",
+      "template": "Pakai template",
+      "templateHint": "50/30/20, Konservatif, Seimbang",
+      "scratch": "Mulai dari awal",
+      "scratchHint": "Atur tiap kategori manual"
+    },
+    "next": "Atur Jumlah Kategori",
+    "amounts": {
+      "suggestToggle": "Jumlah yang disarankan",
+      "suggested": "Saran {amount}",
+      "addCategory": "Tambah kategori lain",
+      "remove": "Hapus {name}",
+      "total": "Total anggaran",
+      "pickCategory": "Tambah kategori",
+      "preview": "Pratinjau Anggaran"
+    },
+    "preview": {
+      "income": "Pemasukan",
+      "budgeted": "Dianggarkan",
+      "savings": "Tabungan",
+      "breakdown": "Rincian kategori",
+      "ofIncome": "{pct}% dari pemasukan",
+      "save": "Simpan Anggaran"
+    },
+    "created": { "title": "Anggaran dibuat!", "cta": "Kembali ke Anggaran" },
+    "confirm": {
+      "title": "Terapkan perubahan anggaran?",
+      "effect": "Perubahan langsung berlaku untuk periode ini. Bulan-bulan sebelumnya tidak terpengaruh.",
+      "cancel": "Batal",
+      "apply": "Terapkan"
+    },
+    "applyChanges": "Terapkan Perubahan",
+    "noChanges": "Belum ada perubahan",
+    "monthlyLabel": "{month} · Anggaran Bulanan",
+    "yearlyLabel": "{year} · Anggaran Tahunan",
+    "errors": { "loadFailed": "Gagal memuat. Coba lagi.", "saveFailed": "Gagal menyimpan anggaran. Coba lagi.", "totalRequired": "Alokasikan minimal satu kategori" }
+  },
   "budgetTab": {
     "error": "Gagal memuat anggaran periode ini. Coba lagi.",
     "retry": "Coba lagi",

@@ -11,8 +11,8 @@ export function MobileBottomNav() {
   const pathname = usePathname()
   const t = useTranslations('navigation.items')
 
-  // Full-screen flows draw without the tab bar (design 08*).
-  if (pathname.startsWith('/accounts/new')) return null
+  // Full-screen flows draw without the tab bar (design 08*, budget 2a–2d).
+  if (pathname.startsWith('/accounts/new') || pathname.startsWith('/budget/create') || pathname.startsWith('/budget/edit')) return null
 
   const navItems = [
     { title: t('home'), url: '/', icon: Home },
