@@ -42,6 +42,22 @@ describe('propertySchema', () => {
     expect(r.success).toBe(false)
     if (!r.success) expect(r.error.issues.map((i) => i.message)).toContain('downPaymentTooLarge')
   })
+  it('rejects fractional loan terms with the i18n key', () => {
+    const r = propertySchema.safeParse({
+      ...base, hasMortgage: true,
+      downPayment: '250000000', interestRate: '7.5', monthlyPayment: '5000000', loanTermYears: '7.4',
+    })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.error.issues.map((i) => i.message)).toContain('termInvalid')
+  })
+  it('rejects negative down payments with the i18n key', () => {
+    const r = propertySchema.safeParse({
+      ...base, hasMortgage: true,
+      downPayment: '-1000000', interestRate: '7.5', monthlyPayment: '5000000', loanTermYears: '15',
+    })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(r.error.issues.map((i) => i.message)).toContain('amountInvalid')
+  })
   it('accepts a full mortgage block', () => {
     const r = propertySchema.safeParse({
       ...base, hasMortgage: true,

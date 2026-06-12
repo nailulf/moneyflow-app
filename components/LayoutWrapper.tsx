@@ -23,6 +23,7 @@ import { Loader2 } from 'lucide-react'
 import { MobileScreenHeader } from '@/components/features/navigation/MobileScreenHeader'
 import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'
 import { useLocale, useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
 import { preferences } from '@/lib/api/user-preferences'
 import { setLocaleCookie } from '@/lib/actions/locale'
 import { Analytics } from '@/lib/analytics/amplitude'
@@ -100,6 +101,9 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   // own their headers; this list shrinks the interim LayoutWrapper fallback).
   const ownsMobileHeader = pathname === '/' || pathname.startsWith('/transactions') || pathname.startsWith('/accounts')
 
+  // MobileBottomNav hides itself on these routes — drop its clearance padding too.
+  const hidesBottomNav = pathname.startsWith('/accounts/new')
+
   const navUserData = {
     name: user.user_metadata.full_name || user.email?.split('@')[0] || 'User',
     email: user.email || '',
@@ -129,7 +133,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
             </div>
           </header>
           {!ownsMobileHeader && <MobileScreenHeader title={pageTitle} user={navUserData} />}
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0 pb-28 md:pb-4">
+          <div className={cn('flex flex-1 flex-col gap-4 p-4 pt-0 md:pb-4', hidesBottomNav ? 'pb-4' : 'pb-28')}>
             <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
               {children}
             </div>
