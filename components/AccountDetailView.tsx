@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecu
 import { Button } from '@/components/ui/atoms/button'
 import { AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts'
 import { ChartContainer } from '@/components/ui/organisms/chart'
-import { ArrowLeft, CreditCard, Wallet, TrendingUp, Building2, Loader2, Edit, Trash2, Download, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, CreditCard, Wallet, TrendingUp, Building2, Loader2, Edit, Trash2, Download, SlidersHorizontal , Smartphone } from 'lucide-react'
 import { useAccounts, AccountWithHistory } from '@/contexts/AccountContext'
 import { formatCurrency, parseCurrencyAmount } from '@/lib/data-utils'
 import { GoalSection } from '@/components/features/goals'
@@ -56,6 +56,7 @@ const ACCOUNT_TYPE_OPTIONS = [
   { value: 'CREDIT_CARD', label: 'Credit Card' },
   { value: 'CASH', label: 'Cash' },
   { value: 'INVESTMENT', label: 'Investment' },
+  { value: 'DIGITAL_WALLET', label: 'Digital Wallet' },
   { value: 'PROPERTY', label: 'Property' },
   { value: 'VEHICLE', label: 'Vehicle' },
   { value: 'MORTGAGE', label: 'Mortgage / KPR' },
@@ -67,6 +68,7 @@ const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   CREDIT_CARD: CreditCard,
   CASH: Wallet,
   INVESTMENT: TrendingUp,
+  DIGITAL_WALLET: Smartphone,
   OTHER: CreditCard
 }
 
