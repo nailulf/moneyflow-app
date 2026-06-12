@@ -113,7 +113,9 @@ export function MobileHome() {
     [transactions, year, month, getCategoryName]
   )
 
-  const baseCurrency = accounts[0]?.currency ?? 'IDR'
+  // Net-worth figures are base-converted by the API — format them in that base currency
+  // (mirrors NetWorthOverview), falling back to the first account's currency.
+  const baseCurrency = netWorth?.accounts?.[0]?.baseCurrency ?? accounts[0]?.currency ?? 'IDR'
   const todayLabel = now.toLocaleDateString(locale, { weekday: undefined, month: 'short', day: 'numeric' })
 
   return (
