@@ -164,7 +164,7 @@ Star — see the Deltas table there before hardcoding anything.
 | `warning` | ⚠ **undefined** | `48 96% 53%` | ⚠ light-mode gap (`#FACC15` dark only) |
 | `border` / `input` / `ring` | `214 32% 91%` / `…` / `209.7 59.7% 31.2%` | `217 33% 17.5%` / `…` / `161 39% 71%` | borders/focus (`#E2E8F0`) |
 | `chart-1`…`chart-5` | data-viz palette | separate dark palette | charts: `hsl(var(--chart-N))` |
-| `selected` (+`-foreground`) | `213 82% 96%` / primary | `213 50% 16%` / accent | selected states, active tab pill (`#EBF3FD`) |
+| `selected` (+`-foreground`) | `213 82% 96%` / primary | `213 50% 16%` / primary (mint) | selected states, active tab pill (`#EBF3FD`) |
 | `hero-*` (`bg-hero-gradient`) | navy `210 65% 15%`→`213 68% 36%`, fg white, muted `#BFD7EA`, success/danger bright | same | navy hero cards/headers |
 | `chart-bar` | `209 44% 43%` | `209 50% 60%` | bar fills in hero charts (`#3D6F9E`) |
 | `tint-{color}-fg/bg` ×8 | category tint pairs | dark equivalents | category icon circles via `getCategoryTint` |
