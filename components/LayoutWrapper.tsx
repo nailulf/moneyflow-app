@@ -19,8 +19,8 @@ import { TransactionProvider } from '@/contexts/TransactionContext'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { OnboardingModal } from '@/components/features/onboarding/OnboardingModal'
-import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
+import { MobileScreenHeader } from '@/components/features/navigation/MobileScreenHeader'
 import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'
 import { useLocale, useTranslations } from 'next-intl'
 import { preferences } from '@/lib/api/user-preferences'
@@ -84,12 +84,25 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     pathname === '/accounts' || pathname.startsWith('/accounts') ? t('accounts') :
     pathname === '/portfolio' || pathname.startsWith('/portfolio') ? t('portfolio') :
     pathname === '/forecast' || pathname.startsWith('/forecast') ? t('forecast') :
+    pathname.startsWith('/budget') ? t('budget') :
+    pathname.startsWith('/transactions') ? t('transactions') :
+    pathname.startsWith('/charts') ? t('charts') :
     pathname === '/invest' ? t('invest') :
     pathname === '/advice' ? t('advice') :
     pathname === '/tax' ? t('tax') :
     pathname === '/equity' ? t('equity') :
     pathname === '/estate-planning' ? t('estatePlanning') :
     t('dashboard')
+
+  // Screens that render their own mobile header (spec sub-project 1: screens
+  // own their headers; this list shrinks the interim LayoutWrapper fallback).
+  const ownsMobileHeader = pathname.startsWith('/transactions')
+
+  const navUserData = {
+    name: user.user_metadata.full_name || user.email?.split('@')[0] || 'User',
+    email: user.email || '',
+    avatar: user.user_metadata.avatar_url || '/avatars/01.svg',
+  }
 
   return (
     <SidebarProvider>
@@ -100,28 +113,20 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
               <OnboardingModal />
               <AppSidebar className="hidden md:flex" />
               <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-            <div className="flex items-center gap-2 px-4 md:hidden">
-              <div className="flex aspect-square size-7 items-center justify-center rounded-md overflow-hidden">
-                <Image src="/icons/icon_.png" alt="Teman Tumbuh" width={28} height={28} className="object-contain" />
-              </div>
-            </div>
-            <div className="hidden md:flex items-center gap-2 px-4">
+          <header className="hidden h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:flex">
+            <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator
                 orientation="vertical"
                 className="mr-2 data-[orientation=vertical]:h-4"
               />
             </div>
-            <h1 className="text-xl font-semibold md:pl-0">{pageTitle}</h1>
+            <h1 className="text-xl font-semibold">{pageTitle}</h1>
             <div className="ml-auto px-4">
-              <NavUser user={{
-                name: user.user_metadata.full_name || user.email?.split('@')[0] || "User",
-                email: user.email || "",
-                avatar: user.user_metadata.avatar_url || "/avatars/01.svg"
-              }} />
+              <NavUser user={navUserData} />
             </div>
           </header>
+          {!ownsMobileHeader && <MobileScreenHeader title={pageTitle} user={navUserData} />}
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0 pb-28 md:pb-4">
             <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
               {children}
