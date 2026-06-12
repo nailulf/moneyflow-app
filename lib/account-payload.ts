@@ -1,3 +1,5 @@
+import { SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
+
 const ACCOUNT_TYPES = [
   'BANK', 'CREDIT_CARD', 'CASH', 'INVESTMENT', 'OTHER',
   'PROPERTY', 'VEHICLE', 'MORTGAGE', 'DIGITAL_WALLET',
@@ -84,7 +86,7 @@ export function sanitizeAccountPayload(body: Record<string, unknown>): AccountPa
         name,
         type,
         balance: balanceRaw,
-        currency: str(body.currency) ?? 'IDR',
+        currency: oneOf(body.currency, SUPPORTED_CURRENCIES, 'currency') ?? 'IDR',
         is_default: body.is_default === true,
         description: str(body.description),
         property_type: oneOf(body.property_type, PROPERTY_TYPES, 'property_type'),

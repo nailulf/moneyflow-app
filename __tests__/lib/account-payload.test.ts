@@ -50,6 +50,20 @@ describe('sanitizeAccountPayload', () => {
     })
   })
 
+  it('pins boundary coercions: string balance, NaN balance, string is_default, currency casing', () => {
+    expect(sanitizeAccountPayload({ ...base, balance: '1000' })).toMatchObject({
+      ok: true, data: expect.objectContaining({ balance: 1000 }),
+    })
+    expect(sanitizeAccountPayload({ ...base, balance: 'abc' }).ok).toBe(false)
+    expect(sanitizeAccountPayload({ ...base, is_default: 'true' })).toMatchObject({
+      ok: true, data: expect.objectContaining({ is_default: false }),
+    })
+    expect(sanitizeAccountPayload({ ...base, currency: 'idr' })).toMatchObject({
+      ok: true, data: expect.objectContaining({ currency: 'IDR' }),
+    })
+    expect(sanitizeAccountPayload({ ...base, currency: 'XYZ' }).ok).toBe(false)
+  })
+
   it('passes through legacy asset fields and trims strings', () => {
     const r = sanitizeAccountPayload({
       ...base, name: '  House — Depok  ', property_type: 'HOUSE',
