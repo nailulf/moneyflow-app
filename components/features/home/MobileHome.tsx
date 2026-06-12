@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTransactions } from '@/contexts/TransactionContext'
@@ -9,7 +9,7 @@ import { useAccounts } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useBudgetSnapshot } from '@/hooks/useBudgetSnapshot'
 import { useGoalsSummary } from '@/hooks/useGoalsQuery'
-import { fetchNetWorthData, getNetWorthChange } from '@/lib/net-worth-utils'
+import { fetchNetWorthData } from '@/lib/net-worth-utils'
 import {
   getGreetingKey, summarizeToday, topExpenses, monthlySpending,
   monthlyNetWorthPoints, splitAccounts, upcomingRecurring,
@@ -31,8 +31,9 @@ const TOP_EXPENSES = 3
 
 export function MobileHome() {
   const locale = useLocale()
+  const t = useTranslations('home')
   const { user } = useAuth()
-  const { transactions } = useTransactions()
+  const { transactions, loading: transactionsLoading } = useTransactions()
   const { accounts } = useAccounts()
   const { getCategoryName } = useCategories()
 
@@ -47,7 +48,7 @@ export function MobileHome() {
   const year = now.getFullYear()
   const month = now.getMonth() + 1
 
-  const { snapshot } = useBudgetSnapshot('monthly', year, month)
+  const { snapshot, isLoading: budgetLoading } = useBudgetSnapshot('monthly', year, month)
   const { data: goalsSummary } = useGoalsSummary()
   const { data: netWorth } = useQuery({
     queryKey: ['home-net-worth', user?.id],
@@ -66,12 +67,28 @@ export function MobileHome() {
   const heroMonths: HeroMonth[] = useMemo(() => {
     const spend = monthlySpending(transactions, HERO_MONTHS, now)
     const points = monthlyNetWorthPoints(netWorth?.netWorthData ?? [], HERO_MONTHS)
-    return spend.map((b) => ({
+    // Carry the last known value across gap months (and backfill the leading
+    // ones) so short histories don't draw a line plunging to zero.
+    const firstKnown = points[0]?.value ?? 0
+    const values = spend.reduce<number[]>((acc, b, i) => {
+      const point = points.find((p) => p.year === b.year && p.month === b.month)
+      acc.push(point ? point.value : i > 0 ? acc[i - 1] : firstKnown)
+      return acc
+    }, [])
+    return spend.map((b, i) => ({
       label: new Date(b.year, b.month - 1, 1).toLocaleDateString(locale, { month: 'short' }),
       spending: b.total,
-      netWorth: points.find((p) => p.year === b.year && p.month === b.month)?.value ?? 0,
+      netWorth: values[i],
     }))
   }, [transactions, netWorth, now, locale])
+
+  // Month-over-month change from the same monthly points the chart uses —
+  // the badge copy says "this month", so the math must too.
+  const monthChangePct = useMemo(() => {
+    const points = monthlyNetWorthPoints(netWorth?.netWorthData ?? [], 2)
+    if (points.length < 2 || points[0].value === 0) return 0
+    return ((points[1].value - points[0].value) / Math.abs(points[0].value)) * 100
+  }, [netWorth])
 
   const monthIncome = useMemo(
     () => transactions
@@ -116,16 +133,21 @@ export function MobileHome() {
   // Net-worth figures are base-converted by the API — format them in that base currency
   // (mirrors NetWorthOverview), falling back to the first account's currency.
   const baseCurrency = netWorth?.accounts?.[0]?.baseCurrency ?? accounts[0]?.currency ?? 'IDR'
-  const todayLabel = now.toLocaleDateString(locale, { weekday: undefined, month: 'short', day: 'numeric' })
+  const todayLabel = t('today.title', {
+    date: now.toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+  })
 
   return (
     <div className="flex flex-col gap-5 pt-3 md:hidden">
       <HomeGreetingHeader greetingKey={getGreetingKey(now.getHours())} user={userData} />
       <OnboardingBanner />
-      <TodayCard dateLabel={todayLabel} spent={today.spent} count={today.count} currency={baseCurrency} />
+      {/* Transaction-fed sections wait for the initial load so they don't flash "loaded-empty" copy. */}
+      {!transactionsLoading && (
+        <TodayCard dateLabel={todayLabel} spent={today.spent} count={today.count} currency={baseCurrency} />
+      )}
       <NetWorthHeroCard
         netWorth={netWorth?.currentNetWorth ?? split.assetsTotal - split.liabilitiesTotal}
-        changePercentage={getNetWorthChange(netWorth?.netWorthData ?? []).percentage}
+        changePercentage={monthChangePct}
         currency={baseCurrency}
         months={heroMonths}
         income={monthIncome}
@@ -138,15 +160,21 @@ export function MobileHome() {
         assetsTotal={split.assetsTotal}
         liabilitiesTotal={split.liabilitiesTotal}
       />
-      <BudgetCard
-        monthLabel={`${new Date(year, month - 1, 1).toLocaleDateString(locale, { month: 'long' })} ${year}`}
-        spent={snapshot?.total_spent ?? 0}
-        total={snapshot?.total_amount ?? 0}
-        currency={snapshot?.currency ?? baseCurrency}
-      />
+      {!budgetLoading && (
+        <BudgetCard
+          monthLabel={`${new Date(year, month - 1, 1).toLocaleDateString(locale, { month: 'long' })} ${year}`}
+          spent={snapshot?.total_spent ?? 0}
+          total={snapshot?.total_amount ?? 0}
+          currency={snapshot?.currency ?? baseCurrency}
+        />
+      )}
       <GoalsGrid goals={goalsSummary?.goals ?? []} />
-      <UpcomingStrip items={upcoming} />
-      <BiggestExpensesCard rows={biggest} />
+      {!transactionsLoading && (
+        <>
+          <UpcomingStrip items={upcoming} />
+          <BiggestExpensesCard rows={biggest} />
+        </>
+      )}
     </div>
   )
 }

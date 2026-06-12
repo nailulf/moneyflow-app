@@ -1039,7 +1039,7 @@
       "afternoon": "Good afternoon 👋",
       "evening": "Good evening 👋"
     },
-    "today": { "logged": "{count} logged" },
+    "today": { "title": "Today, {date}", "logged": "{count} logged" },
     "hero": {
       "totalNetWorth": "Total Net Worth",
       "thisMonth": "{pct}% this month",
