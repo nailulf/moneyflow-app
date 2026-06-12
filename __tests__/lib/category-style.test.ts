@@ -1,6 +1,7 @@
 import {
   Utensils, Car, ShoppingBag, Clapperboard, Receipt, HeartPulse,
   GraduationCap, Plane, Briefcase, ArrowLeftRight, PiggyBank, CreditCard, Coffee, Tag,
+  TrendingUp,
 } from 'lucide-react'
 import { getCategoryIcon, getCategoryTint, CATEGORY_TINTS } from '@/lib/category-style'
 
@@ -15,6 +16,7 @@ describe('getCategoryIcon', () => {
     ['Education', GraduationCap],
     ['Travel', Plane],
     ['Income', Briefcase],
+    ['Investment', TrendingUp],
     ['Transfer', ArrowLeftRight],
     ['Savings transfer', PiggyBank],
     ['Credit card payment', CreditCard],
@@ -35,6 +37,7 @@ describe('getCategoryIcon', () => {
     expect(getCategoryIcon('Kesehatan')).toBe(HeartPulse)
     expect(getCategoryIcon('Pendidikan')).toBe(GraduationCap)
     expect(getCategoryIcon('Gaji')).toBe(Briefcase)
+    expect(getCategoryIcon('Investasi')).toBe(TrendingUp)
     expect(getCategoryIcon('Tabungan')).toBe(PiggyBank)
   })
 
@@ -60,6 +63,7 @@ describe('getCategoryTint', () => {
     expect(getCategoryTint('Healthcare')).toEqual({ bg: 'bg-tint-green-bg', fg: 'text-tint-green-fg' })
     expect(getCategoryTint('Travel')).toEqual({ bg: 'bg-tint-teal-bg', fg: 'text-tint-teal-fg' })
     expect(getCategoryTint('Income')).toEqual({ bg: 'bg-tint-green-bg', fg: 'text-tint-green-fg' })
+    expect(getCategoryTint('Investment')).toEqual({ bg: 'bg-tint-green-bg', fg: 'text-tint-green-fg' })
   })
 
   it('is deterministic for unknown names', () => {
