@@ -53,7 +53,7 @@ export function TransactionsScreen() {
   const resetFilters = () => setFilters((f) => ({ ...f, type: 'ALL', search: '', categoryIds: [], accountIds: [], amountMin: undefined, amountMax: undefined }))
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-3 pb-28 md:pb-6">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-3 pt-3 pb-28 md:pt-0 md:pb-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl leading-title-3 font-bold text-foreground">{t('title')}</h1>
         <div className="flex items-center gap-1">

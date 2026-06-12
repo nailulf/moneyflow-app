@@ -7,8 +7,7 @@ export default function BudgetPage() {
   const t = useTranslations('navigation.items')
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-2 text-center">
-      <h1 className="text-2xl leading-title-3 font-semibold text-foreground">{t('budget')}</h1>
-      <p className="text-sm leading-body-sm text-muted-foreground">{t('comingSoon')}</p>
+      <p className="text-lg leading-body-lg font-semibold text-foreground">{t('comingSoon')}</p>
     </div>
   )
 }
