@@ -24,11 +24,11 @@ export function MonthSummaryBar({ month, onMonthChange, income, expense }: Month
   return (
     <div className="flex items-center justify-between rounded-xl bg-muted/40 px-3 py-2">
       <div className="flex items-center gap-1">
-        <button type="button" aria-label="Previous month" onClick={() => onMonthChange(step(month, -1))} className="rounded-md p-1 text-muted-foreground hover:bg-muted">
+        <button type="button" aria-label={t('prevMonth')} onClick={() => onMonthChange(step(month, -1))} className="rounded-md p-1 text-muted-foreground hover:bg-muted">
           <ChevronLeft className="size-4" />
         </button>
         <span className="text-sm font-semibold text-foreground">{label}</span>
-        <button type="button" aria-label="Next month" onClick={() => onMonthChange(step(month, 1))} className="rounded-md p-1 text-muted-foreground hover:bg-muted">
+        <button type="button" aria-label={t('nextMonth')} onClick={() => onMonthChange(step(month, 1))} className="rounded-md p-1 text-muted-foreground hover:bg-muted">
           <ChevronRight className="size-4" />
         </button>
       </div>

@@ -1,6 +1,9 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-jest.mock('next-intl', () => ({ useTranslations: () => (k: string) => k, useLocale: () => 'en' }))
+jest.mock('next-intl', () => ({
+  useTranslations: () => (k: string) => ({ prevMonth: 'Previous month', nextMonth: 'Next month' }[k] ?? k),
+  useLocale: () => 'en',
+}))
 import { MonthSummaryBar } from '@/components/features/transaction/MonthSummaryBar'
 
 describe('MonthSummaryBar', () => {

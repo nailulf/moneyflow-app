@@ -58,9 +58,9 @@ export function TransactionsScreen() {
         <h1 className="text-2xl leading-title-3 font-bold text-foreground">{t('title')}</h1>
         <div className="flex items-center gap-1">
           <button type="button" aria-label={t('searchPlaceholder')} onClick={() => setShowSearch((s) => { if (s) setFilters((f) => ({ ...f, search: '' })); return !s })} className="rounded-full p-2 text-muted-foreground hover:bg-muted"><Search className="size-5" /></button>
-          <button type="button" aria-label={t('filter.title')} onClick={() => setFilterOpen(true)} className="relative rounded-full p-2 text-muted-foreground hover:bg-muted">
+          <button type="button" aria-label={activeFilterCount > 0 ? t('filter.titleWithCount', { count: activeFilterCount }) : t('filter.title')} onClick={() => setFilterOpen(true)} className="relative rounded-full p-2 text-muted-foreground hover:bg-muted">
             <SlidersHorizontal className="size-5" />
-            {activeFilterCount > 0 && <span className="absolute right-1 top-1 size-2 rounded-full bg-primary" />}
+            {activeFilterCount > 0 && <span aria-hidden="true" className="absolute right-1 top-1 size-2 rounded-full bg-primary" />}
           </button>
         </div>
       </header>
