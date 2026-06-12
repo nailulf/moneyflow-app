@@ -1034,6 +1034,24 @@
     "install": "Instal",
     "dismiss": "Tutup"
   },
+  "wallets": {
+    "title": "Dompet & Akun",
+    "subtitle": "{accounts} akun · {liabilities} liabilitas",
+    "add": "Tambah",
+    "netWorth": {
+      "label": "Kekayaan Bersih",
+      "assets": "Aset",
+      "liabilities": "Liabilitas"
+    },
+    "groups": {
+      "bank": "Rekening Bank",
+      "digitalWallets": "Dompet Digital",
+      "assets": "Aset",
+      "cashOther": "Tunai & Lainnya",
+      "loans": "Pinjaman & KPR"
+    },
+    "empty": "Belum ada akun — tambahkan yang pertama."
+  },
   "home": {
     "greeting": {
       "morning": "Selamat pagi 👋",
