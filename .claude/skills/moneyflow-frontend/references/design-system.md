@@ -148,10 +148,11 @@ Tailwind: `bg-tint-{key}-bg`, `text-tint-{key}-fg` (e.g. `bg-tint-blue-bg text-t
 | Variable | Light value | Dark value | Tailwind class |
 |---|---|---|---|
 | `--shadow-card` | `0 2px 10px hsl(222 47% 11% / 0.05)` | `0 0 0 1px hsl(var(--border))` | `shadow-card` |
-| `--shadow-floating` | `0 4px 20px hsl(222 47% 11% / 0.15)` | `0 4px 20px hsl(0 0% 0% / 0.5)` | `shadow-floating` |
+| `--shadow-floating` | `0 4px 20px hsl(222 47% 11% / 0.15)` | `0 0 0 1px hsl(var(--border)), 0 4px 20px hsl(0 0% 0% / 0.5)` | `shadow-floating` |
 
-Dark-mode quirk: `shadow-card` becomes a 1px ring derived from `--border` instead of a drop shadow
-(better contrast on dark surfaces). This is intentional — do not "fix" it.
+Dark-mode quirk: both shadows gain a 1px ring derived from `--border` (`shadow-card` is ring-only;
+`shadow-floating` is ring + drop shadow). Dark `card` equals dark `background`, so without the ring
+elevated surfaces would be invisible. This is intentional — do not "fix" it.
 
 > **`shadow-card` double-rule quirk:** Tailwind also generates a `.shadow-card` utility via its
 > shadow-COLOR feature (since `card` is a color token). Devtools may show two `.shadow-card` rules.

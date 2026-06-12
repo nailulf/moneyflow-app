@@ -17,7 +17,7 @@ describe('MobileBottomNav', () => {
     expect(screen.getByRole('link', { name: /wallets/i })).toHaveAttribute('href', '/accounts')
     expect(screen.getByRole('link', { name: /budget/i })).toHaveAttribute('href', '/budget')
     expect(screen.getByRole('link', { name: /portfolio/i })).toHaveAttribute('href', '/portfolio')
-    expect(screen.getByRole('button')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /addTransaction/i })).toBeInTheDocument()
     expect(screen.getAllByRole('link')).toHaveLength(4)
   })
 

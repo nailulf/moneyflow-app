@@ -28,12 +28,12 @@ export function MobileBottomNav() {
         href={item.url}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'flex flex-col items-center gap-0.5 rounded-[20px] px-3 py-[5px] transition-colors',
+          'flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-[20px] px-3 py-[5px] transition-colors',
           active ? 'bg-selected text-selected-foreground' : 'text-muted-foreground'
         )}
       >
         <item.icon className="h-5 w-5 shrink-0" />
-        <span className={cn('text-[11px] leading-none', active ? 'font-semibold' : 'font-medium')}>
+        <span className={cn('whitespace-nowrap text-[11px] leading-none', active ? 'font-semibold' : 'font-medium')}>
           {item.title}
         </span>
       </Link>
