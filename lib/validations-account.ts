@@ -47,8 +47,16 @@ export const propertySchema = z
         return
       }
     }
-    if (Number(data.loanTermYears) <= 0) {
+    // Whole years only — the server computes loan_term_months = years * 12 and
+    // rejects fractional months with an opaque 400.
+    const termYears = Number(data.loanTermYears)
+    if (!Number.isInteger(termYears) || termYears <= 0) {
       ctx.addIssue({ code: 'custom', message: 'termInvalid', path: ['loanTermYears'] })
+    }
+    for (const f of ['downPayment', 'interestRate', 'monthlyPayment'] as const) {
+      if (Number(data[f]) < 0) {
+        ctx.addIssue({ code: 'custom', message: 'amountInvalid', path: [f] })
+      }
     }
     if (Number(data.downPayment) >= Number(data.currentValue)) {
       ctx.addIssue({ code: 'custom', message: 'downPaymentTooLarge', path: ['downPayment'] })
