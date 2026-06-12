@@ -61,7 +61,7 @@ export function TransactionsScreen() {
             type="button"
             aria-label={activeFilterCount > 0 ? t('filter.titleWithCount', { count: activeFilterCount }) : t('filter.title')}
             onClick={() => setFilterOpen(true)}
-            className="relative flex h-9 w-9 items-center justify-center rounded-[10px] bg-card text-foreground shadow-card"
+            className="relative flex h-9 w-9 items-center justify-center rounded-[10px] bg-card text-foreground shadow-card transition-colors hover:bg-muted/50"
           >
             <SlidersHorizontal className="size-4" />
             {activeFilterCount > 0 && <span aria-hidden="true" className="absolute right-1 top-1 size-2 rounded-full bg-primary" />}
@@ -70,7 +70,7 @@ export function TransactionsScreen() {
             type="button"
             aria-label={t('searchPlaceholder')}
             onClick={() => setShowSearch((s) => { if (s) setFilters((f) => ({ ...f, search: '' })); return !s })}
-            className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-card text-foreground shadow-card"
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-card text-foreground shadow-card transition-colors hover:bg-muted/50"
           >
             <Search className="size-4" />
           </button>

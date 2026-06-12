@@ -26,6 +26,8 @@ const TINT = {
 // Keyword → (icon, tint), first match wins (EN + ID).
 // Order matters: more specific entries (coffee, savings, credit card) before general ones.
 const CATEGORY_RULES: Array<[string[], LucideIcon, CategoryTint]> = [
+  // Uncategorized sentinel labels (EN/ID) stay neutral regardless of locale.
+  [['uncategorized', 'tanpa kategori'], Tag,       TINT.slate],
   [['coffee', 'kopi'],              Coffee,        TINT.amber],
   [['saving', 'tabungan'],          PiggyBank,     TINT.teal],
   [['credit card', 'kartu kredit'], CreditCard,    TINT.blue],

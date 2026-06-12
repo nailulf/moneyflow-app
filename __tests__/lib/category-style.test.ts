@@ -79,6 +79,12 @@ describe('getCategoryTint', () => {
     expect(distinct.size).toBeGreaterThan(2)
   })
 
+  it('keeps uncategorized labels neutral in both locales', () => {
+    expect(getCategoryTint('Uncategorized')).toEqual({ bg: 'bg-tint-slate-bg', fg: 'text-tint-slate-fg' })
+    expect(getCategoryTint('Tanpa kategori')).toEqual({ bg: 'bg-tint-slate-bg', fg: 'text-tint-slate-fg' })
+    expect(getCategoryIcon('Tanpa kategori')).toBe(Tag)
+  })
+
   it('handles nullish input', () => {
     expect(getCategoryTint(null)).toEqual({ bg: 'bg-tint-slate-bg', fg: 'text-tint-slate-fg' })
     expect(getCategoryTint(undefined)).toEqual({ bg: 'bg-tint-slate-bg', fg: 'text-tint-slate-fg' })
