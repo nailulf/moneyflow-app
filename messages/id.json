@@ -1039,7 +1039,7 @@
       "afternoon": "Selamat siang 👋",
       "evening": "Selamat malam 👋"
     },
-    "today": { "logged": "{count} tercatat" },
+    "today": { "title": "Hari ini, {date}", "logged": "{count} tercatat" },
     "hero": {
       "totalNetWorth": "Total Kekayaan Bersih",
       "thisMonth": "{pct}% bulan ini",
