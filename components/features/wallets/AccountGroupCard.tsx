@@ -62,7 +62,6 @@ export function AccountGroupCard({ groupKey, accounts, onOpen }: AccountGroupCar
               key={account.id}
               type="button"
               onClick={() => onOpen(account.id)}
-              aria-label={account.name}
               className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
             >
               <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', tint.bg)}>
