@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 import { getExchangeRate, SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
-import { sanitizeAccountPayload } from '@/lib/account-payload'
+import { sanitizeAccountPayload, sanitizeAccountUpdate } from '@/lib/account-payload'
 
 /**
  * Build a Map of "FROM-TO" → rate for converting any supported currency
@@ -211,10 +211,15 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, name, type, balance, currency, is_default, is_active, description, property_type, asset_location, depreciation_rate, monthly_payment, mortgage_end_date, purchase_date, credit_limit, statement_day, due_day, vehicle_type, broker, interest_rate, loan_term_months, down_payment, investment_goal } = body
+    const { id } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Account ID is required' }, { status: 400 })
+    }
+
+    const result = sanitizeAccountUpdate(body)
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
     const supabase = await createClient()
@@ -240,7 +245,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // If this is being set as default, unset other defaults first
-    if (is_default) {
+    if (result.data.is_default) {
       await supabase
         .from('accounts')
         .update({ is_default: false, updated_at: new Date().toISOString() })
@@ -248,32 +253,10 @@ export async function PUT(request: NextRequest) {
         .eq('is_default', true)
     }
 
-    const updateData: any = {
-      updated_at: new Date().toISOString()
+    const updateData = {
+      ...result.data,
+      updated_at: new Date().toISOString(),
     }
-
-    if (name !== undefined) updateData.name = name
-    if (type !== undefined) updateData.type = type.toUpperCase()
-    if (balance !== undefined) updateData.balance = balance
-    if (currency !== undefined) updateData.currency = currency
-    if (is_default !== undefined) updateData.is_default = is_default
-    if (is_active !== undefined) updateData.is_active = is_active
-    if (description !== undefined) updateData.description = description
-    if (property_type !== undefined) updateData.property_type = property_type || null
-    if (asset_location !== undefined) updateData.asset_location = asset_location || null
-    if (depreciation_rate !== undefined) updateData.depreciation_rate = depreciation_rate ?? null
-    if (monthly_payment !== undefined) updateData.monthly_payment = monthly_payment ?? null
-    if (mortgage_end_date !== undefined) updateData.mortgage_end_date = mortgage_end_date || null
-    if (purchase_date !== undefined) updateData.purchase_date = purchase_date || null
-    if (credit_limit !== undefined) updateData.credit_limit = credit_limit ?? null
-    if (statement_day !== undefined) updateData.statement_day = statement_day ?? null
-    if (due_day !== undefined) updateData.due_day = due_day ?? null
-    if (vehicle_type !== undefined) updateData.vehicle_type = vehicle_type || null
-    if (broker !== undefined) updateData.broker = broker || null
-    if (interest_rate !== undefined) updateData.interest_rate = interest_rate ?? null
-    if (loan_term_months !== undefined) updateData.loan_term_months = loan_term_months ?? null
-    if (down_payment !== undefined) updateData.down_payment = down_payment ?? null
-    if (investment_goal !== undefined) updateData.investment_goal = investment_goal || null
 
     const { data, error } = await supabase
       .from('accounts')
