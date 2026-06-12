@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { useQuery } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAccounts } from '@/contexts/AccountContext'
@@ -15,11 +16,11 @@ import { AccountGroupCard } from './AccountGroupCard'
 
 interface WalletsScreenProps {
   onOpenAccount: (accountId: string) => void
-  onAdd: () => void
 }
 
 /** Mobile Wallets & Accounts screen (design `EyNg9`). Desktop keeps the legacy grid. */
-export function WalletsScreen({ onOpenAccount, onAdd }: WalletsScreenProps) {
+export function WalletsScreen({ onOpenAccount }: WalletsScreenProps) {
+  const router = useRouter()
   const t = useTranslations('wallets')
   const { user } = useAuth()
   const { accounts } = useAccounts()
@@ -52,7 +53,7 @@ export function WalletsScreen({ onOpenAccount, onAdd }: WalletsScreenProps) {
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
-            onClick={onAdd}
+            onClick={() => router.push('/accounts/new')}
             className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm leading-none font-semibold text-primary-foreground transition-transform active:scale-95"
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />

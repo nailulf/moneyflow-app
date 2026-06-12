@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { Card, CardContent, CardHeader } from '@/components/ui/molecules/card'
-import { CreditCard, Wallet, TrendingUp, Building2, Loader2, Plus, ChevronRight, Target, Home, Car, Landmark, Smartphone } from 'lucide-react'
+import { CreditCard, Wallet, TrendingUp, Building2, Loader2, ChevronRight, Target, Home, Car, Landmark, Smartphone } from 'lucide-react'
 import { useAccounts } from '@/contexts/AccountContext'
 import { formatCurrency } from '@/lib/data-utils'
 import { useGoalsSummary } from '@/hooks/useGoalsQuery'
@@ -16,7 +16,6 @@ import { Sheet, SheetContent } from '@/components/ui/organisms/sheet'
 import { AccountDetailView } from '@/components/AccountDetailView'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { WalletsScreen } from '@/components/features/wallets/WalletsScreen'
-import { AccountManager } from '@/components/AccountManager'
 
 const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   BANK: Building2,
@@ -36,7 +35,6 @@ function AccountsPageContent() {
   const { accounts, loading: accountsLoading } = useAccounts()
   const { data: goalsSummary, isLoading: goalsLoading } = useGoalsSummary()
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
-  const [addOpen, setAddOpen] = useState(false)
   const isMobile = useIsMobile()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -95,7 +93,7 @@ function AccountsPageContent() {
 
   return (
     <div className="flex h-full flex-col">
-      <WalletsScreen onOpenAccount={openAccountDetail} onAdd={() => setAddOpen(true)} />
+      <WalletsScreen onOpenAccount={openAccountDetail} />
       <div className="hidden h-full flex-col md:flex">
       <AccountNavigation />
       <PageLayout>
@@ -340,7 +338,6 @@ function AccountsPageContent() {
         </ContentWrapper>
       </PageLayout>
       </div>
-      <AccountManager open={addOpen} onOpenChange={setAddOpen} defaultMode="create" />
 
       {/* Account Detail - Bottom Sheet on mobile, Dialog on desktop */}
       {isMobile ? (
