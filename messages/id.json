@@ -409,6 +409,8 @@
       "searchPlaceholder": "Cari transaksi",
       "tabs": { "all": "Semua", "income": "Pemasukan", "expense": "Pengeluaran", "transfer": "Transfer" },
       "summary": { "income": "Masuk", "expense": "Keluar" },
+      "prevMonth": "Bulan sebelumnya",
+      "nextMonth": "Bulan berikutnya",
       "today": "Hari ini",
       "yesterday": "Kemarin",
       "uncategorized": "Tanpa kategori",
@@ -416,7 +418,7 @@
       "empty": "Belum ada transaksi",
       "emptyFiltered": "Tidak ada transaksi yang cocok dengan filter",
       "reset": "Atur ulang",
-      "filter": { "title": "Filter", "categories": "Kategori", "accounts": "Akun", "amountMin": "Jumlah min", "amountMax": "Jumlah maks", "apply": "Terapkan", "reset": "Atur ulang" }
+      "filter": { "title": "Filter", "titleWithCount": "Filter ({count} aktif)", "categories": "Kategori", "accounts": "Akun", "amountMin": "Jumlah min", "amountMax": "Jumlah maks", "apply": "Terapkan", "reset": "Atur ulang" }
     }
   },
   "navigation": {

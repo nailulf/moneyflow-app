@@ -409,6 +409,8 @@
       "searchPlaceholder": "Search transactions",
       "tabs": { "all": "All", "income": "Income", "expense": "Expense", "transfer": "Transfer" },
       "summary": { "income": "Income", "expense": "Exp" },
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
       "today": "Today",
       "yesterday": "Yesterday",
       "uncategorized": "Uncategorized",
@@ -416,7 +418,7 @@
       "empty": "No transactions",
       "emptyFiltered": "No transactions match your filters",
       "reset": "Reset",
-      "filter": { "title": "Filters", "categories": "Categories", "accounts": "Accounts", "amountMin": "Min amount", "amountMax": "Max amount", "apply": "Apply", "reset": "Reset" }
+      "filter": { "title": "Filters", "titleWithCount": "Filters ({count} active)", "categories": "Categories", "accounts": "Accounts", "amountMin": "Min amount", "amountMax": "Max amount", "apply": "Apply", "reset": "Reset" }
     }
   },
   "navigation": {

@@ -37,7 +37,7 @@ export function TransactionRow({ transaction, categoryName, categoryColor, accou
         <span className="truncate text-xs text-muted-foreground">{accountName}</span>
       </span>
       <span className={cn('shrink-0 text-sm font-semibold', amountClass)}>
-        {sign} {formatCurrency(Math.abs(transaction.amount), transaction.currency ?? 'IDR')}
+        {sign ? `${sign} ` : ''}{formatCurrency(Math.abs(transaction.amount), transaction.currency ?? 'IDR')}
       </span>
     </button>
   )
