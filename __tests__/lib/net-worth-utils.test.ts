@@ -2,6 +2,7 @@ import {
   calculateAccountBalanceAtDate,
   calculateNetWorth,
   calculatePercentageChange,
+  categorizeAccounts,
   type BalanceTransaction,
 } from '../../lib/net-worth-utils'
 
@@ -120,5 +121,21 @@ describe('calculatePercentageChange', () => {
   it('calculates correct percentage', () => {
     expect(calculatePercentageChange(100, 150)).toBe(50)
     expect(calculatePercentageChange(200, 100)).toBe(-50)
+  })
+})
+
+describe('categorizeAccounts', () => {
+  it('groups DIGITAL_WALLET accounts into their own asset category', () => {
+    const wallet = {
+      id: 'w1', user_id: 'u', name: 'GoPay', type: 'DIGITAL_WALLET',
+      balance: 1800000, currency: 'IDR', is_default: false, is_active: true,
+      description: null, property_type: null, asset_location: null,
+      depreciation_rate: null, monthly_payment: null, mortgage_end_date: null,
+      created_at: '', updated_at: '', currentBalance: 1800000,
+    } as never
+    const categories = categorizeAccounts([wallet])
+    const walletCat = categories.find((c) => c.name === 'Digital Wallets')
+    expect(walletCat).toBeDefined()
+    expect(walletCat!.total).toBe(1800000)
   })
 })

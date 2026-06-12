@@ -118,6 +118,12 @@ describe('splitAccounts', () => {
     const accounts = [acc({ id: '1', type: 'BANK', balance: 5, currentBalance: 10, currentBalanceInBase: 7 })]
     expect(splitAccounts(accounts).assetsTotal).toBe(7)
   })
+  it('classifies DIGITAL_WALLET as an asset', () => {
+    const accounts = [acc({ id: 'w', type: 'DIGITAL_WALLET', balance: 250 })]
+    const { assets, liabilities } = splitAccounts(accounts)
+    expect(assets.map((a: { id: string }) => a.id)).toEqual(['w'])
+    expect(liabilities).toEqual([])
+  })
 })
 
 // Compare LOCAL date parts — toISOString() shifts to UTC and breaks in non-UTC timezones.
