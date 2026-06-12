@@ -109,6 +109,8 @@ module.exports = {
   			md: 'var(--font-size-md)',
   			sm: 'var(--font-size-sm)',
   			xs: 'var(--font-size-xs)',
+  			tiny: 'var(--font-size-tiny)',
+  			nano: 'var(--font-size-nano)',
   		},
   		lineHeight: {
   			'title-1': 'var(--leading-title-1)',

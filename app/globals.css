@@ -24,6 +24,8 @@
     --font-size-md: 1rem;        /* 16px */
     --font-size-sm: 0.875rem;    /* 14px */
     --font-size-xs: 0.75rem;     /* 12px */
+    --font-size-tiny: 0.6875rem; /* 11px — non-responsive, all breakpoints */
+    --font-size-nano: 0.625rem;  /* 10px — non-responsive, all breakpoints */
 
     /* Line heights - mobile first */
     --leading-title-1: 2.5rem;   /* 40px */
