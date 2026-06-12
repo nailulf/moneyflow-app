@@ -6,8 +6,9 @@
 >
 > ✅ **Core palette adopted into `app/globals.css` on 2026-06-12**: `primary` = `#20507F`,
 > `background` = `#EEF2F7`, `foreground` = `#0F172A` (cards stay white); PWA `theme_color`, auth
-> tokens, and the maskable icon were updated too. Design-only values (hero gradient, solid tint
-> hexes) are still not tokens — see
+> tokens, and the maskable icon were updated too. The hero gradient, shadows, selected state, and
+> category tints were tokenized later the same day (mobile-visual-foundations); only Goal Pill and
+> Rating Star remain design-only — see
 > [§ Deltas vs implemented tokens](#deltas-vs-implemented-code-tokens) before hardcoding anything.
 
 **Basics:** Font **Inter** · Icons **lucide-react** · Base unit **4px** · Screen width **390**.
@@ -139,8 +140,10 @@ hand-pick per-category colors or icons.
   `const Icon = getCategoryIcon(...)` render-alias pattern may trip the `react-hooks/static-components`
   lint rule (it looks like a component defined inside a render function). If it fires, wrap in a
   small `<CategoryIcon name={...} />` component instead of disabling the rule.
-- `getCategoryTint(name)` returns a tint key (e.g. `'blue'`, `'green'`). Apply with
-  `bg-tint-{key}-bg text-tint-{key}-fg` Tailwind utilities on the icon circle.
+- `getCategoryTint(name)` returns a `{ bg, fg }` pair of **complete class strings** (e.g.
+  `{ bg: 'bg-tint-blue-bg', fg: 'text-tint-blue-fg' }`). Apply via `cn(tint.bg, tint.fg)` on the
+  icon circle. Never interpolate tint class names (`bg-tint-${key}-bg`) — Tailwind's scanner
+  can't see interpolated classes and the CSS won't be generated.
 - Both functions are name-based (not id-based) so they work before and after DB hydration.
 
 ---
