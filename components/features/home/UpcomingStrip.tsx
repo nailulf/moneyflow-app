@@ -45,7 +45,7 @@ export function UpcomingStrip({ items }: UpcomingStripProps) {
                     first ? 'bg-primary text-primary-foreground' : 'border border-muted bg-muted/50'
                   )}
                 >
-                  <span className={cn('text-[10px] font-semibold leading-none', first ? 'text-primary-foreground/70 dark:text-primary-foreground' : 'text-muted-foreground')}>
+                  <span className={cn('text-nano font-medium leading-none', first ? 'text-primary-foreground/70 dark:text-primary-foreground' : 'text-muted-foreground')}>
                     {item.dayLabel}
                   </span>
                   <span className={cn(
@@ -57,10 +57,10 @@ export function UpcomingStrip({ items }: UpcomingStripProps) {
                   <span className={cn('flex h-7 w-7 items-center justify-center rounded-lg', first ? 'bg-primary-foreground/20' : tint.bg)}>
                     <Icon className={cn('h-3.5 w-3.5', first ? 'text-primary-foreground' : tint.fg)} aria-hidden="true" />
                   </span>
-                  <span className={cn('w-full truncate text-center text-[10px] font-semibold leading-none', first ? 'text-primary-foreground' : 'text-muted-foreground')}>
+                  <span className={cn('w-full truncate text-center text-nano font-medium leading-none', first ? 'text-primary-foreground' : 'text-muted-foreground')}>
                     {item.name}
                   </span>
-                  <span className={cn('text-[10px] font-bold leading-none', first ? 'text-primary-foreground' : 'text-foreground')}>
+                  <span className={cn('text-nano font-medium leading-none', first ? 'text-primary-foreground' : 'text-foreground')}>
                     {formatCurrencyCompact(item.amount, item.currency)}
                   </span>
                 </div>
