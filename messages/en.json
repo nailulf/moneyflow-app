@@ -1034,6 +1034,24 @@
     "install": "Install",
     "dismiss": "Dismiss"
   },
+  "wallets": {
+    "title": "Wallets & Accounts",
+    "subtitle": "{accounts} accounts · {liabilities} liabilities",
+    "add": "Add",
+    "netWorth": {
+      "label": "Net Worth",
+      "assets": "Assets",
+      "liabilities": "Liabilities"
+    },
+    "groups": {
+      "bank": "Bank Accounts",
+      "digitalWallets": "Digital Wallets",
+      "assets": "Assets",
+      "cashOther": "Cash & Other",
+      "loans": "Loans & Mortgages"
+    },
+    "empty": "No accounts yet — add your first one."
+  },
   "home": {
     "greeting": {
       "morning": "Good morning 👋",

@@ -98,7 +98,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
 
   // Screens that render their own mobile header (spec sub-project 1: screens
   // own their headers; this list shrinks the interim LayoutWrapper fallback).
-  const ownsMobileHeader = pathname === '/' || pathname.startsWith('/transactions')
+  const ownsMobileHeader = pathname === '/' || pathname.startsWith('/transactions') || pathname.startsWith('/accounts')
 
   const navUserData = {
     name: user.user_metadata.full_name || user.email?.split('@')[0] || 'User',

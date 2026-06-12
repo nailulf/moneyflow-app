@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/molecules/di
 import { Sheet, SheetContent } from '@/components/ui/organisms/sheet'
 import { AccountDetailView } from '@/components/AccountDetailView'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { WalletsScreen } from '@/components/features/wallets/WalletsScreen'
+import { AccountManager } from '@/components/AccountManager'
 
 const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   BANK: Building2,
@@ -34,6 +36,7 @@ function AccountsPageContent() {
   const { accounts, loading: accountsLoading } = useAccounts()
   const { data: goalsSummary, isLoading: goalsLoading } = useGoalsSummary()
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
   const isMobile = useIsMobile()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -91,7 +94,9 @@ function AccountsPageContent() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
+      <WalletsScreen onOpenAccount={openAccountDetail} onAdd={() => setAddOpen(true)} />
+      <div className="hidden h-full flex-col md:flex">
       <AccountNavigation />
       <PageLayout>
         <TopContent>
@@ -334,6 +339,8 @@ function AccountsPageContent() {
           </MainContent>
         </ContentWrapper>
       </PageLayout>
+      </div>
+      <AccountManager open={addOpen} onOpenChange={setAddOpen} defaultMode="create" />
 
       {/* Account Detail - Bottom Sheet on mobile, Dialog on desktop */}
       {isMobile ? (
