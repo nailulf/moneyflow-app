@@ -1034,6 +1034,112 @@
     "install": "Instal",
     "dismiss": "Tutup"
   },
+  "accountCreate": {
+    "typeSelect": {
+      "title": "Tambah Akun",
+      "choose": "Pilih jenis akun",
+      "close": "Tutup",
+      "types": {
+        "bank": "Rekening Bank",
+        "digitalWallet": "Dompet Digital",
+        "property": "Properti",
+        "vehicle": "Kendaraan",
+        "creditCard": "Kartu Kredit",
+        "investment": "Akun Investasi"
+      }
+    },
+    "common": { "save": "Simpan", "back": "Kembali" },
+    "bank": {
+      "title": "Bank / Dompet",
+      "segBank": "Rekening Bank",
+      "segWallet": "Dompet Digital",
+      "nameLabel": "Nama Akun",
+      "namePlaceholder": "mis. Tabungan BCA",
+      "walletPlaceholder": "mis. GoPay",
+      "balanceLabel": "Saldo Awal",
+      "submit": "Tambah Akun"
+    },
+    "property": {
+      "title": "Aset Properti",
+      "nameLabel": "Nama Properti",
+      "namePlaceholder": "mis. Rumah — Depok",
+      "valueLabel": "Nilai Saat Ini",
+      "purchaseDateLabel": "Tanggal Pembelian",
+      "mortgage": "Detail KPR",
+      "downPayment": "Uang Muka",
+      "interestRate": "Suku Bunga (%/tahun)",
+      "monthlyPayment": "Angsuran Bulanan",
+      "loanTermYears": "Tenor (tahun)",
+      "submit": "Tambah Properti"
+    },
+    "vehicle": {
+      "title": "Aset Kendaraan",
+      "segCar": "Mobil",
+      "segMotorcycle": "Motor",
+      "segTruck": "Truk",
+      "nameLabel": "Nama Kendaraan",
+      "namePlaceholder": "mis. Honda HR-V 2021",
+      "priceLabel": "Harga Beli",
+      "depreciationLabel": "Tingkat Depresiasi (%/tahun)",
+      "submit": "Tambah Kendaraan"
+    },
+    "creditCard": {
+      "title": "Kartu Kredit",
+      "nameLabel": "Nama Kartu",
+      "namePlaceholder": "mis. BCA Platinum",
+      "limitLabel": "Limit Kredit",
+      "statementLabel": "Tanggal Cetak Tagihan (hari)",
+      "dueLabel": "Tanggal Jatuh Tempo (hari)",
+      "info": "Pengeluaran dicatat sebagai expense. Saldo menunjukkan sisa limit kredit.",
+      "submit": "Tambah Kartu Kredit"
+    },
+    "investment": {
+      "title": "Akun Investasi",
+      "nameLabel": "Nama Akun",
+      "namePlaceholder": "mis. Stockbit — Growth",
+      "brokerLabel": "Broker",
+      "brokerPlaceholder": "mis. Stockbit, Bibit, IPOT",
+      "info": "Portofolio dibuat setelah setup. Tambahkan saham, obligasi, dan reksa dana dari halaman akun.",
+      "goalLabel": "Tujuan Investasi",
+      "optional": "Opsional",
+      "goalPlaceholder": "atau tulis tujuanmu sendiri…",
+      "goals": {
+        "capitalGain": "Capital Gain",
+        "dividend": "Investasi Dividen",
+        "education": "Tabungan Sekolah Anak",
+        "retirement": "Tabungan Pensiun"
+      },
+      "submit": "Buat Akun"
+    },
+    "success": {
+      "title": "Akun dibuat!",
+      "typeLabels": {
+        "BANK": "Rekening Bank",
+        "DIGITAL_WALLET": "Dompet Digital",
+        "PROPERTY": "Properti",
+        "VEHICLE": "Kendaraan",
+        "CREDIT_CARD": "Kartu Kredit",
+        "INVESTMENT": "Akun Investasi"
+      },
+      "investmentInfo": "Sudah ada di tab Portofolio. Tambahkan aset yang kamu miliki untuk mulai melacak.",
+      "addAsset": "+ Tambah aset pertamamu",
+      "viewPortfolio": "Nanti saja — lihat portofolio",
+      "backToWallets": "Kembali ke Dompet",
+      "mortgageCreated": "KPR tertaut ditambahkan ke Pinjaman & KPR."
+    },
+    "errors": {
+      "nameRequired": "Nama wajib diisi",
+      "brokerRequired": "Broker wajib diisi",
+      "amountInvalid": "Masukkan jumlah yang valid",
+      "dayRange": "Masukkan hari antara 1 dan 31",
+      "dateRequired": "Pilih tanggal",
+      "mortgageIncomplete": "Lengkapi semua kolom KPR",
+      "downPaymentTooLarge": "Uang muka harus lebih kecil dari nilai",
+      "termInvalid": "Masukkan tenor yang valid",
+      "createFailed": "Gagal membuat akun. Coba lagi.",
+      "mortgageRolledBack": "KPR gagal — properti tidak disimpan. Coba lagi."
+    }
+  },
   "wallets": {
     "title": "Dompet & Akun",
     "subtitle": "{accounts} akun · {liabilities} liabilitas",

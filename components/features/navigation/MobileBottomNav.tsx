@@ -11,6 +11,9 @@ export function MobileBottomNav() {
   const pathname = usePathname()
   const t = useTranslations('navigation.items')
 
+  // Full-screen flows draw without the tab bar (design 08*).
+  if (pathname.startsWith('/accounts/new')) return null
+
   const navItems = [
     { title: t('home'), url: '/', icon: Home },
     { title: t('wallets'), url: '/accounts', icon: Wallet },
@@ -33,7 +36,7 @@ export function MobileBottomNav() {
         )}
       >
         <item.icon className="h-5 w-5 shrink-0" />
-        <span className={cn('whitespace-nowrap text-[11px] leading-none', active ? 'font-semibold' : 'font-medium')}>
+        <span className={cn('whitespace-nowrap text-tiny leading-none', active ? 'font-semibold' : 'font-medium')}>
           {item.title}
         </span>
       </Link>
