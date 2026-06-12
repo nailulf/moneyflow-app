@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Loader2 } from 'lucide-react'
+import { Loader2, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useAuth } from '@/contexts/AuthContext'
@@ -11,6 +11,7 @@ import { useTransactions } from '@/contexts/TransactionContext'
 
 import { getBudgetPlan, updateBudgetPlan, getAvailableCategories } from '@/lib/api/budget-plans'
 import { suggestedAmounts, planDiff } from '@/lib/budget-screen-utils'
+import { formatCurrencyCompact } from '@/lib/data-utils'
 
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { BudgetAmountsEditor } from '@/components/features/budget/BudgetAmountsEditor'
@@ -125,6 +126,13 @@ export default function BudgetEditPage() {
   const suggestions = useMemo(() => suggestedAmounts(transactions, now), [transactions, now])
 
   const draftTotal = draftRows.reduce((s, r) => s + r.allocated_amount, 0)
+  const originalTotal = original.reduce((s, r) => s + r.allocated_amount, 0)
+
+  // Validation: all rows must exist, total > 0, no negative amounts
+  const draftRowsValid =
+    draftRows.length > 0 &&
+    draftTotal > 0 &&
+    draftRows.every((r) => r.allocated_amount >= 0)
 
   // Compute diff between original and current draft
   const diff = useMemo(
@@ -255,7 +263,7 @@ export default function BudgetEditPage() {
       />
 
       <BudgetAmountsEditor
-        rows={draftRows as never}
+        rows={draftRows}
         suggestions={suggestions}
         suggestionsOn={suggestionsOn}
         onToggleSuggestions={handleToggleSuggestions}
@@ -296,11 +304,20 @@ export default function BudgetEditPage() {
         </div>
       )}
 
+      {/* Old → new total context line when there are changes */}
+      {hasChanges && (
+        <p className="flex items-center justify-center gap-1.5 text-xs leading-caption text-muted-foreground">
+          <span>{formatCurrencyCompact(originalTotal, plan?.currency ?? 'IDR')}</span>
+          <ArrowRight className="h-3 w-3" aria-hidden="true" />
+          <span>{formatCurrencyCompact(draftTotal, plan?.currency ?? 'IDR')}</span>
+        </p>
+      )}
+
       {/* sticky footer Apply button */}
       <button
         type="button"
         onClick={() => setShowConfirm(true)}
-        disabled={!hasChanges || pending}
+        disabled={!hasChanges || !draftRowsValid || pending}
         className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
       >
         {t('applyChanges')}

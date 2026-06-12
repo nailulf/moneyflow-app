@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
-import { CheckCircle2, Loader2 } from 'lucide-react'
+import { CheckCircle2, Loader2, Calendar, CalendarRange } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useAuth } from '@/contexts/AuthContext'
@@ -19,13 +19,14 @@ import {
   seedFromSnapshot,
   seedFromTemplate,
 } from '@/lib/budget-screen-utils'
-import { formatCurrency } from '@/lib/data-utils'
+import { formatCurrency, formatCurrencyCompact } from '@/lib/data-utils'
 
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { InfoBanner } from '@/components/features/accounts/create/InfoBanner'
 import { BudgetAmountsEditor } from '@/components/features/budget/BudgetAmountsEditor'
 import { BudgetPreviewCard, type PreviewRow } from '@/components/features/budget/BudgetPreviewCard'
 import { StartFromCards, type StartFrom } from '@/components/features/budget/StartFromCards'
+import { cn } from '@/lib/utils'
 
 import type { CategoryDB } from '@/types/database'
 import type { BudgetTemplateDB } from '@/types/database'
@@ -40,7 +41,6 @@ interface DraftRow {
   category_name: string
   category_color: string
   allocated_amount: number
-  spent_amount?: number
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -98,6 +98,9 @@ export default function BudgetCreatePage() {
   const [showPicker, setShowPicker] = useState(false)
   const [suggestionsOn, setSuggestionsOn] = useState(true)
 
+  // track last seeded start-from value to avoid re-seeding on back navigation
+  const lastSeedRef = useRef<string | null>(null)
+
   // previous period snapshot for "copy" seeding
   const prevYear =
     period === 'monthly'
@@ -134,6 +137,12 @@ export default function BudgetCreatePage() {
 
   const draftTotal = draftRows.reduce((s, r) => s + r.allocated_amount, 0)
 
+  // Validation: all rows must exist, total > 0, and no negative amounts
+  const draftRowsValid =
+    draftRows.length > 0 &&
+    draftTotal > 0 &&
+    draftRows.every((r) => r.allocated_amount >= 0)
+
   // ── navigation ─────────────────────────────────────────────────────────────
   const goBack = useCallback(() => {
     if (stepIndex > 0) {
@@ -149,48 +158,49 @@ export default function BudgetCreatePage() {
 
   // ── entry → amounts ────────────────────────────────────────────────────────
   const handleEntryNext = useCallback(() => {
-    let initialRows: DraftRow[] = []
+    // Only re-seed when draftRows is empty OR the start-from option changed
+    const seedKey = startFrom
+    if (draftRows.length === 0 || lastSeedRef.current !== seedKey) {
+      let initialRows: DraftRow[] = []
 
-    if (startFrom === 'copy' && prevSnapshot) {
-      const seeded = seedFromSnapshot(prevSnapshot as Parameters<typeof seedFromSnapshot>[0])
-      initialRows = seeded.categories.map((c) => ({
-        ...c,
-        category_color: normalizeColor(c.category_color),
-      }))
-    } else if (startFrom === 'template' && templates.length > 0) {
-      const tpl = templates[0]
-      initialRows = seedFromTemplate(
-        tpl as Parameters<typeof seedFromTemplate>[0],
-        income,
-        availableCategories.map((c) => ({ id: c.id, name: c.name, color: normalizeColor(c.color) }))
-      ).map((r) => ({ ...r, category_color: normalizeColor(r.category_color) }))
-    }
-    // scratch → empty rows
+      if (startFrom === 'copy' && prevSnapshot) {
+        const seeded = seedFromSnapshot(prevSnapshot as Parameters<typeof seedFromSnapshot>[0])
+        initialRows = seeded.categories.map((c) => ({
+          ...c,
+          category_color: normalizeColor(c.category_color),
+        }))
+      } else if (startFrom === 'template' && templates.length > 0) {
+        const tpl = templates[0]
+        initialRows = seedFromTemplate(
+          tpl as Parameters<typeof seedFromTemplate>[0],
+          income,
+          availableCategories.map((c) => ({ id: c.id, name: c.name, color: normalizeColor(c.color) }))
+        ).map((r) => ({ ...r, category_color: normalizeColor(r.category_color) }))
+      }
+      // scratch → empty rows
 
-    setDraftRows(initialRows)
-
-    // apply suggestions for scratch when toggle is on
-    if (startFrom === 'scratch' && suggestionsOn) {
-      // will be applied per-row when user adds categories
+      setDraftRows(initialRows)
+      lastSeedRef.current = seedKey
     }
 
     goNext()
-  }, [startFrom, prevSnapshot, templates, income, availableCategories, suggestionsOn, goNext])
+  }, [startFrom, prevSnapshot, templates, income, availableCategories, draftRows.length, goNext])
 
   // ── amounts → preview: commit draft rows to the allocation hook ────────────
   const handleAmountsPreview = useCallback(() => {
+    if (!draftRowsValid) return
     const total = draftRows.reduce((s, r) => s + r.allocated_amount, 0)
     loadFromExistingBudget(
-      Math.max(total, 1), // avoid total=0 validation in the hook
+      total,
       draftRows,
       'IDR'
     )
     goNext()
-  }, [draftRows, loadFromExistingBudget, goNext])
+  }, [draftRows, draftRowsValid, loadFromExistingBudget, goNext])
 
   // ── preview → save ─────────────────────────────────────────────────────────
   const handleSave = useCallback(async () => {
-    if (pending) return
+    if (pending || !draftRowsValid) return
     setPending(true)
     try {
       await createBudgetPlan({
@@ -206,7 +216,7 @@ export default function BudgetCreatePage() {
     } finally {
       setPending(false)
     }
-  }, [pending, user, period, totalAllocated, toDatabaseFormat, goNext, t])
+  }, [pending, draftRowsValid, user, period, totalAllocated, toDatabaseFormat, goNext, t])
 
   // ── draft amount handlers ──────────────────────────────────────────────────
   const handleAmountChange = useCallback((id: string, amt: number) => {
@@ -273,6 +283,12 @@ export default function BudgetCreatePage() {
       ? t('stepOf', { step: stepIndex + 1, total: totalSteps })
       : undefined
 
+  // ── period-type card options ───────────────────────────────────────────────
+  const PERIOD_OPTIONS = [
+    { value: 'monthly' as const, icon: Calendar, labelKey: 'periodType.monthly', hintKey: 'periodType.monthlyHint' },
+    { value: 'yearly' as const, icon: CalendarRange, labelKey: 'periodType.yearly', hintKey: 'periodType.yearlyHint' },
+  ] as const
+
   // ── render ─────────────────────────────────────────────────────────────────
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4 pt-3 pb-10 md:pt-8">
@@ -288,6 +304,41 @@ export default function BudgetCreatePage() {
       {/* ── STEP 1: entry (monthly only) ─────────────────────────────────── */}
       {currentStep === 'entry' && (
         <>
+          {/* Period type selector cards */}
+          <div className="flex flex-col gap-2">
+            {PERIOD_OPTIONS.map((opt) => {
+              const active = period === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => {
+                    if (!active) {
+                      setDraftRows([])
+                      lastSeedRef.current = null
+                      setStepIndex(0)
+                      router.replace(`/budget/create?period=${opt.value}`)
+                    }
+                  }}
+                  className={cn(
+                    'flex items-center gap-3 rounded-2xl bg-card px-4 py-3.5 text-left shadow-card transition-colors',
+                    active && 'ring-2 ring-primary'
+                  )}
+                >
+                  <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px]', active ? 'bg-selected' : 'bg-muted')}>
+                    <opt.icon className={cn('h-4 w-4', active ? 'text-selected-foreground' : 'text-muted-foreground')} aria-hidden="true" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm leading-body-sm font-semibold text-foreground">{t(opt.labelKey)}</span>
+                    <span className="block text-tiny text-muted-foreground">{t(opt.hintKey)}</span>
+                  </span>
+                  <span aria-hidden="true" className={cn('h-4 w-4 shrink-0 rounded-full border-2', active ? 'border-primary bg-primary' : 'border-border')} />
+                </button>
+              )
+            })}
+          </div>
+
           {income > 0 && (
             <InfoBanner variant="success">
               {t('income', { amount: formatCurrency(income, 'IDR') })}
@@ -312,8 +363,32 @@ export default function BudgetCreatePage() {
       {/* ── STEP 2: amounts ───────────────────────────────────────────────── */}
       {currentStep === 'amounts' && (
         <>
+          {/* Yearly copy-from-last-year card */}
+          {period === 'yearly' && prevSnapshot && draftRows.length === 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                const seeded = seedFromSnapshot(prevSnapshot as Parameters<typeof seedFromSnapshot>[0])
+                const rows = seeded.categories.map((c) => ({
+                  ...c,
+                  category_color: normalizeColor(c.category_color),
+                }))
+                setDraftRows(rows)
+                lastSeedRef.current = 'yearly-copy'
+              }}
+              className="flex items-center gap-3 rounded-2xl bg-card px-4 py-3.5 text-left shadow-card transition-colors hover:bg-muted/50"
+            >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-selected">
+                <CalendarRange className="h-4 w-4 text-selected-foreground" aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1 text-sm leading-body-sm font-semibold text-foreground">
+                {t('startFrom.copy')}
+              </span>
+            </button>
+          )}
+
           <BudgetAmountsEditor
-            rows={draftRows as never}
+            rows={draftRows}
             suggestions={suggestions}
             suggestionsOn={suggestionsOn}
             onToggleSuggestions={handleToggleSuggestions}
@@ -354,8 +429,14 @@ export default function BudgetCreatePage() {
             </div>
           )}
 
+          {/* Validation hint: show when rows exist but total is 0 or any amount is negative */}
+          {draftRows.length > 0 && !draftRowsValid && (
+            <p className="text-center text-xs leading-caption text-destructive/80">
+              {t('errors.totalRequired')}
+            </p>
+          )}
           {draftRows.length === 0 && (
-            <p className="text-center text-xs leading-caption text-destructive">
+            <p className="text-center text-xs leading-caption text-destructive/80">
               {t('errors.totalRequired')}
             </p>
           )}
@@ -363,7 +444,7 @@ export default function BudgetCreatePage() {
           <button
             type="button"
             onClick={handleAmountsPreview}
-            disabled={draftRows.length === 0}
+            disabled={!draftRowsValid}
             className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
           >
             {t('amounts.preview')}
@@ -384,7 +465,7 @@ export default function BudgetCreatePage() {
           <button
             type="button"
             onClick={handleSave}
-            disabled={pending}
+            disabled={pending || !draftRowsValid}
             className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
           >
             {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
