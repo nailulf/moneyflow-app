@@ -4,71 +4,46 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 
-// Keyword → icon, first match wins. Keywords are lowercase substrings (EN + ID).
-// Order matters: more specific entries (coffee, savings, credit card) before general ones.
-const ICON_RULES: Array<[string[], LucideIcon]> = [
-  [['coffee', 'kopi'], Coffee],
-  [['saving', 'tabungan'], PiggyBank],
-  [['credit card', 'kartu kredit'], CreditCard],
-  [['food', 'dining', 'makan'], Utensils],
-  [['transport', 'grab', 'gojek'], Car],
-  [['shopping', 'belanja'], ShoppingBag],
-  [['entertain', 'hiburan'], Clapperboard],
-  [['bill', 'utilit', 'tagihan'], Receipt],
-  [['health', 'kesehatan', 'medical'], HeartPulse],
-  [['education', 'pendidikan'], GraduationCap],
-  [['travel', 'perjalanan', 'liburan'], Plane],
-  [['income', 'salary', 'gaji'], Briefcase],
-  [['transfer'], ArrowLeftRight],
-]
-
-export function getCategoryIcon(categoryName: string | null | undefined): LucideIcon {
-  const name = categoryName?.toLowerCase() ?? ''
-  if (!name) return Tag
-  for (const [keywords, icon] of ICON_RULES) {
-    if (keywords.some((k) => name.includes(k))) return icon
-  }
-  return Tag
-}
-
 export interface CategoryTint {
   bg: string
   fg: string
 }
 
 // Literal class strings — Tailwind's scanner must see these verbatim.
-export const CATEGORY_TINTS: CategoryTint[] = [
-  { bg: 'bg-tint-blue-bg', fg: 'text-tint-blue-fg' },
-  { bg: 'bg-tint-green-bg', fg: 'text-tint-green-fg' },
-  { bg: 'bg-tint-orange-bg', fg: 'text-tint-orange-fg' },
-  { bg: 'bg-tint-pink-bg', fg: 'text-tint-pink-fg' },
-  { bg: 'bg-tint-teal-bg', fg: 'text-tint-teal-fg' },
-  { bg: 'bg-tint-purple-bg', fg: 'text-tint-purple-fg' },
-  { bg: 'bg-tint-slate-bg', fg: 'text-tint-slate-fg' },
-  { bg: 'bg-tint-amber-bg', fg: 'text-tint-amber-fg' },
+// Scanned because tailwind.config.js content includes './lib/**/*.{js,ts,jsx,tsx}'.
+const TINT = {
+  blue:   { bg: 'bg-tint-blue-bg',   fg: 'text-tint-blue-fg' },
+  green:  { bg: 'bg-tint-green-bg',  fg: 'text-tint-green-fg' },
+  orange: { bg: 'bg-tint-orange-bg', fg: 'text-tint-orange-fg' },
+  pink:   { bg: 'bg-tint-pink-bg',   fg: 'text-tint-pink-fg' },
+  teal:   { bg: 'bg-tint-teal-bg',   fg: 'text-tint-teal-fg' },
+  purple: { bg: 'bg-tint-purple-bg', fg: 'text-tint-purple-fg' },
+  slate:  { bg: 'bg-tint-slate-bg',  fg: 'text-tint-slate-fg' },
+  amber:  { bg: 'bg-tint-amber-bg',  fg: 'text-tint-amber-fg' },
+} satisfies Record<string, CategoryTint>
+
+// Keyword → (icon, tint), first match wins (EN + ID).
+// Order matters: more specific entries (coffee, savings, credit card) before general ones.
+const CATEGORY_RULES: Array<[string[], LucideIcon, CategoryTint]> = [
+  [['coffee', 'kopi'],              Coffee,        TINT.amber],
+  [['saving', 'tabungan'],          PiggyBank,     TINT.teal],
+  [['credit card', 'kartu kredit'], CreditCard,    TINT.blue],
+  [['food', 'dining', 'makan'],     Utensils,      TINT.amber],
+  [['transport', 'grab', 'gojek'],  Car,           TINT.blue],
+  [['shopping', 'belanja'],         ShoppingBag,   TINT.pink],
+  [['entertain', 'hiburan'],        Clapperboard,  TINT.purple],
+  [['bill', 'utilit', 'tagihan'],   Receipt,       TINT.slate],
+  [['health', 'kesehatan', 'medical'], HeartPulse, TINT.green],
+  [['education', 'pendidikan'],     GraduationCap, TINT.purple],
+  [['travel', 'perjalanan', 'liburan'], Plane,     TINT.teal],
+  [['income', 'salary', 'gaji'],    Briefcase,     TINT.green],
+  [['transfer'],                    ArrowLeftRight, TINT.slate],
 ]
 
-const TINT_BY_NAME: Record<string, CategoryTint> = {
-  blue: CATEGORY_TINTS[0], green: CATEGORY_TINTS[1], orange: CATEGORY_TINTS[2],
-  pink: CATEGORY_TINTS[3], teal: CATEGORY_TINTS[4], purple: CATEGORY_TINTS[5],
-  slate: CATEGORY_TINTS[6], amber: CATEGORY_TINTS[7],
-}
-
-// Keyword → tint, first match wins (EN + ID), mirroring ICON_RULES ordering.
-const TINT_RULES: Array<[string[], CategoryTint]> = [
-  [['coffee', 'kopi'], TINT_BY_NAME.amber],
-  [['saving', 'tabungan'], TINT_BY_NAME.teal],
-  [['credit card', 'kartu kredit'], TINT_BY_NAME.blue],
-  [['food', 'dining', 'makan'], TINT_BY_NAME.amber],
-  [['transport', 'grab', 'gojek'], TINT_BY_NAME.blue],
-  [['shopping', 'belanja'], TINT_BY_NAME.pink],
-  [['entertain', 'hiburan'], TINT_BY_NAME.purple],
-  [['bill', 'utilit', 'tagihan'], TINT_BY_NAME.slate],
-  [['health', 'kesehatan', 'medical'], TINT_BY_NAME.green],
-  [['education', 'pendidikan'], TINT_BY_NAME.purple],
-  [['travel', 'perjalanan', 'liburan'], TINT_BY_NAME.teal],
-  [['income', 'salary', 'gaji'], TINT_BY_NAME.green],
-  [['transfer'], TINT_BY_NAME.slate],
+// Hash-fallback order for unknown names (orange is only reachable via this fallback).
+export const CATEGORY_TINTS: CategoryTint[] = [
+  TINT.blue, TINT.green, TINT.orange, TINT.pink,
+  TINT.teal, TINT.purple, TINT.slate, TINT.amber,
 ]
 
 // djb2 — stable across sessions, no Math.random.
@@ -80,11 +55,18 @@ function hashName(name: string): number {
   return Math.abs(hash)
 }
 
+function findRule(name: string): [string[], LucideIcon, CategoryTint] | undefined {
+  return CATEGORY_RULES.find(([keywords]) => keywords.some((k) => name.includes(k)))
+}
+
+export function getCategoryIcon(categoryName: string | null | undefined): LucideIcon {
+  const name = categoryName?.toLowerCase() ?? ''
+  if (!name) return Tag
+  return findRule(name)?.[1] ?? Tag
+}
+
 export function getCategoryTint(categoryName: string | null | undefined): CategoryTint {
   const name = categoryName?.toLowerCase() ?? ''
-  if (!name) return TINT_BY_NAME.slate
-  for (const [keywords, tint] of TINT_RULES) {
-    if (keywords.some((k) => name.includes(k))) return tint
-  }
-  return CATEGORY_TINTS[hashName(name) % CATEGORY_TINTS.length]
+  if (!name) return TINT.slate
+  return findRule(name)?.[2] ?? CATEGORY_TINTS[hashName(name) % CATEGORY_TINTS.length]
 }

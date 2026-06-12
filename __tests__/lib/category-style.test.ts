@@ -80,4 +80,8 @@ describe('getCategoryTint', () => {
     expect(getCategoryTint(null)).toEqual({ bg: 'bg-tint-slate-bg', fg: 'text-tint-slate-fg' })
     expect(getCategoryTint(undefined)).toEqual({ bg: 'bg-tint-slate-bg', fg: 'text-tint-slate-fg' })
   })
+
+  it('pins the hash fallback so algorithm changes are caught', () => {
+    expect(getCategoryTint('Alpha')).toEqual({ bg: 'bg-tint-green-bg', fg: 'text-tint-green-fg' })
+  })
 })
