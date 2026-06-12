@@ -38,10 +38,13 @@ export function NetWorthHeroCard({
   const nwValues = months.map((m) => m.netWorth)
   const nwMin = Math.min(...nwValues)
   const nwMax = Math.max(...nwValues)
-  const nwSpan = nwMax - nwMin || 1
+  const nwSpan = nwMax - nwMin
   const slot = n > 0 ? CHART_W / n : CHART_W
+  const barW = Math.min(BAR_W, Math.max(8, slot - 4))
   const xCenter = (i: number) => slot * i + slot / 2
-  const lineY = (v: number) => 8 + (1 - (v - nwMin) / nwSpan) * (CHART_H - 20)
+  // Flat history (incl. single-month users) centers the line instead of pinning it low.
+  const lineY = (v: number) =>
+    nwSpan === 0 ? CHART_H / 2 - 2 : 8 + (1 - (v - nwMin) / nwSpan) * (CHART_H - 20)
   const linePoints = months.map((m, i) => `${xCenter(i)},${lineY(m.netWorth)}`).join(' ')
   const last = n - 1
 
@@ -67,9 +70,9 @@ export function NetWorthHeroCard({
             <rect
               key={m.label + i}
               data-bar
-              x={xCenter(i) - BAR_W / 2}
+              x={xCenter(i) - barW / 2}
               y={CHART_H - h}
-              width={BAR_W}
+              width={barW}
               height={h}
               rx={3}
               className={i === last ? 'fill-hero-foreground/20' : 'fill-hero-foreground/10'}
