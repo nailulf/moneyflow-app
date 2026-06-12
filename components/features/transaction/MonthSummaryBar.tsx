@@ -22,7 +22,7 @@ export function MonthSummaryBar({ month, onMonthChange, income, expense }: Month
   const label = new Date(month.year, month.month, 1).toLocaleString(locale, { month: 'short', year: 'numeric' })
 
   return (
-    <div className="flex items-center justify-between rounded-xl bg-muted/40 px-3 py-2">
+    <div className="flex items-center justify-between rounded-2xl bg-card px-3 py-2 shadow-card">
       <div className="flex items-center gap-1">
         <button type="button" aria-label={t('prevMonth')} onClick={() => onMonthChange(step(month, -1))} className="rounded-md p-1 text-muted-foreground hover:bg-muted">
           <ChevronLeft className="size-4" />
@@ -32,9 +32,13 @@ export function MonthSummaryBar({ month, onMonthChange, income, expense }: Month
           <ChevronRight className="size-4" />
         </button>
       </div>
-      <div className="flex items-center gap-3 text-xs font-medium">
-        <span className="text-success">{t('summary.income')} {formatCurrencyCompact(income)}</span>
-        <span className="text-destructive">{t('summary.expense')} {formatCurrencyCompact(expense)}</span>
+      <div className="flex items-center gap-1.5">
+        <span className="rounded-full bg-success/10 px-2.5 py-1 text-tiny font-semibold text-success">
+          {t('summary.income')} {formatCurrencyCompact(income)}
+        </span>
+        <span className="rounded-full bg-destructive/10 px-2.5 py-1 text-tiny font-semibold text-destructive">
+          {t('summary.expense')} {formatCurrencyCompact(expense)}
+        </span>
       </div>
     </div>
   )

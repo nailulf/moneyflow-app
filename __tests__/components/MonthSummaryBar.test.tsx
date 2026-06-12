@@ -16,4 +16,12 @@ describe('MonthSummaryBar', () => {
     fireEvent.click(screen.getByRole('button', { name: /next month/i }))
     expect(onChange).toHaveBeenCalledWith({ year: 2025, month: 6 })
   })
+
+  it('renders income and expense as filled tinted pills', () => {
+    render(<MonthSummaryBar month={{ year: 2026, month: 5 }} onMonthChange={() => {}} income={1000} expense={500} />)
+    const income = screen.getByText(/summary\.income/)
+    expect(income.className).toMatch(/bg-success\/10/)
+    const expense = screen.getByText(/summary\.expense/)
+    expect(expense.className).toMatch(/bg-destructive\/10/)
+  })
 })
