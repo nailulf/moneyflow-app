@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 import { getExchangeRate, SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
+import { sanitizeAccountPayload } from '@/lib/account-payload'
 
 /**
  * Build a Map of "FROM-TO" → rate for converting any supported currency
@@ -159,7 +160,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, type, balance, currency, is_default, description, property_type, asset_location, depreciation_rate, monthly_payment, mortgage_end_date } = body
 
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -168,12 +168,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!name) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    const result = sanitizeAccountPayload(body)
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
     // If this is being set as default, unset other defaults first
-    if (is_default) {
+    if (result.data.is_default) {
       await supabase
         .from('accounts')
         .update({ is_default: false, updated_at: new Date().toISOString() })
@@ -183,20 +184,10 @@ export async function POST(request: NextRequest) {
 
     const insertData = {
       user_id: user.id,
-      name,
-      type: (type || 'BANK').toUpperCase(),
-      balance: balance || 0.00,
-      currency: currency || 'IDR',
-      is_default: is_default || false,
+      ...result.data,
       is_active: true,
-      description: description || null,
-      property_type: property_type || null,
-      asset_location: asset_location || null,
-      depreciation_rate: depreciation_rate ?? null,
-      monthly_payment: monthly_payment ?? null,
-      mortgage_end_date: mortgage_end_date || null,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     }
 
     const { data, error } = await supabase
@@ -220,7 +211,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, name, type, balance, currency, is_default, is_active, description, property_type, asset_location, depreciation_rate, monthly_payment, mortgage_end_date } = body
+    const { id, name, type, balance, currency, is_default, is_active, description, property_type, asset_location, depreciation_rate, monthly_payment, mortgage_end_date, purchase_date, credit_limit, statement_day, due_day, vehicle_type, broker, interest_rate, loan_term_months, down_payment, investment_goal } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Account ID is required' }, { status: 400 })
@@ -273,6 +264,16 @@ export async function PUT(request: NextRequest) {
     if (depreciation_rate !== undefined) updateData.depreciation_rate = depreciation_rate ?? null
     if (monthly_payment !== undefined) updateData.monthly_payment = monthly_payment ?? null
     if (mortgage_end_date !== undefined) updateData.mortgage_end_date = mortgage_end_date || null
+    if (purchase_date !== undefined) updateData.purchase_date = purchase_date || null
+    if (credit_limit !== undefined) updateData.credit_limit = credit_limit ?? null
+    if (statement_day !== undefined) updateData.statement_day = statement_day ?? null
+    if (due_day !== undefined) updateData.due_day = due_day ?? null
+    if (vehicle_type !== undefined) updateData.vehicle_type = vehicle_type || null
+    if (broker !== undefined) updateData.broker = broker || null
+    if (interest_rate !== undefined) updateData.interest_rate = interest_rate ?? null
+    if (loan_term_months !== undefined) updateData.loan_term_months = loan_term_months ?? null
+    if (down_payment !== undefined) updateData.down_payment = down_payment ?? null
+    if (investment_goal !== undefined) updateData.investment_goal = investment_goal || null
 
     const { data, error } = await supabase
       .from('accounts')
