@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
+import { isFullScreenFlow } from '@/lib/nav-visibility'
 import { AddTransactionForm } from '@/components/features/transaction/AddTransactionForm'
 
 export function MobileBottomNav() {
@@ -12,7 +13,7 @@ export function MobileBottomNav() {
   const t = useTranslations('navigation.items')
 
   // Full-screen flows draw without the tab bar (design 08*, budget 2a–2d).
-  if (pathname.startsWith('/accounts/new') || pathname.startsWith('/budget/create') || pathname.startsWith('/budget/edit')) return null
+  if (isFullScreenFlow(pathname)) return null
 
   const navItems = [
     { title: t('home'), url: '/', icon: Home },

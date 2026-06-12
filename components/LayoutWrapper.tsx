@@ -22,6 +22,7 @@ import { OnboardingModal } from '@/components/features/onboarding/OnboardingModa
 import { Loader2 } from 'lucide-react'
 import { MobileScreenHeader } from '@/components/features/navigation/MobileScreenHeader'
 import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'
+import { isFullScreenFlow } from '@/lib/nav-visibility'
 import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { preferences } from '@/lib/api/user-preferences'
@@ -102,7 +103,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const ownsMobileHeader = pathname === '/' || pathname.startsWith('/transactions') || pathname.startsWith('/accounts') || pathname.startsWith('/budget')
 
   // MobileBottomNav hides itself on these routes — drop its clearance padding too.
-  const hidesBottomNav = pathname.startsWith('/accounts/new')
+  const hidesBottomNav = isFullScreenFlow(pathname)
 
   const navUserData = {
     name: user.user_metadata.full_name || user.email?.split('@')[0] || 'User',
