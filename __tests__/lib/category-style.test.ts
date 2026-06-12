@@ -2,8 +2,7 @@ import {
   Utensils, Car, ShoppingBag, Clapperboard, Receipt, HeartPulse,
   GraduationCap, Plane, Briefcase, ArrowLeftRight, PiggyBank, CreditCard, Coffee, Tag,
 } from 'lucide-react'
-import { getCategoryIcon } from '@/lib/category-style'
-import { getCategoryTint, CATEGORY_TINTS } from '@/lib/category-style'
+import { getCategoryIcon, getCategoryTint, CATEGORY_TINTS } from '@/lib/category-style'
 
 describe('getCategoryIcon', () => {
   it.each([
