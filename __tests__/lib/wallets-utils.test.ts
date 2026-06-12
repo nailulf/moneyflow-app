@@ -47,3 +47,54 @@ describe('groupAccounts', () => {
     expect(groupAccounts([])).toEqual([])
   })
 })
+
+import { buildAccountPayload, deriveMortgage } from '@/lib/wallets-utils'
+
+describe('buildAccountPayload', () => {
+  it('fills every nullable column and applies defaults', () => {
+    const p = buildAccountPayload('user-1', { name: 'GoPay', type: 'DIGITAL_WALLET', balance: 50000 })
+    expect(p).toMatchObject({
+      user_id: 'user-1', name: 'GoPay', type: 'DIGITAL_WALLET', balance: 50000,
+      currency: 'IDR', is_default: false, is_active: true,
+      description: null, property_type: null, asset_location: null,
+      depreciation_rate: null, monthly_payment: null, mortgage_end_date: null,
+      purchase_date: null, credit_limit: null, statement_day: null, due_day: null,
+      vehicle_type: null, broker: null, interest_rate: null,
+      loan_term_months: null, down_payment: null, investment_goal: null,
+    })
+  })
+  it('passes through provided extras', () => {
+    const p = buildAccountPayload('u', { name: 'Card', type: 'CREDIT_CARD', credit_limit: 5_000_000, statement_day: 25, due_day: 15 })
+    expect(p.credit_limit).toBe(5_000_000)
+    expect(p.statement_day).toBe(25)
+    expect(p.balance).toBe(0)
+  })
+})
+
+describe('deriveMortgage', () => {
+  const input = {
+    propertyName: 'House — Depok',
+    currentValue: 850_000_000,
+    downPayment: 250_000_000,
+    interestRate: 7.5,
+    monthlyPayment: 5_000_000,
+    loanTermYears: 15,
+    purchaseDate: '2024-05-01',
+  }
+  it('derives the liability account fields', () => {
+    const m = deriveMortgage(input)
+    expect(m).toEqual({
+      name: 'House — Depok — Mortgage',
+      balance: -600_000_000,
+      monthly_payment: 5_000_000,
+      interest_rate: 7.5,
+      loan_term_months: 180,
+      mortgage_end_date: '2039-05-01',
+    })
+  })
+  it('clamps the end date to a valid day of month', () => {
+    // Jan 31 + 1y term lands on Jan 31 next year (no clamp needed); Feb edge:
+    const m = deriveMortgage({ ...input, purchaseDate: '2024-02-29', loanTermYears: 1 })
+    expect(m.mortgage_end_date).toBe('2025-02-28')
+  })
+})
