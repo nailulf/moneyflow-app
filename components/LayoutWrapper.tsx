@@ -61,6 +61,13 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     window.history.replaceState({}, '', url.toString())
   }, [searchParams])
 
+  // Standalone pages (auth + offline) render without the sidebar layout.
+  // Checked before `loading` so /offline still renders when the auth fetch
+  // can't resolve (no network).
+  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth') || pathname.startsWith('/verify-email') || pathname.startsWith('/offline')) {
+    return <>{children}</>
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -69,21 +76,16 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     )
   }
 
-  // If we are on auth pages, don't show the sidebar layout
-  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth') || pathname.startsWith('/verify-email')) {
-    return <>{children}</>
-  }
-
   if (!user) {
     // Middleware should handle redirect, but just in case
     return null
   }
 
   const pageTitle =
-    pathname === '/spending' || pathname.startsWith('/spending') ? t('spending') :
-    pathname === '/accounts' || pathname.startsWith('/accounts') ? t('accounts') :
-    pathname === '/portfolio' || pathname.startsWith('/portfolio') ? t('portfolio') :
-    pathname === '/forecast' || pathname.startsWith('/forecast') ? t('forecast') :
+    pathname.startsWith('/spending') ? t('spending') :
+    pathname.startsWith('/accounts') ? t('accounts') :
+    pathname.startsWith('/portfolio') ? t('portfolio') :
+    pathname.startsWith('/forecast') ? t('forecast') :
     pathname.startsWith('/budget') ? t('budget') :
     pathname.startsWith('/transactions') ? t('transactions') :
     pathname.startsWith('/charts') ? t('charts') :
