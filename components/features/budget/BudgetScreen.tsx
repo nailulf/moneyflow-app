@@ -22,7 +22,7 @@ export function BudgetScreen() {
   const [cursor, setCursor] = useState(() => ({ year: now.getFullYear(), monthIndex: now.getMonth() }))
 
   const isMonthly = periodType === 'monthly'
-  const { snapshot, isLoading, noSnapshot } = useBudgetSnapshot(
+  const { snapshot, isLoading, noSnapshot, error, refetch } = useBudgetSnapshot(
     periodType, cursor.year, isMonthly ? cursor.monthIndex + 1 : undefined
   )
 
@@ -44,7 +44,11 @@ export function BudgetScreen() {
 
   const overview = useMemo(() => (snapshot ? overviewFromSnapshot(snapshot) : null), [snapshot])
   const rows = useMemo(() => (snapshot ? categoryRowsFromSnapshot(snapshot) : []), [snapshot])
-  const editable = snapshot?.status !== 'closed'
+  // Guard against stale 'active' status on past months (cron flips it monthly).
+  const isCurrentOrFuture = isMonthly
+    ? cursor.year * 12 + cursor.monthIndex >= now.getFullYear() * 12 + now.getMonth()
+    : cursor.year >= now.getFullYear()
+  const editable = isCurrentOrFuture && snapshot?.status !== 'closed'
   const currency = snapshot?.currency ?? 'IDR'
 
   return (
@@ -70,13 +74,35 @@ export function BudgetScreen() {
           { value: 'yearly', label: t('yearly') },
         ]}
         value={periodType}
-        onChange={(v) => setPeriodType(v)}
+        onChange={(v) => {
+          setPeriodType(v)
+          // Clamp the cursor to the new period type's forward bound (current+1).
+          setCursor((c) => {
+            if (v === 'monthly') {
+              const maxIdx = now.getFullYear() * 12 + now.getMonth() + 1
+              const idx = c.year * 12 + c.monthIndex
+              return idx > maxIdx ? { year: Math.floor(maxIdx / 12), monthIndex: maxIdx % 12 } : c
+            }
+            return c.year > now.getFullYear() + 1 ? { ...c, year: now.getFullYear() + 1 } : c
+          })
+        }}
       />
 
       {isLoading ? (
         <div className="flex flex-col gap-4" aria-busy="true">
           <div className="h-32 animate-pulse rounded-2xl bg-card shadow-card" />
           <div className="h-48 animate-pulse rounded-2xl bg-card shadow-card" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center gap-3 rounded-2xl bg-card p-6 text-center shadow-card">
+          <p className="text-sm leading-body-sm text-destructive">{t('error')}</p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded-full bg-muted px-4 py-2 text-sm leading-none font-semibold text-foreground transition-colors hover:bg-muted/70"
+          >
+            {t('retry')}
+          </button>
         </div>
       ) : noSnapshot || !snapshot || !overview ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl bg-card p-6 text-center shadow-card">
