@@ -42,7 +42,7 @@ export default function VehiclePage() {
   const vehicleType = watch('vehicleType')
 
   const onSubmit = async (data: z.output<typeof vehicleSchema>) => {
-    if (!user) return
+    if (!user || pending) return
     setPending(true)
     try {
       const account = await createAccount(
@@ -78,6 +78,7 @@ export default function VehiclePage() {
         backLabel={t('common.back')}
         formId={FORM_ID}
         saveLabel={t('common.save')}
+        pending={pending}
       />
       <SegmentedControl
         options={[

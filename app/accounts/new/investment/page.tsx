@@ -39,7 +39,7 @@ export default function InvestmentPage() {
   const goal = watch('goal')
 
   const onSubmit = async (data: z.output<typeof investmentSchema>) => {
-    if (!user) return
+    if (!user || pending) return
     setPending(true)
     try {
       const account = await createAccount(
@@ -75,6 +75,7 @@ export default function InvestmentPage() {
         backLabel={t('common.back')}
         formId={FORM_ID}
         saveLabel={t('common.save')}
+        pending={pending}
       />
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <FormCard>

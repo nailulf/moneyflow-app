@@ -46,7 +46,7 @@ export default function PropertyPage() {
   const hasMortgage = watch('hasMortgage')
 
   const onSubmit = async (data: z.output<typeof propertySchema>) => {
-    if (!user) return
+    if (!user || pending) return
     setPending(true)
     try {
       const property = await createAccount(
@@ -141,6 +141,7 @@ export default function PropertyPage() {
         backLabel={t('common.back')}
         formId={FORM_ID}
         saveLabel={t('common.save')}
+        pending={pending}
       />
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <FormCard>

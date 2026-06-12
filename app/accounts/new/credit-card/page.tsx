@@ -36,7 +36,7 @@ export default function CreditCardPage() {
     })
 
   const onSubmit = async (data: z.output<typeof creditCardSchema>) => {
-    if (!user) return
+    if (!user || pending) return
     setPending(true)
     try {
       const account = await createAccount(
@@ -73,6 +73,7 @@ export default function CreditCardPage() {
         backLabel={t('common.back')}
         formId={FORM_ID}
         saveLabel={t('common.save')}
+        pending={pending}
       />
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <FormCard>

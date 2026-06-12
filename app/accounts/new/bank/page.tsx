@@ -42,7 +42,7 @@ export default function BankAccountPage() {
   const kind = watch('kind')
 
   const onSubmit = async (data: z.output<typeof bankAccountSchema>) => {
-    if (!user) return
+    if (!user || pending) return
     setPending(true)
     try {
       const account = await createAccount(
@@ -72,6 +72,7 @@ export default function BankAccountPage() {
         backLabel={t('common.back')}
         formId={FORM_ID}
         saveLabel={t('common.save')}
+        pending={pending}
       />
       <SegmentedControl
         options={[
