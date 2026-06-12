@@ -1034,6 +1034,112 @@
     "install": "Install",
     "dismiss": "Dismiss"
   },
+  "accountCreate": {
+    "typeSelect": {
+      "title": "Add Account",
+      "choose": "Choose account type",
+      "close": "Close",
+      "types": {
+        "bank": "Bank Account",
+        "digitalWallet": "Digital Wallet",
+        "property": "Property",
+        "vehicle": "Vehicle",
+        "creditCard": "Credit Card",
+        "investment": "Investment Account"
+      }
+    },
+    "common": { "save": "Save", "back": "Back" },
+    "bank": {
+      "title": "Bank / Wallet",
+      "segBank": "Bank Account",
+      "segWallet": "Digital Wallet",
+      "nameLabel": "Account Name",
+      "namePlaceholder": "e.g. BCA Savings",
+      "walletPlaceholder": "e.g. GoPay",
+      "balanceLabel": "Initial Balance",
+      "submit": "Add Account"
+    },
+    "property": {
+      "title": "Property Asset",
+      "nameLabel": "Property Name",
+      "namePlaceholder": "e.g. House — Depok",
+      "valueLabel": "Current Value",
+      "purchaseDateLabel": "Purchase Date",
+      "mortgage": "Mortgage Details",
+      "downPayment": "Down Payment",
+      "interestRate": "Interest Rate (%/year)",
+      "monthlyPayment": "Monthly Payment",
+      "loanTermYears": "Loan Term (years)",
+      "submit": "Add Property"
+    },
+    "vehicle": {
+      "title": "Vehicle Asset",
+      "segCar": "Car",
+      "segMotorcycle": "Motorcycle",
+      "segTruck": "Truck",
+      "nameLabel": "Vehicle Name",
+      "namePlaceholder": "e.g. Honda HR-V 2021",
+      "priceLabel": "Purchase Price",
+      "depreciationLabel": "Depreciation Rate (%/year)",
+      "submit": "Add Vehicle"
+    },
+    "creditCard": {
+      "title": "Credit Card",
+      "nameLabel": "Card Name",
+      "namePlaceholder": "e.g. BCA Platinum",
+      "limitLabel": "Credit Limit",
+      "statementLabel": "Statement Date (day)",
+      "dueLabel": "Due Date (day)",
+      "info": "Spending is tracked as expenses. Balance reflects remaining available credit.",
+      "submit": "Add Credit Card"
+    },
+    "investment": {
+      "title": "Investment Account",
+      "nameLabel": "Account Name",
+      "namePlaceholder": "e.g. Stockbit — Growth",
+      "brokerLabel": "Broker",
+      "brokerPlaceholder": "e.g. Stockbit, Bibit, IPOT",
+      "info": "Your portfolio is created after setup. Add stocks, bonds, and funds from the account page.",
+      "goalLabel": "Investment Goal",
+      "optional": "Optional",
+      "goalPlaceholder": "or type your own goal…",
+      "goals": {
+        "capitalGain": "Capital Gain",
+        "dividend": "Dividend Investing",
+        "education": "Education Fund",
+        "retirement": "Retirement Fund"
+      },
+      "submit": "Create Account"
+    },
+    "success": {
+      "title": "Account created!",
+      "typeLabels": {
+        "BANK": "Bank Account",
+        "DIGITAL_WALLET": "Digital Wallet",
+        "PROPERTY": "Property",
+        "VEHICLE": "Vehicle",
+        "CREDIT_CARD": "Credit Card",
+        "INVESTMENT": "Investment Account"
+      },
+      "investmentInfo": "It's now in your Portfolio tab. Add the assets you own to start tracking.",
+      "addAsset": "+ Add your first asset",
+      "viewPortfolio": "I'll do it later — view portfolio",
+      "backToWallets": "Back to Wallets",
+      "mortgageCreated": "Linked mortgage added to Loans & Mortgages."
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "brokerRequired": "Broker is required",
+      "amountInvalid": "Enter a valid amount",
+      "dayRange": "Enter a day between 1 and 31",
+      "dateRequired": "Select a date",
+      "mortgageIncomplete": "Fill in all mortgage fields",
+      "downPaymentTooLarge": "Down payment must be below the value",
+      "termInvalid": "Enter a valid loan term",
+      "createFailed": "Could not create the account. Try again.",
+      "mortgageRolledBack": "Mortgage failed — the property was not saved. Try again."
+    }
+  },
   "wallets": {
     "title": "Wallets & Accounts",
     "subtitle": "{accounts} accounts · {liabilities} liabilities",
