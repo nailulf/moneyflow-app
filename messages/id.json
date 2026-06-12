@@ -1158,6 +1158,33 @@
     },
     "empty": "Belum ada akun — tambahkan yang pertama."
   },
+  "budgetTab": {
+    "title": "Anggaran",
+    "prevPeriod": "Periode sebelumnya",
+    "nextPeriod": "Periode berikutnya",
+    "monthly": "Bulanan",
+    "yearly": "Tahunan",
+    "overview": {
+      "title": "Ringkasan",
+      "edit": "Ubah",
+      "budget": "Anggaran",
+      "spent": "Terpakai",
+      "left": "Sisa",
+      "used": "{pct}%"
+    },
+    "categories": {
+      "title": "Anggaran Kategori",
+      "add": "Tambah",
+      "over": "Lebih",
+      "spentSub": "{amount} terpakai",
+      "empty": "Belum ada anggaran kategori di periode ini."
+    },
+    "empty": {
+      "title": "Belum ada anggaran",
+      "description": "Atur batas pengeluaran per kategori dan pantau perkembangannya.",
+      "cta": "Buat anggaran"
+    }
+  },
   "home": {
     "greeting": {
       "morning": "Selamat pagi 👋",

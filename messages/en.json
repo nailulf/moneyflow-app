@@ -1158,6 +1158,33 @@
     },
     "empty": "No accounts yet — add your first one."
   },
+  "budgetTab": {
+    "title": "Budget",
+    "prevPeriod": "Previous period",
+    "nextPeriod": "Next period",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "overview": {
+      "title": "Overview",
+      "edit": "Edit",
+      "budget": "Budget",
+      "spent": "Spent",
+      "left": "Left",
+      "used": "{pct}%"
+    },
+    "categories": {
+      "title": "Category Budgets",
+      "add": "Add",
+      "over": "Over",
+      "spentSub": "{amount} spent",
+      "empty": "No category budgets in this period."
+    },
+    "empty": {
+      "title": "No budget yet",
+      "description": "Set spending limits per category and track how you're doing.",
+      "cta": "Create budget"
+    }
+  },
   "home": {
     "greeting": {
       "morning": "Good morning 👋",
