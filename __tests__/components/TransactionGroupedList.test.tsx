@@ -6,7 +6,6 @@ import { TransactionGroupedList } from '@/components/features/transaction/Transa
 const props = {
   todayKey: '2025-06-07',
   getCategoryName: () => 'Food',
-  getCategoryColor: () => 'hsl(var(--chart-1))',
   getAccountName: () => 'BCA',
   onSelect: () => {},
   isLoading: false,
