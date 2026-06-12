@@ -1159,6 +1159,8 @@
     "empty": "Belum ada akun — tambahkan yang pertama."
   },
   "budgetTab": {
+    "error": "Gagal memuat anggaran periode ini. Coba lagi.",
+    "retry": "Coba lagi",
     "title": "Anggaran",
     "prevPeriod": "Periode sebelumnya",
     "nextPeriod": "Periode berikutnya",

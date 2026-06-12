@@ -1159,6 +1159,8 @@
     "empty": "No accounts yet — add your first one."
   },
   "budgetTab": {
+    "error": "Couldn't load this period's budget. Try again.",
+    "retry": "Retry",
     "title": "Budget",
     "prevPeriod": "Previous period",
     "nextPeriod": "Next period",
