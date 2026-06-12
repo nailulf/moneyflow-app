@@ -96,6 +96,7 @@ interface AccountLike {
   type: string
   balance: number
   currentBalance?: number
+  currentBalanceInBase?: number
   currency: string
 }
 
@@ -108,7 +109,7 @@ export interface AccountSplit<A extends AccountLike> {
 
 const LIABILITY_TYPES = new Set(['CREDIT_CARD', 'MORTGAGE'])
 
-const effectiveBalance = (a: AccountLike) => a.currentBalance ?? a.balance
+const effectiveBalance = (a: AccountLike) => a.currentBalanceInBase ?? a.currentBalance ?? a.balance
 
 /** Liability ⇔ liability-typed account or negative balance (mirrors NetWorthOverview intent). */
 export function splitAccounts<A extends AccountLike>(accounts: A[]): AccountSplit<A> {

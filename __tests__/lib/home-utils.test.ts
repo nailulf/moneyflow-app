@@ -114,6 +114,10 @@ describe('splitAccounts', () => {
     expect(assetsTotal).toBe(1000)        // 100 + 900 (currentBalance preferred)
     expect(liabilitiesTotal).toBe(460)    // |−50| + |−400| + |−10|
   })
+  it('prefers currentBalanceInBase over currentBalance', () => {
+    const accounts = [acc({ id: '1', type: 'BANK', balance: 5, currentBalance: 10, currentBalanceInBase: 7 })]
+    expect(splitAccounts(accounts).assetsTotal).toBe(7)
+  })
 })
 
 // Compare LOCAL date parts — toISOString() shifts to UTC and breaks in non-UTC timezones.
