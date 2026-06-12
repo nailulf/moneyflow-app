@@ -53,14 +53,26 @@ export function TransactionsScreen() {
   const resetFilters = () => setFilters((f) => ({ ...f, type: 'ALL', search: '', categoryIds: [], accountIds: [], amountMin: undefined, amountMax: undefined }))
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-3 pt-3 md:pt-0 md:pb-6">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-4 pt-3 md:pt-0 md:pb-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl leading-title-3 font-bold text-foreground">{t('title')}</h1>
-        <div className="flex items-center gap-1">
-          <button type="button" aria-label={t('searchPlaceholder')} onClick={() => setShowSearch((s) => { if (s) setFilters((f) => ({ ...f, search: '' })); return !s })} className="rounded-full p-2 text-muted-foreground hover:bg-muted"><Search className="size-5" /></button>
-          <button type="button" aria-label={activeFilterCount > 0 ? t('filter.titleWithCount', { count: activeFilterCount }) : t('filter.title')} onClick={() => setFilterOpen(true)} className="relative rounded-full p-2 text-muted-foreground hover:bg-muted">
-            <SlidersHorizontal className="size-5" />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label={activeFilterCount > 0 ? t('filter.titleWithCount', { count: activeFilterCount }) : t('filter.title')}
+            onClick={() => setFilterOpen(true)}
+            className="relative flex h-9 w-9 items-center justify-center rounded-[10px] bg-card text-foreground shadow-card"
+          >
+            <SlidersHorizontal className="size-4" />
             {activeFilterCount > 0 && <span aria-hidden="true" className="absolute right-1 top-1 size-2 rounded-full bg-primary" />}
+          </button>
+          <button
+            type="button"
+            aria-label={t('searchPlaceholder')}
+            onClick={() => setShowSearch((s) => { if (s) setFilters((f) => ({ ...f, search: '' })); return !s })}
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-card text-foreground shadow-card"
+          >
+            <Search className="size-4" />
           </button>
         </div>
       </header>
