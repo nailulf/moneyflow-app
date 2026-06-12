@@ -64,6 +64,7 @@ export function GoalsGrid({ goals }: GoalsGridProps) {
                 })}
               </p>
               <div className="h-1.5 overflow-hidden rounded-sm bg-muted" role="progressbar"
+                aria-label={g.name}
                 aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
                 <div className="h-full rounded-sm bg-primary" style={{ width: `${pct}%` }} />
               </div>

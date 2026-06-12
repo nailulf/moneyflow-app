@@ -45,7 +45,7 @@ export function UpcomingStrip({ items }: UpcomingStripProps) {
                     first ? 'bg-primary text-primary-foreground' : 'border border-muted bg-muted/50'
                   )}
                 >
-                  <span className={cn('text-[10px] font-semibold leading-none', first ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
+                  <span className={cn('text-[10px] font-semibold leading-none', first ? 'text-primary-foreground/70 dark:text-primary-foreground' : 'text-muted-foreground')}>
                     {item.dayLabel}
                   </span>
                   <span className={cn(
