@@ -27,7 +27,7 @@ export function TransactionsScreen() {
   const { user } = useAuth()
   const { transactions, isLoading } = useAllTransactions({ userId: user?.id ?? '' })
   const { update } = useTransactionMutations(user?.id ?? '')
-  const { categories, getCategoryName, getCategoryColor } = useCategories()
+  const { categories, getCategoryName } = useCategories()
   const { accounts } = useAccounts()
 
   const now = new Date()
@@ -76,7 +76,6 @@ export function TransactionsScreen() {
         groups={groups}
         todayKey={todayKey()}
         getCategoryName={(id) => (id ? getCategoryName(id) : t('uncategorized'))}
-        getCategoryColor={(id) => (id ? getCategoryColor(id) : 'hsl(var(--muted-foreground))')}
         getAccountName={getAccountName}
         onSelect={setEditing}
         isLoading={isLoading}
