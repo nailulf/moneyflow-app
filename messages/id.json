@@ -1032,5 +1032,56 @@
     "installTitle": "Instal Teman Tumbuh untuk akses cepat.",
     "install": "Instal",
     "dismiss": "Tutup"
+  },
+  "home": {
+    "greeting": {
+      "morning": "Selamat pagi 👋",
+      "afternoon": "Selamat siang 👋",
+      "evening": "Selamat malam 👋"
+    },
+    "today": { "logged": "{count} tercatat" },
+    "hero": {
+      "totalNetWorth": "Total Kekayaan Bersih",
+      "thisMonth": "{pct}% bulan ini",
+      "legendNetWorth": "Kekayaan bersih",
+      "legendSpending": "Pengeluaran bulanan",
+      "income": "Pemasukan",
+      "expenses": "Pengeluaran",
+      "saved": "Tersimpan"
+    },
+    "accounts": {
+      "title": "Akun Saya",
+      "seeAll": "Lihat semua →",
+      "assets": "Aset",
+      "liabilities": "Liabilitas",
+      "accountsCount": "{count} akun",
+      "loansCount": "{count} pinjaman",
+      "more": "+{count} lagi"
+    },
+    "budget": {
+      "title": "Anggaran {month}",
+      "viewAll": "Lihat semua →",
+      "onTrack": "Sesuai rencana",
+      "overBudget": "Melebihi anggaran",
+      "of": "dari {amount}",
+      "used": "{pct}% terpakai",
+      "left": "Sisa {amount}",
+      "noBudget": "Belum ada anggaran untuk bulan ini."
+    },
+    "goals": {
+      "title": "Target Keuangan",
+      "viewAll": "Lihat semua →",
+      "of": "{current} dari {target}"
+    },
+    "upcoming": {
+      "title": "Mendatang",
+      "subtitle": "Tanggal dengan pembayaran terjadwal",
+      "empty": "Tidak ada pembayaran terjadwal dalam 30 hari ke depan."
+    },
+    "biggest": {
+      "title": "Terbesar Bulan Ini",
+      "seeAll": "Lihat semua →",
+      "empty": "Belum ada pengeluaran tercatat bulan ini."
+    }
   }
 }

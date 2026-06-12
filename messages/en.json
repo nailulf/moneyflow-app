@@ -1032,5 +1032,56 @@
     "installTitle": "Install Teman Tumbuh for quick access.",
     "install": "Install",
     "dismiss": "Dismiss"
+  },
+  "home": {
+    "greeting": {
+      "morning": "Good morning 👋",
+      "afternoon": "Good afternoon 👋",
+      "evening": "Good evening 👋"
+    },
+    "today": { "logged": "{count} logged" },
+    "hero": {
+      "totalNetWorth": "Total Net Worth",
+      "thisMonth": "{pct}% this month",
+      "legendNetWorth": "Net worth",
+      "legendSpending": "Monthly spending",
+      "income": "Income",
+      "expenses": "Expenses",
+      "saved": "Saved"
+    },
+    "accounts": {
+      "title": "My Accounts",
+      "seeAll": "See all →",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "accountsCount": "{count} accounts",
+      "loansCount": "{count} loans",
+      "more": "+{count} more"
+    },
+    "budget": {
+      "title": "{month} Budget",
+      "viewAll": "View all →",
+      "onTrack": "On track",
+      "overBudget": "Over budget",
+      "of": "of {amount}",
+      "used": "{pct}% used",
+      "left": "{amount} left",
+      "noBudget": "No budget set for this month yet."
+    },
+    "goals": {
+      "title": "Financial Goals",
+      "viewAll": "View all →",
+      "of": "{current} of {target}"
+    },
+    "upcoming": {
+      "title": "Upcoming",
+      "subtitle": "Dates with scheduled payments",
+      "empty": "No scheduled payments in the next 30 days."
+    },
+    "biggest": {
+      "title": "Biggest This Month",
+      "seeAll": "See all →",
+      "empty": "No expenses recorded this month yet."
+    }
   }
 }
