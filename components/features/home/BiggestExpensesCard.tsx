@@ -40,7 +40,7 @@ export function BiggestExpensesCard({ rows }: BiggestExpensesCardProps) {
                 className={cn('flex items-center gap-3 px-4 py-3', i < rows.length - 1 && 'border-b border-muted')}
               >
                 <span className={cn(
-                  'flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-[10px] font-bold',
+                  'flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-nano font-bold',
                   i === 0 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                 )}>
                   {i + 1}
@@ -50,7 +50,7 @@ export function BiggestExpensesCard({ rows }: BiggestExpensesCardProps) {
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="truncate text-sm leading-body-sm font-medium text-foreground">{row.name}</span>
-                  <span className={cn('self-start rounded-lg px-1.5 py-0.5 text-[10px] font-semibold', tint.bg, tint.fg)}>
+                  <span className={cn('max-w-full self-start truncate rounded-lg px-1.5 py-0.5 text-nano font-normal', tint.bg, tint.fg)}>
                     {row.categoryName}
                   </span>
                 </span>
