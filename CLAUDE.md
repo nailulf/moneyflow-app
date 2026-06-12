@@ -82,7 +82,7 @@ All Supabase clients are typed with `Database` type from `types/database.ts`.
 Core tables (full schema, RLS, triggers & invariants in [`docs/architecture/01-data-model.md`](docs/architecture/01-data-model.md)):
 - `transactions` - Financial transactions (categorization, recurring, transfers via `to_account_id`)
 - `categories` / `category_groups` - User categories and their groupings (EXPENSE, INCOME, TRANSFER)
-- `accounts` - Financial accounts & physical assets (BANK, CREDIT_CARD, CASH, INVESTMENT, PROPERTY, VEHICLE, MORTGAGE)
+- `accounts` - Financial accounts & physical assets (BANK, CREDIT_CARD, CASH, DIGITAL_WALLET, INVESTMENT, PROPERTY, VEHICLE, MORTGAGE)
 - `budget_plans` / `budget_plan_categories` - **Current** budget model (one rolling plan per period type)
 - `budget_snapshots` / `budget_snapshot_categories` - Point-in-time budget archives (immutable; INSERT+SELECT only)
 - `budgets` / `budget_categories` - **Legacy** budget tables (still present; superseded by budget plans/snapshots)
@@ -174,14 +174,19 @@ line-height — always pair with a `leading-*` class:
 
 | Class | Mobile | Tablet | Desktop |  | Class | px |
 |---|---|---|---|---|---|---|
-| `text-xs` | 12 | 12 | 12 |  | `leading-title-1` | 40/48/56 |
-| `text-sm` | 14 | 14 | 14 |  | `leading-title-2` | 32/36/40 |
-| `text-md` | 16 | 16 | 16 |  | `leading-title-3` | 28/30/32 |
-| `text-lg` | 16 | 17 | 18 |  | `leading-title-4`/`-5` | 24/26/28 |
-| `text-xl` | 18 | 20 | 20 |  | `leading-body-lg` | 24 |
-| `text-2xl` | 20 | 22 | 24 |  | `leading-body-sm` | 20 |
-| `text-3xl` | 24 | 28 | 32 |  | `leading-caption` | 20 |
+| `text-nano` | 10 | 10 | 10 |  | `leading-title-1` | 40/48/56 |
+| `text-tiny` | 11 | 11 | 11 |  | `leading-title-2` | 32/36/40 |
+| `text-xs` | 12 | 12 | 12 |  | `leading-title-3` | 28/30/32 |
+| `text-sm` | 14 | 14 | 14 |  | `leading-title-4`/`-5` | 24/26/28 |
+| `text-md` | 16 | 16 | 16 |  | `leading-body-lg` | 24 |
+| `text-lg` | 16 | 17 | 18 |  | `leading-body-sm` | 20 |
+| `text-xl` | 18 | 20 | 20 |  | `leading-caption` | 20 |
+| `text-2xl` | 20 | 22 | 24 |  | | |
+| `text-3xl` | 24 | 28 | 32 |  | | |
 | `text-4xl` | 32 | 40 | 48 |  | | |
+
+(`text-nano`/`text-tiny` are non-responsive micro-type for mobile pills/badges/nav labels —
+use them instead of `text-[10px]`/`text-[11px]`.)
 
 (The `text-[length:var(--font-size-*)]` / `leading-[var(--leading-*)]` arbitrary-value forms are
 equivalent but the utility classes above are the live convention.)
