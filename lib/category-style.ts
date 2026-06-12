@@ -1,6 +1,7 @@
 import {
   Utensils, Car, ShoppingBag, Clapperboard, Receipt, HeartPulse,
   GraduationCap, Plane, Briefcase, ArrowLeftRight, PiggyBank, CreditCard, Coffee, Tag,
+  TrendingUp,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -36,6 +37,7 @@ const CATEGORY_RULES: Array<[string[], LucideIcon, CategoryTint]> = [
   [['health', 'kesehatan', 'medical'], HeartPulse, TINT.green],
   [['education', 'pendidikan'],     GraduationCap, TINT.purple],
   [['travel', 'perjalanan', 'liburan'], Plane,     TINT.teal],
+  [['invest', 'investasi'],         TrendingUp,    TINT.green],
   [['income', 'salary', 'gaji'],    Briefcase,     TINT.green],
   [['transfer'],                    ArrowLeftRight, TINT.slate],
 ]
