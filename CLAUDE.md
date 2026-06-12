@@ -135,24 +135,39 @@ Tokens are defined as HSL CSS variables in `app/globals.css` and exposed as Tail
 auto-applies these rules; the exhaustive token dump (dark mode, charts, sidebar) lives in its
 [`references/design-system.md`](.claude/skills/moneyflow-frontend/references/design-system.md).
 
+**Mobile design spec** (Pencil → `designs/spending-page.pen`, "DESIGN SYSTEM — DEV REFERENCE" frame):
+the spec for the mobile-first screens is documented in
+[`references/mobile-design-system.md`](.claude/skills/moneyflow-frontend/references/mobile-design-system.md)
+— Inter, 4px grid, 390px screens on `#EEF2F7` bg, navy hero gradient `#0D253D→#1D5499` (135°),
+category icon tint pairs, h52/r14 controls, r16 cards. Its core palette (primary `#20507F`,
+background `#EEF2F7`, foreground `#0F172A`) **was adopted into `app/globals.css` on 2026-06-12**,
+replacing the old `#205781`/white values. Mobile visual foundations (hero gradient, tints, shadows,
+chart-bar, selected) were also adopted that day. Remaining design-only values: Goal Pill, Rating
+Star — see the Deltas table there before hardcoding anything.
+
 **Brand palette** (hardcoded hex on auth pages via `auth.*` tokens; mirrored by the semantic system):
-`#205781` deep blue (= `primary`) · `#98D2C0` mint (= `accent`) · `#F6F8D5` pale yellow (`auth.card`).
+`#20507F` deep blue (= `primary`; was `#205781` before 2026-06-12) · `#98D2C0` mint (= `accent`) ·
+`#F6F8D5` pale yellow (`auth.card`).
 
 **Color map** — semantic token (Tailwind class) → `H S% L%` light / dark → use:
 
 | Token | Light | Dark | Use (≈hex light) |
 |---|---|---|---|
-| `background` / `foreground` | `0 0% 100%` / `222 84% 4.9%` | inverted | page bg / text (`#FFF` / `#020817`) |
-| `card`, `popover` (+`-foreground`) | = background pair | = background pair | surfaces |
-| `primary` (+`-foreground`) | `206 60% 31.6%` | `161 39% 71%` | brand actions (`#205781`; mint in dark) |
+| `background` / `foreground` | `213 36% 95.1%` / `222 47% 11.2%` | `222 84% 4.9%` / `210 40% 98%` | page bg / text (`#EEF2F7` / `#0F172A`) |
+| `card`, `popover` (+`-foreground`) | `0 0% 100%` (white) / = foreground | = dark background pair | surfaces (white cards on gray-blue bg) |
+| `primary` (+`-foreground`) | `209.7 59.7% 31.2%` | `161 39% 71%` | brand actions (`#20507F`; mint in dark) |
 | `secondary` | `186 33% 46%` | same | muted teal |
-| `accent` | `161 39% 71%` | `206 60% 31.6%` | highlights (`#98D2C0`; blue in dark) |
+| `accent` | `161 39% 71%` | `209.7 59.7% 31.2%` | highlights (`#98D2C0`; blue in dark) |
 | `muted` / `muted-foreground` | `210 40% 96%` / `215 16% 47%` | `217 33% 17.5%` / `215 20% 65%` | subtle bg / secondary text (`#64748B`) |
 | `destructive` | `0 84% 60%` | same | errors/expense (`#EF4444`) |
 | `success` | `142 76% 36%` | `142 71% 45%` | income/positive (`#16A34A`) |
 | `warning` | ⚠ **undefined** | `48 96% 53%` | ⚠ light-mode gap (`#FACC15` dark only) |
-| `border` / `input` / `ring` | `214 32% 91%` / `…` / `206 60% 31.6%` | `217 33% 17.5%` / `…` / `161 39% 71%` | borders/focus (`#E2E8F0`) |
+| `border` / `input` / `ring` | `214 32% 91%` / `…` / `209.7 59.7% 31.2%` | `217 33% 17.5%` / `…` / `161 39% 71%` | borders/focus (`#E2E8F0`) |
 | `chart-1`…`chart-5` | data-viz palette | separate dark palette | charts: `hsl(var(--chart-N))` |
+| `selected` (+`-foreground`) | `213 82% 96%` / primary | `213 50% 16%` / accent | selected states, active tab pill (`#EBF3FD`) |
+| `hero-*` (`bg-hero-gradient`) | navy `210 65% 15%`→`213 68% 36%`, fg white, muted `#BFD7EA`, success/danger bright | same | navy hero cards/headers |
+| `chart-bar` | `209 44% 43%` | `209 50% 60%` | bar fills in hero charts (`#3D6F9E`) |
+| `tint-{color}-fg/bg` ×8 | category tint pairs | dark equivalents | category icon circles via `getCategoryTint` |
 
 **Font map** — `text-{token}` (px at mobile / tablet / desktop). Tokens carry **no** bundled
 line-height — always pair with a `leading-*` class:
@@ -172,7 +187,9 @@ line-height — always pair with a `leading-*` class:
 equivalent but the utility classes above are the live convention.)
 
 **Other rules:** icons via `lucide-react` (never emojis); hover/active states use semantic tokens
-with opacity (`hover:bg-muted/50`, `hover:bg-destructive/10`); dark mode is `class`-based (`.dark`).
+with opacity (`hover:bg-muted/50`, `hover:bg-destructive/10`); dark mode is `class`-based (`.dark`);
+elevation via `shadow-card` / `shadow-floating` (not ad-hoc `shadow-lg` on mobile surfaces);
+category icons/tints via `lib/category-style.ts` (`getCategoryIcon` / `getCategoryTint`).
 
 **Component Library:**
 - All UI components in `components/ui/` follow Radix UI patterns

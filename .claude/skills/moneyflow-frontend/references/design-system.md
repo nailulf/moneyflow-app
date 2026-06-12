@@ -1,8 +1,15 @@
 # MoneyFlow Design System — Full Token Reference
 
 > Complete, authoritative dump of every design token. Source of truth: `app/globals.css` (HSL CSS
-> variables) + `tailwind.config.js` (Tailwind utility mappings). Snapshot: 2026-06-11. When a value
-> here disagrees with `app/globals.css`, the CSS file wins — re-check before relying on a specific value.
+> variables) + `tailwind.config.js` (Tailwind utility mappings). Snapshot: 2026-06-12 (mobile
+> palette adopted: primary `#20507F`, bg `#EEF2F7`, fg `#0F172A`). When a value here disagrees with
+> `app/globals.css`, the CSS file wins — re-check before relying on a specific value.
+>
+> **Mobile screens:** the Pencil design spec (gradient, category tints, type scale, controls) is
+> documented separately in [`mobile-design-system.md`](mobile-design-system.md). Its core palette +
+> mobile visual foundations (hero gradient, tints, shadows, chart-bar, selected) are now all
+> implemented here (see §2b). Remaining design-only values: Goal Pill, Rating Star — check the
+> Deltas table before hardcoding anything.
 
 ## Contents
 1. [How tokens are wired](#1-how-tokens-are-wired)
@@ -41,20 +48,20 @@ Values are `H S% L%` exactly as in `app/globals.css`. "≈hex" is an approximati
 
 | Token | Light (`:root`) | Dark (`.dark`) | ≈hex (light) | Intended use |
 |---|---|---|---|---|
-| `background` | `0 0% 100%` | `222.2 84% 4.9%` | `#FFFFFF` | app/page background |
-| `foreground` | `222.2 84% 4.9%` | `210 40% 98%` | `#020817` | primary text |
+| `background` | `213.3 36% 95.1%` | `222.2 84% 4.9%` | `#EEF2F7` | app/page background (gray-blue; cards sit white on top) |
+| `foreground` | `222.2 47.4% 11.2%` | `210 40% 98%` | `#0F172A` | primary text |
 | `card` | `0 0% 100%` | `222.2 84% 4.9%` | `#FFFFFF` | card surface |
-| `card-foreground` | `222.2 84% 4.9%` | `210 40% 98%` | `#020817` | text on cards |
+| `card-foreground` | `222.2 47.4% 11.2%` | `210 40% 98%` | `#0F172A` | text on cards |
 | `popover` | `0 0% 100%` | `222.2 84% 4.9%` | `#FFFFFF` | popovers/menus |
-| `popover-foreground` | `222.2 84% 4.9%` | `210 40% 98%` | `#020817` | text in popovers |
-| `primary` | `206 60.2% 31.6%` | `161.4 38.7% 71%` | `#205781` | primary buttons, brand actions (note: **mint** in dark) |
-| `primary-foreground` | `210 40% 98%` | `206 60.2% 31.6%` | `#F8FAFC` | text on primary |
+| `popover-foreground` | `222.2 47.4% 11.2%` | `210 40% 98%` | `#0F172A` | text in popovers |
+| `primary` | `209.7 59.7% 31.2%` | `161.4 38.7% 71%` | `#20507F` | primary buttons, brand actions (note: **mint** in dark) |
+| `primary-foreground` | `210 40% 98%` | `209.7 59.7% 31.2%` | `#F8FAFC` | text on primary |
 | `secondary` | `186.2 33.1% 46.3%` | `186.2 33.1% 46.3%` | `#4F9C9C` | secondary actions (muted teal) |
 | `secondary-foreground` | `210 40% 98%` | `210 40% 98%` | `#F8FAFC` | text on secondary |
 | `muted` | `210 40% 96%` | `217.2 32.6% 17.5%` | `#F1F5F9` | subtle backgrounds, disabled |
 | `muted-foreground` | `215.4 16.3% 46.9%` | `215 20.2% 65.1%` | `#64748B` | secondary/caption text |
-| `accent` | `161.4 38.7% 71%` | `206 60.2% 31.6%` | `#98D2C0` | highlights, hover accents (**blue** in dark) |
-| `accent-foreground` | `206 60.2% 31.6%` | `210 40% 98%` | `#205781` | text on accent |
+| `accent` | `161.4 38.7% 71%` | `209.7 59.7% 31.2%` | `#98D2C0` | highlights, hover accents (**blue** in dark) |
+| `accent-foreground` | `209.7 59.7% 31.2%` | `210 40% 98%` | `#20507F` | text on accent |
 | `destructive` | `0 84.2% 60.2%` | `0 84.2% 60.2%` | `#EF4444` | errors, **expenses**, destructive actions |
 | `destructive-foreground` | `210 40% 98%` | `210 40% 98%` | `#F8FAFC` | text on destructive |
 | `success` | `142 76% 36%` | `142 71% 45%` | `#16A34A` | **income**, positive deltas, success |
@@ -63,11 +70,93 @@ Values are `H S% L%` exactly as in `app/globals.css`. "≈hex" is an approximati
 | `warning-foreground` | ⚠ **(undefined)** | `26 83% 14%` | — | text on warning (dark only) |
 | `border` | `214.3 31.8% 91.4%` | `217.2 32.6% 17.5%` | `#E2E8F0` | borders, dividers |
 | `input` | `214.3 31.8% 91.4%` | `217.2 32.6% 17.5%` | `#E2E8F0` | input borders |
-| `ring` | `206 60.2% 31.6%` | `161.4 38.7% 71%` | `#205781` | focus rings |
+| `ring` | `209.7 59.7% 31.2%` | `161.4 38.7% 71%` | `#20507F` | focus rings |
 
 > The light↔dark **swap of `primary` and `accent`** is intentional: the brand blue leads in light
 > mode, the mint leads in dark mode. Keep using the semantic name (`primary`) — it resolves correctly
 > per theme. Don't hardcode the blue expecting it in dark mode.
+
+### 2b. Mobile visual foundation tokens (2026-06-12)
+
+These tokens were added for the mobile-first screens (design frame: `spending-page.pen`).
+
+#### Selected state
+
+| Token | Light (`:root`) | Dark (`.dark`) | ≈hex (light) | Use |
+|---|---|---|---|---|
+| `selected` | `213 82% 96%` | `213 50% 16%` | `#EBF3FD` | selected-item bg, active tab pill |
+| `selected-foreground` | `209.7 59.7% 31.2%` | `161.4 38.7% 71%` | `#20507F` | text/icon on selected (= `primary` / dark `primary`) |
+
+Tailwind: `bg-selected`, `text-selected-foreground`.
+
+#### Hero gradient palette
+
+The navy hero cards/headers use a 135° linear gradient from `--hero-from` to `--hero-to`.
+Hero values are **identical in light and dark** — the hero surface is always navy.
+
+| Token | Light & Dark | ≈hex | Use |
+|---|---|---|---|
+| `hero-from` | `210 65% 14.5%` | `#0D253D` | gradient start (navy deep) |
+| `hero-to` | `213 68% 35.7%` | `#1D5499` | gradient end (navy light) |
+| `hero-foreground` | `0 0% 100%` | `#FFFFFF` | primary text on hero |
+| `hero-muted` | `207 51% 83%` | `#BFD7EA` | secondary text/icons on hero |
+| `hero-success` | `142 69% 58%` | `#4ADE80` | positive delta text on hero |
+| `hero-danger` | `351 95% 71%` | `#FB7185` | negative delta text on hero |
+
+Tailwind: `bg-hero-gradient` (the full 135° gradient), `text-hero-foreground`, `text-hero-muted`,
+`text-hero-success`, `text-hero-danger`.
+
+#### Chart bar
+
+| Token | Light | Dark | ≈hex (light) | Use |
+|---|---|---|---|---|
+| `chart-bar` | `209 44% 43%` | `209 50% 60%` | `#3D6F9E` | bar fills in hero/navy context charts |
+
+Tailwind: `bg-chart-bar`, `fill-chart-bar`, `text-chart-bar`.
+
+#### Category tint pairs
+
+8 FG-on-soft-BG pairs for category icon circles. Applied via `bg-tint-X-bg text-tint-X-fg`.
+Source: `spending-page.pen` design frame (7 tints) + Transactions mockup (amber, the 8th).
+
+| Tint key | Light FG | Light BG | Dark FG | Dark BG | ≈BG hex (light) |
+|---|---|---|---|---|---|
+| `blue` | `209.7 59.7% 31.2%` | `213 82% 96%` | `210 60% 72%` | `213 45% 16%` | `#EBF3FD` |
+| `green` | `142 76% 36%` | `138 76% 97%` | `142 60% 65%` | `142 40% 14%` | `#F0FDF4` |
+| `orange` | `21 90% 48%` | `33 100% 96%` | `21 90% 65%` | `21 50% 14%` | `#FFF7ED` |
+| `pink` | `333 71% 51%` | `327 73% 97%` | `333 70% 70%` | `333 40% 15%` | `#FDF2F8` |
+| `teal` | `163 51% 36%` | `159 44% 94%` | `163 45% 62%` | `163 35% 13%` | `#E8F6F1` |
+| `purple` | `256 49% 54%` | `257 64% 96%` | `256 55% 75%` | `256 35% 17%` | `#F1EDFB` |
+| `slate` | `215 16% 47%` | `210 40% 96%` | `215 20% 65%` | `217 33% 17.5%` | `#F1F5F9` |
+| `amber` | `38 92% 50%` | `45 90% 96%` | `38 92% 60%` | `38 50% 14%` | `#FFFBEB` |
+
+> **Note:** `orange` is not in the design frame's 7-tint palette — it is reachable only via the
+> hash-fallback in `getCategoryTint()`, not by direct assignment. Amber was sourced from the
+> Transactions mockup.
+
+Tailwind: `bg-tint-{key}-bg`, `text-tint-{key}-fg` (e.g. `bg-tint-blue-bg text-tint-blue-fg`).
+
+**Important:** `lib/` is now included in Tailwind's `content` globs so that the class literals in
+`lib/category-style.ts` generate CSS. Do not remove `'./lib/**/*.{js,ts,jsx,tsx}'` from
+`tailwind.config.js` → `content`.
+
+#### Shadow variables
+
+> **Exception:** `--shadow-card` and `--shadow-floating` hold **raw box-shadow values**, not the
+> `H S% L%` triplets used by every other CSS variable. Do not wrap them in `hsl()`.
+
+| Variable | Light value | Dark value | Tailwind class |
+|---|---|---|---|
+| `--shadow-card` | `0 2px 10px hsl(222 47% 11% / 0.05)` | `0 0 0 1px hsl(var(--border))` | `shadow-card` |
+| `--shadow-floating` | `0 4px 20px hsl(222 47% 11% / 0.15)` | `0 4px 20px hsl(0 0% 0% / 0.5)` | `shadow-floating` |
+
+Dark-mode quirk: `shadow-card` becomes a 1px ring derived from `--border` instead of a drop shadow
+(better contrast on dark surfaces). This is intentional — do not "fix" it.
+
+> **`shadow-card` double-rule quirk:** Tailwind also generates a `.shadow-card` utility via its
+> shadow-COLOR feature (since `card` is a color token). Devtools may show two `.shadow-card` rules.
+> This is benign — both resolve to the same visual result. Do not attempt to rename the token to
+> avoid the collision.
 
 ---
 
@@ -78,15 +167,17 @@ Auth pages (`app/(auth)/**`) use a dedicated hardcoded palette via the `auth.*` 
 
 | Tailwind token | Hex | Role |
 |---|---|---|
-| `auth-sidebar` | `#205781` | deep blue — auth sidebar bg (= semantic `primary`) |
+| `auth-sidebar` | `#20507F` | deep blue — auth sidebar bg (= semantic `primary`) |
 | `auth-sidebar-foreground` | `#FFFFFF` | text on sidebar |
 | `auth-card` | `#F6F8D5` | pale yellow — auth card bg |
-| `auth-card-foreground` | `#205781` | text on card |
+| `auth-card-foreground` | `#20507F` | text on card |
 | `auth-accent` | `#98D2C0` | mint — accents (= semantic `accent`) |
-| `auth-accent-foreground` | `#205781` | text on accent |
+| `auth-accent-foreground` | `#20507F` | text on accent |
 
-**Brand identity = `#205781` deep blue + `#98D2C0` mint + `#F6F8D5` pale yellow.** Outside auth,
-prefer the semantic tokens (`primary`/`accent`) so theming works.
+**Brand identity = `#20507F` deep blue + `#98D2C0` mint + `#F6F8D5` pale yellow** (deep blue was
+`#205781` until 2026-06-12, when the mobile design palette was adopted; the PWA `theme_color` and
+maskable icon were updated too). Outside auth, prefer the semantic tokens (`primary`/`accent`) so
+theming works.
 
 ---
 
@@ -117,10 +208,10 @@ For the app navigation/sidebar surfaces: `sidebar` (DEFAULT bg), `sidebar-foregr
 |---|---|---|
 | `sidebar` (background) | `0 0% 98%` | `240 5.9% 10%` |
 | `sidebar-foreground` | `240 5.3% 26.1%` | `240 4.8% 95.9%` |
-| `sidebar-primary` | `206 60.2% 31.6%` | `161.4 38.7% 71%` |
-| `sidebar-primary-foreground` | `0 0% 98%` | `206 60.2% 31.6%` |
-| `sidebar-accent` | `161.4 38.7% 71%` | `206 60.2% 31.6%` |
-| `sidebar-accent-foreground` | `206 60.2% 31.6%` | `240 4.8% 95.9%` |
+| `sidebar-primary` | `209.7 59.7% 31.2%` | `161.4 38.7% 71%` |
+| `sidebar-primary-foreground` | `0 0% 98%` | `209.7 59.7% 31.2%` |
+| `sidebar-accent` | `161.4 38.7% 71%` | `209.7 59.7% 31.2%` |
+| `sidebar-accent-foreground` | `209.7 59.7% 31.2%` | `240 4.8% 95.9%` |
 | `sidebar-border` | `220 13% 91%` | `240 3.7% 15.9%` |
 | `sidebar-ring` | `217.2 91.2% 59.8%` | `217.2 91.2% 59.8%` |
 
