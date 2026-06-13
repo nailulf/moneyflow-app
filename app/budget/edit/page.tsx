@@ -129,9 +129,9 @@ export default function BudgetEditPage() {
   useEffect(() => {
     if (!user?.id || period !== 'yearly') return
     getBudgetPlan(user.id, 'monthly')
-      .then((plan) =>
+      .then((monthlyPlan) =>
         setMonthlyLockedCategories(
-          plan ? plan.budget_plan_categories.map((c) => ({ id: c.category_id, name: c.categories.name })) : []
+          monthlyPlan ? monthlyPlan.budget_plan_categories.map((c) => ({ id: c.category_id, name: c.categories.name })) : []
         )
       )
       .catch(() => setMonthlyLockedCategories([]))

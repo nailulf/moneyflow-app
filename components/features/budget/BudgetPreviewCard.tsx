@@ -18,6 +18,7 @@ interface BudgetPreviewCardProps {
   income: number
   currency: string
   rows: PreviewRow[]
+  period?: 'monthly' | 'yearly'
 }
 
 // Literal class map — Tailwind JIT sees these verbatim in this file.
@@ -34,7 +35,7 @@ const SEGMENT_CLASSES: Record<string, string> = {
 }
 
 /** Budget preview (design `DDhxR`): navy summary + category breakdown. */
-export function BudgetPreviewCard({ periodLabel, total, income, currency, rows }: BudgetPreviewCardProps) {
+export function BudgetPreviewCard({ periodLabel, total, income, currency, rows, period }: BudgetPreviewCardProps) {
   const t = useTranslations('budgetCreate')
   const savings = Math.max(0, income - total)
   const ofIncome = income > 0 ? Math.round((total / income) * 100) : 0
@@ -62,7 +63,9 @@ export function BudgetPreviewCard({ periodLabel, total, income, currency, rows }
         <div className="flex items-center justify-between">
           <h2 className="text-sm leading-body-sm font-bold text-foreground">{t('preview.breakdown')}</h2>
           <span className="text-xs leading-caption font-semibold text-muted-foreground">
-            {t('preview.ofIncome', { pct: ofIncome })}
+            {period === 'yearly'
+              ? t('ofYearlyIncome', { pct: ofIncome })
+              : t('preview.ofIncome', { pct: ofIncome })}
           </span>
         </div>
         <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-muted" aria-hidden="true">

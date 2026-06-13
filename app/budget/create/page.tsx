@@ -485,6 +485,7 @@ export default function BudgetCreatePage() {
             income={period === 'yearly' ? annualIncome : income}
             currency="IDR"
             rows={previewRows}
+            period={period}
           />
           <button
             type="button"
