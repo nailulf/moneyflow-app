@@ -1168,6 +1168,21 @@
     "lockedBanner": "Kategori tahunan tidak boleh tumpang tindih dengan anggaran bulanan",
     "annualIncome": "Pendapatan tahunan ≈ {amount}",
     "ofYearlyIncome": "{pct}% dari pendapatan tahunan",
+    "lockedCount": "{count} terkunci",
+    "yearlyPreview": {
+      "heroLabel": "Anggaran Tahunan · {year}",
+      "monthlyTotal": "Total bulanan",
+      "timesTwelve": "{amount} × 12",
+      "yearlyOnly": "Tahunan saja",
+      "grandTotal": "Total keseluruhan",
+      "splitTitle": "Pembagian jenis anggaran",
+      "monthlyRecurring": "Berulang bulanan",
+      "perMonth": "{amount} / bln",
+      "yearlyOneTime": "Sekali setahun",
+      "perYear": "{amount} / thn",
+      "categoriesTitle": "Kategori tahunan",
+      "save": "Simpan Anggaran Tahunan"
+    },
     "startFrom": {
       "title": "Mulai dari",
       "copy": "Salin dari periode lalu",

@@ -1168,6 +1168,21 @@
     "lockedBanner": "Yearly categories can't overlap your monthly budget",
     "annualIncome": "Annual income ≈ {amount}",
     "ofYearlyIncome": "{pct}% of yearly income",
+    "lockedCount": "{count} locked",
+    "yearlyPreview": {
+      "heroLabel": "Annual Budget · {year}",
+      "monthlyTotal": "Monthly total",
+      "timesTwelve": "{amount} × 12",
+      "yearlyOnly": "Yearly only",
+      "grandTotal": "Grand total",
+      "splitTitle": "Budget type split",
+      "monthlyRecurring": "Monthly recurring",
+      "perMonth": "{amount} / mo",
+      "yearlyOneTime": "Yearly one-time",
+      "perYear": "{amount} / yr",
+      "categoriesTitle": "Yearly categories",
+      "save": "Save Yearly Budget"
+    },
     "startFrom": {
       "title": "Start from",
       "copy": "Copy from last period",
