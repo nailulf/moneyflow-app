@@ -100,7 +100,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
 
   // Screens that render their own mobile header (spec sub-project 1: screens
   // own their headers; this list shrinks the interim LayoutWrapper fallback).
-  const ownsMobileHeader = pathname === '/' || pathname.startsWith('/transactions') || pathname.startsWith('/accounts') || pathname.startsWith('/budget')
+  const ownsMobileHeader = pathname === '/' || pathname.startsWith('/transactions') || pathname.startsWith('/accounts') || pathname.startsWith('/budget') || pathname.startsWith('/portfolio')
 
   // MobileBottomNav hides itself on these routes — drop its clearance padding too.
   const hidesBottomNav = isFullScreenFlow(pathname)

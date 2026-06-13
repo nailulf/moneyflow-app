@@ -1283,5 +1283,15 @@
       "seeAll": "See all →",
       "empty": "No expenses recorded this month yet."
     }
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "newAccount": "New Account",
+    "hero": { "totalValue": "Total Portfolio Value", "assets": "{count} assets" },
+    "accounts": { "title": "Investment Accounts", "seeAll": "See all →", "holdings": "{count} holdings", "empty": "No investment accounts yet." },
+    "allocation": { "title": "Asset Allocation" },
+    "top": { "title": "Top Holdings", "empty": "No holdings yet — add assets to an investment account." },
+    "class": { "IDX_STOCK": "IDX Stocks", "US_STOCK": "US Stocks", "MUTUAL_FUND": "Mutual Funds", "ETF": "ETF", "BOND": "Bonds", "OTHER": "Other" },
+    "emptyCta": "Create investment account"
   }
 }
