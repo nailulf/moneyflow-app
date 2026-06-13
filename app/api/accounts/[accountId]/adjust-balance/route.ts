@@ -88,6 +88,21 @@ export async function POST(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Investment-account balances are owned by the holdings trigger (5.0); manual
+    // adjustment would be silently overwritten by the next holding change.
+    if (account.type === 'INVESTMENT') {
+      const { count } = await supabase
+        .from('portfolio_holdings')
+        .select('id', { count: 'exact', head: true })
+        .eq('account_id', accountId)
+      if ((count ?? 0) > 0) {
+        return NextResponse.json(
+          { error: 'This investment account\'s balance is the sum of its holdings — edit the assets instead.' },
+          { status: 400 }
+        )
+      }
+    }
+
     // Fetch ALL transactions for this account to compute the true current balance.
     // Include both outbound (account_id) and inbound transfers (to_account_id).
     const { data: transactions, error: txError } = await supabase
