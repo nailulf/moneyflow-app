@@ -61,4 +61,21 @@ describe('YearlyCategorySelector', () => {
     fireEvent.change(input, { target: { value: '6000000' } })
     expect(onAmountChange).toHaveBeenCalledWith('c1', 6000000)
   })
+
+  it('clamps negative amounts to zero', () => {
+    const onAmountChange = jest.fn()
+    render(
+      <YearlyCategorySelector
+        categories={categories}
+        selected={new Map([['c1', 5_000_000]])}
+        currency="IDR"
+        onToggle={() => {}}
+        onAmountChange={onAmountChange}
+      />
+    )
+    fireEvent.click(screen.getByRole('button', { name: /5/ }))
+    const input = screen.getByRole('spinbutton', { name: 'Holiday Travel' }) as HTMLInputElement
+    fireEvent.change(input, { target: { value: '-5' } })
+    expect(onAmountChange).toHaveBeenCalledWith('c1', 0)
+  })
 })

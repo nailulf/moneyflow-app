@@ -111,7 +111,7 @@ export function YearlyCategorySelector({
                     autoFocus
                     aria-label={cat.name}
                     value={amount === 0 ? '' : amount}
-                    onChange={(e) => onAmountChange(cat.id, Number(e.target.value) || 0)}
+                    onChange={(e) => onAmountChange(cat.id, Math.max(0, Number(e.target.value) || 0))}
                     onBlur={() => setEditingId(null)}
                     className="w-24 rounded-lg bg-muted px-2 py-1.5 text-right text-sm leading-body-sm font-semibold text-foreground outline-none focus:ring-2 focus:ring-ring"
                   />
@@ -127,7 +127,8 @@ export function YearlyCategorySelector({
               ) : (
                 <button
                   type="button"
-                  aria-label={cat.name}
+                  aria-hidden="true"
+                  tabIndex={-1}
                   onClick={() => handleToggle(cat)}
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors hover:bg-muted/70"
                 >
