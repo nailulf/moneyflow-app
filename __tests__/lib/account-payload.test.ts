@@ -133,9 +133,10 @@ describe('sanitizeAccountUpdate', () => {
     })
     expect(sanitizeAccountUpdate({ currency: 'XYZ' }).ok).toBe(false)
     expect(sanitizeAccountUpdate({ currency: 'idr' })).toEqual({ ok: true, data: { currency: 'IDR' } })
-    expect(sanitizeAccountUpdate({ balance: 'abc' }).ok).toBe(false)
-    expect(sanitizeAccountUpdate({ balance: null }).ok).toBe(false)
-    expect(sanitizeAccountUpdate({ balance: '1000' })).toEqual({ ok: true, data: { balance: 1000 } })
+    // balance is the opening anchor (C1 fix) — it is silently ignored on update regardless of value
+    expect(sanitizeAccountUpdate({ balance: 'abc' })).toEqual({ ok: true, data: {} })
+    expect(sanitizeAccountUpdate({ balance: null })).toEqual({ ok: true, data: {} })
+    expect(sanitizeAccountUpdate({ balance: '1000' })).toEqual({ ok: true, data: {} })
   })
 
   it('requires real booleans for is_default and is_active', () => {
@@ -153,5 +154,14 @@ describe('sanitizeAccountUpdate', () => {
       ok: true,
       data: { property_type: 'HOUSE', monthly_payment: 2500000, mortgage_end_date: '2040-01-01' },
     })
+  })
+
+  it('ignores balance on update — the opening anchor is not editable via account update', () => {
+    const result = sanitizeAccountUpdate({ id: 'acc-1', name: 'Renamed', balance: 999999 })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.data.name).toBe('Renamed')       // other fields still update
+      expect('balance' in result.data).toBe(false)   // balance is NOT in the update payload
+    }
   })
 })

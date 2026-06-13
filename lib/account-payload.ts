@@ -155,7 +155,8 @@ export function sanitizeAccountUpdate(body: Record<string, unknown>): AccountUpd
       if (!currency) return { ok: false, error: `currency must be one of ${SUPPORTED_CURRENCIES.join(', ')}` }
       data.currency = currency
     }
-    if (body.balance !== undefined) data.balance = finiteNumber(body.balance, 'balance')
+    // NOTE: balance is the opening anchor (migration 050) and is intentionally NOT updatable here.
+    // Balance changes flow through POST /api/accounts/[id]/adjust-balance, which emits an adjustment transaction.
     if (body.is_default !== undefined) data.is_default = strictBoolean(body.is_default, 'is_default')
     if (body.is_active !== undefined) data.is_active = strictBoolean(body.is_active, 'is_active')
     if (body.description !== undefined) data.description = str(body.description)
