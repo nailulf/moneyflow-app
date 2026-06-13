@@ -23,3 +23,7 @@ COMMENT ON COLUMN accounts.balance IS
 
 COMMENT ON COLUMN transactions.is_balance_adjustment IS
   'TRUE for synthetic reconciliation transactions created when a user edits their account balance directly. Counts toward budget totals but is shown under the Other/Uncategorized category, never a real one.';
+
+-- 4. Link each adjustment audit row to the synthetic transaction it created.
+ALTER TABLE account_balance_adjustments
+  ADD COLUMN IF NOT EXISTS transaction_id UUID REFERENCES transactions(id) ON DELETE SET NULL;
