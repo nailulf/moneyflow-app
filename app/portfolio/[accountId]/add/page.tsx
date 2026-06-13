@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -34,15 +34,15 @@ export default function AddAssetPage() {
   const [assetClass, setAssetClass] = useState<AssetClass | null>(null)
   const [pending, setPending] = useState(false)
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } =
+  const { register, handleSubmit, control, setValue, formState: { errors } } =
     useForm<FormIn, unknown, FormOut>({
       resolver: zodResolver(holdingFormSchema),
       defaultValues: { name: '', symbol: '', quantity: '', purchase_price: '', purchase_date: '', currency: 'IDR' },
     })
 
-  const currency = watch('currency')
-  const rawQty = watch('quantity')
-  const rawPrice = watch('purchase_price')
+  const currency = useWatch({ control, name: 'currency' })
+  const rawQty = useWatch({ control, name: 'quantity' })
+  const rawPrice = useWatch({ control, name: 'purchase_price' })
   const qty = Number(rawQty) || 0
   const price = Number(rawPrice) || 0
   const isIdx = assetClass === 'IDX_STOCK'
@@ -73,6 +73,8 @@ export default function AddAssetPage() {
       await createHolding(accountId, toHoldingPayload(data, assetClass))
       queryClient.invalidateQueries({ queryKey: ['holdings', accountId] })
       queryClient.invalidateQueries({ queryKey: ['all-holdings'] })
+      queryClient.invalidateQueries({ queryKey: ['accounts'] })
+      queryClient.invalidateQueries({ queryKey: ['net-worth'] })
       router.push(`/portfolio/${accountId}`)
     } catch {
       toast.error(t('errors.createFailed'))
