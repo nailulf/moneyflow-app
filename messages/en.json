@@ -1164,6 +1164,10 @@
     "stepOf": "{step} of {total}",
     "periodType": { "monthly": "Monthly", "monthlyHint": "Set limits per category each month", "yearly": "Yearly", "yearlyHint": "Plan annual big-ticket expenses" },
     "income": "Income this period: {amount}",
+    "lockedTitle": "Monthly budget (locked)",
+    "lockedBanner": "Yearly categories can't overlap your monthly budget",
+    "annualIncome": "Annual income ≈ {amount}",
+    "ofYearlyIncome": "{pct}% of yearly income",
     "startFrom": {
       "title": "Start from",
       "copy": "Copy from last period",
@@ -1307,8 +1311,6 @@
     "titleFor": "Add {class}",
     "tickerLabel": "Stock / Ticker",
     "tickerPlaceholder": "e.g. BBCA",
-    "nameLabel": "Name",
-    "namePlaceholder": "e.g. Bank Central Asia",
     "lotsLabel": "Number of Lots",
     "lotsHelper": "1 lot = 100 shares",
     "unitsLabel": "Units",
@@ -1316,6 +1318,6 @@
     "dateLabel": "Purchase Date",
     "estimatedTotal": "Estimated Total",
     "submit": "Add to Portfolio",
-    "errors": { "nameRequired": "Name is required", "amountInvalid": "Enter a valid amount", "createFailed": "Couldn't add the asset. Try again." }
+    "errors": { "tickerRequired": "Enter a ticker", "amountInvalid": "Enter a valid amount", "createFailed": "Couldn't add the asset. Try again." }
   }
 }

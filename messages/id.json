@@ -1164,6 +1164,10 @@
     "stepOf": "{step} dari {total}",
     "periodType": { "monthly": "Bulanan", "monthlyHint": "Atur batas per kategori tiap bulan", "yearly": "Tahunan", "yearlyHint": "Rencanakan pengeluaran besar tahunan" },
     "income": "Pemasukan periode ini: {amount}",
+    "lockedTitle": "Anggaran bulanan (terkunci)",
+    "lockedBanner": "Kategori tahunan tidak boleh tumpang tindih dengan anggaran bulanan",
+    "annualIncome": "Pendapatan tahunan ≈ {amount}",
+    "ofYearlyIncome": "{pct}% dari pendapatan tahunan",
     "startFrom": {
       "title": "Mulai dari",
       "copy": "Salin dari periode lalu",
@@ -1307,8 +1311,6 @@
     "titleFor": "Tambah {class}",
     "tickerLabel": "Saham / Ticker",
     "tickerPlaceholder": "mis. BBCA",
-    "nameLabel": "Nama",
-    "namePlaceholder": "mis. Bank Central Asia",
     "lotsLabel": "Jumlah Lot",
     "lotsHelper": "1 lot = 100 lembar",
     "unitsLabel": "Unit",
@@ -1316,6 +1318,6 @@
     "dateLabel": "Tanggal Beli",
     "estimatedTotal": "Estimasi Total",
     "submit": "Tambah ke Portofolio",
-    "errors": { "nameRequired": "Nama wajib diisi", "amountInvalid": "Masukkan jumlah yang valid", "createFailed": "Gagal menambah aset. Coba lagi." }
+    "errors": { "tickerRequired": "Masukkan ticker", "amountInvalid": "Masukkan jumlah yang valid", "createFailed": "Gagal menambah aset. Coba lagi." }
   }
 }
