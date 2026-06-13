@@ -31,6 +31,8 @@ export default function AccountDetailPage() {
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['holdings', accountId] })
     queryClient.invalidateQueries({ queryKey: ['all-holdings'] })
+    queryClient.invalidateQueries({ queryKey: ['accounts'] })
+    queryClient.invalidateQueries({ queryKey: ['net-worth'] })
   }
 
   const handleSave = async (patch: Partial<SanitizedHolding>) => {
