@@ -107,6 +107,14 @@ describe('calculateAccountBalanceAtDate', () => {
     // Total should equal starting total (1000 + 1000 = 2000)
     expect(balA + balB).toBe(2000)
   })
+
+  it('INVESTMENT accounts pass the holdings-driven balance through unchanged (no opening + Σ tx)', () => {
+    const transactions: BalanceTransaction[] = [
+      tx({ amount: 1000, type: 'INCOME', date: '2026-01-05', account_id: 'acct-INV' }),
+    ]
+    // balance is the holdings sum (e.g. 5,000,000); transactions must NOT be added on top.
+    expect(calculateAccountBalanceAtDate(transactions, farFuture, 'INVESTMENT', 5_000_000, 'acct-INV')).toBe(5_000_000)
+  })
 })
 
 describe('calculatePercentageChange', () => {

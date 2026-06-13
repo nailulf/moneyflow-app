@@ -89,6 +89,12 @@ export function calculateAccountBalanceAtDate(
   accountCurrency?: string,
   currencyRates?: Map<string, number>
 ): number {
+  // INVESTMENT accounts are holdings-driven: their `balance` is kept = SUM(holdings.current_value)
+  // by a dedicated DB trigger (migration 049), NOT an opening anchor. Computing opening + Σ(tx)
+  // would double-count, so pass the live column through unchanged.
+  if (accountType === 'INVESTMENT') {
+    return initialBalance
+  }
   if (!accountId) {
     // Legacy path: no account context, apply INCOME/EXPENSE unconditionally (no transfer direction).
     // Real callers always pass accountId; this branch preserves backward compat for existing tests.
