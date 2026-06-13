@@ -36,9 +36,13 @@ export const apiTransactionSchema = z.object({
   notes: z.string().optional().nullable(),
   tags: z.array(z.string()).optional(),
   is_recurring: z.boolean().optional(),
+  is_balance_adjustment: z.boolean().optional(),
   recurring_frequency: z.string().optional(),
   recurring_end_date: z.string().optional()
-})
+}).refine(
+  (d) => d.type !== 'TRANSFER' || (!!d.to_account_id && d.to_account_id !== d.account_id),
+  { message: 'TRANSFER requires a destination account different from the source', path: ['to_account_id'] }
+)
 
 export const reviewTransactionSchema = z.object({
   date: z.string().min(1, 'Date is required').refine((val) => !isNaN(Date.parse(val)), 'Invalid date format'),
