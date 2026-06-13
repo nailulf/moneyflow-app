@@ -1183,6 +1183,12 @@
       "categoriesTitle": "Kategori tahunan",
       "save": "Simpan Anggaran Tahunan"
     },
+    "yearlyAmounts": {
+      "available": "Tersedia untuk anggaran tahunan",
+      "categoryCount": "{count} kategori",
+      "selectedCount": "{selected} dari {total} kategori dipilih",
+      "yearlyTotal": "{amount} per tahun"
+    },
     "startFrom": {
       "title": "Mulai dari",
       "copy": "Salin dari periode lalu",
