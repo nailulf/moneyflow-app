@@ -27,8 +27,10 @@ export function useAllHoldings(): AllHoldings {
   const query = useQuery({
     queryKey: ['all-holdings', user?.id, investmentIds.sort().join(',')],
     queryFn: async () => {
-      const lists = await Promise.all(investmentIds.map((id) => listHoldings(id)))
-      return lists.flat()
+      // allSettled, not all: one failing account degrades to a partial portfolio
+      // rather than blanking the whole screen with no error.
+      const results = await Promise.allSettled(investmentIds.map((id) => listHoldings(id)))
+      return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
     },
     enabled: !!user?.id && investmentIds.length > 0,
   })
