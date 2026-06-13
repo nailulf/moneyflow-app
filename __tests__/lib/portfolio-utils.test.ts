@@ -77,3 +77,47 @@ describe('groupHoldingsByClass', () => {
     expect(groups[0].holdings.map((x) => x.id)).toEqual(['2', '3'])
   })
 })
+
+import { sanitizeHoldingPayload } from '@/lib/portfolio-utils'
+
+describe('sanitizeHoldingPayload', () => {
+  const base = { asset_class: 'IDX_STOCK', name: 'BBCA', quantity: 100, purchase_price: 9000, current_value: 990000 }
+
+  it('accepts a valid payload, trims strings, defaults currency to IDR', () => {
+    const r = sanitizeHoldingPayload({ ...base, symbol: '  BBCA ', name: ' Bank Central Asia ' })
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.data).toMatchObject({
+      asset_class: 'IDX_STOCK', symbol: 'BBCA', name: 'Bank Central Asia',
+      quantity: 100, purchase_price: 9000, current_value: 990000, currency: 'IDR', purchase_date: null,
+    })
+  })
+
+  it('coerces numeric strings and keeps a provided supported currency', () => {
+    const r = sanitizeHoldingPayload({ ...base, quantity: '50', purchase_price: '10000', current_value: '480000', currency: 'usd' })
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.data).toMatchObject({ quantity: 50, purchase_price: 10000, current_value: 480000, currency: 'USD' })
+  })
+
+  it('rejects unknown asset class, blank name, non-positive quantity, negative money, bad currency', () => {
+    expect(sanitizeHoldingPayload({ ...base, asset_class: 'CRYPTO' }).ok).toBe(false)
+    expect(sanitizeHoldingPayload({ ...base, name: '   ' }).ok).toBe(false)
+    expect(sanitizeHoldingPayload({ ...base, quantity: 0 }).ok).toBe(false)
+    expect(sanitizeHoldingPayload({ ...base, quantity: -1 }).ok).toBe(false)
+    expect(sanitizeHoldingPayload({ ...base, purchase_price: -1 }).ok).toBe(false)
+    expect(sanitizeHoldingPayload({ ...base, current_value: -1 }).ok).toBe(false)
+    expect(sanitizeHoldingPayload({ ...base, currency: 'XYZ' }).ok).toBe(false)
+  })
+
+  it('null symbol/purchase_date pass through; empty symbol becomes null', () => {
+    const r = sanitizeHoldingPayload({ ...base, symbol: '', purchase_date: '2026-06-01' })
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.data).toMatchObject({ symbol: null, purchase_date: '2026-06-01' })
+  })
+
+  it('partial=true validates only provided keys and forbids account_id', () => {
+    const ok = sanitizeHoldingPayload({ current_value: 1000000 }, { partial: true })
+    expect(ok.ok).toBe(true)
+    if (ok.ok) expect(ok.data).toEqual({ current_value: 1000000 })
+    expect(sanitizeHoldingPayload({ account_id: 'other' }, { partial: true }).ok).toBe(false)
+  })
+})
