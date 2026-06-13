@@ -142,6 +142,7 @@ export interface Database {
           adjustment_amount: number
           note: string | null
           adjustment_date: string
+          transaction_id: string | null
           created_at: string
         }
         Insert: {
@@ -153,6 +154,7 @@ export interface Database {
           adjustment_amount: number
           note?: string | null
           adjustment_date?: string
+          transaction_id?: string | null
           created_at?: string
         }
         Update: Record<string, never>
