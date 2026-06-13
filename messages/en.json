@@ -1292,6 +1292,30 @@
     "allocation": { "title": "Asset Allocation" },
     "top": { "title": "Top Holdings", "empty": "No holdings yet — add assets to an investment account." },
     "class": { "IDX_STOCK": "IDX Stocks", "US_STOCK": "US Stocks", "MUTUAL_FUND": "Mutual Funds", "ETF": "ETF", "BOND": "Bonds", "OTHER": "Other" },
+    "classHint": { "IDX_STOCK": "Indonesia stocks on IDX", "US_STOCK": "NYSE & NASDAQ listed", "MUTUAL_FUND": "Managed mutual funds", "ETF": "Exchange-traded funds", "BOND": "Government & corporate bonds", "OTHER": "Anything else" },
+    "detail": { "investmentAccount": "Investment Account", "addAsset": "Add Asset", "back": "Back", "emptyTitle": "No assets yet", "emptyDescription": "What do you hold in this account? Pick a type to add your first one:", "emptyTip": "Tip: add your holdings with their buy price — we'll calculate returns automatically." },
+    "manage": { "edit": "Edit", "remove": "Remove from portfolio", "currentValue": "Current value", "cancel": "Cancel", "save": "Save", "removeWarning": "This removes the asset and its history. The account balance will update.", "confirmRemove": "Remove", "saveFailed": "Couldn't update the asset.", "deleteFailed": "Couldn't remove the asset." },
     "emptyCta": "Create investment account"
+  },
+  "holdingCreate": {
+    "selectTitle": "Add Investment",
+    "selectPrompt": "What type of asset?",
+    "selectSubtitle": "Select the asset class to add to your portfolio",
+    "close": "Close",
+    "back": "Back",
+    "save": "Save",
+    "titleFor": "Add {class}",
+    "tickerLabel": "Stock / Ticker",
+    "tickerPlaceholder": "e.g. BBCA",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Bank Central Asia",
+    "lotsLabel": "Number of Lots",
+    "lotsHelper": "1 lot = 100 shares",
+    "unitsLabel": "Units",
+    "priceLabel": "Purchase Price / Unit",
+    "dateLabel": "Purchase Date",
+    "estimatedTotal": "Estimated Total",
+    "submit": "Add to Portfolio",
+    "errors": { "nameRequired": "Name is required", "amountInvalid": "Enter a valid amount", "createFailed": "Couldn't add the asset. Try again." }
   }
 }
