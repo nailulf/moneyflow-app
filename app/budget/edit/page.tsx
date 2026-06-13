@@ -10,12 +10,14 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useTransactions } from '@/contexts/TransactionContext'
 
 import { getBudgetPlan, updateBudgetPlan, getAvailableCategories } from '@/lib/api/budget-plans'
-import { suggestedAmounts, planDiff } from '@/lib/budget-screen-utils'
-import { formatCurrencyCompact } from '@/lib/data-utils'
+import { suggestedAmounts, planDiff, annualizedIncome } from '@/lib/budget-screen-utils'
+import { formatCurrencyCompact, formatCurrency } from '@/lib/data-utils'
 
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { BudgetAmountsEditor } from '@/components/features/budget/BudgetAmountsEditor'
 import { ConfirmChangesSheet } from '@/components/features/budget/ConfirmChangesSheet'
+import { LockedCategoriesNotice } from '@/components/features/budget/LockedCategoriesNotice'
+import { InfoBanner } from '@/components/features/accounts/create/InfoBanner'
 
 import type { BudgetPlanWithCategories } from '@/lib/api/budget-plans'
 import type { CategoryDB } from '@/types/database'
@@ -74,6 +76,7 @@ export default function BudgetEditPage() {
   const [showConfirm, setShowConfirm] = useState(false)
   const [pending, setPending] = useState(false)
   const [availableCategories, setAvailableCategories] = useState<CategoryDB[]>([])
+  const [monthlyLockedCategories, setMonthlyLockedCategories] = useState<Array<{ id: string; name: string }>>([])
 
   // ── fetch plan on mount ───────────────────────────────────────────────────
   // Use a ref to hold stable references to avoid re-firing the effect
@@ -122,8 +125,21 @@ export default function BudgetEditPage() {
       .catch(() => {})
   }, [user?.id, period])
 
+  // ── fetch monthly plan for yearly locked-categories notice ─────────────────
+  useEffect(() => {
+    if (!user?.id || period !== 'yearly') return
+    getBudgetPlan(user.id, 'monthly')
+      .then((plan) =>
+        setMonthlyLockedCategories(
+          plan ? plan.budget_plan_categories.map((c) => ({ id: c.category_id, name: c.categories.name })) : []
+        )
+      )
+      .catch(() => setMonthlyLockedCategories([]))
+  }, [user?.id, period])
+
   // ── derived state ─────────────────────────────────────────────────────────
   const suggestions = useMemo(() => suggestedAmounts(transactions, now), [transactions, now])
+  const annualIncome = useMemo(() => annualizedIncome(transactions, now), [transactions, now])
 
   const draftTotal = draftRows.reduce((s, r) => s + r.allocated_amount, 0)
   const originalTotal = original.reduce((s, r) => s + r.allocated_amount, 0)
@@ -261,6 +277,17 @@ export default function BudgetEditPage() {
         onBack={() => router.push('/budget')}
         backLabel={t('editTitle')}
       />
+
+      {period === 'yearly' && (
+        <>
+          <LockedCategoriesNotice categories={monthlyLockedCategories} />
+          {annualIncome > 0 && (
+            <InfoBanner variant="success">
+              {t('annualIncome', { amount: formatCurrency(annualIncome, plan?.currency ?? 'IDR') })}
+            </InfoBanner>
+          )}
+        </>
+      )}
 
       <BudgetAmountsEditor
         rows={draftRows}
