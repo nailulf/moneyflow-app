@@ -150,7 +150,32 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(accounts)
+    if (!accounts || accounts.length === 0) return NextResponse.json([])
+
+    const liveAccountIds = accounts.map(a => a.id)
+    const accountIdList = liveAccountIds.map(id => `"${id}"`).join(',')
+    const { data: txns, error: txErr } = await supabase
+      .from('transactions')
+      .select('amount, type, date, account_id, to_account_id, currency')
+      .eq('user_id', user.id)
+      .or(`account_id.in.(${accountIdList}),to_account_id.in.(${accountIdList})`)
+    if (txErr) {
+      console.error('❌ Error fetching transactions for balances:', txErr)
+      return NextResponse.json({ error: 'Failed to compute balances' }, { status: 500 })
+    }
+
+    const uniqueCurrencies = [...new Set(accounts.map(a => a.currency || 'IDR'))]
+    const rateMaps = new Map<string, Map<string, number>>()
+    await Promise.all(uniqueCurrencies.map(async (cur) => { rateMaps.set(cur, await buildCrossRateMap(cur)) }))
+
+    const now = new Date()
+    const withBalances = accounts.map(account => {
+      const accountTxns = (txns || []).filter(t => t.account_id === account.id || t.to_account_id === account.id)
+      const cur = account.currency || 'IDR'
+      const computed = calculateAccountBalanceAtDate(accountTxns, now, account.type, account.balance, account.id, cur, rateMaps.get(cur))
+      return { ...account, balance: computed }
+    })
+    return NextResponse.json(withBalances)
   } catch (error: unknown) {
     console.error('❌ API Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
