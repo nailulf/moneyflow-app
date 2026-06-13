@@ -319,7 +319,7 @@ export default function BudgetCreatePage() {
           return rows.filter((r) => r.category_id !== cat.id)
         }
         const source = availableCategories.find((c) => c.id === cat.id)
-        const color = normalizeColor(source?.color ?? '#205781')
+        const color = normalizeColor(source?.color ?? '#20507F')
         const suggested = suggestionsOn ? (suggestions.get(cat.id) ?? 0) : 0
         return [
           ...rows,
