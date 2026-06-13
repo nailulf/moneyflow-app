@@ -22,7 +22,10 @@ async function resolveOtherCategoryId(
   userId: string,
   type: 'INCOME' | 'EXPENSE'
 ): Promise<string | null> {
-  const name = type === 'EXPENSE' ? 'Other' : 'Other Income'
+  // Adjustments must land in the generic "Other/Uncategorized" bucket — never a real
+  // category like Food/Transport. Prefer the seeded generic category; if the user has
+  // deleted it, return null (uncategorized) rather than an arbitrary real category.
+  const candidates = type === 'EXPENSE' ? ['Other'] : ['Other Income', 'Income']
   const { data } = await supabase
     .from('categories')
     .select('id, name')
@@ -30,7 +33,8 @@ async function resolveOtherCategoryId(
     .eq('group_type', type)
     .order('created_at', { ascending: true })
   if (!data || data.length === 0) return null
-  return (data.find(c => c.name === name) ?? data[0]).id
+  const match = data.find(c => candidates.includes(c.name))
+  return match ? match.id : null
 }
 
 // GET /api/accounts/[accountId]/adjust-balance
