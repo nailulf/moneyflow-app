@@ -88,6 +88,7 @@ Core tables (full schema, RLS, triggers & invariants in [`docs/architecture/01-d
 - `budgets` / `budget_categories` - **Legacy** budget tables (still present; superseded by budget plans/snapshots)
 - `statements` - Uploaded bank statement metadata (file bytes are never persisted)
 - `financial_goals` - Per-account savings goals (one per account)
+- `portfolio_holdings` - Per-asset positions inside INVESTMENT accounts (asset_class, quantity, purchase_price, manual `current_value`); a DB trigger keeps the parent account's `balance` = SUM of its holdings' `current_value`
 - `wealth_forecast_scenarios` / `wealth_forecast_events` - Net-worth forecasting inputs
 - `account_balance_adjustments` - Immutable manual balance-correction audit log
 - `user_settings` - **Wide** per-user settings table (replaced the legacy `user_preferences` EAV table in migration 030)
