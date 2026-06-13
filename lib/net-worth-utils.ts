@@ -1,4 +1,5 @@
 import { AccountDB } from '@/types/database'
+import { computeAccountBalance } from '@/lib/account-balance'
 
 /** Minimal transaction shape needed for balance calculations. */
 export type BalanceTransaction = {
@@ -88,41 +89,32 @@ export function calculateAccountBalanceAtDate(
   accountCurrency?: string,
   currencyRates?: Map<string, number>
 ): number {
-  const filteredTransactions = transactions.filter(
-    transaction => new Date(transaction.date) <= targetDate
-  )
-
-  const convert = (amount: number, txCurrency?: string | null): number => {
-    if (!accountCurrency || !currencyRates || !txCurrency || txCurrency === accountCurrency) {
-      return amount
+  if (!accountId) {
+    // Legacy path: no account context, apply INCOME/EXPENSE unconditionally (no transfer direction).
+    // Real callers always pass accountId; this branch preserves backward compat for existing tests.
+    const convert = (amount: number, txCurrency?: string | null): number => {
+      if (!accountCurrency || !currencyRates || !txCurrency || txCurrency === accountCurrency) return amount
+      const rate = currencyRates.get(`${txCurrency}-${accountCurrency}`)
+      return rate ? amount * rate : amount
     }
-    const rate = currencyRates.get(`${txCurrency}-${accountCurrency}`)
-    return rate ? amount * rate : amount
-  }
-
-  let balance = initialBalance
-  for (const transaction of filteredTransactions) {
-    const amount = convert(transaction.amount, transaction.currency)
-    switch (transaction.type) {
-      case 'INCOME':
-        balance += amount
-        break
-      case 'EXPENSE':
-        balance -= amount
-        break
-      case 'TRANSFER':
-        if (accountId && transaction.to_account_id) {
-          if (transaction.account_id === accountId) {
-            balance -= amount
-          } else if (transaction.to_account_id === accountId) {
-            balance += amount
-          }
-        }
-        break
+    let balance = initialBalance
+    for (const t of transactions) {
+      if (new Date(t.date) > targetDate) continue
+      const amount = convert(t.amount, t.currency)
+      if (t.type === 'INCOME') balance += amount
+      else if (t.type === 'EXPENSE') balance -= amount
+      // TRANSFER skipped: no account_id context to determine direction
     }
+    return balance
   }
-
-  return balance
+  return computeAccountBalance({
+    accountId,
+    opening: initialBalance,
+    transactions,
+    asOf: targetDate,
+    accountCurrency,
+    currencyRates,
+  })
 }
 
 /**
