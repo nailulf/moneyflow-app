@@ -25,6 +25,7 @@ export interface Database {
           posting_date: string | null
           is_duplicate: boolean
           duplicate_of: string | null
+          is_balance_adjustment: boolean
           created_at: string
           updated_at: string
         }
@@ -51,6 +52,7 @@ export interface Database {
           posting_date?: string | null
           is_duplicate?: boolean
           duplicate_of?: string | null
+          is_balance_adjustment?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -77,6 +79,7 @@ export interface Database {
           posting_date?: string | null
           is_duplicate?: boolean
           duplicate_of?: string | null
+          is_balance_adjustment?: boolean
           updated_at?: string
         }
       }
