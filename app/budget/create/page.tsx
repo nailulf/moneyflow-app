@@ -11,13 +11,14 @@ import { useTransactions } from '@/contexts/TransactionContext'
 import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
 import { useBudgetSnapshot } from '@/hooks/useBudgetSnapshot'
 
-import { createBudgetPlan, getAvailableCategories } from '@/lib/api/budget-plans'
+import { createBudgetPlan, getAvailableCategories, getBudgetPlan } from '@/lib/api/budget-plans'
 import { getBudgetTemplates } from '@/lib/api/onboarding'
 import {
   incomeReference,
   suggestedAmounts,
   seedFromSnapshot,
   seedFromTemplate,
+  annualizedIncome,
 } from '@/lib/budget-screen-utils'
 import { formatCurrency, formatCurrencyCompact } from '@/lib/data-utils'
 
@@ -25,6 +26,7 @@ import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFl
 import { InfoBanner } from '@/components/features/accounts/create/InfoBanner'
 import { BudgetAmountsEditor } from '@/components/features/budget/BudgetAmountsEditor'
 import { BudgetPreviewCard, type PreviewRow } from '@/components/features/budget/BudgetPreviewCard'
+import { LockedCategoriesNotice } from '@/components/features/budget/LockedCategoriesNotice'
 import { StartFromCards, type StartFrom } from '@/components/features/budget/StartFromCards'
 import { cn } from '@/lib/utils'
 
@@ -91,6 +93,7 @@ export default function BudgetCreatePage() {
   // ── remote data ────────────────────────────────────────────────────────────
   const [availableCategories, setAvailableCategories] = useState<CategoryDB[]>([])
   const [templates, setTemplates] = useState<BudgetTemplateDB[]>([])
+  const [monthlyLockedCategories, setMonthlyLockedCategories] = useState<Array<{ id: string; name: string }>>([])
   const [pending, setPending] = useState(false)
 
   // entry step UI state
@@ -122,10 +125,20 @@ export default function BudgetCreatePage() {
     getBudgetTemplates()
       .then(setTemplates)
       .catch(() => {})
+    if (period === 'yearly') {
+      getBudgetPlan(user.id, 'monthly')
+        .then((plan) =>
+          setMonthlyLockedCategories(
+            plan ? plan.budget_plan_categories.map((c) => ({ id: c.category_id, name: c.categories.name })) : []
+          )
+        )
+        .catch(() => setMonthlyLockedCategories([]))
+    }
   }, [user?.id, period])
 
   // ── helpers ────────────────────────────────────────────────────────────────
   const income = incomeReference(transactions, period, now)
+  const annualIncome = useMemo(() => annualizedIncome(transactions, now), [transactions, now])
   const suggestions = useMemo(() => suggestedAmounts(transactions, now), [transactions, now])
 
   const periodLabel =
@@ -363,6 +376,17 @@ export default function BudgetCreatePage() {
       {/* ── STEP 2: amounts ───────────────────────────────────────────────── */}
       {currentStep === 'amounts' && (
         <>
+          {period === 'yearly' && (
+            <>
+              <LockedCategoriesNotice categories={monthlyLockedCategories} />
+              {annualIncome > 0 && (
+                <InfoBanner variant="success">
+                  {t('annualIncome', { amount: formatCurrency(annualIncome, 'IDR') })}
+                </InfoBanner>
+              )}
+            </>
+          )}
+
           {/* Yearly copy-from-last-year card */}
           {period === 'yearly' && prevSnapshot && draftRows.length === 0 && (
             <button
@@ -458,7 +482,7 @@ export default function BudgetCreatePage() {
           <BudgetPreviewCard
             periodLabel={periodLabel}
             total={totalAllocated}
-            income={income}
+            income={period === 'yearly' ? annualIncome : income}
             currency="IDR"
             rows={previewRows}
           />
