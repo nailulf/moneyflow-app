@@ -4,8 +4,9 @@
 -- is an OPENING ANCHOR only — it is never auto-mutated by income/expense. Live balance
 -- is computed in application code as: opening + Σ(transaction effects), transfer-aware.
 --
--- Also adds transactions.is_balance_adjustment so reconciliation deltas can be excluded
--- from real-category analytics while still counting toward budget totals.
+-- Also adds transactions.is_balance_adjustment to mark reconciliation deltas. These DO
+-- count toward budget totals and spending, booked to the generic Other/Uncategorized
+-- category; the flag identifies them for future analytics (e.g. a separate breakdown line).
 
 -- 1. Drop the stored-balance triggers + function from migration 018.
 DROP TRIGGER IF EXISTS trigger_update_account_balance_insert ON transactions;
