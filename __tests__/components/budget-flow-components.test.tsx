@@ -66,6 +66,36 @@ describe('BudgetPreviewCard', () => {
     expect(screen.getByText('Food & Dining')).toBeInTheDocument()
     expect(screen.getByText(/preview\.ofIncome:/)).toBeInTheDocument()
   })
+
+  it('shows the monthly "% of income" label when period is monthly', () => {
+    render(
+      <BudgetPreviewCard
+        periodLabel="June 2026"
+        total={8_500_000}
+        income={12_500_000}
+        currency="IDR"
+        rows={[{ categoryId: 'c1', name: 'Food', amount: 8_500_000, pct: 100 }] as never}
+        period="monthly"
+      />
+    )
+    expect(screen.getByText(/preview\.ofIncome:/)).toBeInTheDocument()
+    expect(screen.queryByText(/ofYearlyIncome:/)).not.toBeInTheDocument()
+  })
+
+  it('shows "% of yearly income" label when period is yearly', () => {
+    render(
+      <BudgetPreviewCard
+        periodLabel="2026 Yearly Budget"
+        total={90_000_000}
+        income={120_000_000}
+        currency="IDR"
+        rows={[{ categoryId: 'c1', name: 'Food', amount: 90_000_000, pct: 100 }] as never}
+        period="yearly"
+      />
+    )
+    expect(screen.getByText(/ofYearlyIncome:/)).toBeInTheDocument()
+    expect(screen.queryByText(/preview\.ofIncome:/)).not.toBeInTheDocument()
+  })
 })
 
 describe('ConfirmChangesSheet', () => {
