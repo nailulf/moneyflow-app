@@ -15,6 +15,7 @@ import { formatCurrencyCompact, formatCurrency } from '@/lib/data-utils'
 
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { BudgetAmountsEditor } from '@/components/features/budget/BudgetAmountsEditor'
+import { YearlyCategorySelector, type SelectableCategory } from '@/components/features/budget/YearlyCategorySelector'
 import { ConfirmChangesSheet } from '@/components/features/budget/ConfirmChangesSheet'
 import { LockedCategoriesNotice } from '@/components/features/budget/LockedCategoriesNotice'
 import { InfoBanner } from '@/components/features/accounts/create/InfoBanner'
@@ -196,6 +197,51 @@ export default function BudgetEditPage() {
   const pickedIds = useMemo(() => new Set(draftRows.map((r) => r.category_id)), [draftRows])
   const unpickedCategories = availableCategories.filter((c) => !pickedIds.has(c.id))
 
+  // ── yearly selector (design eTQEb): every eligible category as a toggle ─────
+  const yearlySelectableCategories = useMemo<SelectableCategory[]>(() => {
+    const seen = new Set<string>()
+    const list: SelectableCategory[] = []
+    for (const c of availableCategories) {
+      if (seen.has(c.id)) continue
+      seen.add(c.id)
+      list.push({ id: c.id, name: c.name })
+    }
+    for (const r of draftRows) {
+      if (seen.has(r.category_id)) continue
+      seen.add(r.category_id)
+      list.push({ id: r.category_id, name: r.category_name })
+    }
+    return list
+  }, [availableCategories, draftRows])
+
+  const selectedAmounts = useMemo(
+    () => new Map(draftRows.map((r) => [r.category_id, r.allocated_amount])),
+    [draftRows]
+  )
+
+  const handleToggleCategory = useCallback(
+    (cat: SelectableCategory) => {
+      setDraftRows((rows) => {
+        if (rows.some((r) => r.category_id === cat.id)) {
+          return rows.filter((r) => r.category_id !== cat.id)
+        }
+        const source = availableCategories.find((c) => c.id === cat.id)
+        const color = normalizeColor(source?.color ?? '#205781')
+        const suggested = suggestionsOn ? (suggestions.get(cat.id) ?? 0) : 0
+        return [
+          ...rows,
+          {
+            category_id: cat.id,
+            category_name: cat.name,
+            category_color: color,
+            allocated_amount: suggested,
+          },
+        ]
+      })
+    },
+    [availableCategories, suggestions, suggestionsOn]
+  )
+
   const handlePickCategory = useCallback(
     (cat: CategoryDB) => {
       const color = normalizeColor(cat.color)
@@ -289,46 +335,58 @@ export default function BudgetEditPage() {
         </>
       )}
 
-      <BudgetAmountsEditor
-        rows={draftRows}
-        suggestions={suggestions}
-        suggestionsOn={suggestionsOn}
-        onToggleSuggestions={handleToggleSuggestions}
-        onAmountChange={handleAmountChange}
-        onRemove={handleRemove}
-        onAddCategory={() => setShowPicker(true)}
-        totalAllocated={draftTotal}
-        currency={plan?.currency ?? 'IDR'}
-      />
+      {period === 'yearly' ? (
+        <YearlyCategorySelector
+          categories={yearlySelectableCategories}
+          selected={selectedAmounts}
+          currency={plan?.currency ?? 'IDR'}
+          onToggle={handleToggleCategory}
+          onAmountChange={handleAmountChange}
+        />
+      ) : (
+        <>
+          <BudgetAmountsEditor
+            rows={draftRows}
+            suggestions={suggestions}
+            suggestionsOn={suggestionsOn}
+            onToggleSuggestions={handleToggleSuggestions}
+            onAmountChange={handleAmountChange}
+            onRemove={handleRemove}
+            onAddCategory={() => setShowPicker(true)}
+            totalAllocated={draftTotal}
+            currency={plan?.currency ?? 'IDR'}
+          />
 
-      {/* inline category picker */}
-      {showPicker && (
-        <div className="flex flex-col gap-1 rounded-2xl bg-card p-3 shadow-card">
-          <p className="px-1 text-sm leading-body-sm font-semibold text-foreground">
-            {t('amounts.pickCategory')}
-          </p>
-          {unpickedCategories.length === 0 ? (
-            <p className="px-1 text-sm leading-body-sm text-muted-foreground">
-              {t('amounts.addCategory')}
-            </p>
-          ) : (
-            unpickedCategories.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => handlePickCategory(cat)}
-                className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm leading-body-sm font-semibold text-foreground transition-colors hover:bg-muted/50"
-              >
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ background: cat.color }}
-                  aria-hidden="true"
-                />
-                {cat.name}
-              </button>
-            ))
+          {/* inline category picker */}
+          {showPicker && (
+            <div className="flex flex-col gap-1 rounded-2xl bg-card p-3 shadow-card">
+              <p className="px-1 text-sm leading-body-sm font-semibold text-foreground">
+                {t('amounts.pickCategory')}
+              </p>
+              {unpickedCategories.length === 0 ? (
+                <p className="px-1 text-sm leading-body-sm text-muted-foreground">
+                  {t('amounts.addCategory')}
+                </p>
+              ) : (
+                unpickedCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => handlePickCategory(cat)}
+                    className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm leading-body-sm font-semibold text-foreground transition-colors hover:bg-muted/50"
+                  >
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ background: cat.color }}
+                      aria-hidden="true"
+                    />
+                    {cat.name}
+                  </button>
+                ))
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
 
       {/* Old → new total context line when there are changes */}

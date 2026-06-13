@@ -1183,6 +1183,12 @@
       "categoriesTitle": "Yearly categories",
       "save": "Save Yearly Budget"
     },
+    "yearlyAmounts": {
+      "available": "Available for yearly budget",
+      "categoryCount": "{count} categories",
+      "selectedCount": "{selected} of {total} categories selected",
+      "yearlyTotal": "{amount} yearly"
+    },
     "startFrom": {
       "title": "Start from",
       "copy": "Copy from last period",
