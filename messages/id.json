@@ -1283,5 +1283,15 @@
       "seeAll": "Lihat semua →",
       "empty": "Belum ada pengeluaran tercatat bulan ini."
     }
+  },
+  "portfolio": {
+    "title": "Portofolio",
+    "newAccount": "Akun Baru",
+    "hero": { "totalValue": "Total Nilai Portofolio", "assets": "{count} aset" },
+    "accounts": { "title": "Akun Investasi", "seeAll": "Lihat semua →", "holdings": "{count} aset", "empty": "Belum ada akun investasi." },
+    "allocation": { "title": "Alokasi Aset" },
+    "top": { "title": "Aset Terbesar", "empty": "Belum ada aset — tambahkan ke akun investasi." },
+    "class": { "IDX_STOCK": "Saham IDX", "US_STOCK": "Saham AS", "MUTUAL_FUND": "Reksa Dana", "ETF": "ETF", "BOND": "Obligasi", "OTHER": "Lainnya" },
+    "emptyCta": "Buat akun investasi"
   }
 }
