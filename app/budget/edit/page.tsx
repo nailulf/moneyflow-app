@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Loader2, ArrowRight } from 'lucide-react'
+import { Loader2, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { useAuth } from '@/contexts/AuthContext'
@@ -16,7 +16,9 @@ import { formatCurrencyCompact, formatCurrency } from '@/lib/data-utils'
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { BudgetAmountsEditor } from '@/components/features/budget/BudgetAmountsEditor'
 import { YearlyCategorySelector, type SelectableCategory } from '@/components/features/budget/YearlyCategorySelector'
+import { YearlyBudgetPreview } from '@/components/features/budget/YearlyBudgetPreview'
 import { ConfirmChangesSheet } from '@/components/features/budget/ConfirmChangesSheet'
+import type { PreviewRow } from '@/components/features/budget/BudgetPreviewCard'
 import { LockedCategoriesNotice } from '@/components/features/budget/LockedCategoriesNotice'
 import { InfoBanner } from '@/components/features/accounts/create/InfoBanner'
 
@@ -78,6 +80,8 @@ export default function BudgetEditPage() {
   const [pending, setPending] = useState(false)
   const [availableCategories, setAvailableCategories] = useState<CategoryDB[]>([])
   const [monthlyLockedCategories, setMonthlyLockedCategories] = useState<Array<{ id: string; name: string }>>([])
+  const [monthlyPlanTotal, setMonthlyPlanTotal] = useState(0)
+  const [showYearlyPreview, setShowYearlyPreview] = useState(false)
 
   // ── fetch plan on mount ───────────────────────────────────────────────────
   // Use a ref to hold stable references to avoid re-firing the effect
@@ -130,12 +134,16 @@ export default function BudgetEditPage() {
   useEffect(() => {
     if (!user?.id || period !== 'yearly') return
     getBudgetPlan(user.id, 'monthly')
-      .then((monthlyPlan) =>
+      .then((monthlyPlan) => {
         setMonthlyLockedCategories(
           monthlyPlan ? monthlyPlan.budget_plan_categories.map((c) => ({ id: c.category_id, name: c.categories.name })) : []
         )
-      )
-      .catch(() => setMonthlyLockedCategories([]))
+        setMonthlyPlanTotal(monthlyPlan?.total_amount ?? 0)
+      })
+      .catch(() => {
+        setMonthlyLockedCategories([])
+        setMonthlyPlanTotal(0)
+      })
   }, [user?.id, period])
 
   // ── derived state ─────────────────────────────────────────────────────────
@@ -166,6 +174,14 @@ export default function BudgetEditPage() {
   )
 
   const hasChanges = diff.length > 0
+
+  // Preview rows for the yearly preview hero (design V1A0Po), derived from the draft.
+  const previewRows: PreviewRow[] = draftRows.map((r) => ({
+    categoryId: r.category_id,
+    name: r.category_name,
+    amount: r.allocated_amount,
+    pct: draftTotal > 0 ? Math.round((r.allocated_amount / draftTotal) * 100) : 0,
+  }))
 
   // ── handlers ──────────────────────────────────────────────────────────────
   const handleAmountChange = useCallback((id: string, amt: number) => {
@@ -320,108 +336,156 @@ export default function BudgetEditPage() {
     <div className="mx-auto flex w-full max-w-md flex-col gap-4 pt-3 pb-10 md:pt-8">
       <CreateFlowHeader
         title={t('editTitle')}
-        onBack={() => router.push('/budget')}
+        onBack={
+          period === 'yearly' && showYearlyPreview
+            ? () => setShowYearlyPreview(false)
+            : () => router.push('/budget')
+        }
         backLabel={t('editTitle')}
       />
 
-      {period === 'yearly' && (
+      {period === 'yearly' && showYearlyPreview ? (
+        /* ── Yearly preview step (mirrors create; replaces the confirm sheet) ── */
         <>
-          <LockedCategoriesNotice categories={monthlyLockedCategories} />
-          {annualIncome > 0 && (
-            <InfoBanner variant="success">
-              {t('annualIncome', { amount: formatCurrency(annualIncome, plan?.currency ?? 'IDR') })}
-            </InfoBanner>
+          <YearlyBudgetPreview
+            heroLabel={t('yearlyPreview.heroLabel', { year: now.getFullYear() })}
+            yearlyTotal={draftTotal}
+            monthlyTotal={monthlyPlanTotal}
+            currency={plan?.currency ?? 'IDR'}
+            rows={previewRows}
+          />
+          <button
+            type="button"
+            onClick={handleApply}
+            disabled={!hasChanges || !draftRowsValid || pending}
+            className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
+          >
+            {pending ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+            )}
+            {t('applyChanges')}
+          </button>
+          {!hasChanges && (
+            <p className="text-center text-xs leading-caption text-muted-foreground">{t('noChanges')}</p>
           )}
         </>
-      )}
-
-      {period === 'yearly' ? (
-        <YearlyCategorySelector
-          categories={yearlySelectableCategories}
-          selected={selectedAmounts}
-          currency={plan?.currency ?? 'IDR'}
-          onToggle={handleToggleCategory}
-          onAmountChange={handleAmountChange}
-        />
       ) : (
         <>
-          <BudgetAmountsEditor
-            rows={draftRows}
-            suggestions={suggestions}
-            suggestionsOn={suggestionsOn}
-            onToggleSuggestions={handleToggleSuggestions}
-            onAmountChange={handleAmountChange}
-            onRemove={handleRemove}
-            onAddCategory={() => setShowPicker(true)}
-            totalAllocated={draftTotal}
-            currency={plan?.currency ?? 'IDR'}
-          />
-
-          {/* inline category picker */}
-          {showPicker && (
-            <div className="flex flex-col gap-1 rounded-2xl bg-card p-3 shadow-card">
-              <p className="px-1 text-sm leading-body-sm font-semibold text-foreground">
-                {t('amounts.pickCategory')}
-              </p>
-              {unpickedCategories.length === 0 ? (
-                <p className="px-1 text-sm leading-body-sm text-muted-foreground">
-                  {t('amounts.addCategory')}
-                </p>
-              ) : (
-                unpickedCategories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => handlePickCategory(cat)}
-                    className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm leading-body-sm font-semibold text-foreground transition-colors hover:bg-muted/50"
-                  >
-                    <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ background: cat.color }}
-                      aria-hidden="true"
-                    />
-                    {cat.name}
-                  </button>
-                ))
+          {period === 'yearly' && (
+            <>
+              <LockedCategoriesNotice categories={monthlyLockedCategories} />
+              {annualIncome > 0 && (
+                <InfoBanner variant="success">
+                  {t('annualIncome', { amount: formatCurrency(annualIncome, plan?.currency ?? 'IDR') })}
+                </InfoBanner>
               )}
-            </div>
+            </>
+          )}
+
+          {period === 'yearly' ? (
+            <YearlyCategorySelector
+              categories={yearlySelectableCategories}
+              selected={selectedAmounts}
+              currency={plan?.currency ?? 'IDR'}
+              onToggle={handleToggleCategory}
+              onAmountChange={handleAmountChange}
+            />
+          ) : (
+            <>
+              <BudgetAmountsEditor
+                rows={draftRows}
+                suggestions={suggestions}
+                suggestionsOn={suggestionsOn}
+                onToggleSuggestions={handleToggleSuggestions}
+                onAmountChange={handleAmountChange}
+                onRemove={handleRemove}
+                onAddCategory={() => setShowPicker(true)}
+                totalAllocated={draftTotal}
+                currency={plan?.currency ?? 'IDR'}
+              />
+
+              {/* inline category picker */}
+              {showPicker && (
+                <div className="flex flex-col gap-1 rounded-2xl bg-card p-3 shadow-card">
+                  <p className="px-1 text-sm leading-body-sm font-semibold text-foreground">
+                    {t('amounts.pickCategory')}
+                  </p>
+                  {unpickedCategories.length === 0 ? (
+                    <p className="px-1 text-sm leading-body-sm text-muted-foreground">
+                      {t('amounts.addCategory')}
+                    </p>
+                  ) : (
+                    unpickedCategories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => handlePickCategory(cat)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm leading-body-sm font-semibold text-foreground transition-colors hover:bg-muted/50"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{ background: cat.color }}
+                          aria-hidden="true"
+                        />
+                        {cat.name}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Old → new total context line when there are changes */}
+          {hasChanges && (
+            <p className="flex items-center justify-center gap-1.5 text-xs leading-caption text-muted-foreground">
+              <span>{formatCurrencyCompact(originalTotal, plan?.currency ?? 'IDR')}</span>
+              <ArrowRight className="h-3 w-3" aria-hidden="true" />
+              <span>{formatCurrencyCompact(draftTotal, plan?.currency ?? 'IDR')}</span>
+            </p>
+          )}
+
+          {period === 'yearly' ? (
+            /* Yearly advances to the preview step instead of the confirm sheet. */
+            <button
+              type="button"
+              onClick={() => setShowYearlyPreview(true)}
+              disabled={!draftRowsValid}
+              className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
+            >
+              {t('amounts.preview')}
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowConfirm(true)}
+                disabled={!hasChanges || !draftRowsValid || pending}
+                className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
+              >
+                {t('applyChanges')}
+              </button>
+
+              {!hasChanges && (
+                <p className="text-center text-xs leading-caption text-muted-foreground">
+                  {t('noChanges')}
+                </p>
+              )}
+
+              <ConfirmChangesSheet
+                open={showConfirm}
+                diff={diff}
+                currency={plan?.currency ?? 'IDR'}
+                pending={pending}
+                onApply={handleApply}
+                onCancel={() => setShowConfirm(false)}
+              />
+            </>
           )}
         </>
       )}
-
-      {/* Old → new total context line when there are changes */}
-      {hasChanges && (
-        <p className="flex items-center justify-center gap-1.5 text-xs leading-caption text-muted-foreground">
-          <span>{formatCurrencyCompact(originalTotal, plan?.currency ?? 'IDR')}</span>
-          <ArrowRight className="h-3 w-3" aria-hidden="true" />
-          <span>{formatCurrencyCompact(draftTotal, plan?.currency ?? 'IDR')}</span>
-        </p>
-      )}
-
-      {/* sticky footer Apply button */}
-      <button
-        type="button"
-        onClick={() => setShowConfirm(true)}
-        disabled={!hasChanges || !draftRowsValid || pending}
-        className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
-      >
-        {t('applyChanges')}
-      </button>
-
-      {!hasChanges && (
-        <p className="text-center text-xs leading-caption text-muted-foreground">
-          {t('noChanges')}
-        </p>
-      )}
-
-      <ConfirmChangesSheet
-        open={showConfirm}
-        diff={diff}
-        currency={plan?.currency ?? 'IDR'}
-        pending={pending}
-        onApply={handleApply}
-        onCancel={() => setShowConfirm(false)}
-      />
     </div>
   )
 }
