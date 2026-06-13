@@ -1292,6 +1292,30 @@
     "allocation": { "title": "Alokasi Aset" },
     "top": { "title": "Aset Terbesar", "empty": "Belum ada aset — tambahkan ke akun investasi." },
     "class": { "IDX_STOCK": "Saham IDX", "US_STOCK": "Saham AS", "MUTUAL_FUND": "Reksa Dana", "ETF": "ETF", "BOND": "Obligasi", "OTHER": "Lainnya" },
+    "classHint": { "IDX_STOCK": "Saham Indonesia di IDX", "US_STOCK": "Terdaftar NYSE & NASDAQ", "MUTUAL_FUND": "Reksa dana terkelola", "ETF": "Dana yang diperdagangkan di bursa", "BOND": "Obligasi pemerintah & korporasi", "OTHER": "Lainnya" },
+    "detail": { "investmentAccount": "Akun Investasi", "addAsset": "Tambah Aset", "back": "Kembali", "emptyTitle": "Belum ada aset", "emptyDescription": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:", "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis." },
+    "manage": { "edit": "Ubah", "remove": "Hapus dari portofolio", "currentValue": "Nilai saat ini", "cancel": "Batal", "save": "Simpan", "removeWarning": "Ini menghapus aset dan riwayatnya. Saldo akun akan diperbarui.", "confirmRemove": "Hapus", "saveFailed": "Gagal memperbarui aset.", "deleteFailed": "Gagal menghapus aset." },
     "emptyCta": "Buat akun investasi"
+  },
+  "holdingCreate": {
+    "selectTitle": "Tambah Investasi",
+    "selectPrompt": "Jenis aset apa?",
+    "selectSubtitle": "Pilih kelas aset untuk portofoliomu",
+    "close": "Tutup",
+    "back": "Kembali",
+    "save": "Simpan",
+    "titleFor": "Tambah {class}",
+    "tickerLabel": "Saham / Ticker",
+    "tickerPlaceholder": "mis. BBCA",
+    "nameLabel": "Nama",
+    "namePlaceholder": "mis. Bank Central Asia",
+    "lotsLabel": "Jumlah Lot",
+    "lotsHelper": "1 lot = 100 lembar",
+    "unitsLabel": "Unit",
+    "priceLabel": "Harga Beli / Unit",
+    "dateLabel": "Tanggal Beli",
+    "estimatedTotal": "Estimasi Total",
+    "submit": "Tambah ke Portofolio",
+    "errors": { "nameRequired": "Nama wajib diisi", "amountInvalid": "Masukkan jumlah yang valid", "createFailed": "Gagal menambah aset. Coba lagi." }
   }
 }
