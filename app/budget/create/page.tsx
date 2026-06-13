@@ -26,6 +26,7 @@ import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFl
 import { InfoBanner } from '@/components/features/accounts/create/InfoBanner'
 import { BudgetAmountsEditor } from '@/components/features/budget/BudgetAmountsEditor'
 import { BudgetPreviewCard, type PreviewRow } from '@/components/features/budget/BudgetPreviewCard'
+import { YearlyBudgetPreview } from '@/components/features/budget/YearlyBudgetPreview'
 import { LockedCategoriesNotice } from '@/components/features/budget/LockedCategoriesNotice'
 import { StartFromCards, type StartFrom } from '@/components/features/budget/StartFromCards'
 import { cn } from '@/lib/utils'
@@ -94,6 +95,7 @@ export default function BudgetCreatePage() {
   const [availableCategories, setAvailableCategories] = useState<CategoryDB[]>([])
   const [templates, setTemplates] = useState<BudgetTemplateDB[]>([])
   const [monthlyLockedCategories, setMonthlyLockedCategories] = useState<Array<{ id: string; name: string }>>([])
+  const [monthlyPlanTotal, setMonthlyPlanTotal] = useState(0)
   const [pending, setPending] = useState(false)
 
   // entry step UI state
@@ -127,12 +129,16 @@ export default function BudgetCreatePage() {
       .catch(() => {})
     if (period === 'yearly') {
       getBudgetPlan(user.id, 'monthly')
-        .then((plan) =>
+        .then((plan) => {
           setMonthlyLockedCategories(
             plan ? plan.budget_plan_categories.map((c) => ({ id: c.category_id, name: c.categories.name })) : []
           )
-        )
-        .catch(() => setMonthlyLockedCategories([]))
+          setMonthlyPlanTotal(plan?.total_amount ?? 0)
+        })
+        .catch(() => {
+          setMonthlyLockedCategories([])
+          setMonthlyPlanTotal(0)
+        })
     }
   }, [user?.id, period])
 
@@ -479,22 +485,36 @@ export default function BudgetCreatePage() {
       {/* ── STEP 3: preview ───────────────────────────────────────────────── */}
       {currentStep === 'preview' && (
         <>
-          <BudgetPreviewCard
-            periodLabel={periodLabel}
-            total={totalAllocated}
-            income={period === 'yearly' ? annualIncome : income}
-            currency="IDR"
-            rows={previewRows}
-            period={period}
-          />
+          {period === 'yearly' ? (
+            <YearlyBudgetPreview
+              heroLabel={t('yearlyPreview.heroLabel', { year: now.getFullYear() })}
+              yearlyTotal={totalAllocated}
+              monthlyTotal={monthlyPlanTotal}
+              currency="IDR"
+              rows={previewRows}
+            />
+          ) : (
+            <BudgetPreviewCard
+              periodLabel={periodLabel}
+              total={totalAllocated}
+              income={income}
+              currency="IDR"
+              rows={previewRows}
+              period={period}
+            />
+          )}
           <button
             type="button"
             onClick={handleSave}
             disabled={pending || !draftRowsValid}
             className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
           >
-            {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-            {t('preview.save')}
+            {pending ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              period === 'yearly' && <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+            )}
+            {period === 'yearly' ? t('yearlyPreview.save') : t('preview.save')}
           </button>
         </>
       )}
