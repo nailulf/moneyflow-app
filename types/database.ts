@@ -726,6 +726,52 @@ export interface Database {
           updated_at?: string
         }
       }
+      portfolio_holdings: {
+        Row: {
+          id: string
+          account_id: string
+          user_id: string
+          asset_class: 'IDX_STOCK' | 'US_STOCK' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'OTHER'
+          symbol: string | null
+          name: string
+          quantity: number
+          purchase_price: number
+          current_value: number
+          purchase_date: string | null
+          currency: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          account_id: string
+          user_id: string
+          asset_class: 'IDX_STOCK' | 'US_STOCK' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'OTHER'
+          symbol?: string | null
+          name: string
+          quantity: number
+          purchase_price: number
+          current_value: number
+          purchase_date?: string | null
+          currency?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          account_id?: string
+          user_id?: string
+          asset_class?: 'IDX_STOCK' | 'US_STOCK' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'OTHER'
+          symbol?: string | null
+          name?: string
+          quantity?: number
+          purchase_price?: number
+          current_value?: number
+          purchase_date?: string | null
+          currency?: string
+          updated_at?: string
+        }
+      }
       wealth_forecast_scenarios: {
         Row: {
           id: string
