@@ -20,6 +20,7 @@ import { YearlyBudgetPreview } from '@/components/features/budget/YearlyBudgetPr
 import { ConfirmChangesSheet } from '@/components/features/budget/ConfirmChangesSheet'
 import type { PreviewRow } from '@/components/features/budget/BudgetPreviewCard'
 import { LockedCategoriesNotice } from '@/components/features/budget/LockedCategoriesNotice'
+import { StickyCtaBar } from '@/components/features/budget/StickyCtaBar'
 import { InfoBanner } from '@/components/features/accounts/create/InfoBanner'
 
 import type { BudgetPlanWithCategories } from '@/lib/api/budget-plans'
@@ -354,22 +355,24 @@ export default function BudgetEditPage() {
             currency={plan?.currency ?? 'IDR'}
             rows={previewRows}
           />
-          <button
-            type="button"
-            onClick={handleApply}
-            disabled={!hasChanges || !draftRowsValid || pending}
-            className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
-          >
-            {pending ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            )}
-            {t('applyChanges')}
-          </button>
           {!hasChanges && (
             <p className="text-center text-xs leading-caption text-muted-foreground">{t('noChanges')}</p>
           )}
+          <StickyCtaBar>
+            <button
+              type="button"
+              onClick={handleApply}
+              disabled={!hasChanges || !draftRowsValid || pending}
+              className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
+            >
+              {pending ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              )}
+              {t('applyChanges')}
+            </button>
+          </StickyCtaBar>
         </>
       ) : (
         <>
@@ -449,30 +452,34 @@ export default function BudgetEditPage() {
 
           {period === 'yearly' ? (
             /* Yearly advances to the preview step instead of the confirm sheet. */
-            <button
-              type="button"
-              onClick={() => setShowYearlyPreview(true)}
-              disabled={!draftRowsValid}
-              className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
-            >
-              {t('amounts.preview')}
-            </button>
-          ) : (
-            <>
+            <StickyCtaBar>
               <button
                 type="button"
-                onClick={() => setShowConfirm(true)}
-                disabled={!hasChanges || !draftRowsValid || pending}
+                onClick={() => setShowYearlyPreview(true)}
+                disabled={!draftRowsValid}
                 className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
               >
-                {t('applyChanges')}
+                {t('amounts.preview')}
               </button>
-
+            </StickyCtaBar>
+          ) : (
+            <>
               {!hasChanges && (
                 <p className="text-center text-xs leading-caption text-muted-foreground">
                   {t('noChanges')}
                 </p>
               )}
+
+              <StickyCtaBar>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  disabled={!hasChanges || !draftRowsValid || pending}
+                  className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
+                >
+                  {t('applyChanges')}
+                </button>
+              </StickyCtaBar>
 
               <ConfirmChangesSheet
                 open={showConfirm}
