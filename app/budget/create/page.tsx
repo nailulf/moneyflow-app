@@ -29,6 +29,7 @@ import { BudgetPreviewCard, type PreviewRow } from '@/components/features/budget
 import { YearlyBudgetPreview } from '@/components/features/budget/YearlyBudgetPreview'
 import { YearlyCategorySelector, type SelectableCategory } from '@/components/features/budget/YearlyCategorySelector'
 import { LockedCategoriesNotice } from '@/components/features/budget/LockedCategoriesNotice'
+import { StickyCtaBar } from '@/components/features/budget/StickyCtaBar'
 import { StartFromCards, type StartFrom } from '@/components/features/budget/StartFromCards'
 import { cn } from '@/lib/utils'
 
@@ -530,14 +531,16 @@ export default function BudgetCreatePage() {
             </p>
           )}
 
-          <button
-            type="button"
-            onClick={handleAmountsPreview}
-            disabled={!draftRowsValid}
-            className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
-          >
-            {t('amounts.preview')}
-          </button>
+          <StickyCtaBar>
+            <button
+              type="button"
+              onClick={handleAmountsPreview}
+              disabled={!draftRowsValid}
+              className="flex h-[52px] w-full items-center justify-center rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
+            >
+              {t('amounts.preview')}
+            </button>
+          </StickyCtaBar>
         </>
       )}
 
@@ -562,19 +565,21 @@ export default function BudgetCreatePage() {
               period={period}
             />
           )}
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={pending || !draftRowsValid}
-            className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
-          >
-            {pending ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            ) : (
-              period === 'yearly' && <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            )}
-            {period === 'yearly' ? t('yearlyPreview.save') : t('preview.save')}
-          </button>
+          <StickyCtaBar>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={pending || !draftRowsValid}
+              className="flex h-[52px] w-full items-center justify-center gap-2 rounded-[14px] bg-primary text-md leading-body-lg font-semibold text-primary-foreground transition-transform active:scale-[0.99] disabled:opacity-60"
+            >
+              {pending ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                period === 'yearly' && <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              )}
+              {period === 'yearly' ? t('yearlyPreview.save') : t('preview.save')}
+            </button>
+          </StickyCtaBar>
         </>
       )}
 
