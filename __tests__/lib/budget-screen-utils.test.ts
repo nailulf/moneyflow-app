@@ -167,3 +167,35 @@ describe('seedFromTemplate', () => {
     expect(seedFromTemplate(template as never, 10_000_000, [] as never)).toEqual([])
   })
 })
+
+import { annualizedIncome } from '@/lib/budget-screen-utils'
+
+describe('annualizedIncome', () => {
+  it('averages current-year income over months-with-income and × 12', () => {
+    // one income month (June, 12.5M) → avg 12.5M × 12 = 150M
+    const list = [
+      txn({ type: 'INCOME', amount: 12_500_000, date: '2026-06-01' }),
+      txn({ type: 'EXPENSE', amount: -500_000, date: '2026-06-05' }),
+    ]
+    expect(annualizedIncome(list, NOW)).toBe(150_000_000)
+  })
+  it('uses the count of distinct income months, not elapsed months', () => {
+    // May 10M + June 12M across 2 months → avg 11M × 12 = 132M
+    const list = [
+      txn({ type: 'INCOME', amount: 10_000_000, date: '2026-05-15' }),
+      txn({ type: 'INCOME', amount: 12_000_000, date: '2026-06-01' }),
+    ]
+    expect(annualizedIncome(list, NOW)).toBe(132_000_000)
+  })
+  it('sums multiple income txns within the same month before averaging', () => {
+    const list = [
+      txn({ type: 'INCOME', amount: 6_000_000, date: '2026-06-01' }),
+      txn({ type: 'INCOME', amount: 6_000_000, date: '2026-06-20' }),
+    ]
+    expect(annualizedIncome(list, NOW)).toBe(144_000_000) // 12M in 1 month × 12
+  })
+  it('ignores prior-year income and returns 0 when there is none', () => {
+    expect(annualizedIncome([txn({ type: 'INCOME', amount: 9_000_000, date: '2025-06-01' })], NOW)).toBe(0)
+    expect(annualizedIncome([txn({ type: 'EXPENSE', amount: -1, date: '2026-06-01' })], NOW)).toBe(0)
+  })
+})

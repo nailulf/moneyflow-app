@@ -156,3 +156,17 @@ export function seedFromTemplate(
   }
   return out
 }
+
+/** Annual income estimate: current-year income ÷ (distinct months with income) × 12. 0 if none. */
+export function annualizedIncome(transactions: Transaction[], now: Date): number {
+  const byMonth = new Map<number, number>()
+  for (const t of transactions) {
+    if (t.type !== 'INCOME') continue
+    const d = new Date(t.date)
+    if (d.getFullYear() !== now.getFullYear()) continue
+    byMonth.set(d.getMonth(), (byMonth.get(d.getMonth()) ?? 0) + Math.abs(t.amount))
+  }
+  if (byMonth.size === 0) return 0
+  const total = [...byMonth.values()].reduce((s, v) => s + v, 0)
+  return (total / byMonth.size) * 12
+}
