@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateGoalProgress } from '@/lib/goals/calculations'
+import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 import { AccountDB } from '@/types/database'
 
 // GET /api/goals/summary - Get all user goals with progress
@@ -44,6 +45,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch goals' }, { status: 500 })
     }
 
+    // Fetch all transactions for this user once to avoid N+1 queries.
+    // No currency-rate map is passed to calculateAccountBalanceAtDate: goal accounts are
+    // effectively single-currency; the rare foreign-currency transaction falls back to its
+    // raw amount — acceptable for goal progress and avoids pulling in exchange-rate fetching.
+    const { data: allUserTxns } = await supabase
+      .from('transactions')
+      .select('amount, type, date, account_id, to_account_id, currency')
+      .eq('user_id', user.id)
+
+    const now = new Date()
+
     // Process goals and calculate progress
     const goals = (goalsWithAccounts || []).map((item) => {
       // TypeScript needs help with the joined data
@@ -56,7 +68,14 @@ export async function GET(request: NextRequest) {
         currency: string
       }
 
-      const currentBalance = account.balance ?? 0
+      // Filter the already-fetched user transactions to legs touching this account
+      const accountTxns = (allUserTxns || []).filter(
+        (t) => t.account_id === account.id || t.to_account_id === account.id
+      )
+      // Compute live balance: opening anchor + Σ(transactions up to now)
+      const currentBalance = calculateAccountBalanceAtDate(
+        accountTxns, now, account.type, account.balance ?? 0, account.id, account.currency || 'IDR'
+      )
       const progress = calculateGoalProgress(currentBalance, item.target_amount)
 
       return {
