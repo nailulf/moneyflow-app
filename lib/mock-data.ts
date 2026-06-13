@@ -26,6 +26,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-15',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-15T10:00:00Z',
     updated_at: '2024-01-15T10:00:00Z'
   },
@@ -52,6 +53,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-14',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-14T15:30:00Z',
     updated_at: '2024-01-14T15:30:00Z'
   },
@@ -78,6 +80,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-13',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-13T09:00:00Z',
     updated_at: '2024-01-13T09:00:00Z'
   },
@@ -104,6 +107,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-12',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-12T12:00:00Z',
     updated_at: '2024-01-12T12:00:00Z'
   },
@@ -130,6 +134,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-11',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-11T14:00:00Z',
     updated_at: '2024-01-11T14:00:00Z'
   },
@@ -156,6 +161,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-10',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-10T08:30:00Z',
     updated_at: '2024-01-10T08:30:00Z'
   },
@@ -182,6 +188,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-09',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-09T16:45:00Z',
     updated_at: '2024-01-09T16:45:00Z'
   },
@@ -208,6 +215,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-08',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-08T11:00:00Z',
     updated_at: '2024-01-08T11:00:00Z'
   },
@@ -234,6 +242,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-07',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-07T19:20:00Z',
     updated_at: '2024-01-07T19:20:00Z'
   },
@@ -260,6 +269,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-01-06',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-01-06T17:00:00Z',
     updated_at: '2024-01-06T17:00:00Z'
   },
@@ -286,6 +296,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-02-20',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-02-20T09:00:00Z',
     updated_at: '2024-02-20T09:00:00Z'
   },
@@ -312,6 +323,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-02-10',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-02-10T19:30:00Z',
     updated_at: '2024-02-10T19:30:00Z'
   },
@@ -338,6 +350,7 @@ export const mockTransactions: Transaction[] = [
     posting_date: '2024-02-05',
     is_duplicate: false,
     duplicate_of: null,
+    is_balance_adjustment: false,
     created_at: '2024-02-05T08:00:00Z',
     updated_at: '2024-02-05T08:00:00Z'
   }
@@ -680,6 +693,7 @@ export const generateMockTransactions = (months: number = 10): Transaction[] => 
         posting_date: date.toISOString().split('T')[0],
         is_duplicate: false,
         duplicate_of: null,
+        is_balance_adjustment: false,
         created_at: date.toISOString(),
         updated_at: date.toISOString()
       })
