@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronRight, Calendar, FileText, Repeat } from 'lucide-react'
+import { ChevronRight, Calendar, FileText, Repeat, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   type FormState,
@@ -20,6 +20,16 @@ import { RecurringFields } from '@/components/features/transaction/form/Recurrin
 import { CategoryPickerSheet } from '@/components/features/transaction/form/CategoryPickerSheet'
 import { AccountPickerSheet } from '@/components/features/transaction/form/AccountPickerSheet'
 import { TransactionSuccessView, type TransactionSummary } from '@/components/features/transaction/form/TransactionSuccessView'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/molecules/alert-dialog'
 import { useTransactionMutations } from '@/hooks/useTransactionsQuery'
 import { useCategories } from '@/hooks/use-category-manager'
 import { useAccounts } from '@/contexts/AccountContext'
@@ -31,8 +41,11 @@ import { useAccounts } from '@/contexts/AccountContext'
 export interface TransactionFormProps {
   mode: 'create' | 'edit'
   userId: string
-  /** Pre-seed values for edit mode; also accepts `id` for targeting the existing record. */
-  initial?: Partial<FormState> & { id?: string }
+  /**
+   * Pre-seed values for edit mode; also accepts `id` for targeting the existing record
+   * and `isBalanceAdjustment` (display-only flag — not part of editable FormState).
+   */
+  initial?: Partial<FormState> & { id?: string; isBalanceAdjustment?: boolean }
   onDone: () => void
 }
 
@@ -80,7 +93,7 @@ function buildDefaultState(
 // ---------------------------------------------------------------------------
 
 export function TransactionForm({ mode, userId, initial, onDone }: TransactionFormProps) {
-  const { create, update, isCreating, isUpdating } = useTransactionMutations(userId)
+  const { create, update, delete: deleteTxn, isCreating, isUpdating, isDeleting } = useTransactionMutations(userId)
   const { categories } = useCategories()
   const { accounts } = useAccounts()
 
@@ -101,9 +114,15 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
   const [accountOpen, setAccountOpen] = useState(false)
   const [toAccountOpen, setToAccountOpen] = useState(false)
 
+  // Delete confirm dialog
+  const [deleteOpen, setDeleteOpen] = useState(false)
+
   // Derived
   const fields = fieldsForType(state.type)
   const pending = mode === 'create' ? isCreating : isUpdating
+
+  // Display-only flag from initial (not part of editable FormState)
+  const isBalanceAdjustment = initial?.isBalanceAdjustment ?? false
 
   // Resolve display names
   const selectedCategory = categories.find((c) => c.id === state.categoryId)
@@ -177,6 +196,18 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
     }))
   }
 
+  async function handleDelete() {
+    if (!initial?.id) return
+    try {
+      await deleteTxn(initial.id)
+    } catch {
+      // useTransactionMutations already shows an error toast via its onError handler
+      return
+    }
+    setDeleteOpen(false)
+    onDone()
+  }
+
   // ---------------------------------------------------------------------------
   // Success view
   // ---------------------------------------------------------------------------
@@ -234,6 +265,12 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
         </p>
         {showValidation && !state.amount.digits && (
           <p className="text-xs leading-caption text-destructive">Enter an amount</p>
+        )}
+        {/* Balance adjustment badge — display-only; only shown when editing a reconciliation row */}
+        {isBalanceAdjustment && (
+          <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs leading-caption text-muted-foreground">
+            Balance adjustment
+          </span>
         )}
       </div>
 
@@ -382,6 +419,45 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
           setState((prev) => ({ ...prev, amount: amountReducer(prev.amount, action) }))
         }
       />
+
+      {/* Delete action — edit mode only */}
+      {mode === 'edit' && (
+        <button
+          type="button"
+          onClick={() => setDeleteOpen(true)}
+          disabled={isDeleting}
+          className={cn(
+            'flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl border border-destructive/30',
+            'text-md leading-body-lg font-medium text-destructive',
+            'transition-colors hover:bg-destructive/5 active:bg-destructive/10',
+            'disabled:opacity-50 disabled:pointer-events-none',
+          )}
+        >
+          <Trash2 className="size-4" />
+          Delete
+        </button>
+      )}
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The transaction will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Pickers */}
       {fields.category && (
