@@ -49,13 +49,15 @@ const TYPE_OPTIONS: Array<{ value: TxnType; label: string }> = [
 // ---------------------------------------------------------------------------
 
 function todayString(): string {
-  return new Date().toISOString().slice(0, 10)
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function buildDefaultState(
-  initial: Partial<FormState> | undefined,
-  _firstAccountId: string | null,
-  _firstAccountCurrency: string,
+  initial?: Partial<FormState>,
 ): FormState {
   const base: FormState = {
     type: 'EXPENSE',
@@ -79,12 +81,12 @@ function buildDefaultState(
 
 export function TransactionForm({ mode, userId, initial, onDone }: TransactionFormProps) {
   const { create, update, isCreating, isUpdating } = useTransactionMutations(userId)
-  const { categories } = useCategories() as { categories: Array<{ id: string; name: string; group_type: string }> }
+  const { categories } = useCategories()
   const { accounts } = useAccounts()
 
   // Core form state
   const [state, setState] = useState<FormState>(() =>
-    buildDefaultState(initial, null, 'IDR')
+    buildDefaultState(initial)
   )
 
   // Phase: 'form' while editing, 'success' after a successful save
@@ -125,16 +127,28 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
     setShowValidation(false)
 
     const payload = buildTransactionPayload(state, mode, userId)
-
-    if (mode === 'create') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await create(payload as any)
-    } else if (initial?.id) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await update({ id: initial.id, data: payload as any })
+    const insert = {
+      ...payload,
+      category_id: payload.category_id ?? undefined,
+      account_id: payload.account_id ?? undefined,
+      to_account_id: payload.to_account_id ?? undefined,
+      // TransactionPayload.recurring_frequency is typed as `string | null` (too broad);
+      // FormState guarantees RecurringFrequency | null so the cast is safe.
+      recurring_frequency: payload.recurring_frequency as 'daily' | 'weekly' | 'monthly' | 'yearly' | null,
     }
 
-    // Build summary for success view
+    try {
+      if (mode === 'create') {
+        await create(insert)
+      } else if (initial?.id) {
+        await update({ id: initial.id, data: insert })
+      }
+    } catch {
+      // useTransactionMutations already shows an error toast via its onError handler
+      return
+    }
+
+    // Build summary for success view (only reached on success)
     const summary: TransactionSummary = {
       type: state.type,
       amount: payload.amount,
@@ -149,7 +163,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
   }
 
   function handleAddAnother() {
-    setState(buildDefaultState(undefined, null, 'IDR'))
+    setState(buildDefaultState())
     setShowValidation(false)
     setPhase('form')
   }
@@ -370,14 +384,16 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
       />
 
       {/* Pickers */}
-      <CategoryPickerSheet
-        open={categoryOpen}
-        type={state.type}
-        categories={categories}
-        selectedId={state.categoryId}
-        onSelect={(id) => setState((prev) => ({ ...prev, categoryId: id }))}
-        onOpenChange={setCategoryOpen}
-      />
+      {fields.category && (
+        <CategoryPickerSheet
+          open={categoryOpen}
+          type={state.type}
+          categories={categories}
+          selectedId={state.categoryId}
+          onSelect={(id) => setState((prev) => ({ ...prev, categoryId: id }))}
+          onOpenChange={setCategoryOpen}
+        />
+      )}
 
       <AccountPickerSheet
         open={accountOpen}
