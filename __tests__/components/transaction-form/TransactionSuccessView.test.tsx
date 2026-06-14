@@ -1,4 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+
+jest.mock('next-intl', () => require('@/__tests__/components/transaction-form/i18n-mock').nextIntlMock)
+
 import { TransactionSuccessView } from '@/components/features/transaction/form/TransactionSuccessView'
 
 const tx = { type: 'EXPENSE' as const, amount: 125000, categoryName: 'Coffee', accountName: 'BCA', date: '2026-06-14', currency: 'IDR', toAccountName: null }

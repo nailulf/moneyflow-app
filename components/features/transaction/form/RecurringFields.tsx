@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import type { RecurringFrequency } from '@/lib/transaction-form'
 
@@ -16,14 +17,16 @@ export interface RecurringFieldsProps {
   onChange: (value: RecurringFieldsValue) => void
 }
 
-const FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'yearly', label: 'Yearly' },
-]
+const FREQUENCY_VALUES: RecurringFrequency[] = ['daily', 'weekly', 'monthly', 'yearly']
 
 export function RecurringFields({ frequency, endDate, onChange }: RecurringFieldsProps) {
+  const t = useTranslations('transactions.form')
+
+  const FREQUENCIES: { value: RecurringFrequency; label: string }[] = FREQUENCY_VALUES.map((v) => ({
+    value: v,
+    label: t(v as 'daily' | 'weekly' | 'monthly' | 'yearly'),
+  }))
+
   function handleFrequency(value: RecurringFrequency) {
     onChange({ frequency: value, endDate })
   }
@@ -45,7 +48,7 @@ export function RecurringFields({ frequency, endDate, onChange }: RecurringField
     <div className="flex flex-col gap-4">
       {/* Frequency group */}
       <div className="flex flex-col gap-2">
-        <p className="text-sm leading-body-sm font-medium text-foreground">Repeat</p>
+        <p className="text-sm leading-body-sm font-medium text-foreground">{t('repeat')}</p>
         <div className="flex flex-wrap gap-2">
           {FREQUENCIES.map(({ value, label }) => {
             const isSelected = value === frequency
@@ -72,7 +75,7 @@ export function RecurringFields({ frequency, endDate, onChange }: RecurringField
 
       {/* Ends group */}
       <div className="flex flex-col gap-2">
-        <p className="text-sm leading-body-sm font-medium text-foreground">Ends</p>
+        <p className="text-sm leading-body-sm font-medium text-foreground">{t('ends')}</p>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -86,7 +89,7 @@ export function RecurringFields({ frequency, endDate, onChange }: RecurringField
                 : 'bg-card text-foreground border-border hover:bg-muted/50',
             )}
           >
-            Never
+            {t('never')}
           </button>
           <button
             type="button"
@@ -100,7 +103,7 @@ export function RecurringFields({ frequency, endDate, onChange }: RecurringField
                 : 'bg-card text-foreground border-border hover:bg-muted/50',
             )}
           >
-            On date
+            {t('onDate')}
           </button>
         </div>
 

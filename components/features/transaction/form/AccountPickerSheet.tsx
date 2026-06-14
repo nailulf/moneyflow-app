@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Landmark,
   Wallet,
@@ -73,21 +74,6 @@ function getAccountStyle(type: string): AccountStyle {
   return ACCOUNT_STYLES[type] ?? DEFAULT_STYLE
 }
 
-// Human-readable label per type (EN baseline — parent can i18n-ify via title prop)
-function typeLabel(type: string): string {
-  const labels: Record<string, string> = {
-    BANK:           'Bank account',
-    CREDIT_CARD:    'Credit card',
-    CASH:           'Cash wallet',
-    DIGITAL_WALLET: 'Digital wallet',
-    INVESTMENT:     'Investment',
-    PROPERTY:       'Property',
-    VEHICLE:        'Vehicle',
-    MORTGAGE:       'Mortgage',
-  }
-  return labels[type] ?? type
-}
-
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -100,7 +86,21 @@ export function AccountPickerSheet({
   onSelect,
   onOpenChange,
 }: AccountPickerSheetProps) {
+  const t = useTranslations('transactions.form')
   const [search, setSearch] = useState('')
+
+  function typeLabel(type: string): string {
+    const key = type === 'BANK' ? 'bank'
+      : type === 'CREDIT_CARD' ? 'creditCard'
+      : type === 'CASH' ? 'cash'
+      : type === 'DIGITAL_WALLET' ? 'digitalWallet'
+      : type === 'INVESTMENT' ? 'investment'
+      : type === 'PROPERTY' ? 'property'
+      : type === 'VEHICLE' ? 'vehicle'
+      : type === 'MORTGAGE' ? 'mortgage'
+      : null
+    return key ? t(`accountType.${key}` as Parameters<typeof t>[0]) : type
+  }
 
   useEffect(() => {
     if (!open) setSearch('')
@@ -120,14 +120,14 @@ export function AccountPickerSheet({
       <SheetContent side="bottom" className="rounded-t-2xl">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
-          <SheetDescription className="sr-only">Select an account for this transaction</SheetDescription>
+          <SheetDescription className="sr-only">{t('accountSheetDescription')}</SheetDescription>
         </SheetHeader>
 
         {/* Search input */}
         <div className="px-4 py-3">
           <input
             type="text"
-            placeholder="Search accounts"
+            placeholder={t('searchAccount')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={cn(

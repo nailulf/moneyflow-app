@@ -1,6 +1,7 @@
 'use client'
 
 import { Delete } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import type { AmountAction } from '@/lib/transaction-form'
 
@@ -29,6 +30,8 @@ const KEYS: KeyDef[] = [
 ]
 
 export function AmountKeypad({ onKey }: AmountKeypadProps) {
+  const t = useTranslations('transactions.form')
+
   function handleKey(key: KeyDef) {
     if (key.kind === 'digit') {
       onKey({ type: 'appendDigit', digit: key.digit })
@@ -83,7 +86,7 @@ export function AmountKeypad({ onKey }: AmountKeypadProps) {
           <button
             key="backspace"
             type="button"
-            aria-label="Backspace"
+            aria-label={t('backspace')}
             onClick={() => handleKey(key)}
             className={cn(
               'flex h-14 items-center justify-center rounded-lg',

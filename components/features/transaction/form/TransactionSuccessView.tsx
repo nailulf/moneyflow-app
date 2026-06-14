@@ -1,6 +1,7 @@
 'use client'
 
 import { Check, ArrowRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/atoms/button'
 import { getCategoryIcon, getCategoryTint } from '@/lib/category-style'
@@ -29,6 +30,7 @@ export function TransactionSuccessView({
   onDone,
   onAddAnother,
 }: TransactionSuccessViewProps) {
+  const t = useTranslations('transactions.form')
   const { type, amount, categoryName, accountName, toAccountName, date, currency } = summary
 
   // Amount display
@@ -74,11 +76,11 @@ export function TransactionSuccessView({
       {/* Title + subtitle */}
       <div className="flex flex-col items-center gap-1 text-center">
         <h2 className="text-xl leading-title-4 font-semibold text-foreground">
-          {mode === 'create' ? 'Transaction added' : 'Transaction updated'}
+          {mode === 'create' ? t('addedTitle') : t('updatedTitle')}
         </h2>
         {accountName && (
           <p className="text-sm leading-body-sm text-muted-foreground">
-            Saved to {accountName}
+            {t('savedTo', { account: accountName ?? '' })}
           </p>
         )}
       </div>
@@ -123,7 +125,7 @@ export function TransactionSuccessView({
                 </p>
               ) : (
                 <p className="text-sm leading-body-sm font-medium text-foreground truncate">
-                  {categoryName ?? 'Uncategorized'}
+                  {categoryName ?? t('uncategorized')}
                 </p>
               )}
               <p className="text-xs leading-caption text-muted-foreground">
@@ -147,7 +149,7 @@ export function TransactionSuccessView({
           onClick={onDone}
           className="h-[52px] rounded-[14px] w-full"
         >
-          Done
+          {t('done')}
         </Button>
 
         {mode === 'create' && (
@@ -161,7 +163,7 @@ export function TransactionSuccessView({
               'hover:bg-primary/5 hover:text-primary',
             )}
           >
-            Add another
+            {t('addAnother')}
           </Button>
         )}
       </div>

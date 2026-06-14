@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import {
   Sheet,
@@ -36,6 +37,7 @@ export function CategoryPickerSheet({
   onSelect,
   onOpenChange,
 }: CategoryPickerSheetProps) {
+  const t = useTranslations('transactions.form')
   const [search, setSearch] = useState('')
 
   useEffect(() => {
@@ -55,15 +57,15 @@ export function CategoryPickerSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="rounded-t-2xl">
         <SheetHeader>
-          <SheetTitle>Choose category</SheetTitle>
-          <SheetDescription className="sr-only">Select a category for this transaction</SheetDescription>
+          <SheetTitle>{t('categorySheetTitle')}</SheetTitle>
+          <SheetDescription className="sr-only">{t('categorySheetDescription')}</SheetDescription>
         </SheetHeader>
 
         {/* Search input */}
         <div className="px-4 py-3">
           <input
             type="text"
-            placeholder="Search"
+            placeholder={t('searchCategory')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={cn(

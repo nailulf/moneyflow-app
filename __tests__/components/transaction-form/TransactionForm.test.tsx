@@ -1,4 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+
+jest.mock('next-intl', () => require('@/__tests__/components/transaction-form/i18n-mock').nextIntlMock)
+
 import { TransactionForm } from '@/components/features/transaction/form/TransactionForm'
 
 const create = jest.fn().mockResolvedValue({ id: 'new' })

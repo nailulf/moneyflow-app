@@ -1,4 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+
+jest.mock('next-intl', () => require('@/__tests__/components/transaction-form/i18n-mock').nextIntlMock)
+
 import { CategoryPickerSheet } from '@/components/features/transaction/form/CategoryPickerSheet'
 
 const cats = [

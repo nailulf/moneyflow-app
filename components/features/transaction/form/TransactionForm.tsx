@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronRight, Calendar, FileText, Repeat, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import {
   type FormState,
@@ -51,11 +52,7 @@ export interface TransactionFormProps {
 
 type Phase = 'form' | 'success'
 
-const TYPE_OPTIONS: Array<{ value: TxnType; label: string }> = [
-  { value: 'EXPENSE', label: 'Expense' },
-  { value: 'INCOME', label: 'Income' },
-  { value: 'TRANSFER', label: 'Transfer' },
-]
+const TYPE_OPTION_VALUES: TxnType[] = ['EXPENSE', 'INCOME', 'TRANSFER']
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -93,6 +90,12 @@ function buildDefaultState(
 // ---------------------------------------------------------------------------
 
 export function TransactionForm({ mode, userId, initial, onDone }: TransactionFormProps) {
+  const t = useTranslations('transactions.form')
+  const TYPE_OPTIONS: Array<{ value: TxnType; label: string }> = TYPE_OPTION_VALUES.map((v) => ({
+    value: v,
+    label: t(v === 'EXPENSE' ? 'expense' : v === 'INCOME' ? 'income' : 'transfer'),
+  }))
+
   const { create, update, delete: deleteTxn, isCreating, isUpdating, isDeleting } = useTransactionMutations(userId)
   const { categories } = useCategories()
   const { accounts } = useAccounts()
@@ -235,11 +238,11 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
     >
       {/* Header */}
       <CreateFlowHeader
-        title={mode === 'create' ? 'Add transaction' : 'Edit transaction'}
+        title={mode === 'create' ? t('addTitle') : t('editTitle')}
         onBack={onDone}
-        backLabel="Back"
+        backLabel={t('back')}
         formId="txn-form"
-        saveLabel="Save"
+        saveLabel={t('save')}
         pending={pending}
       />
 
@@ -264,12 +267,12 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
           {formatAmountDisplay(state.amount)}
         </p>
         {showValidation && !state.amount.digits && (
-          <p className="text-xs leading-caption text-destructive">Enter an amount</p>
+          <p className="text-xs leading-caption text-destructive">{t('enterAmount')}</p>
         )}
         {/* Balance adjustment badge — display-only; only shown when editing a reconciliation row */}
         {isBalanceAdjustment && (
           <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs leading-caption text-muted-foreground">
-            Balance adjustment
+            {t('balanceAdjustment')}
           </span>
         )}
       </div>
@@ -290,7 +293,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
             >
               <span className="flex-1 text-md leading-body-lg text-foreground">
                 {selectedCategory ? selectedCategory.name : (
-                  <span className="text-muted-foreground">Choose category</span>
+                  <span className="text-muted-foreground">{t('chooseCategory')}</span>
                 )}
               </span>
               <ChevronRight className="size-4 text-muted-foreground shrink-0" />
@@ -312,7 +315,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
           <span className="flex-1 text-md leading-body-lg text-foreground">
             {selectedAccount ? selectedAccount.name : (
               <span className="text-muted-foreground">
-                {fields.toAccount ? 'From account' : 'Choose account'}
+                {fields.toAccount ? t('fromAccount') : t('chooseAccount')}
               </span>
             )}
           </span>
@@ -334,7 +337,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
             >
               <span className="flex-1 text-md leading-body-lg text-foreground">
                 {selectedToAccount ? selectedToAccount.name : (
-                  <span className="text-muted-foreground">To account</span>
+                  <span className="text-muted-foreground">{t('toAccount')}</span>
                 )}
               </span>
               <ChevronRight className="size-4 text-muted-foreground shrink-0" />
@@ -360,7 +363,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
           <FileText className="size-4 text-muted-foreground shrink-0" />
           <input
             type="text"
-            placeholder="Add note…"
+            placeholder={t('addNote')}
             value={state.note}
             onChange={(e) => setState((prev) => ({ ...prev, note: e.target.value }))}
             className={cn(
@@ -374,7 +377,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
         <div className="h-px bg-border mx-4" />
         <div className="flex h-[52px] items-center gap-3 px-4">
           <Repeat className="size-4 text-muted-foreground shrink-0" />
-          <span className="flex-1 text-md leading-body-lg text-foreground">Repeat</span>
+          <span className="flex-1 text-md leading-body-lg text-foreground">{t('repeat')}</span>
           <button
             type="button"
             role="switch"
@@ -434,7 +437,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
           )}
         >
           <Trash2 className="size-4" />
-          Delete
+          {t('delete')}
         </button>
       )}
 
@@ -442,18 +445,18 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+            <AlertDialogTitle>{t('deleteConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. The transaction will be permanently removed.
+              {t('deleteConfirmBody')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t('confirmDelete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -473,7 +476,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
 
       <AccountPickerSheet
         open={accountOpen}
-        title={fields.toAccount ? 'From' : 'Account'}
+        title={fields.toAccount ? t('from') : t('account')}
         accounts={accounts}
         selectedId={state.accountId}
         onSelect={handleAccountSelect}
@@ -483,7 +486,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
       {fields.toAccount && (
         <AccountPickerSheet
           open={toAccountOpen}
-          title="To"
+          title={t('to')}
           accounts={accounts}
           selectedId={state.toAccountId}
           excludeId={state.accountId}
