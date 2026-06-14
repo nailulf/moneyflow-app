@@ -29,8 +29,9 @@ jest.mock('@/components/features/goals', () => ({
   GoalSection: () => <div data-testid="goal-section">Goal Section</div>
 }))
 
-// Mock formatCurrency to return consistent string
+// Mock formatCurrency to return consistent string; keep the rest of the real module
 jest.mock('@/lib/data-utils', () => ({
+  ...jest.requireActual('@/lib/data-utils'),
   formatCurrency: (amount: number) => `$${amount.toFixed(2)}`
 }))
 

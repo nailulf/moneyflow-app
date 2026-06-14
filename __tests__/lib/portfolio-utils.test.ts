@@ -2,6 +2,7 @@ import {
   SHARES_PER_LOT, lotsToShares, sharesToLots,
   costBasis, gainLoss, gainLossPct,
   portfolioTotals, allocation, groupHoldingsByClass,
+  convertHoldingsToBase, defaultCurrencyForClass,
   type HoldingLike,
 } from '@/lib/portfolio-utils'
 
@@ -75,6 +76,33 @@ describe('groupHoldingsByClass', () => {
     expect(groups.map((g) => g.assetClass)).toEqual(['IDX_STOCK', 'MUTUAL_FUND'])
     expect(groups[0].total).toBe(1490000)
     expect(groups[0].holdings.map((x) => x.id)).toEqual(['2', '3'])
+  })
+})
+
+describe('defaultCurrencyForClass', () => {
+  it('uses USD for US-listed classes and IDR otherwise', () => {
+    expect(defaultCurrencyForClass('US_STOCK')).toBe('USD')
+    expect(defaultCurrencyForClass('ETF')).toBe('USD')
+    expect(defaultCurrencyForClass('IDX_STOCK')).toBe('IDR')
+    expect(defaultCurrencyForClass('MUTUAL_FUND')).toBe('IDR')
+    expect(defaultCurrencyForClass('BOND')).toBe('IDR')
+    expect(defaultCurrencyForClass('OTHER')).toBe('IDR')
+  })
+})
+
+describe('convertHoldingsToBase', () => {
+  const rates = { USD: 16000 }
+  it('scales current_value + purchase_price of non-base holdings and relabels currency', () => {
+    const [r] = convertHoldingsToBase([h({ currency: 'USD', current_value: 800, purchase_price: 100 })], rates, 'IDR')
+    expect(r).toMatchObject({ currency: 'IDR', current_value: 12800000, purchase_price: 1600000 })
+  })
+  it('passes base-currency holdings through untouched', () => {
+    const input = h({ currency: 'IDR', current_value: 5000000 })
+    expect(convertHoldingsToBase([input], rates, 'IDR')[0]).toBe(input)
+  })
+  it('leaves a holding in its native currency when its rate is missing (rates not loaded)', () => {
+    const input = h({ currency: 'USD', current_value: 800 })
+    expect(convertHoldingsToBase([input], undefined, 'IDR')[0]).toBe(input)
   })
 })
 
