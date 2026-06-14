@@ -1,5 +1,9 @@
 export type AssetClass = 'IDX_STOCK' | 'US_STOCK' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'OTHER'
 
+/** Default trading currency for an asset class: US-listed assets price in USD, the rest in IDR. */
+export const defaultCurrencyForClass = (assetClass: AssetClass): 'IDR' | 'USD' =>
+  assetClass === 'US_STOCK' || assetClass === 'ETF' ? 'USD' : 'IDR'
+
 export interface HoldingLike {
   id: string
   account_id: string
@@ -27,6 +31,26 @@ export const gainLoss = (h: Pick<HoldingLike, 'quantity' | 'purchase_price' | 'c
 export function gainLossPct(h: Pick<HoldingLike, 'quantity' | 'purchase_price' | 'current_value'>): number {
   const basis = costBasis(h)
   return basis > 0 ? round1((gainLoss(h) / basis) * 100) : 0
+}
+
+/**
+ * Convert each holding's monetary fields into `base` currency using a `{ CURRENCY: rate }` map
+ * (rate = currency→base). Holdings already in `base` pass through untouched; a holding whose rate
+ * is missing (rates not loaded yet) is left in its native currency rather than mislabeled. Both
+ * `current_value` and `purchase_price` are scaled by the same rate, so gain/loss stays consistent.
+ */
+export function convertHoldingsToBase<H extends HoldingLike>(
+  holdings: H[],
+  rates: Record<string, number> | undefined,
+  base: string
+): H[] {
+  const baseUpper = base.toUpperCase()
+  return holdings.map((h) => {
+    if (h.currency.toUpperCase() === baseUpper) return h
+    const rate = rates?.[h.currency.toUpperCase()]
+    if (rate === undefined) return h
+    return { ...h, currency: base, current_value: h.current_value * rate, purchase_price: h.purchase_price * rate }
+  })
 }
 
 export interface PortfolioTotals {

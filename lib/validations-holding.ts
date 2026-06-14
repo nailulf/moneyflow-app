@@ -11,8 +11,9 @@ const money = (positive: boolean) =>
   )
 
 export const holdingFormSchema = z.object({
-  name: z.string().trim().min(1, { message: 'nameRequired' }),
-  symbol: z.string().trim().optional().or(z.literal('')),
+  // Ticker is the only identifier the user enters; the display name is enriched
+  // from an external market-data API later (until then it falls back to the ticker).
+  symbol: z.string().trim().min(1, { message: 'tickerRequired' }),
   quantity: money(true),       // lots (IDX) or units (others)
   purchase_price: money(false),
   purchase_date: z.string().optional().or(z.literal('')),
@@ -24,12 +25,12 @@ export type HoldingFormOutput = z.output<typeof holdingFormSchema>
 /** Convert the validated form to a CreateHoldingPayload: IDX lots → shares; current_value = qty × price. */
 export function toHoldingPayload(form: HoldingFormOutput, assetClass: AssetClass): CreateHoldingPayload {
   const quantity = assetClass === 'IDX_STOCK' ? lotsToShares(form.quantity) : form.quantity
-  const symbol = form.symbol && form.symbol.trim() !== '' ? form.symbol.trim() : null
+  const symbol = form.symbol.trim()
   const purchase_date = form.purchase_date && form.purchase_date.trim() !== '' ? form.purchase_date : null
   return {
     asset_class: assetClass,
     symbol,
-    name: form.name,
+    name: symbol,               // placeholder until external-API enrichment fills the real name
     quantity,
     purchase_price: form.purchase_price,
     current_value: quantity * form.purchase_price,

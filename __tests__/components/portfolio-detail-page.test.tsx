@@ -26,6 +26,7 @@ jest.mock('@tanstack/react-query', () => ({
 }))
 const holdingsData = { data: [{ id: 'h1', account_id: 'acc1', user_id: 'u', asset_class: 'IDX_STOCK', symbol: 'BBCA', name: 'Bank Central Asia', quantity: 200, purchase_price: 9000, current_value: 1900000, purchase_date: null, currency: 'IDR', created_at: '', updated_at: '' }], isLoading: false }
 jest.mock('@/hooks/useHoldings', () => ({ useHoldings: () => holdingsData }))
+jest.mock('@/hooks/useExchangeRates', () => ({ useExchangeRates: () => ({ data: {} }) }))
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }))
 
 import AccountDetailPage from '@/app/portfolio/[accountId]/page'

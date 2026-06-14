@@ -115,6 +115,9 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [editName, setEditName] = useState('')
+  // Opening anchor value, surfaced read-only in the currency-change "keep value"
+  // preview. It is no longer editable here — balance changes go through the Adjust
+  // dialog, which emits an adjustment transaction for the delta.
   const [editBalance, setEditBalance] = useState<string>('')
   const [editCurrency, setEditCurrency] = useState('')
   const [editType, setEditType] = useState<'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'>('BANK')
@@ -148,17 +151,11 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
     enabled: !!accountId,
   })
 
-  const adjustmentTotal = useMemo(() => (
-    adjustments.reduce((sum, adj) => sum + adj.adjustment_amount, 0)
-  ), [adjustments])
-
-  // Initial balance = DB stored balance minus manual adjustments.
-  // account.balance in the DB = original balance + cumulative adjustments.
-  // Transactions are applied on top by the API to get currentBalance.
-  const initialBalance = useMemo(() => {
-    if (!account) return 0
-    return account.balance - adjustmentTotal
-  }, [account, adjustmentTotal])
+  // Initial balance = the opening anchor (migration 050): accounts.balance is the
+  // from-creation figure and is never auto-mutated. Manual balance edits are now
+  // real adjustment transactions (counted into currentBalance and the transactions
+  // list), so nothing is folded into this column — the initial balance is the anchor.
+  const initialBalance = account?.balance ?? 0
 
   // Real-time adjustment preview
   const currentBalance = account?.currentBalance ?? account?.balance ?? 0
@@ -167,13 +164,16 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
 
   // Balance history chart data.
   // Uses all transactions (including cross-currency at face value) to show trends.
-  // The chart is anchored to initialBalance at start and currentBalance at end.
+  // The chart is anchored to initialBalance (opening anchor) at start and
+  // currentBalance at end. Balance-adjustment edits are real transactions in this
+  // list, so they're already counted here — the audit log is never added separately
+  // (doing so would double-count every adjustment).
   const balanceHistory = useMemo(() => {
     if (!account) return []
 
     const dateEffects = new Map<string, number>()
 
-    // Include all transactions
+    // Include all transactions (adjustment edits are transactions too)
     transactions.forEach(tx => {
       let effect = 0
       if (tx.type === 'INCOME') effect = tx.amount
@@ -185,11 +185,6 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
       if (effect !== 0) {
         dateEffects.set(tx.date, (dateEffects.get(tx.date) || 0) + effect)
       }
-    })
-
-    // Adjustments are always in account currency
-    adjustments.forEach(adj => {
-      dateEffects.set(adj.adjustment_date, (dateEffects.get(adj.adjustment_date) || 0) + adj.adjustment_amount)
     })
 
     const sortedDates = [...dateEffects.keys()].sort()
@@ -249,7 +244,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
     }
 
     return deduped
-  }, [account, transactions, adjustments, accountId, initialBalance])
+  }, [account, transactions, accountId, initialBalance])
 
   const chartConfig = {
     balance: {
@@ -292,15 +287,12 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
 
   const handleUpdate = async () => {
     try {
-      const balanceValue = parseCurrencyAmount(editBalance)
-      if (balanceValue === 0 && editBalance.trim() !== '' && editBalance.trim() !== '0') {
-        toast.error('Please enter a valid balance amount')
-        return
-      }
-
+      // Balance is intentionally omitted: accounts.balance is the opening anchor and
+      // is never overwritten through the generic account update. To change the current
+      // balance, use the Adjust dialog, which records the delta as an adjustment
+      // transaction (POST /api/accounts/[accountId]/adjust-balance).
       const updateData: Partial<AccountDB> = {
         name: editName,
-        balance: balanceValue,
         currency: editCurrency,
         type: editType,
         description: editDescription || null,
@@ -675,21 +667,6 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-
-              {/* Balance */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="balance" className="text-right">
-                  {t('editDialog.balance')}
-                </Label>
-                <Input
-                  id="balance"
-                  type="amount"
-                  step="0.01"
-                  value={editBalance}
-                  onChange={(e) => setEditBalance(e.target.value)}
-                  className="col-span-3"
-                />
               </div>
 
               {/* Currency */}
