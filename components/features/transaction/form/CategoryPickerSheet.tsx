@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/organisms/sheet'
@@ -37,6 +38,10 @@ export function CategoryPickerSheet({
 }: CategoryPickerSheetProps) {
   const [search, setSearch] = useState('')
 
+  useEffect(() => {
+    if (!open) setSearch('')
+  }, [open])
+
   const filtered = categories
     .filter((c) => c.group_type === type)
     .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
@@ -51,6 +56,7 @@ export function CategoryPickerSheet({
       <SheetContent side="bottom" className="rounded-t-2xl">
         <SheetHeader>
           <SheetTitle>Choose category</SheetTitle>
+          <SheetDescription className="sr-only">Select a category for this transaction</SheetDescription>
         </SheetHeader>
 
         {/* Search input */}

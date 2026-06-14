@@ -1,5 +1,6 @@
 // lib/transaction-form.ts
 export type TxnType = 'INCOME' | 'EXPENSE' | 'TRANSFER'
+export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
 export interface FieldVisibility {
   category: boolean
@@ -62,7 +63,7 @@ export interface FormState {
   date: string // YYYY-MM-DD
   currency: string
   isRecurring: boolean
-  recurringFrequency: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+  recurringFrequency: RecurringFrequency | null
   recurringEndDate: string | null
 }
 

@@ -1,8 +1,9 @@
 'use client'
 
 import { cn } from '@/lib/utils'
+import type { RecurringFrequency } from '@/lib/transaction-form'
 
-export type RecurringFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
+export type { RecurringFrequency }
 
 export interface RecurringFieldsValue {
   frequency: RecurringFrequency
@@ -10,7 +11,7 @@ export interface RecurringFieldsValue {
 }
 
 export interface RecurringFieldsProps {
-  frequency: RecurringFrequency | null
+  frequency: RecurringFrequency
   endDate: string | null
   onChange: (value: RecurringFieldsValue) => void
 }
@@ -23,23 +24,21 @@ const FREQUENCIES: { value: RecurringFrequency; label: string }[] = [
 ]
 
 export function RecurringFields({ frequency, endDate, onChange }: RecurringFieldsProps) {
-  const effectiveFrequency: RecurringFrequency = frequency ?? 'monthly'
-
   function handleFrequency(value: RecurringFrequency) {
     onChange({ frequency: value, endDate })
   }
 
   function handleNever() {
-    onChange({ frequency: effectiveFrequency, endDate: null })
+    onChange({ frequency, endDate: null })
   }
 
   function handleOnDate() {
     const defaultDate = new Date().toISOString().slice(0, 10)
-    onChange({ frequency: effectiveFrequency, endDate: defaultDate })
+    onChange({ frequency, endDate: defaultDate })
   }
 
   function handleDateChange(e: React.ChangeEvent<HTMLInputElement>) {
-    onChange({ frequency: effectiveFrequency, endDate: e.target.value })
+    onChange({ frequency, endDate: e.target.value })
   }
 
   return (
@@ -49,7 +48,7 @@ export function RecurringFields({ frequency, endDate, onChange }: RecurringField
         <p className="text-sm leading-body-sm font-medium text-foreground">Repeat</p>
         <div className="flex flex-wrap gap-2">
           {FREQUENCIES.map(({ value, label }) => {
-            const isSelected = value === effectiveFrequency
+            const isSelected = value === frequency
             return (
               <button
                 key={value}

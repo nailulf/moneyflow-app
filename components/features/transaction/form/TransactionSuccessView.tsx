@@ -32,7 +32,7 @@ export function TransactionSuccessView({
   const { type, amount, categoryName, accountName, toAccountName, date, currency } = summary
 
   // Amount display
-  const formattedAmount = amount.toLocaleString('id-ID')
+  const formattedAmount = amount.toLocaleString('en-US')
   const isIncome = type === 'INCOME'
   const isExpense = type === 'EXPENSE'
   const isTransfer = type === 'TRANSFER'
@@ -53,7 +53,7 @@ export function TransactionSuccessView({
   const TransferIcon = getCategoryIcon('transfer')
 
   // Formatted date
-  const displayDate = new Date(date + 'T00:00:00').toLocaleDateString('en-GB', {
+  const displayDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -145,7 +145,7 @@ export function TransactionSuccessView({
         <Button
           type="button"
           onClick={onDone}
-          className="h-[52px] rounded-[14px] w-full bg-primary text-primary-foreground"
+          className="h-[52px] rounded-[14px] w-full"
         >
           Done
         </Button>

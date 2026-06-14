@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Landmark,
   Wallet,
@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/organisms/sheet'
@@ -101,6 +102,10 @@ export function AccountPickerSheet({
 }: AccountPickerSheetProps) {
   const [search, setSearch] = useState('')
 
+  useEffect(() => {
+    if (!open) setSearch('')
+  }, [open])
+
   const filtered = accounts
     .filter((a) => a.id !== excludeId)
     .filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
@@ -115,6 +120,7 @@ export function AccountPickerSheet({
       <SheetContent side="bottom" className="rounded-t-2xl">
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
+          <SheetDescription className="sr-only">Select an account for this transaction</SheetDescription>
         </SheetHeader>
 
         {/* Search input */}
@@ -173,7 +179,7 @@ export function AccountPickerSheet({
                   {/* Right: balance + optional check */}
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-sm leading-body-sm text-foreground tabular-nums">
-                      {acct.balance.toLocaleString()} {acct.currency}
+                      {acct.balance.toLocaleString('en-US')} {acct.currency}
                     </span>
                     {isSelected && (
                       <Check className="size-4 text-primary" />
