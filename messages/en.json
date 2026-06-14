@@ -231,6 +231,7 @@
   },
   "transactions": {
     "title": "TRANSACTIONS",
+    "addTransaction": "Add",
     "recentTransactions": "Recent Transactions",
     "loading": "Loading...",
     "noTransactionsFound": "No transactions found",

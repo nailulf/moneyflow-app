@@ -231,6 +231,7 @@
   },
   "transactions": {
     "title": "TRANSAKSI",
+    "addTransaction": "Tambah",
     "recentTransactions": "Transaksi Terbaru",
     "loading": "Memuat...",
     "noTransactionsFound": "Tidak ada transaksi ditemukan",
