@@ -1,0 +1,53 @@
+// lib/transaction-form.ts
+export type TxnType = 'INCOME' | 'EXPENSE' | 'TRANSFER'
+
+export interface FieldVisibility {
+  category: boolean
+  account: boolean
+  toAccount: boolean
+  requiredCategory: boolean
+}
+
+export function fieldsForType(type: TxnType): FieldVisibility {
+  if (type === 'TRANSFER') return { category: false, account: true, toAccount: true, requiredCategory: false }
+  return { category: true, account: true, toAccount: false, requiredCategory: true }
+}
+
+const MAX_DIGITS = 15
+export interface AmountState { digits: string }
+export type AmountAction =
+  | { type: 'appendDigit'; digit: string }
+  | { type: 'appendThousands' }
+  | { type: 'backspace' }
+  | { type: 'clear' }
+
+export function amountReducer(state: AmountState, action: AmountAction): AmountState {
+  switch (action.type) {
+    case 'appendDigit': {
+      if (state.digits === '' && action.digit === '0') return state // no leading zero
+      if (state.digits.length >= MAX_DIGITS) return state
+      return { digits: state.digits + action.digit }
+    }
+    case 'appendThousands': {
+      if (state.digits === '') return state
+      if (state.digits.length + 3 > MAX_DIGITS) return state
+      return { digits: state.digits + '000' }
+    }
+    case 'backspace':
+      return { digits: state.digits.slice(0, -1) }
+    case 'clear':
+      return { digits: '' }
+    default:
+      return state
+  }
+}
+
+/** Numeric amount from digit string (integer currency units, e.g. IDR has no decimals here). */
+export function amountValue(state: AmountState): number {
+  return state.digits === '' ? 0 : Number(state.digits)
+}
+
+/** Grouped display, e.g. "125000" -> "125,000". Empty -> "0". */
+export function formatAmountDisplay(state: AmountState): string {
+  return amountValue(state).toLocaleString('en-US')
+}
