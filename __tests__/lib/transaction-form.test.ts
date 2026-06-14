@@ -1,4 +1,4 @@
-import { amountReducer, fieldsForType, type AmountState } from '@/lib/transaction-form'
+import { amountReducer, fieldsForType, reconcileOnTypeChange, type AmountState, type FormState } from '@/lib/transaction-form'
 
 describe('fieldsForType', () => {
   it('expense/income show category + single account, not transfer', () => {
@@ -33,5 +33,42 @@ describe('amountReducer (integer minor units)', () => {
   it('caps length to avoid overflow', () => {
     const long = '1'.repeat(15)
     expect(amountReducer({ digits: long }, { type: 'appendDigit', digit: '2' }).digits).toBe(long)
+  })
+})
+
+function base(over: Partial<FormState> = {}): FormState {
+  return {
+    type: 'EXPENSE', amount: { digits: '125' }, categoryId: 'food',
+    accountId: 'A', toAccountId: null, note: 'lunch', date: '2026-06-14',
+    currency: 'IDR', isRecurring: false, recurringFrequency: null, recurringEndDate: null, ...over,
+  }
+}
+
+describe('reconcileOnTypeChange', () => {
+  it('expense -> income clears category, keeps amount + note', () => {
+    const s = reconcileOnTypeChange(base(), 'INCOME')
+    expect(s.type).toBe('INCOME')
+    expect(s.categoryId).toBeNull()
+    expect(s.amount.digits).toBe('125')
+    expect(s.note).toBe('lunch')
+    expect(s.toAccountId).toBeNull()
+  })
+  it('expense -> transfer clears category, keeps account as source, requires to', () => {
+    const s = reconcileOnTypeChange(base(), 'TRANSFER')
+    expect(s.type).toBe('TRANSFER')
+    expect(s.categoryId).toBeNull()
+    expect(s.accountId).toBe('A')
+    expect(s.toAccountId).toBeNull()
+  })
+  it('transfer -> expense clears toAccount, clears category (re-pick), keeps account', () => {
+    const s = reconcileOnTypeChange(base({ type: 'TRANSFER', categoryId: null, toAccountId: 'B' }), 'EXPENSE')
+    expect(s.type).toBe('EXPENSE')
+    expect(s.toAccountId).toBeNull()
+    expect(s.categoryId).toBeNull()
+    expect(s.accountId).toBe('A')
+  })
+  it('same type is a no-op (returns prev)', () => {
+    const b = base()
+    expect(reconcileOnTypeChange(b, 'EXPENSE')).toBe(b)
   })
 })

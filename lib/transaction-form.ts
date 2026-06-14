@@ -51,3 +51,27 @@ export function amountValue(state: AmountState): number {
 export function formatAmountDisplay(state: AmountState): string {
   return amountValue(state).toLocaleString('en-US')
 }
+
+export interface FormState {
+  type: TxnType
+  amount: AmountState
+  categoryId: string | null
+  accountId: string | null
+  toAccountId: string | null
+  note: string
+  date: string // YYYY-MM-DD
+  currency: string
+  isRecurring: boolean
+  recurringFrequency: 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+  recurringEndDate: string | null
+}
+
+/** Switch type, resetting ONLY fields invalidated by the new type. Keeps amount + note + date. */
+export function reconcileOnTypeChange(prev: FormState, nextType: TxnType): FormState {
+  if (nextType === prev.type) return prev
+  if (nextType === 'TRANSFER') {
+    return { ...prev, type: nextType, categoryId: null, toAccountId: null }
+  }
+  // -> EXPENSE or INCOME: category is type-specific so always clear; drop transfer dest.
+  return { ...prev, type: nextType, categoryId: null, toAccountId: null }
+}
