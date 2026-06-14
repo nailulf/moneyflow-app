@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/molecules/tabs'
+import { SegmentedControl } from '@/components/features/accounts/create/SegmentedControl'
 import type { TransactionTypeFilter } from '@/lib/transaction-filters'
 
 const VALUES: TransactionTypeFilter[] = ['ALL', 'INCOME', 'EXPENSE', 'TRANSFER']
@@ -12,15 +12,14 @@ interface Props {
   onValueChange: (v: TransactionTypeFilter) => void
 }
 
+/** Pill segmented type filter (design `kp7fu`), on the shared SegmentedControl. */
 export function TransactionTypeTabs({ value, onValueChange }: Props) {
   const t = useTranslations('transactions.screen.tabs')
   return (
-    <Tabs value={value} onValueChange={(v) => onValueChange(v as TransactionTypeFilter)}>
-      <TabsList className="grid w-full grid-cols-4">
-        {VALUES.map((v) => (
-          <TabsTrigger key={v} value={v}>{t(KEY[v])}</TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
+    <SegmentedControl
+      options={VALUES.map((v) => ({ value: v, label: t(KEY[v]) }))}
+      value={value}
+      onChange={onValueChange}
+    />
   )
 }

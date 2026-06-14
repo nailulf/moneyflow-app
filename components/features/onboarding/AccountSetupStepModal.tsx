@@ -51,11 +51,12 @@ const ACCOUNT_TYPES = [
   { value: 'BANK', label: 'Bank Account', icon: Banknote, description: 'Checking or savings account' },
   { value: 'CREDIT_CARD', label: 'Credit Card', icon: CreditCard, description: 'Credit card account' },
   { value: 'CASH', label: 'Cash', icon: Wallet, description: 'Cash on hand' },
+  { value: 'DIGITAL_WALLET', label: 'Digital Wallet', icon: Smartphone, description: 'GoPay, OVO, Dana, etc.' },
   { value: 'INVESTMENT', label: 'Investment', icon: PiggyBank, description: 'Stocks, bonds, mutual funds' },
   { value: 'PROPERTY', label: 'Property', icon: Home, description: 'House, apartment, or land' },
   { value: 'VEHICLE', label: 'Vehicle', icon: Car, description: 'Car, motorcycle, etc.' },
   { value: 'MORTGAGE', label: 'Mortgage / KPR', icon: Landmark, description: 'Home loan or mortgage' },
-  { value: 'OTHER', label: 'E-Wallet / Other', icon: Smartphone, description: 'GoPay, OVO, Dana, etc.' }
+  { value: 'OTHER', label: 'Other', icon: Wallet, description: 'Anything else' }
 ]
 
 // Display order for the account-type tile grid. All types are tappable cards;
@@ -63,6 +64,7 @@ const ACCOUNT_TYPES = [
 const TYPE_CARD_ORDER = [
   'BANK',
   'CASH',
+  'DIGITAL_WALLET',
   'CREDIT_CARD',
   'INVESTMENT',
   'PROPERTY',
@@ -204,7 +206,7 @@ export function AccountSetupStepModal() {
     const accountData = {
       user_id: user.id,
       name: accountName.trim(),
-      type: accountType as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE',
+      type: accountType as 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET',
       balance,
       currency,
       is_active: true,
@@ -222,6 +224,18 @@ export function AccountSetupStepModal() {
         accountType === 'MORTGAGE' && monthlyPayment > 0 ? monthlyPayment : null,
       mortgage_end_date:
         accountType === 'MORTGAGE' && mortgageEndDate ? mortgageEndDate : null,
+      // New per-type creation fields (all null in the onboarding wizard; full
+      // editing is handled in the account creation flow for each type).
+      purchase_date: null,
+      credit_limit: null,
+      statement_day: null,
+      due_day: null,
+      vehicle_type: null,
+      broker: null,
+      interest_rate: null,
+      loan_term_months: null,
+      down_payment: null,
+      investment_goal: null,
     }
 
     if (isPreviewMode) {

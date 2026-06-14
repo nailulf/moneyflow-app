@@ -2,6 +2,7 @@ import {
   calculateAccountBalanceAtDate,
   calculateNetWorth,
   calculatePercentageChange,
+  categorizeAccounts,
   type BalanceTransaction,
 } from '../../lib/net-worth-utils'
 
@@ -106,6 +107,14 @@ describe('calculateAccountBalanceAtDate', () => {
     // Total should equal starting total (1000 + 1000 = 2000)
     expect(balA + balB).toBe(2000)
   })
+
+  it('INVESTMENT accounts pass the holdings-driven balance through unchanged (no opening + Σ tx)', () => {
+    const transactions: BalanceTransaction[] = [
+      tx({ amount: 1000, type: 'INCOME', date: '2026-01-05', account_id: 'acct-INV' }),
+    ]
+    // balance is the holdings sum (e.g. 5,000,000); transactions must NOT be added on top.
+    expect(calculateAccountBalanceAtDate(transactions, farFuture, 'INVESTMENT', 5_000_000, 'acct-INV')).toBe(5_000_000)
+  })
 })
 
 describe('calculatePercentageChange', () => {
@@ -120,5 +129,21 @@ describe('calculatePercentageChange', () => {
   it('calculates correct percentage', () => {
     expect(calculatePercentageChange(100, 150)).toBe(50)
     expect(calculatePercentageChange(200, 100)).toBe(-50)
+  })
+})
+
+describe('categorizeAccounts', () => {
+  it('groups DIGITAL_WALLET accounts into their own asset category', () => {
+    const wallet = {
+      id: 'w1', user_id: 'u', name: 'GoPay', type: 'DIGITAL_WALLET',
+      balance: 1800000, currency: 'IDR', is_default: false, is_active: true,
+      description: null, property_type: null, asset_location: null,
+      depreciation_rate: null, monthly_payment: null, mortgage_end_date: null,
+      created_at: '', updated_at: '', currentBalance: 1800000,
+    } as never
+    const categories = categorizeAccounts([wallet])
+    const walletCat = categories.find((c) => c.name === 'Digital Wallets')
+    expect(walletCat).toBeDefined()
+    expect(walletCat!.total).toBe(1800000)
   })
 })

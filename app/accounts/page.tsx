@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { Card, CardContent, CardHeader } from '@/components/ui/molecules/card'
-import { CreditCard, Wallet, TrendingUp, Building2, Loader2, Plus, ChevronRight, Target, Home, Car, Landmark } from 'lucide-react'
+import { CreditCard, Wallet, TrendingUp, Building2, Loader2, ChevronRight, Target, Home, Car, Landmark, Smartphone } from 'lucide-react'
 import { useAccounts } from '@/contexts/AccountContext'
 import { formatCurrency } from '@/lib/data-utils'
 import { useGoalsSummary } from '@/hooks/useGoalsQuery'
@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/molecules/di
 import { Sheet, SheetContent } from '@/components/ui/organisms/sheet'
 import { AccountDetailView } from '@/components/AccountDetailView'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { WalletsScreen } from '@/components/features/wallets/WalletsScreen'
 
 const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   BANK: Building2,
@@ -24,7 +25,8 @@ const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   PROPERTY: Home,
   VEHICLE: Car,
   MORTGAGE: Landmark,
-  OTHER: CreditCard
+  OTHER: CreditCard,
+  DIGITAL_WALLET: Smartphone,
 }
 
 function AccountsPageContent() {
@@ -90,7 +92,9 @@ function AccountsPageContent() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
+      <WalletsScreen onOpenAccount={openAccountDetail} />
+      <div className="hidden h-full flex-col md:flex">
       <AccountNavigation />
       <PageLayout>
         <TopContent>
@@ -333,6 +337,7 @@ function AccountsPageContent() {
           </MainContent>
         </ContentWrapper>
       </PageLayout>
+      </div>
 
       {/* Account Detail - Bottom Sheet on mobile, Dialog on desktop */}
       {isMobile ? (

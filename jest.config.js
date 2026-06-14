@@ -14,7 +14,7 @@ module.exports = {
     '^.+\\.(js|jsx)$': ['babel-jest', { presets: ['next/babel'] }]
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(isows|@supabase)/)'
+    'node_modules/(?!(isows|@supabase|uuid)/)'
   ],
   testMatch: [
     '**/__tests__/**/*.test.ts',

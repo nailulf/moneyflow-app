@@ -45,17 +45,26 @@ Tokens are HSL CSS variables in `app/globals.css`, exposed as Tailwind utilities
 `tailwind.config.js`. **Full token dump (dark mode, charts, sidebar, examples, known gaps) →
 [`references/design-system.md`](references/design-system.md). Read it when you need a value not below.**
 
-**Brand palette:** `#205781` deep blue (`primary` / `auth.sidebar`) · `#98D2C0` mint (`accent`) ·
-`#F6F8D5` pale yellow (`auth.card`). Auth pages use the hardcoded `auth.*` tokens; everything else
-uses the semantic system, which mirrors the brand.
+**Building a mobile screen from the Pencil designs?** The mobile design spec (palette, navy hero
+gradient, category icon tints, 12-step Inter type scale, control specs, radii/spacing) lives in
+[`references/mobile-design-system.md`](references/mobile-design-system.md) — extracted from the
+"DESIGN SYSTEM — DEV REFERENCE" frame in `designs/spending-page.pen`. Its core palette was adopted
+into `app/globals.css` on 2026-06-12 (`primary` = `#20507F`, `background` = `#EEF2F7`, `foreground`
+= `#0F172A`; cards stay white). The hero gradient, shadows, selected state, and category tints were
+tokenized later that day (mobile-visual-foundations); only Goal Pill and Rating Star remain
+design-only — check the Deltas table there before hardcoding anything.
+
+**Brand palette:** `#20507F` deep blue (`primary` / `auth.sidebar`; was `#205781` before
+2026-06-12) · `#98D2C0` mint (`accent`) · `#F6F8D5` pale yellow (`auth.card`). Auth pages use the
+hardcoded `auth.*` tokens; everything else uses the semantic system, which mirrors the brand.
 
 **Color tokens** (Tailwind class → light `H S% L%` → use). Each has a paired `*-foreground` for text on it:
 
 | Class | Light HSL | Use |
 |---|---|---|
-| `background` / `foreground` | `0 0% 100%` / `222 84% 4.9%` | page bg / primary text |
-| `card`, `popover` | = background | surfaces, dropdowns |
-| `primary` | `206 60% 31.6%` | primary buttons, brand actions (`#205781`) |
+| `background` / `foreground` | `213 36% 95.1%` / `222 47% 11.2%` | page bg / primary text (`#EEF2F7` / `#0F172A`) |
+| `card`, `popover` | `0 0% 100%` (white) | surfaces, dropdowns — white cards on gray-blue bg |
+| `primary` | `209.7 59.7% 31.2%` | primary buttons, brand actions (`#20507F`) |
 | `secondary` | `186 33% 46%` | secondary actions (muted teal) |
 | `accent` | `161 39% 71%` | highlights, hover accents (`#98D2C0`) |
 | `muted` / `muted-foreground` | `210 40% 96%` / `215 16% 47%` | subtle bg / secondary text (`#64748B`) |
@@ -150,7 +159,9 @@ Mirror an existing form (e.g. `AddTransactionForm`, `EditTransactionForm`) for s
 - Phone-first: default classes are mobile; layer `sm:` (≥640) and `lg:` (≥1024). The font/line-height
   tokens already scale across these breakpoints — don't fight them with fixed px.
 - Reference the mobile designs in `designs/spending-page.pen` (5 core screens + Add-Transaction flows,
-  bottom tab bar + center FAB, custom numpad, camera receipt capture).
+  bottom tab bar + center FAB, custom numpad, camera receipt capture). Its design-system frame is
+  documented in [`references/mobile-design-system.md`](references/mobile-design-system.md) — screen
+  width 390, screen padding 20, CTA h52 r14, cards r16, base grid 4px.
 - Touch targets ≥44px; avoid hover-only affordances; respect safe areas.
 - The mobile pivot is the current direction — see the [`mobile-first-pivot` memory] and
   [`docs/architecture/02-auth-sessions-rls.md`](../../../docs/architecture/02-auth-sessions-rls.md)

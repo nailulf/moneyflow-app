@@ -27,7 +27,7 @@ export function TransactionsScreen() {
   const { user } = useAuth()
   const { transactions, isLoading } = useAllTransactions({ userId: user?.id ?? '' })
   const { update } = useTransactionMutations(user?.id ?? '')
-  const { categories, getCategoryName, getCategoryColor } = useCategories()
+  const { categories, getCategoryName } = useCategories()
   const { accounts } = useAccounts()
 
   const now = new Date()
@@ -53,14 +53,26 @@ export function TransactionsScreen() {
   const resetFilters = () => setFilters((f) => ({ ...f, type: 'ALL', search: '', categoryIds: [], accountIds: [], amountMin: undefined, amountMax: undefined }))
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-3 pb-28 md:pb-6">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-4 pt-3 md:pt-0 md:pb-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl leading-title-3 font-bold text-foreground">{t('title')}</h1>
-        <div className="flex items-center gap-1">
-          <button type="button" aria-label={t('searchPlaceholder')} onClick={() => setShowSearch((s) => { if (s) setFilters((f) => ({ ...f, search: '' })); return !s })} className="rounded-full p-2 text-muted-foreground hover:bg-muted"><Search className="size-5" /></button>
-          <button type="button" aria-label={activeFilterCount > 0 ? t('filter.titleWithCount', { count: activeFilterCount }) : t('filter.title')} onClick={() => setFilterOpen(true)} className="relative rounded-full p-2 text-muted-foreground hover:bg-muted">
-            <SlidersHorizontal className="size-5" />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label={activeFilterCount > 0 ? t('filter.titleWithCount', { count: activeFilterCount }) : t('filter.title')}
+            onClick={() => setFilterOpen(true)}
+            className="relative flex h-9 w-9 items-center justify-center rounded-[10px] bg-card text-foreground shadow-card transition-colors hover:bg-muted/50"
+          >
+            <SlidersHorizontal className="size-4" />
             {activeFilterCount > 0 && <span aria-hidden="true" className="absolute right-1 top-1 size-2 rounded-full bg-primary" />}
+          </button>
+          <button
+            type="button"
+            aria-label={t('searchPlaceholder')}
+            onClick={() => setShowSearch((s) => { if (s) setFilters((f) => ({ ...f, search: '' })); return !s })}
+            className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-card text-foreground shadow-card transition-colors hover:bg-muted/50"
+          >
+            <Search className="size-4" />
           </button>
         </div>
       </header>
@@ -76,7 +88,6 @@ export function TransactionsScreen() {
         groups={groups}
         todayKey={todayKey()}
         getCategoryName={(id) => (id ? getCategoryName(id) : t('uncategorized'))}
-        getCategoryColor={(id) => (id ? getCategoryColor(id) : 'hsl(var(--muted-foreground))')}
         getAccountName={getAccountName}
         onSelect={setEditing}
         isLoading={isLoading}
