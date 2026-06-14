@@ -13,4 +13,9 @@ describe('isFullScreenFlow', () => {
   it.each(['/portfolio', '/portfolio/holdings', '/portfolio/analytics'])(
     'keeps chrome on portfolio root and desktop sub-pages %s', (path) => expect(isFullScreenFlow(path)).toBe(false)
   )
+  it('hides nav on the add/edit transaction routes but NOT the list', () => {
+    expect(isFullScreenFlow('/transactions/new')).toBe(true)
+    expect(isFullScreenFlow('/transactions/abc-123/edit')).toBe(true)
+    expect(isFullScreenFlow('/transactions')).toBe(false)
+  })
 })

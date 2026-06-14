@@ -1,11 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
-jest.mock('next/navigation', () => ({ usePathname: jest.fn(() => '/') }))
+jest.mock('next/navigation', () => ({ usePathname: jest.fn(() => '/'), useRouter: () => ({ push: jest.fn() }) }))
 jest.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }))
-jest.mock('@/components/features/transaction/AddTransactionForm', () => ({
-  AddTransactionForm: ({ trigger }: { trigger: React.ReactNode }) => <>{trigger}</>,
-}))
 
 import { usePathname } from 'next/navigation'
 import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'

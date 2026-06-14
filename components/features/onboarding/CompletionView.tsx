@@ -2,16 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { Check, Plus, ArrowRight, Loader2 } from 'lucide-react'
-import { AddTransactionForm } from '@/components/features/transaction/AddTransactionForm'
 
 export function CompletionView() {
   const t = useTranslations('onboarding.completion')
+  const router = useRouter()
   const { user } = useAuth()
   const { complete, closeModal, state } = useOnboarding()
-  const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false)
   const [isCompleting, setIsCompleting] = useState(!state?.is_completed)
   // Ref-based dedupe so StrictMode double-invokes don't fire complete() twice.
   const hasFiredRef = useRef(false)
@@ -59,7 +59,7 @@ export function CompletionView() {
 
   const handleAddFirstExpense = () => {
     closeModal()
-    setTimeout(() => setIsTransactionFormOpen(true), 50)
+    router.push('/transactions/new')
   }
 
   const handleSkipToDashboard = () => {
@@ -176,11 +176,6 @@ export function CompletionView() {
         </div>
       </div>
 
-      {/* Controlled AddTransactionForm — opens after the onboarding modal closes */}
-      <AddTransactionForm
-        open={isTransactionFormOpen}
-        onOpenChange={setIsTransactionFormOpen}
-      />
     </>
   )
 }

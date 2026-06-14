@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { Transaction, CategoryDB } from '@/types/database'
 import { formatCurrency, getTotalBalance, calculateTotalSpending, calculateTotalIncome } from '@/lib/data-utils'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
-import { Edit, Trash2, Search, ArrowUpDown, Filter, Loader2, EllipsisVertical, X } from 'lucide-react'
+import { Edit, Trash2, Search, ArrowUpDown, Filter, Loader2, EllipsisVertical, X, Plus } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -45,12 +46,10 @@ import {
   SheetTrigger,
 } from '@/components/ui/organisms/sheet'
 import { useTransactionManager } from '@/hooks/use-transaction-manager'
-import { EditTransactionForm } from '@/components/features/transaction/EditTransactionForm'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { DateRangePicker, DateRange } from '@/components/DateRangePicker'
-import { AddTransactionForm } from '@/components/features/transaction/AddTransactionForm'
 import { useFilteredTransactions } from '@/hooks/useFilteredTransactions'
 
 interface TransactionTableProps {
@@ -79,10 +78,10 @@ interface CategoryChangeConfirmation {
   newCategoryName: string
 }
 
-export function TransactionTable({ 
-  transactions: propTransactions, 
-  limit = 10, 
-  onEditTransaction, 
+export function TransactionTable({
+  transactions: propTransactions,
+  limit = 10,
+  onEditTransaction,
   onDeleteTransaction,
   categories: propCategories,
   onTransactionUpdate,
@@ -94,6 +93,7 @@ export function TransactionTable({
   dateFilterPreset = 'none'
 }: TransactionTableProps) {
   const t = useTranslations('transactions')
+  const router = useRouter()
   const { user } = useAuth()
   const userId = user?.id || ''
   const [isClient, setIsClient] = useState(false)
@@ -107,8 +107,6 @@ export function TransactionTable({
   const [isUpdating, setIsUpdating] = useState(false)
   const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{ transaction: Transaction } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   
   // Lazy loading state
@@ -284,31 +282,6 @@ export function TransactionTable({
     }
   }
 
-  const handleTransactionUpdated = useCallback(async (id: string, data: Partial<Transaction>) => {
-    try {
-      if (enableSelfManagement && transactionManager) {
-        await transactionManager.editTransaction(id, data)
-      } else if (transactionContext) {
-        await transactionContext.editTransaction(id, data)
-      }
-      
-      if (onTransactionUpdate) {
-        const updatedTransaction = transactions.find(t => t.id === id)
-        if (updatedTransaction) {
-          onTransactionUpdate({ ...updatedTransaction, ...data })
-        }
-      }
-      
-      setEditingTransaction(null)
-      setIsEditModalOpen(false)
-      transactionContext?.refreshTransactions?.()
-      if (enableSelfManagement && transactionManager) {
-        transactionManager.loadTransactions()
-      }
-    } catch (error) {
-      console.error('Failed to update transaction:', error)
-    }
-  }, [enableSelfManagement, transactionManager, transactionContext, onTransactionUpdate, transactions])
 
   // Get unique merchants for filter dropdown
   const uniqueMerchants = useMemo(() => {
@@ -466,13 +439,14 @@ export function TransactionTable({
             <h1 className="text-md leading-body-lg font-semibold text-muted-foreground">{t('title')}</h1>
             {showAddButton && (
               <div className="flex items-center">
-                <AddTransactionForm onSuccess={() => {
-                  transactionContext?.refreshTransactions?.()
-                  // Also refresh local manager if enabled
-                  if (enableSelfManagement && transactionManager) {
-                    transactionManager.loadTransactions()
-                  }
-                }}/>
+                <Button
+                  size="sm"
+                  onClick={() => router.push('/transactions/new')}
+                  className="flex items-center gap-1"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t('addTransaction')}
+                </Button>
               </div>
             )}
           </div>
@@ -756,14 +730,8 @@ export function TransactionTable({
                                       onClick={() => {
                                         if (onEditTransaction) {
                                           onEditTransaction(transaction)
-                                        } else if (enableSelfManagement) {
-                                          setEditingTransaction(transaction)
-                                          // Defer Sheet open until DropdownMenu's DismissableLayer
-                                          // has fully unmounted. Without this, Radix sets
-                                          // pointer-events:none on the Sheet content because the
-                                          // layers context still contains the DropdownMenu node on
-                                          // the Sheet's first render.
-                                          setTimeout(() => setIsEditModalOpen(true), 0)
+                                        } else {
+                                          router.push(`/transactions/${transaction.id}/edit`)
                                         }
                                       }}
                                     >
@@ -893,21 +861,6 @@ export function TransactionTable({
         </DialogContent>
       </Dialog>
       
-      {/* Edit Transaction Modal for self-management */}
-      {enableSelfManagement && (
-        <EditTransactionForm
-          transaction={editingTransaction}
-          open={isEditModalOpen}
-          onOpenChange={setIsEditModalOpen}
-          onTransactionUpdated={handleTransactionUpdated}
-          onSuccess={() => {
-            transactionContext?.refreshTransactions?.()
-            if (enableSelfManagement && transactionManager) {
-              transactionManager.loadTransactions()
-            }
-          }}
-        />
-      )}
     </Card>
   )
 }

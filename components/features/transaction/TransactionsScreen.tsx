@@ -3,14 +3,12 @@
 import { useMemo, useState } from 'react'
 import { Search, SlidersHorizontal } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAccounts } from '@/contexts/AccountContext'
-import { useAllTransactions, useTransactionMutations } from '@/hooks/useTransactionsQuery'
-import { EditTransactionForm } from '@/components/features/transaction/EditTransactionForm'
-import type { TransactionFormData } from '@/lib/validations'
+import { useAllTransactions } from '@/hooks/useTransactionsQuery'
 import { Input } from '@/components/ui/atoms/input'
-import type { Transaction } from '@/types/database'
 import { filterTransactions, groupByDate, summarize, type TransactionFilters } from '@/lib/transaction-filters'
 import { TransactionTypeTabs } from './TransactionTypeTabs'
 import { MonthSummaryBar } from './MonthSummaryBar'
@@ -25,9 +23,9 @@ function todayKey(): string {
 
 export function TransactionsScreen() {
   const t = useTranslations('transactions.screen')
+  const router = useRouter()
   const { user } = useAuth()
   const { transactions, isLoading } = useAllTransactions({ userId: user?.id ?? '' })
-  const { update } = useTransactionMutations(user?.id ?? '')
   const { categories, getCategoryName } = useCategories()
   const { accounts } = useAccounts()
 
@@ -37,12 +35,6 @@ export function TransactionsScreen() {
   })
   const [showSearch, setShowSearch] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
-  const [editing, setEditing] = useState<Transaction | null>(null)
-
-  const handleTransactionUpdated = async (id: string, data: Partial<TransactionFormData>) => {
-    await update({ id, data })
-    setEditing(null)
-  }
 
   const filtered = useMemo(() => filterTransactions(transactions, filters), [transactions, filters])
   const groups = useMemo(() => groupByDate(filtered), [filtered])
@@ -90,7 +82,7 @@ export function TransactionsScreen() {
         todayKey={todayKey()}
         getCategoryName={(id) => (id ? getCategoryName(id) : t('uncategorized'))}
         getAccountName={getAccountName}
-        onSelect={setEditing}
+        onSelect={(tx) => router.push(`/transactions/${tx.id}/edit`)}
         isLoading={isLoading}
         isFiltered={isFiltered}
         onReset={resetFilters}
@@ -104,8 +96,6 @@ export function TransactionsScreen() {
         filters={filters}
         onApply={(next) => setFilters((f) => ({ ...f, ...next }))}
       />
-
-      <EditTransactionForm transaction={editing} open={editing != null} onOpenChange={(o) => { if (!o) setEditing(null) }} onTransactionUpdated={handleTransactionUpdated} />
     </div>
   )
 }
