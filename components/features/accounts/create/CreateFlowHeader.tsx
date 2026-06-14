@@ -12,10 +12,16 @@ interface CreateFlowHeaderProps {
   stepLabel?: string
 }
 
-/** Flow header (design `CuDYL` top row): back circle, centered title, optional Save pill. */
+/**
+ * Flow header (design `CuDYL` top row): back circle, centered title, optional Save pill.
+ * Sticks to the top of the viewport while the flow scrolls underneath — the
+ * back action and title stay reachable. Plain `sticky top-0` is enough here
+ * (unlike the bottom CTA): a top-anchored element sits at the top naturally
+ * even when the page fits, so no fixed/spacer dance is needed.
+ */
 export function CreateFlowHeader({ title, onBack, backLabel, formId, saveLabel, pending, stepLabel }: CreateFlowHeaderProps) {
   return (
-    <header className="flex items-center gap-2">
+    <header className="sticky top-0 z-20 -mt-3 flex items-center gap-2 bg-background/90 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/75 md:-mt-8">
       <button
         type="button"
         onClick={onBack}
