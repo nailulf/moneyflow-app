@@ -12,16 +12,19 @@ export default function EditTransactionPage() {
   const params = useParams()
   const id = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : ''
   const { user } = useAuth()
-  const { transactions, isLoading } = useAllTransactions({ userId: user?.id ?? '' })
+  const { transactions, totalCount, isLoading } = useAllTransactions({ userId: user?.id ?? '' })
 
   const txn = transactions.find((t) => t.id === id)
 
-  // Once loading is done and the transaction isn't found, redirect away.
+  // Redirect away only once ALL pages are loaded (transactions.length >= totalCount)
+  // and the id still isn't found — covers the empty-account case without redirecting
+  // prematurely while background pagination is still streaming pages in.
+  const fullyLoaded = !isLoading && transactions.length >= totalCount
   useEffect(() => {
-    if (!isLoading && !txn && transactions.length > 0) {
+    if (fullyLoaded && !txn) {
       router.replace('/transactions')
     }
-  }, [isLoading, txn, transactions.length, router])
+  }, [fullyLoaded, txn, router])
 
   // Wait until auth resolves — mirrors /transactions/new
   if (!user) return null
