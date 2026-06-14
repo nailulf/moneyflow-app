@@ -75,3 +75,49 @@ export function reconcileOnTypeChange(prev: FormState, nextType: TxnType): FormS
   // -> EXPENSE or INCOME: category is type-specific so always clear; drop transfer dest.
   return { ...prev, type: nextType, categoryId: null, toAccountId: null }
 }
+
+export function isFormValid(s: FormState): boolean {
+  if (amountValue(s.amount) <= 0) return false
+  if (!s.accountId) return false
+  if (s.type === 'TRANSFER') return !!s.toAccountId && s.toAccountId !== s.accountId
+  return !!s.categoryId
+}
+
+export interface TransactionPayload {
+  user_id: string
+  date: string
+  description: string
+  amount: number
+  type: TxnType
+  category_id: string | null
+  account_id: string | null
+  to_account_id: string | null
+  currency: string
+  notes: string | null
+  is_recurring: boolean
+  recurring_frequency: string | null
+  recurring_end_date: string | null
+}
+
+export function buildTransactionPayload(s: FormState, _mode: 'create' | 'edit', userId: string): TransactionPayload {
+  return {
+    user_id: userId,
+    date: new Date(s.date).toISOString(),
+    description: s.note || defaultDescription(s),
+    amount: amountValue(s.amount),
+    type: s.type,
+    category_id: s.type === 'TRANSFER' ? null : s.categoryId,
+    account_id: s.accountId,
+    to_account_id: s.type === 'TRANSFER' ? s.toAccountId : null,
+    currency: s.currency,
+    notes: s.note || null,
+    is_recurring: s.isRecurring,
+    recurring_frequency: s.isRecurring ? s.recurringFrequency : null,
+    recurring_end_date: s.isRecurring ? s.recurringEndDate : null,
+  }
+}
+
+function defaultDescription(s: FormState): string {
+  if (s.type === 'TRANSFER') return 'Transfer'
+  return s.type === 'INCOME' ? 'Income' : 'Expense'
+}
