@@ -69,7 +69,7 @@ export function CompletionView() {
   if (isCompleting) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-[#205781] mb-4" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#20507F] mb-4" />
         <p className="text-sm text-[#5A6B7A]">{t('finishing')}</p>
       </div>
     )
@@ -86,7 +86,7 @@ export function CompletionView() {
        * 1:1 mapping to landing page.pen frame zCSGO
        * (5. Completion + First Transaction):
        *
-       *   yem72  Hero    — $primary #205781, h=260, two concentric ellipses
+       *   yem72  Hero    — $primary #20507F, h=260, two concentric ellipses
        *                    ($primary-light #2A6FA3 200, $accent #98D2C0 120),
        *                    lucide:check 64×64 in $primary
        *   lvcRx  Body    — padding [24,40], gap 20, centered
@@ -105,7 +105,7 @@ export function CompletionView() {
         {/* Hero — full-bleed primary block with concentric circles. We use
             absolute positioning to mirror the pen's pixel-precise stack so
             the off-center composition (offset right) survives at this width. */}
-        <div className="relative h-[220px] shrink-0 overflow-hidden bg-[#205781]">
+        <div className="relative h-[220px] shrink-0 overflow-hidden bg-[#20507F]">
           <div
             aria-hidden
             className="absolute h-[180px] w-[180px] rounded-full bg-[#2A6FA3]"
@@ -116,7 +116,7 @@ export function CompletionView() {
             className="absolute flex h-[110px] w-[110px] items-center justify-center rounded-full bg-[#98D2C0]"
             style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
           >
-            <Check className="h-14 w-14 text-[#205781]" strokeWidth={3} />
+            <Check className="h-14 w-14 text-[#20507F]" strokeWidth={3} />
           </div>
         </div>
 
@@ -136,7 +136,7 @@ export function CompletionView() {
           {/* Warm yellow first-transaction card — pen jOGFG */}
           <div className="mt-6 rounded-2xl bg-[#F6F8D5] p-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#205781]">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#20507F]">
                 <Plus className="h-5 w-5 text-white" strokeWidth={3} />
               </div>
               <div className="flex-1 min-w-0">
@@ -156,7 +156,7 @@ export function CompletionView() {
             <button
               type="button"
               onClick={handleAddFirstExpense}
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[10px] bg-[#205781] px-5 text-[15px] font-semibold text-white transition-colors hover:bg-[#1A4570]"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[10px] bg-[#20507F] px-5 text-[15px] font-semibold text-white transition-colors hover:bg-[#1A4168]"
             >
               {t('addFirstExpense')}
               <ArrowRight className="h-4 w-4" />
