@@ -124,7 +124,7 @@ export function useForecastEngine(
         dobISO: dob ?? null,
       })
     }, DEBOUNCE_MS)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [scenarioDraft, netWorth, monthlyIncomeBase, monthlyExpenseBase, eventMapSerialized, dob, retirementDateISO])
 
   return result

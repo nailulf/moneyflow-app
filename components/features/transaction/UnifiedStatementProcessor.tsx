@@ -130,7 +130,7 @@ export function UnifiedStatementProcessor({
   // Notify parent when upload loading state changes
   useEffect(() => {
     onUploadingChange?.(isUploading)
-  }, [isUploading]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isUploading])  
 
   // -- UPLOAD HANDLERS --
 

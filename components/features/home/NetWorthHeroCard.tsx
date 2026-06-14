@@ -53,7 +53,7 @@ export function NetWorthHeroCard({
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs leading-caption text-hero-muted">{t('hero.totalNetWorth')}</p>
         <span className={cn(
-          'flex items-center gap-1 rounded-xl px-2 py-0.5 text-[11px] font-semibold',
+          'flex items-center gap-1 rounded-xl px-2 py-0.5 text-tiny font-semibold',
           up ? 'bg-hero-success/20 text-hero-success' : 'bg-hero-danger/20 text-hero-danger'
         )}>
           {up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -98,7 +98,7 @@ export function NetWorthHeroCard({
         {months.map((m, i) => (
           <span
             key={m.label + i}
-            className={cn('text-[11px] leading-none', i === last ? 'font-semibold text-hero-foreground' : 'text-hero-muted')}
+            className={cn('text-tiny leading-none', i === last ? 'font-semibold text-hero-foreground' : 'text-hero-muted')}
           >
             {m.label}
           </span>
@@ -106,11 +106,11 @@ export function NetWorthHeroCard({
       </div>
 
       <div className="mt-2 flex items-center gap-3.5">
-        <span className="flex items-center gap-1.5 text-[11px] text-hero-muted">
+        <span className="flex items-center gap-1.5 text-tiny text-hero-muted">
           <span className="h-0.5 w-4 rounded-full bg-hero-foreground" aria-hidden="true" />
           {t('hero.legendNetWorth')}
         </span>
-        <span className="flex items-center gap-1.5 text-[11px] text-hero-muted">
+        <span className="flex items-center gap-1.5 text-tiny text-hero-muted">
           <span className="h-2.5 w-2.5 rounded-sm bg-hero-foreground/20" aria-hidden="true" />
           {t('hero.legendSpending')}
         </span>
@@ -118,21 +118,21 @@ export function NetWorthHeroCard({
 
       <div className="mt-3.5 flex gap-4 border-t border-hero-foreground/10 pt-3">
         <div className="min-w-0">
-          <p className="text-[11px] text-hero-muted">{t('hero.income')}</p>
+          <p className="text-tiny text-hero-muted">{t('hero.income')}</p>
           <p className="truncate text-sm leading-body-sm font-semibold text-hero-success">
             + {formatCurrency(income, currency)}
           </p>
         </div>
         <div className="w-px self-stretch bg-hero-foreground/15" aria-hidden="true" />
         <div className="min-w-0">
-          <p className="text-[11px] text-hero-muted">{t('hero.expenses')}</p>
+          <p className="text-tiny text-hero-muted">{t('hero.expenses')}</p>
           <p className="truncate text-sm leading-body-sm font-semibold text-hero-danger">
             − {formatCurrency(expenses, currency)}
           </p>
         </div>
         <div className="w-px self-stretch bg-hero-foreground/15" aria-hidden="true" />
         <div className="min-w-0">
-          <p className="text-[11px] text-hero-muted">{t('hero.saved')}</p>
+          <p className="text-tiny text-hero-muted">{t('hero.saved')}</p>
           <p className="truncate text-sm leading-body-sm font-semibold">{formatCurrency(saved, currency)}</p>
         </div>
       </div>

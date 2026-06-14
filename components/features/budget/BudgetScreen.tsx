@@ -9,6 +9,7 @@ import { overviewFromSnapshot, categoryRowsFromSnapshot } from '@/lib/budget-scr
 import { SegmentedControl } from '@/components/features/accounts/create/SegmentedControl'
 import { BudgetOverview } from './BudgetOverview'
 import { CategoryBudgetList } from './CategoryBudgetList'
+import { StickyScreenHeader } from '@/components/features/navigation/StickyScreenHeader'
 
 type PeriodType = 'monthly' | 'yearly'
 
@@ -53,7 +54,7 @@ export function BudgetScreen() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4 pt-3 md:pt-8">
-      <header className="flex items-center justify-between gap-2">
+      <StickyScreenHeader>
         <h1 className="text-2xl font-bold leading-title-3 text-foreground">{t('title')}</h1>
         <div className="flex items-center gap-0.5 rounded-full bg-card px-1 py-1 shadow-card">
           <button type="button" aria-label={t('prevPeriod')} onClick={() => step(-1)}
@@ -66,7 +67,7 @@ export function BudgetScreen() {
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
-      </header>
+      </StickyScreenHeader>
 
       <SegmentedControl
         options={[

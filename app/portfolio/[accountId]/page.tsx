@@ -8,8 +8,11 @@ import { ArrowLeft, Plus, Layers } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useHoldings } from '@/hooks/useHoldings'
+import { useHoldingsInBase } from '@/hooks/useHoldingsInBase'
 import { updateHolding, deleteHolding, type Holding } from '@/lib/api/holdings'
 import { portfolioTotals, type SanitizedHolding } from '@/lib/portfolio-utils'
+
+const BASE_CURRENCY = 'IDR'
 import { PortfolioValueHero } from '@/components/features/portfolio/PortfolioValueHero'
 import { HoldingsByClassList } from '@/components/features/portfolio/HoldingsByClassList'
 import { HoldingManageSheet } from '@/components/features/portfolio/HoldingManageSheet'
@@ -25,8 +28,11 @@ export default function AccountDetailPage() {
   const [pending, setPending] = useState(false)
 
   const account = accounts.find((a) => a.id === accountId)
-  const totals = useMemo(() => portfolioTotals(holdings), [holdings])
-  const currency = account?.currency ?? 'IDR'
+
+  // Holdings can be priced in different currencies (USD US-stocks/ETFs alongside IDR).
+  // Convert each to IDR so the value hero and grouped rows present one consistent base.
+  const displayHoldings = useHoldingsInBase(holdings, BASE_CURRENCY)
+  const totals = useMemo(() => portfolioTotals(displayHoldings), [displayHoldings])
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['holdings', accountId] })
@@ -72,7 +78,7 @@ export default function AccountDetailPage() {
       </header>
 
       <PortfolioValueHero totalValue={totals.totalValue} totalGainLoss={totals.totalGainLoss}
-        totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={currency} />
+        totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={BASE_CURRENCY} />
 
       {!isLoading && holdings.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-2xl bg-card p-6 text-center shadow-card">
@@ -88,7 +94,10 @@ export default function AccountDetailPage() {
           </button>
         </div>
       ) : (
-        <HoldingsByClassList holdings={holdings} onSelect={setManaged} />
+        <HoldingsByClassList
+          holdings={displayHoldings}
+          onSelect={(h) => setManaged(holdings.find((o) => o.id === h.id) ?? null)}
+        />
       )}
 
       {managed && (

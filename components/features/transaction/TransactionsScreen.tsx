@@ -16,6 +16,7 @@ import { TransactionTypeTabs } from './TransactionTypeTabs'
 import { MonthSummaryBar } from './MonthSummaryBar'
 import { TransactionGroupedList } from './TransactionGroupedList'
 import { TransactionFilterSheet } from './TransactionFilterSheet'
+import { StickyScreenHeader } from '@/components/features/navigation/StickyScreenHeader'
 
 function todayKey(): string {
   const d = new Date()
@@ -54,7 +55,7 @@ export function TransactionsScreen() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4 pt-3 md:pt-0 md:pb-6">
-      <header className="flex items-center justify-between">
+      <StickyScreenHeader>
         <h1 className="text-2xl leading-title-3 font-bold text-foreground">{t('title')}</h1>
         <div className="flex items-center gap-2">
           <button
@@ -75,7 +76,7 @@ export function TransactionsScreen() {
             <Search className="size-4" />
           </button>
         </div>
-      </header>
+      </StickyScreenHeader>
 
       {showSearch && (
         <Input autoFocus placeholder={t('searchPlaceholder')} value={filters.search} onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))} />

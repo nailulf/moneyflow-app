@@ -227,6 +227,8 @@ Mobile-first, with `sm:` (≥640px) and `lg:` (≥1024px) overrides baked into t
 
 | Class / token | Mobile (<640) | Tablet (≥640) | Desktop (≥1024) |
 |---|---|---|---|
+| `text-nano` / `--font-size-nano` | 10px | 10px | 10px |
+| `text-tiny` / `--font-size-tiny` | 11px | 11px | 11px |
 | `text-xs` / `--font-size-xs` | 12px | 12px | 12px |
 | `text-sm` / `--font-size-sm` | 14px | 14px | 14px |
 | `text-md` / `--font-size-md` | 16px | 16px | 16px |
@@ -238,7 +240,8 @@ Mobile-first, with `sm:` (≥640px) and `lg:` (≥1024px) overrides baked into t
 
 The arbitrary-value form `text-[length:var(--font-size-2xl)]` is equivalent but verbose; the utility
 class is the live convention. `text-base` is **not** part of this scale (it stays Tailwind's default
-16px) — prefer `text-md`.
+16px) — prefer `text-md`. `text-tiny` (11px) and `text-nano` (10px) are **non-responsive** — same
+size at all breakpoints — for mobile pill/badge/nav-label micro-type; never use `text-[10px]`/`text-[11px]`.
 
 ---
 

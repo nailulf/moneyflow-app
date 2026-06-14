@@ -197,6 +197,27 @@ with opacity (`hover:bg-muted/50`, `hover:bg-destructive/10`); dark mode is `cla
 elevation via `shadow-card` / `shadow-floating` (not ad-hoc `shadow-lg` on mobile surfaces);
 category icons/tints via `lib/category-style.ts` (`getCategoryIcon` / `getCategoryTint`).
 
+**Full-screen flow chrome (sticky header + sticky bottom CTA — design-system convention):**
+Multi-step flows (`/budget/create`, `/budget/edit`, `/accounts/new*` — the routes in
+`lib/nav-visibility.ts` `FULL_SCREEN_FLOW_PREFIXES`, where the bottom nav hides itself) keep their
+chrome pinned to the screen edges so navigation and the primary action stay reachable while the form
+scrolls:
+- **Header pinned to the top** — `components/features/accounts/create/CreateFlowHeader.tsx` (back +
+  title + optional step/save) uses plain `sticky top-0 z-20` with a translucent `bg-background/90`
+  + `backdrop-blur` band. Sticky is sufficient at the top: a top-anchored element sits at the top
+  even when the page fits. The main mobile **tab** screens (Home, Transactions, Wallets, Budget,
+  Portfolio) get the identical treatment via `components/features/navigation/StickyScreenHeader.tsx`
+  — wrap the screen's title/actions row in it instead of a bare `<header>`. It reverts to a plain
+  static header on `md+`, where the app shell (`LayoutWrapper`) renders its own header.
+- **Primary CTA pinned to the bottom** — wrap it in
+  `components/features/budget/StickyCtaBar.tsx`, which uses **`position: fixed` + an in-flow spacer +
+  a gradient fade**, NOT `sticky`. Sticky-bottom only pins while scrolling, so on a short page the CTA
+  floats mid-screen; `fixed` keeps it at the bottom always. The band is `pointer-events-none` (taps
+  fall through to content) with only the CTA interactive. Safe because these flows hide the bottom nav.
+- The app shell content area is `flex-1` (not a viewport-unit `min-h`) so pages fill the screen
+  without overflowing the `min-h-svh` parent — see `components/LayoutWrapper.tsx`. Don't reintroduce
+  `min-h-[100vh]` there; it over-scrolls by the mobile toolbar height + padding.
+
 **Component Library:**
 - All UI components in `components/ui/` follow Radix UI patterns
 - Use `cn()` utility from `lib/utils.ts` for className merging

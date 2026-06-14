@@ -40,7 +40,7 @@ function CardColumn({
           <span className={`h-2 w-2 rounded-full ${tone === 'success' ? 'bg-success' : 'bg-destructive'}`} aria-hidden="true" />
           {label}
         </span>
-        <span className={`rounded-[10px] px-1.5 py-0.5 text-[10px] font-semibold ${toneText} ${
+        <span className={`rounded-[10px] px-1.5 py-0.5 text-nano font-semibold ${toneText} ${
           tone === 'success' ? 'bg-success/15' : 'bg-destructive/15'
         }`}>
           {badge}
@@ -56,7 +56,7 @@ function CardColumn({
         ))}
       </ul>
       {moreLabel && (
-        <p className={`mt-auto flex items-center justify-center gap-1 pt-2 text-[11px] font-semibold ${toneText}`}>
+        <p className={`mt-auto flex items-center justify-center gap-1 pt-2 text-tiny font-semibold ${toneText}`}>
           <ChevronsDown className="h-3 w-3" aria-hidden="true" />
           {moreLabel}
         </p>

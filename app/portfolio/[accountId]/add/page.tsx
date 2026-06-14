@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import { Tag, Hash, Banknote, Calendar } from 'lucide-react'
 import { z } from 'zod'
 import { createHolding } from '@/lib/api/holdings'
-import type { AssetClass } from '@/lib/portfolio-utils'
+import { defaultCurrencyForClass, type AssetClass } from '@/lib/portfolio-utils'
 import { holdingFormSchema, toHoldingPayload } from '@/lib/validations-holding'
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { FormCard, FormRow } from '@/components/features/accounts/create/FormCard'
@@ -37,8 +37,14 @@ export default function AddAssetPage() {
   const { register, handleSubmit, control, setValue, formState: { errors } } =
     useForm<FormIn, unknown, FormOut>({
       resolver: zodResolver(holdingFormSchema),
-      defaultValues: { name: '', symbol: '', quantity: '', purchase_price: '', purchase_date: '', currency: 'IDR' },
+      defaultValues: { symbol: '', quantity: '', purchase_price: '', purchase_date: '', currency: 'IDR' },
     })
+
+  // Picking a class also seeds the default trading currency (USD for US stock/ETF, IDR otherwise).
+  const handleSelectClass = (ac: AssetClass) => {
+    setValue('currency', defaultCurrencyForClass(ac))
+    setAssetClass(ac)
+  }
 
   const currency = useWatch({ control, name: 'currency' })
   const rawQty = useWatch({ control, name: 'quantity' })
@@ -61,7 +67,7 @@ export default function AddAssetPage() {
           <h2 className="text-xl leading-title-4 font-bold text-foreground">{t('selectPrompt')}</h2>
           <p className="mt-1 text-sm leading-body-sm text-muted-foreground">{t('selectSubtitle')}</p>
         </div>
-        <AssetClassSelectCards onSelect={setAssetClass} />
+        <AssetClassSelectCards onSelect={handleSelectClass} />
       </div>
     )
   }
@@ -95,19 +101,11 @@ export default function AddAssetPage() {
 
       <form id={FORM_ID} onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <FormCard>
-          <FormRow icon={Tag}>
+          <FormRow icon={Tag} error={errors.symbol ? t(`errors.${errors.symbol.message}`) : undefined}>
             <input
               {...register('symbol')}
               placeholder={t('tickerPlaceholder')}
               aria-label={t('tickerLabel')}
-              className="w-full bg-transparent text-sm leading-body-sm text-foreground outline-none placeholder:text-muted-foreground/60"
-            />
-          </FormRow>
-          <FormRow icon={Tag} error={errors.name ? t(`errors.${errors.name.message}`) : undefined}>
-            <input
-              {...register('name')}
-              placeholder={t('namePlaceholder')}
-              aria-label={t('nameLabel')}
               className="w-full bg-transparent text-sm leading-body-sm text-foreground outline-none placeholder:text-muted-foreground/60"
             />
           </FormRow>

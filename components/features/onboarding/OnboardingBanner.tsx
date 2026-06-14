@@ -411,7 +411,7 @@ export function OnboardingBanner({ variant = 'warm' }: OnboardingBannerProps) {
                   </span>
                   <span
                     className={cn(
-                      'truncate text-[11px]',
+                      'truncate text-tiny',
                       isDone
                         ? 'text-success'
                         : isActive

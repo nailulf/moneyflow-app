@@ -52,12 +52,12 @@ export function GoalsGrid({ goals }: GoalsGridProps) {
                 <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-selected">
                   <Icon className="h-4 w-4 text-selected-foreground" aria-hidden="true" />
                 </span>
-                <span className="rounded-[10px] bg-selected px-2 py-0.5 text-[11px] font-bold text-selected-foreground">
+                <span className="rounded-[10px] bg-selected px-2 py-0.5 text-tiny font-bold text-selected-foreground">
                   {pct}%
                 </span>
               </div>
               <p className="truncate text-xs leading-caption font-bold text-foreground">{g.name}</p>
-              <p className="text-[11px] leading-none text-muted-foreground">
+              <p className="text-tiny leading-none text-muted-foreground">
                 {t('goals.of', {
                   current: formatCurrencyCompact(g.currentAmount, g.currency),
                   target: formatCurrencyCompact(g.targetAmount, g.currency),
