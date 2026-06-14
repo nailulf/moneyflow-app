@@ -418,7 +418,7 @@ export function AddTransactionForm({ onSuccess, trigger, open: controlledOpen, o
                         <p className="text-xs text-destructive mb-1">Error: {categoriesError}</p>
                       )}
                       {process.env.NODE_ENV === 'development' && (
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-nano text-muted-foreground">
                           {categories.length} dev only stat : cats / User: {user?.id?.slice(0, 8)}...
                         </span>
                       )}

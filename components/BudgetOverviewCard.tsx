@@ -500,7 +500,7 @@ export function BudgetOverviewCard({
                     <span>{formatCurrency(allocated, snapshotCurrency)}</span>
                     <Badge
                       variant={status === 'over' ? 'destructive' : status === 'warning' ? 'secondary' : 'outline'}
-                      className="text-[10px] px-1 py-0"
+                      className="text-nano px-1 py-0"
                     >
                       {status === 'over' ? 'Over' : status === 'warning' ? '!' : 'OK'}
                     </Badge>

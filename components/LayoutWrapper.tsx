@@ -135,7 +135,9 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
           </header>
           {!ownsMobileHeader && <MobileScreenHeader title={pageTitle} user={navUserData} />}
           <div className={cn('flex flex-1 flex-col gap-4 p-4 pt-0 md:pb-4', hidesBottomNav ? 'pb-4' : 'pb-28')}>
-            <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
+            {/* flex-1 fills the screen without forcing a viewport-unit min-height,
+                which previously overflowed the svh parent (toolbar + padding). */}
+            <div className="flex-1 rounded-xl">
               {children}
             </div>
           </div>
