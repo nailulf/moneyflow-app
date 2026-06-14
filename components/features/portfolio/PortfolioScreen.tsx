@@ -14,6 +14,7 @@ import { NavUser } from '@/components/features/navigation/nav-user'
 import { formatCurrency } from '@/lib/data-utils'
 import { PortfolioValueHero } from './PortfolioValueHero'
 import { AllocationBars } from './AllocationBars'
+import { StickyScreenHeader } from '@/components/features/navigation/StickyScreenHeader'
 import { TopHoldingsCard, type TopHoldingRow } from './TopHoldingsCard'
 
 const TOP_N = 5
@@ -50,7 +51,7 @@ export function PortfolioScreen() {
 
   return (
     <div className="flex flex-col gap-5 pt-3 md:hidden">
-      <header className="flex items-center justify-between gap-2">
+      <StickyScreenHeader>
         <h1 className="text-2xl font-bold leading-title-3 text-foreground">{t('title')}</h1>
         <div className="flex shrink-0 items-center gap-2">
           <button type="button" onClick={() => router.push('/accounts/new/investment')}
@@ -60,7 +61,7 @@ export function PortfolioScreen() {
           </button>
           <NavUser user={userData} />
         </div>
-      </header>
+      </StickyScreenHeader>
 
       <PortfolioValueHero
         totalValue={totals.totalValue} totalGainLoss={totals.totalGainLoss}
