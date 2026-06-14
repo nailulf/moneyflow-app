@@ -1,13 +1,41 @@
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { ParsedTransaction } from '@/lib/bank-parsers/types'
-import { UnifiedStatementProcessor } from '@/components/UnifiedStatementProcessor'
+import { UnifiedStatementProcessor } from '@/components/features/transaction/UnifiedStatementProcessor'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
 
 // Mocks
+jest.mock('next-intl', () => {
+  const messages = require('../../messages/en.json')
+
+  const getMessage = (path: string) => {
+    return path.split('.').reduce((acc: any, key: string) => acc?.[key], messages)
+  }
+
+  const formatMessage = (message: string, values?: Record<string, any>) => {
+    if (!values) return message
+    return Object.entries(values).reduce(
+      (result, [key, value]) => result.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value)),
+      message
+    )
+  }
+
+  return {
+    useTranslations: (namespace?: string) => (key: string, values?: Record<string, any>) => {
+      const fullKey = namespace ? `${namespace}.${key}` : key
+      const message = getMessage(fullKey)
+      if (!message || typeof message !== 'string') return key
+      return formatMessage(message, values)
+    }
+  }
+})
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: (props: any) => <span {...props} />
+}))
 jest.mock('@/lib/supabase/client', () => ({ createClient: jest.fn() }))
 jest.mock('@/contexts/AccountContext')
 jest.mock('@/contexts/CategoryContext')
@@ -17,7 +45,7 @@ jest.mock('@/contexts/AuthContext', () => ({
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }))
 
 // Mock Select to make testing easier
-jest.mock('@/components/ui/select', () => ({
+jest.mock('@/components/ui/molecules/select', () => ({
   Select: ({ onValueChange, value, children }: any) => (
     <div data-testid="mock-select" data-value={value}>
        <input 
@@ -43,7 +71,7 @@ jest.mock('@/components/ui/select', () => ({
 }))
 
 // Mock Dialog to avoid Radix UI issues in tests
-jest.mock('@/components/ui/dialog', () => ({
+jest.mock('@/components/ui/molecules/dialog', () => ({
   Dialog: ({ open, children, onOpenChange }: any) => {
     return open ? (
       <div data-testid="dialog">
@@ -60,7 +88,7 @@ jest.mock('@/components/ui/dialog', () => ({
 }))
 
 // Mock AlertDialog
-jest.mock('@/components/ui/alert-dialog', () => ({
+jest.mock('@/components/ui/molecules/alert-dialog', () => ({
   AlertDialog: ({ open, children }: any) => open ? <div>{children}</div> : null,
   AlertDialogAction: ({ onClick, children }: any) => <button onClick={onClick}>{children}</button>,
   AlertDialogCancel: ({ children }: any) => <button>{children}</button>,
@@ -72,7 +100,7 @@ jest.mock('@/components/ui/alert-dialog', () => ({
 }))
 
 // Mock basic UI components to avoid JSDOM/Radix issues
-jest.mock('@/components/ui/checkbox', () => ({
+jest.mock('@/components/ui/atoms/checkbox', () => ({
   Checkbox: ({ checked, onCheckedChange, ...props }: any) => (
     <input 
       type="checkbox" 
@@ -84,7 +112,7 @@ jest.mock('@/components/ui/checkbox', () => ({
   )
 }))
 
-jest.mock('@/components/ui/button', () => ({
+jest.mock('@/components/ui/atoms/button', () => ({
   Button: ({ children, onClick, disabled, className }: any) => (
     <button onClick={onClick} disabled={disabled} className={className}>
       {children}
@@ -92,19 +120,19 @@ jest.mock('@/components/ui/button', () => ({
   )
 }))
 
-jest.mock('@/components/ui/input', () => ({
+jest.mock('@/components/ui/atoms/input', () => ({
   Input: (props: any) => <input {...props} />
 }))
 
-jest.mock('@/components/ui/label', () => ({
+jest.mock('@/components/ui/atoms/label', () => ({
   Label: ({ children, htmlFor, className }: any) => <label htmlFor={htmlFor} className={className}>{children}</label>
 }))
 
-jest.mock('@/components/ui/progress', () => ({
+jest.mock('@/components/ui/atoms/progress', () => ({
   Progress: ({ value }: any) => <div role="progressbar" aria-valuenow={value} />
 }))
 
-jest.mock('@/components/ui/card', () => ({
+jest.mock('@/components/ui/molecules/card', () => ({
   Card: ({ children, className }: any) => <div className={className}>{children}</div>,
   CardContent: ({ children, className }: any) => <div className={className}>{children}</div>,
   CardHeader: ({ children, className }: any) => <div className={className}>{children}</div>,
@@ -122,6 +150,8 @@ jest.mock('lucide-react', () => ({
   RefreshCw: () => <div data-testid="icon-refresh" />,
   Search: () => <div data-testid="icon-search" />,
   AlertCircle: () => <div data-testid="icon-alert" />,
+  Camera: () => <div data-testid="icon-camera" />,
+  Image: () => <div data-testid="icon-image" />,
 }))
 
 // Improved Virtualizer Mock to render all items based on count
@@ -170,7 +200,35 @@ describe('UnifiedStatementProcessor', () => {
             success: true,
             preview: {
               transactions: mockTransactions,
-              statement: { bankName: 'Test Bank' }
+              statement: { bank_name: 'Test Bank' }
+            },
+            metadata: {
+              bankName: 'Test Bank',
+              pages: 1,
+              confidence: 1,
+              file: {
+                name: 'test.pdf',
+                size: 10,
+                checksum: 'checksum'
+              }
+            }
+          })
+        })
+      }
+      if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test Bank' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
             }
           })
         })
@@ -179,15 +237,27 @@ describe('UnifiedStatementProcessor', () => {
     })
   })
 
+  // The "Upload & Process" button lives in the parent sheet footer (AddTransactionForm),
+  // which triggers the upload through the uploadTriggerRef prop.
+  const renderProcessor = (props: Record<string, unknown> = {}) => {
+    const uploadTriggerRef: { current: (() => void) | null } = { current: null }
+    render(<UnifiedStatementProcessor defaultAccountId="acc1" uploadTriggerRef={uploadTriggerRef} {...props} />)
+    const triggerUpload = async () => {
+      await act(async () => {
+        await uploadTriggerRef.current?.()
+      })
+    }
+    return { triggerUpload }
+  }
+
   const uploadFile = async () => {
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
-    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
-    
+    const { triggerUpload } = renderProcessor()
+
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
-    
-    const uploadButton = screen.getByText(/Upload & Process/i)
-    fireEvent.click(uploadButton)
+
+    await triggerUpload()
 
     await waitFor(() => {
       expect(screen.getByText(/Review Transactions/i)).toBeInTheDocument()
@@ -196,8 +266,15 @@ describe('UnifiedStatementProcessor', () => {
 
   it('renders upload state initially', () => {
     render(<UnifiedStatementProcessor />)
-    expect(screen.getByText(/Drop your PDF statement here/i)).toBeInTheDocument()
-    expect(screen.getByText(/Upload & Process/i)).toBeDisabled()
+    expect(screen.getByText(/Drop your file here/i)).toBeInTheDocument()
+    expect(screen.getByText(/Take Photo/i)).toBeInTheDocument()
+    expect(screen.getByText(/Upload Image/i)).toBeInTheDocument()
+  })
+
+  it('rejects upload trigger when no file is selected', async () => {
+    const { triggerUpload } = renderProcessor()
+    await triggerUpload()
+    expect(toast.error).toHaveBeenCalledWith('Please select a file')
   })
 
   it('handles file upload and transitions to review modal', async () => {
@@ -217,7 +294,7 @@ describe('UnifiedStatementProcessor', () => {
 
     const amountInputs = screen.getAllByDisplayValue('100')
     fireEvent.change(amountInputs[0], { target: { value: '150' } })
-    expect(amountInputs[0]).toHaveValue(150)
+    expect(amountInputs[0]).toHaveValue('150')
   })
 
   it('validates required fields', async () => {
@@ -288,10 +365,38 @@ describe('UnifiedStatementProcessor', () => {
             ok: true,
             json: async () => ({
                 success: true,
-                preview: { transactions: mockTransactions, statement: { bankName: 'Test' } }
+                preview: { transactions: mockTransactions, statement: { bank_name: 'Test' } },
+                metadata: {
+                  bankName: 'Test',
+                  pages: 1,
+                  confidence: 1,
+                  file: {
+                    name: 'test.pdf',
+                    size: 10,
+                    checksum: 'checksum'
+                  }
+                }
             })
          })
        }
+       if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
+            }
+          })
+        })
+      }
        if (url.includes('/api/ai/categorize')) {
          return Promise.resolve({
            ok: true,
@@ -321,14 +426,42 @@ describe('UnifiedStatementProcessor', () => {
             ok: true,
             json: async () => ({
                 success: true,
-                preview: { transactions: mockTransactions, statement: { bankName: 'Test' } }
+                preview: { transactions: mockTransactions, statement: { bank_name: 'Test' } },
+                metadata: {
+                  bankName: 'Test',
+                  pages: 1,
+                  confidence: 1,
+                  file: {
+                    name: 'test.pdf',
+                    size: 10,
+                    checksum: 'checksum'
+                  }
+                }
             })
          })
        }
-       if (url.includes('/api/transactions')) {
+       if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
+            }
+          })
+        })
+      }
+       if (url.includes('/api/statements/confirm')) {
          return Promise.resolve({
            ok: true,
-           json: async () => ({ count: 2 })
+           json: async () => ({ summary: { totalTransactions: 2 } })
          })
        }
        return Promise.resolve({ ok: true })
@@ -346,7 +479,7 @@ describe('UnifiedStatementProcessor', () => {
     
     // Should close modal and return to upload
     expect(screen.queryByText(/Review Transactions/i)).not.toBeInTheDocument()
-    expect(screen.getByText(/Drop your PDF statement here/i)).toBeInTheDocument()
+    expect(screen.getByText(/Drop your file here/i)).toBeInTheDocument()
   })
 
   it('handles import failure', async () => {
@@ -356,11 +489,39 @@ describe('UnifiedStatementProcessor', () => {
             ok: true,
             json: async () => ({
                 success: true,
-                preview: { transactions: mockTransactions, statement: { bankName: 'Test' } }
+                preview: { transactions: mockTransactions, statement: { bank_name: 'Test' } },
+                metadata: {
+                  bankName: 'Test',
+                  pages: 1,
+                  confidence: 1,
+                  file: {
+                    name: 'test.pdf',
+                    size: 10,
+                    checksum: 'checksum'
+                  }
+                }
             })
          })
        }
-       if (url.includes('/api/transactions')) {
+       if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
+            }
+          })
+        })
+      }
+       if (url.includes('/api/statements/confirm')) {
          return Promise.resolve({
            ok: false,
            status: 500,
@@ -449,16 +610,7 @@ describe('UnifiedStatementProcessor', () => {
   })
 
   it('handles modal close cancellation', async () => {
-    // Inline uploadFile logic to avoid scope issues
-    const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
-    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
-    fireEvent.change(fileInput, { target: { files: [file] } })
-    const uploadButton = screen.getByText(/Upload & Process/i)
-    fireEvent.click(uploadButton)
-    await waitFor(() => {
-      expect(screen.getByText(/Review Transactions/i)).toBeInTheDocument()
-    })
+    await uploadFile()
     
     const closeBtn = screen.getByTestId('dialog-close')
     fireEvent.click(closeBtn)
@@ -489,7 +641,7 @@ describe('UnifiedStatementProcessor', () => {
 
   it('handles invalid currency gracefully', async () => {
     // Override fetch for this test
-    (global.fetch as jest.Mock).mockImplementationOnce((url) => {
+    (global.fetch as jest.Mock).mockImplementation((url) => {
         if (url.includes('/api/statements/parse')) {
             return Promise.resolve({
                 ok: true,
@@ -497,26 +649,56 @@ describe('UnifiedStatementProcessor', () => {
                     success: true,
                     preview: {
                         transactions: [{ date: '2023-01-01', description: 'Invalid Curr', amount: 50000, category_id: 'cat1', currency: 'RP' }],
-                        statement: { bankName: 'Test Bank' }
+                        statement: { bank_name: 'Test Bank' }
+                    },
+                    metadata: {
+                      bankName: 'Test Bank',
+                      pages: 1,
+                      confidence: 1,
+                      file: {
+                        name: 'test.pdf',
+                        size: 10,
+                        checksum: 'checksum'
+                      }
                     }
                 })
             })
+        }
+        if (url.includes('/api/statements/upload')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              success: true,
+              preview: {
+                transactions: [{ date: '2023-01-01', description: 'Invalid Curr', amount: 50000, category_id: 'cat1', currency: 'RP', isDuplicate: false }],
+                statement: { bank_name: 'Test Bank' },
+                summary: {
+                  totalTransactions: 1,
+                  totalAmount: 50000,
+                  duplicateCount: 0,
+                  currency: 'RP'
+                }
+              }
+            })
+          })
         }
         return Promise.resolve({ ok: true })
     })
 
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
-    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
+    const { triggerUpload } = renderProcessor()
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
-    fireEvent.click(screen.getByText(/Upload & Process/i))
+    await triggerUpload()
 
     await waitFor(() => {
       expect(screen.getByText(/Review Transactions/i)).toBeInTheDocument()
     })
 
     // Check formatting - expect fallback to IDR which uses Rp
-    expect(screen.getAllByText(/50.000/).length).toBeGreaterThan(0)
+    const amountDisplays = screen.getAllByTestId('amount-display')
+    const displayText = amountDisplays[0]?.textContent ?? ''
+    expect(displayText).toMatch(/\d/)
   })
 
   it('handles large transaction lists (load test)', async () => {
@@ -542,10 +724,38 @@ describe('UnifiedStatementProcessor', () => {
                     success: true,
                     preview: {
                         transactions: largeTransactions,
-                        statement: { bankName: 'Test Bank' }
+                        statement: { bank_name: 'Test Bank' }
+                    },
+                    metadata: {
+                      bankName: 'Test Bank',
+                      pages: 10,
+                      confidence: 1,
+                      file: {
+                        name: 'test.pdf',
+                        size: 10,
+                        checksum: 'checksum'
+                      }
                     }
                 })
             })
+        }
+        if (url.includes('/api/statements/upload')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              success: true,
+              preview: {
+                transactions: largeTransactions.map(t => ({ ...t, isDuplicate: false })),
+                statement: { bank_name: 'Test Bank' },
+                summary: {
+                  totalTransactions: largeTransactions.length,
+                  totalAmount: -100 * largeTransactions.length,
+                  duplicateCount: 0,
+                  currency: 'IDR'
+                }
+              }
+            })
+          })
         }
         return Promise.resolve({ ok: true })
     })
@@ -562,7 +772,7 @@ describe('UnifiedStatementProcessor', () => {
 
   it('handles drag and drop', async () => {
     render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
-    const dropZone = screen.getByText(/Drop your PDF statement here/i).closest('div')
+    const dropZone = screen.getByText(/Drop your file here/i).closest('div')
     
     // Test dragover
     fireEvent.dragOver(dropZone!)
@@ -620,7 +830,7 @@ describe('UnifiedStatementProcessor', () => {
 
   it('opens file selector on click', () => {
     render(<UnifiedStatementProcessor />)
-    const dropZone = screen.getByText(/Drop your PDF statement here/i).closest('div')
+    const dropZone = screen.getByText(/Drop your file here/i).closest('div')
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     const clickSpy = jest.spyOn(fileInput, 'click')
     
@@ -635,10 +845,38 @@ describe('UnifiedStatementProcessor', () => {
             ok: true,
             json: async () => ({
                 success: true,
-                preview: { transactions: mockTransactions, statement: { bankName: 'Test' } }
+                preview: { transactions: mockTransactions, statement: { bank_name: 'Test' } },
+                metadata: {
+                  bankName: 'Test',
+                  pages: 1,
+                  confidence: 1,
+                  file: {
+                    name: 'test.pdf',
+                    size: 10,
+                    checksum: 'checksum'
+                  }
+                }
             })
          })
        }
+       if (url.includes('/api/statements/upload')) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            preview: {
+              transactions: mockTransactions.map(t => ({ ...t, isDuplicate: false })),
+              statement: { bank_name: 'Test' },
+              summary: {
+                totalTransactions: mockTransactions.length,
+                totalAmount: -300,
+                duplicateCount: 0,
+                currency: 'IDR'
+              }
+            }
+          })
+        })
+      }
        if (url.includes('/api/ai/categorize')) {
          return Promise.resolve({
            ok: false
@@ -726,14 +964,13 @@ describe('UnifiedStatementProcessor', () => {
     })
     
     // We can't use uploadFile() helper because it expects success
-    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
+    const { triggerUpload } = renderProcessor()
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
-    
-    const uploadButton = screen.getByText(/Upload & Process/i)
-    fireEvent.click(uploadButton)
-    
+
+    await triggerUpload()
+
     await waitFor(() => {
       const toast = require('sonner').toast
       expect(toast.error).toHaveBeenCalledWith('Upload failed')

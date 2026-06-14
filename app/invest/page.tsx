@@ -1,7 +1,7 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { InvestNavigation } from "@/components/TopNavigation"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
+import { Button } from "@/components/ui/atoms/button"
+import { Badge } from "@/components/ui/atoms/badge"
+import { InvestNavigation } from "@/components/features/navigation/TopNavigation"
 import { PageLayout, MainContent, SideContent, ContentWrapper } from "@/components/PageLayout"
 import { StackedBarChart } from "@/components/StackedBarChart"
 

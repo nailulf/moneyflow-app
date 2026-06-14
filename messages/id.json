@@ -1,0 +1,1344 @@
+{
+  "auth": {
+    "login": {
+      "title": "Selamat datang kembali",
+      "subtitle": "Masukkan email Anda di bawah untuk masuk ke akun Anda",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Kata Sandi",
+      "forgotPassword": "Lupa kata sandi?",
+      "submit": "Masuk",
+      "orContinueWith": "Atau lanjutkan dengan",
+      "noAccount": "Belum punya akun?",
+      "signUp": "Daftar",
+      "successLoggedIn": "Berhasil masuk",
+      "errors": {
+        "invalidEmail": "Alamat email tidak valid",
+        "passwordTooShort": "Kata sandi minimal 6 karakter"
+      }
+    },
+    "register": {
+      "title": "Buat akun",
+      "subtitle": "Masukkan detail Anda di bawah untuk membuat akun",
+      "fullName": "Nama Lengkap",
+      "fullNamePlaceholder": "Budi Santoso",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Kata Sandi",
+      "confirmPassword": "Konfirmasi Kata Sandi",
+      "primaryCurrency": "Mata Uang Utama",
+      "currencyPlaceholder": "Mata Uang",
+      "country": "Negara",
+      "countryPlaceholder": "Negara",
+      "goal": "Apa tujuan utama Anda?",
+      "goalOptional": "(opsional)",
+      "submit": "Daftar",
+      "alreadyHaveAccount": "Sudah punya akun?",
+      "signIn": "Masuk",
+      "verificationNotice": "Kami akan mengirimkan tautan verifikasi ke alamat email Anda. Anda perlu mengkliknya sebelum dapat masuk.",
+      "verificationConsent": "Saya mengerti bahwa saya perlu memverifikasi alamat email saya untuk mengakses akun.",
+      "successDev": "Pendaftaran berhasil! Anda sekarang sudah masuk.",
+      "successProd": "Pendaftaran berhasil! Silakan periksa email Anda untuk memverifikasi akun.",
+      "errors": {
+        "fullNameTooShort": "Nama lengkap minimal 2 karakter",
+        "invalidEmail": "Alamat email tidak valid",
+        "passwordTooShort": "Kata sandi minimal 8 karakter",
+        "passwordNeedsNumber": "Kata sandi harus mengandung setidaknya satu angka",
+        "passwordsDontMatch": "Kata sandi tidak cocok",
+        "selectCountry": "Pilih negara Anda",
+        "mustAcknowledgeVerification": "Anda harus mengakui persyaratan verifikasi email"
+      },
+      "goals": {
+        "networth_tracking": "Melacak kekayaan bersih",
+        "expense_management": "Mengelola pengeluaran & anggaran pribadi",
+        "family_budget": "Mengelola dan mempersiapkan anggaran keluarga",
+        "saving_goals": "Mengelola tabungan untuk target",
+        "debt_payoff": "Mengelola hutang"
+      }
+    },
+    "layout": {
+      "tagline": "Ketahui ke mana uang Anda pergi—dan ke mana uang itu dapat membawa Anda.",
+      "ctaText": "Lihat setiap pengeluaran dengan jelas, sehingga keuangan Anda terasa terkendali. Mulailah dengan MoneyFlow hari ini.",
+      "termsPrefix": "Dengan masuk, Anda menyetujui",
+      "termsOfService": "ketentuan layanan",
+      "and": "dan",
+      "privacyPolicy": "kebijakan privasi",
+      "features": {
+        "uploadExpenses": "Unggah Pengeluaran",
+        "manageBudgets": "Kelola Anggaran",
+        "cashFlowClarity": "Kejelasan Arus Kas",
+        "networthTracker": "Pelacak Kekayaan",
+        "connectCFP": "Hubungkan CFP",
+        "aiPowered": "Bertenaga AI"
+      }
+    },
+    "verifyEmail": {
+      "title": "Periksa email Anda",
+      "description": "Kami telah mengirimkan tautan verifikasi ke",
+      "instruction": "Klik tautan di email untuk memverifikasi akun Anda. Jika tidak menemukannya, periksa folder spam.",
+      "resendCountdown": "Kirim ulang email dalam {countdown}d",
+      "resendButton": "Kirim ulang email verifikasi",
+      "backToLogin": "Kembali ke Masuk",
+      "needHelp": "Butuh bantuan?",
+      "contactSupport": "Hubungi Dukungan",
+      "toasts": {
+        "emailMissing": "Alamat email tidak ada",
+        "sentSuccess": "Email verifikasi berhasil dikirim",
+        "rateLimited": "Mohon tunggu sebentar sebelum mencoba lagi",
+        "sendFailed": "Gagal mengirim ulang email verifikasi"
+      }
+    },
+    "forgotPassword": {
+      "title": "Lupa Kata Sandi",
+      "description": "Masukkan alamat email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "submit": "Kirim Tautan Reset",
+      "rememberPassword": "Ingat kata sandi Anda?",
+      "signIn": "Masuk",
+      "successEmailSent": "Periksa email Anda untuk tautan reset kata sandi",
+      "errorFailed": "Gagal mengirim email reset kata sandi",
+      "errors": {
+        "invalidEmail": "Alamat email tidak valid"
+      }
+    },
+    "social": {
+      "orContinueWith": "Atau lanjutkan dengan",
+      "oauthError": "Gagal terhubung dengan {provider}. Silakan coba lagi."
+    }
+  },
+  "nav": {
+    "upgradeLabel": "Tingkatkan ke Pro",
+    "manageCategories": "Kelola Kategori",
+    "manageAccounts": "Kelola Akun",
+    "account": "Akun",
+    "billing": "Tagihan",
+    "notifications": "Notifikasi",
+    "logOut": "Keluar",
+    "language": "Bahasa",
+    "languageOptions": {
+      "en": "Inggris",
+      "id": "Indonesia"
+    }
+  },
+  "layout": {
+    "pageTitle": {
+      "spending": "Pengeluaran",
+      "accounts": "Akun & Aset",
+      "portfolio": "Portofolio",
+      "forecast": "Prakiraan",
+      "budget": "Anggaran",
+      "transactions": "Transaksi",
+      "charts": "Grafik",
+      "invest": "Investasi",
+      "advice": "Konsultasi",
+      "tax": "Pajak",
+      "equity": "Ekuitas",
+      "estatePlanning": "Perencanaan Warisan",
+      "dashboard": "Beranda"
+    }
+  },
+  "spending": {
+    "breakdown": {
+      "title": "Laporan Anggaran",
+      "description": "Lihat performa anggaran dan pola pengeluaran Anda"
+    },
+    "cashflow": {
+      "title": "Arus Kas",
+      "description": "Visualisasikan aliran pendapatan dan pengeluaran Anda",
+      "totalIncome": "Total Pendapatan",
+      "totalExpenses": "Total Pengeluaran",
+      "netCashFlow": "Arus Kas Bersih",
+      "month": "Bulan",
+      "year": "Tahun"
+    },
+    "transactions": {
+      "allTransactions": "Semua Transaksi",
+      "recurringTransactions": "Transaksi Berulang"
+    }
+  },
+  "cashflowBreakdown": {
+    "title": "Rincian Arus Kas",
+    "viewBy": "Tampilkan per",
+    "tabs": {
+      "expenses": "Pengeluaran",
+      "budget": "Anggaran",
+      "income": "Pendapatan"
+    },
+    "noData": "Tidak ada data tersedia",
+    "noExpenseData": "Tidak ada data pengeluaran tersedia",
+    "noIncomeData": "Tidak ada data pendapatan tersedia",
+    "expensesTitle": "Pengeluaran",
+    "totalSpending": "Total pengeluaran bulan ini: {amount}",
+    "expensesBreakdown": "Rincian Pengeluaran",
+    "expenseCategories": "{count} kategori pengeluaran",
+    "incomeSources": "Sumber Pendapatan",
+    "incomeBreakdown": "Rincian Pendapatan",
+    "totalIncome": "Total pendapatan bulan ini: {amount}",
+    "incomeCounts": "{count} sumber pendapatan",
+    "budgetPerformance": "Performa Anggaran",
+    "upcoming": "Akan Datang",
+    "projectedBudget": "Proyeksi anggaran untuk periode ini",
+    "budgetUsed": "{percent}% anggaran terpakai",
+    "editBudget": "Edit anggaran",
+    "categoryBreakdown": "Rincian Kategori",
+    "budgetCategoriesCount": "{count} kategori anggaran",
+    "noBudgetCategories": "Tidak ada kategori anggaran",
+    "noBudgetForPeriod": "Tidak ada anggaran untuk periode ini",
+    "createBudgetPrompt": "Buat anggaran untuk melacak pengeluaran sesuai target.",
+    "setupBudget": "Atur anggaran Anda",
+    "errorLoading": "Gagal memuat data anggaran.",
+    "status": {
+      "over": "Melebihi",
+      "warning": "Peringatan",
+      "onTrack": "Sesuai rencana"
+    },
+    "amounts": {
+      "spent": "Terpakai",
+      "budget": "Anggaran",
+      "left": "Sisa"
+    }
+  },
+  "cashflowSummary": {
+    "title": "Arus Kas",
+    "income": "Pendapatan",
+    "spending": "Pengeluaran",
+    "netCashFlow": "Arus Kas Bersih"
+  },
+  "budgetFilterBar": {
+    "period": "Periode",
+    "year": "Tahun",
+    "month": "Bulan",
+    "monthly": "Bulanan",
+    "yearly": "Tahunan",
+    "filterPeriod": "Filter Periode",
+    "createBudget": "Buat Anggaran",
+    "budget": "Anggaran"
+  },
+  "accounts": {
+    "totalSavingsProgress": "Total Progres Tabungan",
+    "goalProgress": "Progres Target",
+    "activeGoals": "Tujuan Aktif",
+    "completedGoals": "Tujuan Selesai",
+    "savingsAndInvestment": "Akun Tabungan & Investasi",
+    "assetsAccounts": "Aset",
+    "liabilitiesAccounts": "Kewajiban",
+    "otherAccounts": "Akun Lainnya",
+    "noAccountsTitle": "Belum Ada Akun",
+    "noAccountsDescription": "Buat akun pertama Anda untuk mulai melacak keuangan",
+    "noGoalSet": "Belum ada tujuan",
+    "target": "Target: {amount}"
+  },
+  "transactions": {
+    "title": "TRANSAKSI",
+    "recentTransactions": "Transaksi Terbaru",
+    "loading": "Memuat...",
+    "noTransactionsFound": "Tidak ada transaksi ditemukan",
+    "search": "Cari",
+    "allCategories": "Semua Kategori",
+    "allMerchants": "Semua Merchant",
+    "filters": "Filter",
+    "dateRange": "Rentang Tanggal",
+    "category": "Kategori",
+    "merchant": "Merchant",
+    "applyFilters": "Terapkan Filter",
+    "summary": {
+      "total": "Total transaksi",
+      "dateRange": "Rentang tanggal",
+      "noTransactions": "Tidak ada transaksi",
+      "totalExpenses": "Total pengeluaran",
+      "totalIncome": "Total pendapatan",
+      "balance": "Saldo"
+    },
+    "columns": {
+      "merchantDescription": "Merchant / Deskripsi",
+      "category": "Kategori",
+      "amount": "Jumlah"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Hapus"
+    },
+    "loadMore": "Muat Lebih ({remaining} tersisa)",
+    "loadingMore": "Memuat lebih banyak transaksi...",
+    "allLoaded": "Semua transaksi dimuat ({total} total)",
+    "confirmCategoryChange": {
+      "title": "Konfirmasi Perubahan Kategori",
+      "description": "Apakah Anda yakin ingin mengubah kategori untuk \"{description}\" menjadi \"{category}\"?",
+      "cancel": "Batal",
+      "confirm": "Konfirmasi",
+      "updating": "Memperbarui..."
+    },
+    "confirmDelete": {
+      "title": "Hapus Transaksi",
+      "description": "Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.",
+      "details": "Detail Transaksi:",
+      "merchantLabel": "Merchant",
+      "amountLabel": "Jumlah",
+      "dateLabel": "Tanggal",
+      "notAvailable": "N/A",
+      "cancel": "Batal",
+      "delete": "Hapus Transaksi",
+      "deleting": "Menghapus..."
+    },
+    "noDescription": "Tidak ada deskripsi",
+    "form": {
+      "addTitle": "Tambah Transaksi Baru",
+      "editTitle": "Edit Transaksi",
+      "addTrigger": "Tambah Transaksi",
+      "manualEntry": "Masukkan Manual",
+      "uploadPdf": "Upload PDF",
+      "date": "Tanggal",
+      "description": "Deskripsi",
+      "descriptionPlaceholder": "Masukkan deskripsi",
+      "amount": "Jumlah",
+      "type": "Jenis",
+      "selectType": "Pilih jenis",
+      "typeExpense": "Pengeluaran",
+      "typeIncome": "Pemasukan",
+      "typeTransfer": "Transfer",
+      "category": "Kategori",
+      "categoryLoading": "Memuat kategori...",
+      "noCategoriesForType": "Tidak ada kategori untuk jenis ini",
+      "loadingShort": "Memuat...",
+      "selectCategory": "Pilih kategori",
+      "noCategoriesAvailable": "Tidak ada kategori untuk jenis ini",
+      "account": "Dari Akun",
+      "selectAccount": "Pilih akun",
+      "toAccount": "Ke Akun",
+      "selectToAccount": "Pilih akun tujuan",
+      "currency": "Mata Uang",
+      "noAccountsAvailable": "Tidak ada akun tersedia",
+      "merchantOpt": "Merchant (Ops)",
+      "merchantPlaceholder": "Masukkan nama merchant",
+      "recurringTransaction": "Transaksi Berulang",
+      "frequency": "Frekuensi",
+      "selectFrequency": "Pilih frekuensi",
+      "daily": "Harian",
+      "weekly": "Mingguan",
+      "monthly": "Bulanan",
+      "yearly": "Tahunan",
+      "period": "Periode",
+      "continuous": "Terus-menerus (Tanpa tanggal akhir)",
+      "endDate": "Tanggal Akhir",
+      "cancel": "Batal",
+      "adding": "Menambahkan...",
+      "addButton": "Tambah Transaksi",
+      "updating": "Memperbarui...",
+      "updateButton": "Perbarui Transaksi",
+      "uploadProcess": "Upload & Proses"
+    },
+    "confirmation": {
+      "title": "Konfirmasi Import Transaksi",
+      "transactionsLabel": "Transaksi",
+      "credits": "Kredit ({count})",
+      "debits": "Debit ({count})",
+      "netAmount": "Jumlah Bersih",
+      "importDetails": "Detail Import",
+      "targetAccount": "Akun Tujuan:",
+      "dateRange": "Rentang Tanggal:",
+      "categoryBreakdown": "Rincian Kategori",
+      "transactionsBadge": "transaksi",
+      "transactionPreview": "Pratinjau Transaksi",
+      "showLess": "Tampilkan Lebih Sedikit",
+      "showAll": "Tampilkan Semua ({count})",
+      "headerDate": "Tanggal",
+      "headerDescription": "Deskripsi",
+      "headerAmount": "Jumlah",
+      "headerCategory": "Kategori",
+      "showing": "Menampilkan {shown} dari {total} transaksi",
+      "previous": "Sebelumnya",
+      "page": "Halaman {page} dari {total}",
+      "next": "Berikutnya",
+      "uncategorized": "Tidak Dikategorikan",
+      "alertTitle": "Siap Diimpor",
+      "alertDescription": "Anda akan mengimpor {count} transaksi ke {account}. Tindakan ini tidak dapat dibatalkan.",
+      "alertReview": "Tinjau detail transaksi di atas dan klik \"Import Transaksi\" untuk melanjutkan.",
+      "backToPreview": "Kembali ke Pratinjau",
+      "importing": "Mengimpor...",
+      "importButton": "Import Transaksi"
+    },
+    "statementProcessor": {
+      "dropHere": "Letakkan file di sini",
+      "clickToBrowse": "atau klik untuk menelusuri",
+      "takePhoto": "Ambil Foto",
+      "uploadImage": "Upload Gambar",
+      "fileSupport": "Mendukung laporan bank PDF · JPG, PNG, WEBP kuitansi & faktur",
+      "selectAccount": "Pilih Akun",
+      "chooseAccount": "Pilih akun...",
+      "noAccountsAvailable": "Tidak ada akun tersedia",
+      "useAI": "Gunakan AI untuk ekstraksi & kategorisasi yang lebih baik",
+      "processingStatement": "Memproses laporan...",
+      "cancel": "Batal",
+      "uploadProcess": "Upload & Proses",
+      "reviewTitle": "Tinjau Transaksi",
+      "reviewDescription": "{selected} dari {total} dipilih. Tinjau dan edit sebelum mengimpor.",
+      "account": "Akun:",
+      "currency": "Mata Uang:",
+      "searchPlaceholder": "Cari deskripsi atau merchant...",
+      "allTypes": "Semua Jenis",
+      "incomeOnly": "Pemasukan Saja",
+      "expenseOnly": "Pengeluaran Saja",
+      "recategorize": "Kategorikan Ulang",
+      "headerDate": "Tanggal",
+      "headerType": "Jenis",
+      "headerDescription": "Deskripsi",
+      "headerMerchant": "Merchant",
+      "headerNotes": "Catatan",
+      "headerCategory": "Kategori",
+      "headerAmount": "Jumlah",
+      "noTransactions": "Tidak ada transaksi ditemukan",
+      "noTransactionsFromFile": "Kami tidak dapat mengekstrak transaksi dari file yang diunggah.",
+      "noTransactionsFilter": "Coba sesuaikan filter untuk melihat lebih banyak hasil.",
+      "possibleDuplicate": "Kemungkinan duplikat",
+      "uncategorized": "Tidak Dikategorikan",
+      "expensesGroup": "Pengeluaran",
+      "incomeGroup": "Pemasukan",
+      "transfersGroup": "Transfer",
+      "typeIncome": "Pemasukan",
+      "typeExpense": "Pengeluaran",
+      "typeTransfer": "Transfer",
+      "selected": "Dipilih: {count}",
+      "totalAmount": "Total: {amount}",
+      "cancelReview": "Batal",
+      "addTransactions": "Tambah transaksi",
+      "discardTitle": "Buang perubahan?",
+      "discardDescription": "Apakah Anda yakin ingin menutup? Progres yang belum disimpan akan hilang.",
+      "discardCancel": "Batal",
+      "discardConfirm": "Buang"
+    },
+    "screen": {
+      "title": "Transaksi",
+      "searchPlaceholder": "Cari transaksi",
+      "tabs": { "all": "Semua", "income": "Pemasukan", "expense": "Pengeluaran", "transfer": "Transfer" },
+      "summary": { "income": "Masuk", "expense": "Keluar" },
+      "prevMonth": "Bulan sebelumnya",
+      "nextMonth": "Bulan berikutnya",
+      "today": "Hari ini",
+      "yesterday": "Kemarin",
+      "uncategorized": "Tanpa kategori",
+      "noAccount": "Tanpa akun",
+      "empty": "Belum ada transaksi",
+      "emptyFiltered": "Tidak ada transaksi yang cocok dengan filter",
+      "reset": "Atur ulang",
+      "filter": { "title": "Filter", "titleWithCount": "Filter ({count} aktif)", "categories": "Kategori", "accounts": "Akun", "amountMin": "Jumlah min", "amountMax": "Jumlah maks", "apply": "Terapkan", "reset": "Atur ulang" }
+    }
+  },
+  "navigation": {
+    "sidebar": {
+      "tagline": "Keuangan Pribadi"
+    },
+    "items": {
+      "dashboard": "Beranda",
+      "accounts": "Akun & Aset",
+      "spending": "Pengeluaran",
+      "portfolio": "Portofolio",
+      "forecast": "Prakiraan",
+      "advice": "Saran",
+      "home": "Beranda",
+      "spend": "Belanja",
+      "invest": "Investasi",
+      "wallets": "Dompet",
+      "budget": "Anggaran",
+      "transactions": "Transaksi",
+      "equity": "Ekuitas",
+      "charts": "Grafik",
+      "more": "Lainnya",
+      "comingSoon": "Segera hadir",
+      "addTransaction": "Tambah Transaksi"
+    },
+    "topNav": {
+      "overview": "Ringkasan",
+      "breakdown": "Rincian",
+      "cashFlow": "Arus Kas",
+      "transaction": "Transaksi",
+      "holdings": "Aset",
+      "analytics": "Analitik",
+      "forecast": "Proyeksi"
+    }
+  },
+  "onboarding": {
+    "modal": {
+      "title": "Selesaikan pengaturan",
+      "progress": "{completed} dari {total} selesai",
+      "stepOf": "Langkah {current} dari {total}",
+      "skipSetup": "Lewati pengaturan untuk sekarang",
+      "srTitle": "Selesaikan pengaturan"
+    },
+    "steps": {
+      "accountSetup": {
+        "title": "Buat akun pertama Anda",
+        "description": "Siapkan rekening bank, kartu kredit, atau e-wallet"
+      },
+      "categories": {
+        "title": "Tinjau kategori Anda",
+        "description": "Kami telah menyiapkan kategori default untuk Anda"
+      },
+      "budgetSetup": {
+        "title": "Siapkan anggaran Anda",
+        "description": "Buat rencana pengeluaran untuk bulan ini"
+      }
+    },
+    "stepItem": {
+      "done": "Selesai",
+      "pending": "Menunggu"
+    },
+    "welcome": {
+      "heading": "Halo, {name} 👋",
+      "tagline": "Dalam 3 menit, kami akan menyiapkan akun dan anggaran pertama Anda.",
+      "helpIntro": "Kami akan membantu Anda:",
+      "bullets": {
+        "account": "Tambah akun pertama Anda · 60d",
+        "categories": "Pilih kategori pengeluaran · 60d",
+        "budget": "Atur anggaran sederhana · 60d"
+      },
+      "features": {
+        "track": {
+          "title": "Lacak pengeluaran di semua akun",
+          "description": "Hubungkan rekening bank, kartu kredit, dan e-wallet Anda dalam satu tempat"
+        },
+        "budgets": {
+          "title": "Buat anggaran yang benar-benar berfungsi",
+          "description": "Tetapkan batas pengeluaran dan dapatkan peringatan sebelum Anda berlebihan"
+        },
+        "insights": {
+          "title": "Pahami ke mana uang Anda pergi",
+          "description": "Wawasan visual dan laporan untuk membantu Anda membuat keputusan keuangan yang lebih baik"
+        }
+      },
+      "setupTime": "Pengaturan membutuhkan sekitar 3 menit",
+      "startSetup": "Mulai Pengaturan",
+      "skipForNow": "Lewati untuk sekarang",
+      "skipNote": "Anda selalu dapat menyelesaikan pengaturan nanti dari dasbor Anda"
+    },
+    "completion": {
+      "finishing": "Menyelesaikan pengaturan...",
+      "titleWithName": "Semuanya siap, {name}! 🎉",
+      "title": "Semuanya siap! 🎉",
+      "description": "Ruang kerja Anda sudah siap. Sekarang lakukan satu hal yang membuat aplikasi ini berguna:",
+      "summary": {
+        "title": "Ringkasan Pengaturan",
+        "accountCreated": "{count} akun dibuat",
+        "accountsCreated": "{count} akun dibuat",
+        "accountsReady": "Akun siap (tambahkan nanti)",
+        "categoriesConfigured": "{count} kategori dikonfigurasi",
+        "budgetCreated": "Anggaran dibuat",
+        "budgetReady": "Anggaran siap (buat kapan saja)"
+      },
+      "firstExpense": {
+        "title": "Catat pengeluaran pertama Anda",
+        "subtitle": "Kurang dari 30 detik"
+      },
+      "addFirstExpense": "Tambah pengeluaran pertama",
+      "skipToDashboard": "Nanti saja · ke dasbor",
+      "goToDashboard": "Pergi ke Dasbor"
+    },
+    "accountSetup": {
+      "accountTypeLabel": "Jenis Akun *",
+      "selectAccountType": "Pilih jenis akun",
+      "moreTypes": "Jenis lainnya…",
+      "autoFilledFromBank": "Otomatis terisi dari pilihan bank",
+      "currencyFromRegistration": "Menggunakan mata uang dari pendaftaran Anda",
+      "bankInstitution": "Bank / Institusi",
+      "optional": "(opsional)",
+      "searchBanks": "Cari bank & e-wallet…",
+      "banks": "Bank",
+      "eWallets": "E-Wallet",
+      "noResults": "Tidak ada hasil untuk \"{search}\"",
+      "accountNameLabel": "Nama Akun *",
+      "accountNamePlaceholder": "mis., BCA Tabungan, Kas Utama",
+      "atLeast3Chars": "Minimal 3 karakter diperlukan",
+      "currencyLabel": "Mata Uang *",
+      "selectCurrency": "Pilih mata uang",
+      "startingBalance": "Saldo Awal",
+      "balanceNote": "Masukkan saldo Anda saat ini — Anda dapat memperbaruinya kapan saja",
+      "errors": {
+        "enterName": "Masukkan nama akun",
+        "minChars": "Nama akun harus minimal 3 karakter",
+        "notAuthenticated": "Pengguna tidak terautentikasi",
+        "failedToCreate": "Gagal membuat akun. Silakan coba lagi."
+      },
+      "skip": "Lewati langkah ini",
+      "creating": "Membuat…",
+      "continue": "Lanjutkan",
+      "accountTypes": {
+        "BANK": {
+          "label": "Rekening Bank",
+          "description": "Rekening giro atau tabungan"
+        },
+        "CREDIT_CARD": {
+          "label": "Kartu Kredit",
+          "description": "Akun kartu kredit"
+        },
+        "CASH": {
+          "label": "Tunai",
+          "description": "Uang tunai"
+        },
+        "INVESTMENT": {
+          "label": "Investasi",
+          "description": "Saham, obligasi, reksa dana"
+        },
+        "PROPERTY": {
+          "label": "Properti",
+          "description": "Rumah, apartemen, atau tanah"
+        },
+        "VEHICLE": {
+          "label": "Kendaraan",
+          "description": "Mobil, motor, dll."
+        },
+        "MORTGAGE": {
+          "label": "KPR / Kredit Properti",
+          "description": "Cicilan rumah atau KPR"
+        },
+        "DIGITAL_WALLET": { "label": "Dompet Digital", "description": "GoPay, OVO, Dana, dll." },
+        "OTHER": {
+          "label": "Lainnya",
+          "description": "Akun lainnya"
+        }
+      },
+      "assetDetails": {
+        "propertyType": "Jenis Properti",
+        "propertyTypePlaceholder": "Pilih jenis properti",
+        "propertyTypes": {
+          "house": "Rumah",
+          "apartment": "Apartemen",
+          "land": "Tanah"
+        },
+        "location": "Lokasi (opsional)",
+        "locationPlaceholder": "mis., Jakarta Selatan",
+        "depreciationRate": "Tingkat Penyusutan Tahunan (%)",
+        "depreciationRatePlaceholder": "15",
+        "depreciationRateHint": "Default 15% per tahun",
+        "monthlyPayment": "Cicilan Bulanan",
+        "mortgageEndDate": "Bulan Pembayaran Terakhir",
+        "mortgageEndDateHint": "Bulan dan tahun pembayaran KPR terakhir Anda",
+        "balanceLabel": {
+          "property": "Nilai Saat Ini",
+          "vehicle": "Nilai Saat Ini",
+          "mortgage": "Saldo Tersisa"
+        },
+        "balanceHint": {
+          "property": "Masukkan perkiraan nilai properti saat ini",
+          "vehicle": "Masukkan perkiraan nilai kendaraan saat ini",
+          "mortgage": "Masukkan saldo KPR yang tersisa"
+        }
+      }
+    },
+    "budgetSetup": {
+      "monthlyIncomeLabel": "Pendapatan Bulanan (setelah pajak)",
+      "incomePlaceholder": "mis., 10000000",
+      "chooseBudgetTemplate": "Pilih Template Anggaran",
+      "needs": "Kebutuhan",
+      "wants": "Keinginan",
+      "savings": "Tabungan",
+      "budgetPreview": "Pratinjau Anggaran",
+      "incomeAllocated": "{percent}% dari pendapatan dialokasikan",
+      "editNote": "Anda dapat membuat atau mengedit anggaran kapan saja dari dasbor",
+      "skipBudget": "Lewati anggaran",
+      "back": "Kembali",
+      "creating": "Membuat...",
+      "createBudget": "Buat Anggaran",
+      "errors": {
+        "incomeRequired": "Masukkan pendapatan bulanan Anda",
+        "incomeInvalid": "Masukkan angka yang valid",
+        "incomeMin": "Pendapatan harus 0 atau lebih",
+        "incomeMax": "Jumlah tersebut terlalu besar"
+      }
+    }
+  },
+  "accountManager": {
+    "title": "KELOLA AKUN",
+    "description": "Buat, edit, dan atur rekening bank Anda",
+    "loadingAccounts": "Memuat akun...",
+    "searchPlaceholder": "Cari akun...",
+    "addNewAccount": "Tambah Akun Baru",
+    "yourAccounts": "Akun Anda ({count})",
+    "default": "Default",
+    "noAccountsSearch": "Tidak ada akun yang sesuai dengan pencarian Anda.",
+    "noAccounts": "Tidak ada akun. Buat akun pertama Anda!",
+    "close": "Tutup",
+    "addAccount": "Tambah Akun",
+    "manageAccounts": "Kelola Akun",
+    "create": {
+      "title": "Tambah Akun Baru",
+      "description": "Buat akun baru untuk melacak transaksi Anda.",
+      "name": "Nama",
+      "type": "Jenis",
+      "currency": "Mata Uang",
+      "initialBalance": "Saldo Awal",
+      "namePlaceholder": "mis., BCA Tabungan",
+      "balancePlaceholder": "0,00",
+      "cancel": "Batal",
+      "createAccount": "Buat Akun"
+    },
+    "edit": {
+      "title": "Edit Akun",
+      "description": "Perbarui informasi akun.",
+      "name": "Nama",
+      "type": "Jenis",
+      "currency": "Mata Uang",
+      "namePlaceholder": "Nama akun",
+      "cancel": "Batal",
+      "updateAccount": "Perbarui Akun"
+    },
+    "delete": {
+      "title": "Hapus Akun",
+      "description": "Apakah Anda yakin ingin menghapus \"{name}\"? Tindakan ini tidak dapat dibatalkan.",
+      "defaultWarning": "Ini adalah akun default Anda dan tidak dapat dihapus.",
+      "cancel": "Batal",
+      "deleteAccount": "Hapus Akun"
+    },
+    "accountTypes": {
+      "bank": "Bank",
+      "creditCard": "Kartu Kredit",
+      "cash": "Tunai",
+      "investment": "Investasi",
+      "other": "Lainnya",
+      "property": "Properti",
+      "vehicle": "Kendaraan",
+      "mortgage": "KPR / Kredit Properti", "digitalWallet": "Dompet Digital"
+    },
+    "groups": {
+      "savingsInvestment": "Tabungan & Investasi",
+      "assets": "Aset",
+      "liabilities": "Kewajiban",
+      "other": "Lainnya"
+    },
+    "assetDetails": {
+      "propertyType": "Tipe Properti",
+      "propertyTypePlaceholder": "Pilih tipe properti",
+      "propertyTypes": {
+        "house": "Rumah",
+        "apartment": "Apartemen",
+        "land": "Tanah"
+      },
+      "location": "Lokasi (opsional)",
+      "locationPlaceholder": "mis., Jakarta Selatan",
+      "depreciationRate": "Penyusutan Tahunan (%)",
+      "depreciationRatePlaceholder": "15",
+      "depreciationRateHint": "Default 15% per tahun",
+      "monthlyPayment": "Cicilan Bulanan",
+      "monthlyPaymentPlaceholder": "mis., 3500000",
+      "mortgageEndDate": "Bulan Pelunasan",
+      "mortgageEndDateHint": "Bulan dan tahun cicilan terakhir Anda",
+      "balanceHint": {
+        "property": "Masukkan estimasi nilai properti saat ini",
+        "vehicle": "Masukkan estimasi nilai kendaraan saat ini",
+        "mortgage": "Masukkan sisa pokok pinjaman KPR"
+      }
+    }
+  },
+  "accountDetail": {
+    "backToAccounts": "Kembali ke Akun",
+    "tabs": {
+      "overview": "Ringkasan",
+      "transactions": "Transaksi"
+    },
+    "details": {
+      "title": "Detail Akun",
+      "accountType": "Jenis Akun",
+      "currency": "Mata Uang",
+      "initialBalance": "Saldo Awal",
+      "currentBalance": "Saldo Saat Ini",
+      "status": "Status",
+      "active": "Aktif",
+      "inactive": "Tidak Aktif",
+      "descriptionLabel": "Deskripsi"
+    },
+    "default": "Default",
+    "actions": {
+      "edit": "Edit",
+      "export": "Ekspor",
+      "adjust": "Sesuaikan",
+      "delete": "Hapus"
+    },
+    "editDialog": {
+      "title": "Edit Akun",
+      "subtitle": "Buat perubahan pada detail akun Anda di sini.",
+      "name": "Nama",
+      "type": "Jenis",
+      "balance": "Saldo",
+      "currency": "Mata Uang",
+      "amount": "Jumlah",
+      "currencyChangedNote": "Mata uang diubah dari {from} ke {to}. Bagaimana Anda ingin menangani saldo?",
+      "keepValue": "Pertahankan nilai numerik yang sama ({balance} {currency})",
+      "convertAmount": "Konversi jumlah (segera hadir)",
+      "descriptionLabel": "Deskripsi",
+      "descriptionPlaceholder": "Deskripsi opsional",
+      "selectAccountType": "Pilih jenis akun",
+      "selectCurrency": "Pilih mata uang",
+      "cancel": "Batal",
+      "saveChanges": "Simpan perubahan"
+    },
+    "deleteDialog": {
+      "title": "Hapus Akun",
+      "description": "Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak dapat dibatalkan.",
+      "cancel": "Batal",
+      "delete": "Hapus"
+    },
+    "adjustDialog": {
+      "title": "Sesuaikan Saldo",
+      "subtitle": "Tetapkan saldo terkini yang benar. Transaksi Anda yang ada tidak akan berubah.",
+      "currentBalance": "Saldo Saat Ini",
+      "newBalance": "Saldo Baru",
+      "date": "Tanggal",
+      "note": "Catatan",
+      "notePlaceholder": "mis. Rekonsiliasi rekening koran",
+      "adjustment": "Penyesuaian",
+      "cancel": "Batal",
+      "confirm": "Sesuaikan Saldo",
+      "adjusting": "Menyesuaikan..."
+    },
+    "adjustments": {
+      "title": "Riwayat Saldo"
+    },
+    "chart": {
+      "title": "Perubahan Saldo"
+    }
+  },
+  "dashboard": {
+    "netWorth": {
+      "totalNetWorth": "Total Kekayaan Bersih",
+      "noData": "Tidak ada data tersedia",
+      "netWorth": "Kekayaan Bersih",
+      "assets": "Aset",
+      "liabilities": "Kewajiban",
+      "noAssetsRecorded": "Tidak ada aset tercatat",
+      "noLiabilitiesRecorded": "Tidak ada kewajiban tercatat",
+      "added": "Ditambahkan",
+      "recently": "baru-baru ini",
+      "periods": {
+        "allTime": "sepanjang waktu",
+        "lastWeek": "minggu lalu",
+        "lastMonth": "bulan lalu",
+        "last3Months": "3 bulan terakhir",
+        "lastYear": "tahun lalu",
+        "last5Years": "5 tahun terakhir"
+      }
+    },
+    "budget": {
+      "budgetIn": "Anggaran {period}",
+      "failedToLoad": "Gagal memuat anggaran",
+      "noBudgetSet": "Anggaran belum diatur"
+    },
+    "onboarding": {
+      "title": "Selesaikan Pengaturan Anda",
+      "description": "Anda belum menyelesaikan pengaturan MoneyFlow. Selesaikan pengaturan untuk membuka semua fitur.",
+      "features": {
+        "trackExpenses": "Lacak pengeluaran di semua akun",
+        "createBudgets": "Buat anggaran yang bekerja",
+        "understandSpending": "Pahami pengeluaran Anda"
+      },
+      "completeSetup": "Selesaikan Pengaturan",
+      "maybeLater": "Nanti Saja"
+    },
+    "activationBanner": {
+      "ariaLabel": "Daftar aktivasi",
+      "greeting": "Halo, {name} 👋",
+      "greetingFallback": "Halo 👋",
+      "subtitle": "Berikut beberapa hal yang bisa Anda lakukan minggu ini untuk memaksimalkan dasbor Anda.",
+      "title": "Siapkan dasbor",
+      "progress": "{completed} dari {total} selesai · buka wawasan Anda",
+      "dismiss": "Tutup",
+      "steps": {
+        "nextStep": "Langkah berikutnya",
+        "firstExpense": {
+          "title": "Catat pengeluaran pertama",
+          "subtitle": "Mulai melacak pengeluaran",
+          "done": "Selesai"
+        },
+        "categories": {
+          "title": "Tambah 4 lagi minggu ini",
+          "subtitle": "Bangun riwayat Anda",
+          "done": "Selesai"
+        },
+        "firstGoal": {
+          "title": "Buat tujuan pertama",
+          "subtitle": "Darurat, liburan, atau apa pun",
+          "done": "Selesai"
+        },
+        "uploadStatement": {
+          "title": "Unggah rekening koran",
+          "subtitle": "Impor transaksi otomatis",
+          "done": "Selesai"
+        }
+      }
+    },
+    "goals": {
+      "title": "Tujuan Keuangan",
+      "subtitle": "Lacak kemajuan menuju target tabungan Anda",
+      "failedToLoad": "Gagal memuat tujuan keuangan",
+      "emptyTitle": "Mulai Perjalanan Menabung Anda",
+      "emptyDescription": "Tetapkan tujuan keuangan untuk rekening bank dan investasi Anda untuk melacak kemajuan menuju impian Anda.",
+      "setFirstGoal": "Tetapkan Target Pertama Anda",
+      "manageGoals": "Kelola Target",
+      "goalsCount": "Target",
+      "completedCount": "Selesai",
+      "target": "Target"
+    }
+  },
+  "forecast": {
+    "tabs": {
+      "netWorth": "Kekayaan Bersih",
+      "cashFlow": "Arus Kas",
+      "simulation": "Simulasi"
+    },
+    "addEventsCustomize": "Tambah peristiwa atau sesuaikan",
+    "summary": "Ringkasan",
+    "chart": {
+      "currentNetWorth": "Kekayaan bersih saat ini",
+      "futureNetWorthAt": "Kekayaan bersih di masa depan pada {age}",
+      "netWorth": "Kekayaan Bersih",
+      "eventCost": "Biaya peristiwa",
+      "topRange": "Rentang atas",
+      "midRange": "Rentang tengah",
+      "median": "Median",
+      "bottomRange": "Rentang bawah",
+      "income": "Pemasukan",
+      "expense": "Pengeluaran",
+      "computing": "Menghitung proyeksi...",
+      "noProjection": "Tidak ada proyeksi",
+      "preRetire": "Sebelum pensiun",
+      "postRetire": "Setelah pensiun",
+      "average": "Rata-rata",
+      "avgPerYear": "{amount} rata-rata/tahun",
+      "chanceOfSuccess": "Peluang keberhasilan",
+      "medianNetWorthAt": "Median kekayaan bersih pada {age}",
+      "avgProjectedReturn": "Rata-rata proyeksi imbal hasil tahunan",
+      "successDescriptionHigh": "Setelah memperhitungkan peristiwa Anda, Anda mencapai atau melampaui target kekayaan bersih di {rate}% simulasi.",
+      "successDescriptionLow": "Setelah memperhitungkan peristiwa Anda, Anda mungkin tidak mencapai target kekayaan bersih di {rate}% simulasi.",
+      "medianDescription": "Sebagian besar hasil terkonsentrasi di sekitar {amount}, sebagai hasil median.",
+      "returnDescription": "Diproyeksikan tumbuh {rate}% per tahun selama {years} tahun, disesuaikan dengan inflasi.",
+      "today": "HARI INI",
+      "yearN": "TAHUN {n}"
+    },
+    "insights": {
+      "lowSuccess": "Kurang dari setengah simulasi berakhir {targetLabel}. Tinjau asumsi imbal hasil atau tambah kontribusi.",
+      "highSuccess": "Prakiraan kuat: 90%+ simulasi berakhir {targetLabel} pada horizon.",
+      "belowToday": "Proyeksi median kekayaan berakhir di bawah hari ini. Pertimbangkan menambah kontribusi atau mengurangi penarikan.",
+      "negativeCashflowMonths": "Arus kas median negatif (sampel {months} bulan) menghambat prakiraan.",
+      "negativeCashflow": "Rata-rata arus kas negatif menghambat prakiraan.",
+      "highVolatility": "Volatilitas tinggi meningkatkan risiko penurunan. Seimbangkan alokasi untuk menghaluskan imbal hasil.",
+      "onTrack": "Skenario berjalan sesuai rencana. Terus pantau kontribusi dan sesuaikan jika tujuan berubah.",
+      "targetAbove": "di atas target ({amount})",
+      "targetPositive": "positif"
+    },
+    "customize": {
+      "title": "Sesuaikan Prakiraan",
+      "description": "Tambahkan peristiwa hidup dan sesuaikan pengaturan skenario.",
+      "tabEvents": "Peristiwa Hidup",
+      "tabSettings": "Pengaturan"
+    },
+    "categories": {
+      "PROPERTY": { "label": "Properti", "template": "Beli rumah" },
+      "WEDDING": { "label": "Pernikahan", "template": "Rencanakan pernikahan" },
+      "KIDS": { "label": "Anak", "template": "Punya anak" },
+      "EDUCATION": { "label": "Pendidikan", "template": "Tabungan kuliah" },
+      "HAJJ": { "label": "Haji", "template": "Ibadah haji" },
+      "VEHICLE": { "label": "Kendaraan", "template": "Beli kendaraan" },
+      "RETIREMENT": { "label": "Pensiun", "template": "Rencanakan pensiun" },
+      "OTHER": { "label": "Lainnya", "template": "Peristiwa kustom" }
+    },
+    "events": {
+      "yourEvents": "Peristiwa Anda",
+      "addEvent": "Tambah peristiwa",
+      "eventTitle": "Judul peristiwa",
+      "year": "Tahun",
+      "purchaseYear": "Tahun pembelian",
+      "homePrice": "Harga rumah",
+      "vehiclePrice": "Harga kendaraan",
+      "paymentType": "Jenis pembayaran",
+      "loan": "Kredit",
+      "cash": "Tunai",
+      "downPayment": "Uang muka (%)",
+      "loanTerm": "Jangka waktu kredit",
+      "years": "{n} tahun",
+      "interestRate": "Suku bunga (%)",
+      "estMonthlyPayment": "Estimasi cicilan bulanan",
+      "totalCost": "Total biaya",
+      "annualCost": "Biaya tahunan",
+      "annualCostHint": "Estimasi biaya tahunan membesarkan anak.",
+      "untilAge": "Hingga usia",
+      "annualTuition": "Biaya kuliah tahunan",
+      "duration": "Durasi (tahun)",
+      "recurring": "Berulang",
+      "numberOfYears": "Jumlah tahun",
+      "save": "Simpan",
+      "saving": "Menyimpan..."
+    },
+    "settings": {
+      "scenarioSection": "Skenario",
+      "scenarioSectionDescription": "Pilih skenario untuk diedit atau buat yang baru.",
+      "scenarioActions": "Aksi skenario",
+      "newScenario": "Skenario baru",
+      "duplicate": "Duplikat",
+      "delete": "Hapus",
+      "details": "Detail",
+      "name": "Nama",
+      "description": "Deskripsi",
+      "timelineGoal": "Waktu & target",
+      "startDate": "Tanggal Mulai",
+      "horizonYears": "Horizon (tahun)",
+      "targetNetWorth": "Target Kekayaan Bersih",
+      "targetHint": "Tingkat keberhasilan mengukur persentase simulasi yang berakhir di atas nilai ini.",
+      "marketAssumptions": "Asumsi pasar",
+      "marketAssumptionsDescription": "Imbal hasil, risiko, dan inflasi menggerakkan proyeksi.",
+      "annualReturn": "Imbal Hasil Tahunan",
+      "volatility": "Volatilitas",
+      "inflation": "Inflasi",
+      "useHistoricalCagr": "Gunakan CAGR historis Anda: {value}%",
+      "cashflow": "Arus Kas",
+      "cashflowDescription": "Pemasukan dan pengeluaran bulanan yang menjadi dasar prakiraan.",
+      "monthlyIncome": "Pemasukan Bulanan",
+      "monthlyExpenses": "Pengeluaran Bulanan",
+      "cashflowGrowthHint": "Pemasukan tumbuh dengan inflasi ditambah imbal hasil; pengeluaran hanya tumbuh dengan inflasi.",
+      "useActualCashflow": "Gunakan arus kas aktual",
+      "cashflowFromMonths": "Median dari {months} bulan: {amount}/bulan",
+      "cashflowFallback": "Menggunakan median arus kas bersih bulanan dari transaksi terbaru.",
+      "options": "Opsi",
+      "defaultScenario": "Skenario default",
+      "defaultScenarioHint": "Jadikan skenario ini sebagai default pada halaman prakiraan.",
+      "selectScenario": "Pilih skenario",
+      "saveScenario": "Simpan Skenario",
+      "saving": "Menyimpan..."
+    },
+    "simulationTable": {
+      "title": "Tabel Simulasi Prakiraan",
+      "description": "Rincian tahunan pemasukan, pengeluaran, peristiwa, dan pertumbuhan kekayaan bersih.",
+      "startingNetWorth": "Kekayaan Bersih Awal",
+      "annualReturn": "Imbal Hasil Tahunan",
+      "inflationRate": "Tingkat Inflasi",
+      "nominalMonthlyRate": "Tingkat Bulanan Nominal",
+      "year1Income": "Pemasukan Tahun 1",
+      "year1Expense": "Pengeluaran Tahun 1",
+      "retirementYear": "Tahun Pensiun",
+      "events": "Peristiwa",
+      "eventsCount": "{count} peristiwa",
+      "none": "Tidak ada",
+      "columnYear": "Tahun",
+      "columnInflation": "Inflasi ×",
+      "columnIncome": "Pemasukan",
+      "columnExpense": "Pengeluaran",
+      "columnEventsLabel": "Peristiwa",
+      "columnNetCashflow": "Arus Kas Bersih",
+      "columnStartNW": "KB Awal",
+      "columnReturn": "Imbal ({rate}%)",
+      "columnEndNW": "KB Akhir",
+      "retire": "(pensiun)"
+    }
+  },
+  "pwa": {
+    "updateAvailable": "Versi baru tersedia",
+    "reload": "Muat ulang",
+    "installTitle": "Instal Teman Tumbuh untuk akses cepat.",
+    "install": "Instal",
+    "dismiss": "Tutup"
+  },
+  "accountCreate": {
+    "typeSelect": {
+      "title": "Tambah Akun",
+      "choose": "Pilih jenis akun",
+      "close": "Tutup",
+      "types": {
+        "bank": "Rekening Bank",
+        "digitalWallet": "Dompet Digital",
+        "property": "Properti",
+        "vehicle": "Kendaraan",
+        "creditCard": "Kartu Kredit",
+        "investment": "Akun Investasi"
+      }
+    },
+    "common": { "save": "Simpan", "back": "Kembali" },
+    "bank": {
+      "title": "Bank / Dompet",
+      "segBank": "Rekening Bank",
+      "segWallet": "Dompet Digital",
+      "nameLabel": "Nama Akun",
+      "namePlaceholder": "mis. Tabungan BCA",
+      "walletPlaceholder": "mis. GoPay",
+      "balanceLabel": "Saldo Awal",
+      "submit": "Tambah Akun"
+    },
+    "property": {
+      "title": "Aset Properti",
+      "nameLabel": "Nama Properti",
+      "namePlaceholder": "mis. Rumah — Depok",
+      "valueLabel": "Nilai Saat Ini",
+      "purchaseDateLabel": "Tanggal Pembelian",
+      "mortgage": "Detail KPR",
+      "downPayment": "Uang Muka",
+      "interestRate": "Suku Bunga (%/tahun)",
+      "monthlyPayment": "Angsuran Bulanan",
+      "loanTermYears": "Tenor (tahun)",
+      "submit": "Tambah Properti"
+    },
+    "vehicle": {
+      "title": "Aset Kendaraan",
+      "segCar": "Mobil",
+      "segMotorcycle": "Motor",
+      "segTruck": "Truk",
+      "nameLabel": "Nama Kendaraan",
+      "namePlaceholder": "mis. Honda HR-V 2021",
+      "priceLabel": "Harga Beli",
+      "depreciationLabel": "Tingkat Depresiasi (%/tahun)",
+      "submit": "Tambah Kendaraan"
+    },
+    "creditCard": {
+      "title": "Kartu Kredit",
+      "nameLabel": "Nama Kartu",
+      "namePlaceholder": "mis. BCA Platinum",
+      "limitLabel": "Limit Kredit",
+      "statementLabel": "Tanggal Cetak Tagihan (hari)",
+      "dueLabel": "Tanggal Jatuh Tempo (hari)",
+      "info": "Pengeluaran dicatat sebagai expense. Saldo menunjukkan sisa limit kredit.",
+      "submit": "Tambah Kartu Kredit"
+    },
+    "investment": {
+      "title": "Akun Investasi",
+      "nameLabel": "Nama Akun",
+      "namePlaceholder": "mis. Stockbit — Growth",
+      "brokerLabel": "Broker",
+      "brokerPlaceholder": "mis. Stockbit, Bibit, IPOT",
+      "info": "Portofolio dibuat setelah setup. Tambahkan saham, obligasi, dan reksa dana dari halaman akun.",
+      "goalLabel": "Tujuan Investasi",
+      "optional": "Opsional",
+      "goalPlaceholder": "atau tulis tujuanmu sendiri…",
+      "goals": {
+        "capitalGain": "Capital Gain",
+        "dividend": "Investasi Dividen",
+        "education": "Tabungan Sekolah Anak",
+        "retirement": "Tabungan Pensiun"
+      },
+      "submit": "Buat Akun"
+    },
+    "success": {
+      "title": "Akun dibuat!",
+      "typeLabels": {
+        "BANK": "Rekening Bank",
+        "DIGITAL_WALLET": "Dompet Digital",
+        "PROPERTY": "Properti",
+        "VEHICLE": "Kendaraan",
+        "CREDIT_CARD": "Kartu Kredit",
+        "INVESTMENT": "Akun Investasi"
+      },
+      "investmentInfo": "Sudah ada di tab Portofolio. Tambahkan aset yang kamu miliki untuk mulai melacak.",
+      "addAsset": "+ Tambah aset pertamamu",
+      "viewPortfolio": "Nanti saja — lihat portofolio",
+      "backToWallets": "Kembali ke Dompet",
+      "mortgageCreated": "KPR tertaut ditambahkan ke Pinjaman & KPR."
+    },
+    "errors": {
+      "nameRequired": "Nama wajib diisi",
+      "brokerRequired": "Broker wajib diisi",
+      "amountInvalid": "Masukkan jumlah yang valid",
+      "dayRange": "Masukkan hari antara 1 dan 31",
+      "dateRequired": "Pilih tanggal",
+      "mortgageIncomplete": "Lengkapi semua kolom KPR",
+      "downPaymentTooLarge": "Uang muka harus lebih kecil dari nilai",
+      "termInvalid": "Masukkan tenor yang valid",
+      "createFailed": "Gagal membuat akun. Coba lagi.",
+      "mortgageRolledBack": "KPR gagal — properti tidak disimpan. Coba lagi."
+    }
+  },
+  "wallets": {
+    "title": "Dompet & Akun",
+    "subtitle": "{accounts} akun · {liabilities} liabilitas",
+    "add": "Tambah",
+    "netWorth": {
+      "label": "Kekayaan Bersih",
+      "assets": "Aset",
+      "liabilities": "Liabilitas"
+    },
+    "groups": {
+      "bank": "Rekening Bank",
+      "digitalWallets": "Dompet Digital",
+      "assets": "Aset",
+      "cashOther": "Tunai & Lainnya",
+      "loans": "Pinjaman & KPR"
+    },
+    "empty": "Belum ada akun — tambahkan yang pertama."
+  },
+  "budgetCreate": {
+    "createTitle": "Buat Anggaran",
+    "editTitle": "Ubah Anggaran",
+    "stepOf": "{step} dari {total}",
+    "periodType": { "monthly": "Bulanan", "monthlyHint": "Atur batas per kategori tiap bulan", "yearly": "Tahunan", "yearlyHint": "Rencanakan pengeluaran besar tahunan" },
+    "income": "Pemasukan periode ini: {amount}",
+    "lockedTitle": "Anggaran bulanan (terkunci)",
+    "lockedBanner": "Kategori tahunan tidak boleh tumpang tindih dengan anggaran bulanan",
+    "annualIncome": "Pendapatan tahunan ≈ {amount}",
+    "ofYearlyIncome": "{pct}% dari pendapatan tahunan",
+    "lockedCount": "{count} terkunci",
+    "yearlyPreview": {
+      "heroLabel": "Anggaran Tahunan · {year}",
+      "monthlyTotal": "Total bulanan",
+      "timesTwelve": "{amount} × 12",
+      "yearlyOnly": "Tahunan saja",
+      "grandTotal": "Total keseluruhan",
+      "splitTitle": "Pembagian jenis anggaran",
+      "monthlyRecurring": "Berulang bulanan",
+      "perMonth": "{amount} / bln",
+      "yearlyOneTime": "Sekali setahun",
+      "perYear": "{amount} / thn",
+      "categoriesTitle": "Kategori tahunan",
+      "save": "Simpan Anggaran Tahunan"
+    },
+    "yearlyAmounts": {
+      "available": "Tersedia untuk anggaran tahunan",
+      "categoryCount": "{count} kategori",
+      "selectedCount": "{selected} dari {total} kategori dipilih",
+      "yearlyTotal": "{amount} per tahun"
+    },
+    "startFrom": {
+      "title": "Mulai dari",
+      "copy": "Salin dari periode lalu",
+      "copyHint": "Belum ada anggaran sebelumnya",
+      "template": "Pakai template",
+      "templateHint": "50/30/20, Konservatif, Seimbang",
+      "scratch": "Mulai dari awal",
+      "scratchHint": "Atur tiap kategori manual"
+    },
+    "next": "Atur Jumlah Kategori",
+    "amounts": {
+      "suggestToggle": "Jumlah yang disarankan",
+      "suggested": "Saran {amount}",
+      "addCategory": "Tambah kategori lain",
+      "remove": "Hapus {name}",
+      "total": "Total anggaran",
+      "pickCategory": "Tambah kategori",
+      "preview": "Pratinjau Anggaran"
+    },
+    "preview": {
+      "income": "Pemasukan",
+      "budgeted": "Dianggarkan",
+      "savings": "Tabungan",
+      "breakdown": "Rincian kategori",
+      "ofIncome": "{pct}% dari pemasukan",
+      "save": "Simpan Anggaran"
+    },
+    "created": { "title": "Anggaran dibuat!", "cta": "Kembali ke Anggaran" },
+    "confirm": {
+      "title": "Terapkan perubahan anggaran?",
+      "effect": "Perubahan langsung berlaku untuk periode ini. Bulan-bulan sebelumnya tidak terpengaruh.",
+      "cancel": "Batal",
+      "apply": "Terapkan"
+    },
+    "applyChanges": "Terapkan Perubahan",
+    "noChanges": "Belum ada perubahan",
+    "monthlyLabel": "{month} · Anggaran Bulanan",
+    "yearlyLabel": "{year} · Anggaran Tahunan",
+    "errors": { "loadFailed": "Gagal memuat. Coba lagi.", "saveFailed": "Gagal menyimpan anggaran. Coba lagi.", "totalRequired": "Alokasikan minimal satu kategori" }
+  },
+  "budgetTab": {
+    "error": "Gagal memuat anggaran periode ini. Coba lagi.",
+    "retry": "Coba lagi",
+    "title": "Anggaran",
+    "prevPeriod": "Periode sebelumnya",
+    "nextPeriod": "Periode berikutnya",
+    "monthly": "Bulanan",
+    "yearly": "Tahunan",
+    "overview": {
+      "title": "Ringkasan",
+      "edit": "Ubah",
+      "budget": "Anggaran",
+      "spent": "Terpakai",
+      "left": "Sisa",
+      "used": "{pct}%"
+    },
+    "categories": {
+      "title": "Anggaran Kategori",
+      "add": "Tambah",
+      "over": "Lebih",
+      "spentSub": "{amount} terpakai",
+      "empty": "Belum ada anggaran kategori di periode ini."
+    },
+    "empty": {
+      "title": "Belum ada anggaran",
+      "description": "Atur batas pengeluaran per kategori dan pantau perkembangannya.",
+      "cta": "Buat anggaran"
+    }
+  },
+  "home": {
+    "greeting": {
+      "morning": "Selamat pagi 👋",
+      "afternoon": "Selamat siang 👋",
+      "evening": "Selamat malam 👋"
+    },
+    "today": { "title": "Hari ini, {date}", "logged": "{count} tercatat" },
+    "hero": {
+      "totalNetWorth": "Total Kekayaan Bersih",
+      "thisMonth": "{pct}% bulan ini",
+      "legendNetWorth": "Kekayaan bersih",
+      "legendSpending": "Pengeluaran bulanan",
+      "income": "Pemasukan",
+      "expenses": "Pengeluaran",
+      "saved": "Tersimpan"
+    },
+    "accounts": {
+      "title": "Akun Saya",
+      "seeAll": "Lihat semua →",
+      "assets": "Aset",
+      "liabilities": "Liabilitas",
+      "accountsCount": "{count} akun",
+      "loansCount": "{count} pinjaman",
+      "more": "+{count} lagi"
+    },
+    "budget": {
+      "title": "Anggaran {month}",
+      "viewAll": "Lihat semua →",
+      "onTrack": "Sesuai rencana",
+      "overBudget": "Melebihi anggaran",
+      "of": "dari {amount}",
+      "used": "{pct}% terpakai",
+      "left": "Sisa {amount}",
+      "noBudget": "Belum ada anggaran untuk bulan ini."
+    },
+    "goals": {
+      "title": "Target Keuangan",
+      "viewAll": "Lihat semua →",
+      "of": "{current} dari {target}"
+    },
+    "upcoming": {
+      "title": "Mendatang",
+      "subtitle": "Tanggal dengan pembayaran terjadwal",
+      "empty": "Tidak ada pembayaran terjadwal dalam 30 hari ke depan."
+    },
+    "biggest": {
+      "title": "Terbesar Bulan Ini",
+      "seeAll": "Lihat semua →",
+      "empty": "Belum ada pengeluaran tercatat bulan ini."
+    }
+  },
+  "portfolio": {
+    "title": "Portofolio",
+    "newAccount": "Akun Baru",
+    "hero": { "totalValue": "Total Nilai Portofolio", "assets": "{count} aset" },
+    "accounts": { "title": "Akun Investasi", "seeAll": "Lihat semua →", "holdings": "{count} aset", "empty": "Belum ada akun investasi." },
+    "allocation": { "title": "Alokasi Aset" },
+    "top": { "title": "Aset Terbesar", "empty": "Belum ada aset — tambahkan ke akun investasi." },
+    "class": { "IDX_STOCK": "Saham IDX", "US_STOCK": "Saham AS", "MUTUAL_FUND": "Reksa Dana", "ETF": "ETF", "BOND": "Obligasi", "OTHER": "Lainnya" },
+    "classHint": { "IDX_STOCK": "Saham Indonesia di IDX", "US_STOCK": "Terdaftar NYSE & NASDAQ", "MUTUAL_FUND": "Reksa dana terkelola", "ETF": "Dana yang diperdagangkan di bursa", "BOND": "Obligasi pemerintah & korporasi", "OTHER": "Lainnya" },
+    "detail": { "investmentAccount": "Akun Investasi", "addAsset": "Tambah Aset", "back": "Kembali", "emptyTitle": "Belum ada aset", "emptyDescription": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:", "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis." },
+    "manage": { "edit": "Ubah", "remove": "Hapus dari portofolio", "currentValue": "Nilai saat ini", "cancel": "Batal", "save": "Simpan", "removeWarning": "Ini menghapus aset dan riwayatnya. Saldo akun akan diperbarui.", "confirmRemove": "Hapus", "saveFailed": "Gagal memperbarui aset.", "deleteFailed": "Gagal menghapus aset." },
+    "emptyCta": "Buat akun investasi"
+  },
+  "holdingCreate": {
+    "selectTitle": "Tambah Investasi",
+    "selectPrompt": "Jenis aset apa?",
+    "selectSubtitle": "Pilih kelas aset untuk portofoliomu",
+    "close": "Tutup",
+    "back": "Kembali",
+    "save": "Simpan",
+    "titleFor": "Tambah {class}",
+    "tickerLabel": "Saham / Ticker",
+    "tickerPlaceholder": "mis. BBCA",
+    "lotsLabel": "Jumlah Lot",
+    "lotsHelper": "1 lot = 100 lembar",
+    "unitsLabel": "Unit",
+    "priceLabel": "Harga Beli / Unit",
+    "dateLabel": "Tanggal Beli",
+    "estimatedTotal": "Estimasi Total",
+    "submit": "Tambah ke Portofolio",
+    "errors": { "tickerRequired": "Masukkan ticker", "amountInvalid": "Masukkan jumlah yang valid", "createFailed": "Gagal menambah aset. Coba lagi." }
+  }
+}

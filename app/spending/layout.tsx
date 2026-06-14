@@ -1,6 +1,5 @@
 'use client'
 
-import { TransactionProvider } from '@/contexts/TransactionContext'
 import { BudgetProvider } from '@/contexts/BudgetContext'
 
 export default function SpendingLayout({
@@ -10,9 +9,7 @@ export default function SpendingLayout({
 }) {
   return (
     <BudgetProvider>
-      <TransactionProvider>
-        {children}
-      </TransactionProvider>
+      {children}
     </BudgetProvider>
   )
 }

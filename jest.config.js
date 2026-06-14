@@ -14,7 +14,7 @@ module.exports = {
     '^.+\\.(js|jsx)$': ['babel-jest', { presets: ['next/babel'] }]
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(isows|@supabase)/)'
+    'node_modules/(?!(isows|@supabase|uuid|date-fns)/)'
   ],
   testMatch: [
     '**/__tests__/**/*.test.ts',
@@ -22,4 +22,7 @@ module.exports = {
     '**/?(*.)+(spec|test).ts',
     '**/?(*.)+(spec|test).tsx'
   ],
+  testPathIgnorePatterns: [
+    '<rootDir>/__tests__/e2e/'
+  ]
 }

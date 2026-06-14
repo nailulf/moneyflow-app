@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@/components/ui/atoms/button'
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/organisms/sheet'
+import { Input } from '@/components/ui/atoms/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/molecules/select'
+import { Label } from '@/components/ui/atoms/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
+import { Badge } from '@/components/ui/atoms/badge'
+import { Separator } from '@/components/ui/atoms/separator'
 import { Plus, Trash2, Save, X } from 'lucide-react'
 import { formatCurrency } from '@/lib/data-utils'
 import { useCategories } from '@/contexts/CategoryContext'
@@ -17,6 +17,7 @@ import { toast } from 'sonner'
 import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
 import { fromExistingBudgetData, toDatabase } from '@/lib/budget-allocation'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface BudgetCategory {
   id: string
@@ -43,6 +44,7 @@ interface BudgetEditSheetProps {
 }
 
 export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetEditSheetProps) {
+  const isMobile = useIsMobile()
   const [editForm, setEditForm] = useState<BudgetEditData>({
     id: '',
     name: '',
@@ -443,19 +445,20 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Edit Budget</SheetTitle>
-          <SheetDescription>
-            Modify your budget breakdown and category allocations
-          </SheetDescription>
-        </SheetHeader>
+      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'max-h-[95dvh] rounded-t-2xl w-full p-0 overflow-hidden' : 'w-full sm:max-w-2xl'}>
+        <div className="flex h-full flex-col">
+          <SheetHeader>
+            <SheetTitle>Edit Budget</SheetTitle>
+            <SheetDescription>
+              Modify your budget breakdown and category allocations
+            </SheetDescription>
+          </SheetHeader>
 
-        <div className="mt-6 space-y-6">
+          <div className="flex-1 overflow-y-auto px-4 pb-4 pt-4 space-y-6">
           {/* Budget Basic Info */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Budget Details</CardTitle>
+              <CardTitle className="text-lg leading-title-5">Budget Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -490,11 +493,11 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                   maxLength={50}
                 />
                 {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name}</p>
+                  <p className="text-sm leading-body-sm text-destructive">{errors.name}</p>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="budget-period">Period</Label>
                   <Select
@@ -517,7 +520,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                   <Label htmlFor="total-amount">Total Budget Amount</Label>
                   <Input
                     id="total-amount"
-                    type="number"
+                    type="amount"
                     value={editForm.totalAmount || ''}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0
@@ -557,25 +560,25 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                     step="0.01"
                   />
                   {errors.totalAmount && (
-                    <p className="text-sm text-destructive">{errors.totalAmount}</p>
+                    <p className="text-sm leading-body-sm text-destructive">{errors.totalAmount}</p>
                   )}
                 </div>
               </div>
 
               {/* Budget Summary */}
               <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm leading-body-sm">
                   <span>Total Budget:</span>
                   <span className="font-medium">{formatCurrency(editForm.totalAmount)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm leading-body-sm">
                   <span>Total Allocated:</span>
                   <span className={`font-medium ${isOverAllocated ? 'text-destructive' : 'text-foreground'}`}>
                     {formatCurrency(totalAllocated)}
                   </span>
                 </div>
                 <Separator />
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm leading-body-sm">
                   <span>Remaining:</span>
                   <span className={`font-medium ${isOverAllocated ? 'text-destructive' : 'text-success'}`}>
                     {formatCurrency(remainingBudget)}
@@ -599,8 +602,8 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
           <Card>
             <CardHeader>
               <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                <CardTitle className="text-lg">Category Allocations</CardTitle>
-                <div className="flex w-full sm:w-auto items-center space-x-2">
+                <CardTitle className="text-lg leading-title-5">Category Allocations</CardTitle>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:space-x-2">
                   <Select
                     value={selectedAddCategoryId}
                     onValueChange={setSelectedAddCategoryId}
@@ -631,6 +634,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                     size="sm"
                     disabled={!selectedAddCategoryId || isLoading}
                     title={!selectedAddCategoryId ? 'Select a category first' : 'Add selected category'}
+                    className="h-11 sm:h-10"
                   >
                     <Plus className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Add</span>
@@ -638,14 +642,14 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                 </div>
               </div>
               {errors.categories && (
-                <p className="text-sm text-destructive">{errors.categories}</p>
+                <p className="text-sm leading-body-sm text-destructive">{errors.categories}</p>
               )}
             </CardHeader>
             <CardContent className="space-y-4">
               {editForm.categories.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>No categories added yet</p>
-                  <p className="text-sm">Click "Add Category" to get started</p>
+                  <p className="text-sm leading-body-sm">Click &quot;Add Category&quot; to get started</p>
                 </div>
               ) : (
                 editForm.categories.map((category, index) => (
@@ -666,7 +670,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                           onClick={() => removeCategory(index)}
                           size="sm"
                           variant="ghost"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="h-11 w-11 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 sm:h-8 sm:w-8"
                           disabled={isLoading}
                           title="Remove this category"
                           aria-label={`Remove ${category.category} category`}
@@ -679,7 +683,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                     <div className="space-y-2">
                       <Label>Budget Amount</Label>
                       <Input
-                        type="number"
+                        type="amount"
                         value={category.budgetAmount || ''}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value) || 0
@@ -718,10 +722,10 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
                         title={category.category === 'Others' ? 'Others category is automatically calculated' : ''}
                       />
                       {errors[`category-${index}`] && (
-                        <p className="text-sm text-destructive">{errors[`category-${index}`]}</p>
+                        <p className="text-sm leading-body-sm text-destructive">{errors[`category-${index}`]}</p>
                       )}
                       {category.category === 'Others' && (
-                        <p className="text-xs text-muted-foreground">This amount is automatically calculated from unallocated budget</p>
+                        <p className="text-xs leading-caption text-muted-foreground">This amount is automatically calculated from unallocated budget</p>
                       )}
                     </div>
                   </div>
@@ -739,8 +743,8 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t">
+          </div>
+          <SheetFooter className="border-t p-4 safe-area-inset-bottom">
             <Button
               onClick={handleCancel}
               variant="outline"
@@ -757,7 +761,7 @@ export function BudgetEditSheet({ isOpen, onClose, budgetData, onSave }: BudgetE
               <Save className="h-4 w-4 mr-2" />
               {isLoading ? 'Saving...' : 'Save Changes'}
             </Button>
-          </div>
+          </SheetFooter>
         </div>
       </SheetContent>
     </Sheet>

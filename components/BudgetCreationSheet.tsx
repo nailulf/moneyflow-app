@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
+import { Button } from '@/components/ui/atoms/button'
+import { Input } from '@/components/ui/atoms/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/molecules/select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
+import { Badge } from '@/components/ui/atoms/badge'
 import { Trash2, Plus, Calendar, DollarSign, Target } from 'lucide-react'
 import { toast } from 'sonner'
 import { CategoryDB } from '@/types/database'
@@ -15,6 +15,7 @@ import { preferences } from '@/lib/api/user-preferences'
 import { useBudgetAllocation } from '@/hooks/useBudgetAllocation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Analytics } from '@/lib/analytics/amplitude'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface BudgetCategory {
   category_id: string
@@ -72,6 +73,7 @@ const YEARS = Array.from({ length: 5 }, (_, i) => CURRENT_YEAR + i)
 
 export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categories }: BudgetCreationModalProps) {
   const { user } = useAuth()
+  const isMobile = useIsMobile()
   const userId = user?.id || ''
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
@@ -374,18 +376,17 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
-         <SheetHeader>
-           <SheetTitle className="flex items-center gap-2">
-             <Target className="h-5 w-5" />
-             Create New Budget
-           </SheetTitle>
-         </SheetHeader>
-         <div className="mt-6 overflow-y-auto max-h-[calc(100vh-120px)]">
-
-        {step === 1 && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+      <SheetContent side={isMobile ? 'bottom' : 'right'} className={isMobile ? 'rounded-t-2xl overflow-hidden' : 'w-full sm:max-w-2xl'}>
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Create New Budget
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-4 pt-4">
+            {step === 1 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <div className="text-sm font-medium text-foreground">Budget Name</div>
                 <Input
@@ -407,9 +408,9 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                   </SelectContent>
                 </Select>
               </div>
-            </div>
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <div className="text-sm font-medium text-foreground">Year</div>
                 <Select value={year.toString()} onValueChange={(value) => setYear(parseInt(value))}>
@@ -438,14 +439,14 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                   </Select>
                 </div>
               )}
-            </div>
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <div className="text-sm font-medium text-foreground">Total Budget Amount</div>
                 <Input
                   id="total-amount"
-                  type="number"
+                  type="amount"
                   placeholder="0.00"
                   value={totalAmount}
                   onChange={(e) => setTotalAmount(e.target.value)}
@@ -463,152 +464,163 @@ export function BudgetCreationModal({ isOpen, onClose, onBudgetCreated, categori
                     <SelectItem value="EUR">EUR (€)</SelectItem>
                     <SelectItem value="GBP">GBP (£)</SelectItem>
                     <SelectItem value="JPY">JPY (¥)</SelectItem>
+                    <SelectItem value="SGD">SGD (S$)</SelectItem>
+                    <SelectItem value="MYR">MYR (RM)</SelectItem>
+                    <SelectItem value="AED">AED (Dhs)</SelectItem>
+                    <SelectItem value="SAR">SAR</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="flex justify-end">
-              <Button
-                onClick={handleProceedToStep2}
-                disabled={!canProceedToStep2()}
-                className="flex items-center gap-2"
-              >
-                Next: Allocate Categories
-                <Calendar className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
-                  Budget Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Total Budget</p>
-                    <p className="font-semibold">{formatCurrency(parseFloat(totalAmount || '0'), currency)}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Allocated</p>
-                    <p className="font-semibold">{formatCurrency(getTotalAllocated(), currency)}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Remaining</p>
-                    <p className={`font-semibold ${getRemainingAmount() < 0 ? 'text-destructive' : 'text-success'}`}>
-                      {formatCurrency(getRemainingAmount(), currency)}
-                    </p>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {getRemainingAmount() < 0 && (
-              <Card className="border-destructive/20 bg-destructive/10">
-                <CardContent className="pt-4">
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-destructive">Validation Error:</p>
-                    <p className="text-sm text-destructive">
-                      Total allocations exceed budget by {formatCurrency(Math.abs(getRemainingAmount()), currency)}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+              </div>
             )}
 
-            <div className="space-y-4">
-              <h3 className="font-semibold">Add Category Allocation</h3>
-              <div className="flex gap-2">
-                <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableCategories.map(category => (
-                      <SelectItem key={category.id} value={category.id}>
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: category.color }}
-                          />
-                          {category.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Input
-                  type="number"
-                  placeholder="Amount"
-                  value={categoryAmount}
-                  onChange={(e) => setCategoryAmount(e.target.value)}
-                  className="w-32"
-                />
-                <Button onClick={handleAddCategory} size="sm">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {budgetCategories.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="font-semibold">Category Allocations</h3>
-                <div className="space-y-2">
-                  {budgetCategories.map((budgetCategory) => (
-                    <div key={budgetCategory.category_id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-4 h-4 rounded-full" 
-                          style={{ backgroundColor: budgetCategory.category?.color || 'hsl(var(--muted-foreground))' }}
-                        />
-                        <span className="font-medium">{budgetCategory.category?.name}</span>
-                        <Badge variant="secondary">
-                          {formatCurrency(budgetCategory.allocated_amount, currency)}
-                        </Badge>
+            {step === 2 && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <DollarSign className="h-5 w-5" />
+                      Budget Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
+                      <div>
+                        <p className="text-muted-foreground">Total Budget</p>
+                        <p className="font-semibold">{formatCurrency(parseFloat(totalAmount || '0'), currency)}</p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveCategory(budgetCategory.category_id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div>
+                        <p className="text-muted-foreground">Allocated</p>
+                        <p className="font-semibold">{formatCurrency(getTotalAllocated(), currency)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Remaining</p>
+                        <p className={`font-semibold ${getRemainingAmount() < 0 ? 'text-destructive' : 'text-success'}`}>
+                          {formatCurrency(getRemainingAmount(), currency)}
+                        </p>
+                      </div>
                     </div>
-                  ))}
+                  </CardContent>
+                </Card>
+
+                {getRemainingAmount() < 0 && (
+                  <Card className="border-destructive/20 bg-destructive/10">
+                    <CardContent className="pt-4">
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-destructive">Validation Error:</p>
+                        <p className="text-sm text-destructive">
+                          Total allocations exceed budget by {formatCurrency(Math.abs(getRemainingAmount()), currency)}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Add Category Allocation</h3>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+                      <SelectTrigger className="w-full sm:flex-1">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableCategories.map(category => (
+                          <SelectItem key={category.id} value={category.id}>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: category.color }}
+                              />
+                              {category.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      type="amount"
+                      placeholder="Amount"
+                      value={categoryAmount}
+                      onChange={(e) => setCategoryAmount(e.target.value)}
+                      className="w-full sm:w-32"
+                    />
+                    <Button onClick={handleAddCategory} className="h-11 sm:h-10 sm:w-auto">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
+
+                {budgetCategories.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="font-semibold">Category Allocations</h3>
+                    <div className="space-y-2">
+                      {budgetCategories.map((budgetCategory) => (
+                        <div key={budgetCategory.category_id} className="flex items-center justify-between gap-3 p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-4 h-4 rounded-full" 
+                              style={{ backgroundColor: budgetCategory.category?.color || 'hsl(var(--muted-foreground))' }}
+                            />
+                            <span className="font-medium">{budgetCategory.category?.name}</span>
+                            <Badge variant="secondary">
+                              {formatCurrency(budgetCategory.allocated_amount, currency)}
+                            </Badge>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveCategory(budgetCategory.category_id)}
+                            className="h-11 w-11 p-0 sm:h-8 sm:w-8"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => {
-                Analytics.track('Budget Creation Back Clicked', {
-                  budget_name: budgetName,
-                  categories_count: budgetCategories.length
-                })
-                setStep(1)
-              }}>
-                Back
-              </Button>
-              <Button 
-                onClick={handleCreateBudget} 
-                disabled={!canCreateBudget() || isLoading}
-                className="flex items-center gap-2"
-              >
-                {isLoading ? 'Creating...' : 'Create Budget'}
-                <Target className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
-        )}
-         </div>
-       </SheetContent>
-     </Sheet>
+          <SheetFooter className="border-t p-4 safe-area-inset-bottom">
+            {step === 1 ? (
+              <>
+                <SheetClose asChild>
+                  <Button variant="outline">Close</Button>
+                </SheetClose>
+                <Button
+                  onClick={handleProceedToStep2}
+                  disabled={!canProceedToStep2()}
+                  className="flex items-center gap-2"
+                >
+                  Next: Allocate Categories
+                  <Calendar className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => {
+                  Analytics.track('Budget Creation Back Clicked', {
+                    budget_name: budgetName,
+                    categories_count: budgetCategories.length
+                  })
+                  setStep(1)
+                }}>
+                  Back
+                </Button>
+                <Button 
+                  onClick={handleCreateBudget} 
+                  disabled={!canCreateBudget() || isLoading}
+                  className="flex items-center gap-2"
+                >
+                  {isLoading ? 'Creating...' : 'Create Budget'}
+                  <Target className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+          </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }

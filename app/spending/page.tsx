@@ -1,16 +1,14 @@
 'use client'
 
 import { SummaryCards } from '@/components/SummaryCards'
-import SpendingVsBudgetChart from '@/components/SpendingVsBudgetChart'
-import { TransactionTable } from '@/components/TransactionTable'
-import { SpendingNavigation } from '@/components/TopNavigation'
+import SpendingVsBudgetChart from '@/components/MonthlySpendingChart'
+import { TransactionTable } from '@/components/features/transaction/TransactionTable'
+import { SpendingNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { useBudgets } from '@/contexts/BudgetContext'
 
 
-import { CategoryManager } from '@/components/CategoryManager'
-import { AccountManager } from '@/components/AccountManager'
 
 
 export default function SpendingPage() {
@@ -27,12 +25,7 @@ export default function SpendingPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation actionButton={
-        <div className="flex items-center gap-2">
-          <CategoryManager />
-          <AccountManager />
-        </div>
-      } />
+      <SpendingNavigation />
       
       <PageLayout>
         <TopContent>

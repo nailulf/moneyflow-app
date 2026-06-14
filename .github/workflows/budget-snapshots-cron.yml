@@ -1,0 +1,61 @@
+name: Generate Budget Snapshots
+
+on:
+  schedule:
+    # Run on the 1st of every month at 00:05 UTC
+    - cron: "5 0 1 * *"
+  workflow_dispatch: # Allows manual triggering from GitHub UI
+
+jobs:
+  generate-snapshots:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate budget snapshots for current period
+        run: |
+          # Validate environment variables
+          if [ -z "${{ secrets.APP_URL }}" ]; then
+            echo "Error: APP_URL secret is not set"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "Error: CRON_SECRET secret is not set"
+            exit 1
+          fi
+
+          # Strip trailing slash from APP_URL if present
+          APP_URL="${{ secrets.APP_URL }}"
+          APP_URL="${APP_URL%/}"
+
+          echo "Sending request to: ${APP_URL}/api/budget-snapshots/generate"
+
+          response=$(curl -X POST "${APP_URL}/api/budget-snapshots/generate" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -w "\n%{http_code}" \
+            -s \
+            -L) || {
+            curl_exit_code=$?
+            echo "Error: curl command failed with exit code $curl_exit_code"
+            exit 1
+          }
+
+          http_code=$(echo "$response" | tail -n 1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "HTTP Status: $http_code"
+          echo "Response Body:"
+          echo "$body"
+
+          if [ "$http_code" -ne 200 ]; then
+            echo "Error: Request failed with status $http_code"
+            if [ "$http_code" -eq 401 ]; then
+              echo "Authorization failed. Check that CRON_SECRET matches in both GitHub and Vercel."
+            elif [ "$http_code" -eq 500 ]; then
+              echo "Server error. Check Vercel function logs for details."
+            fi
+            exit 1
+          fi
+
+          echo "Successfully generated budget snapshots"

@@ -1,25 +1,56 @@
 import './globals.css'
+import type { Viewport } from 'next'
 import LayoutWrapper from '@/components/LayoutWrapper'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/next"
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
+import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration'
+import { InstallPrompt } from '@/components/InstallPrompt'
 
-export const metadata = {
-  title: 'MoneyFlow - Personal Finance Tracker',
-  description: 'Track your expenses and manage your finances with ease',
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-visual',
+  themeColor: '#20507F',
 }
 
-export default function RootLayout({
+export const metadata = {
+  title: 'Teman Tumbuh - Personal Finance Tracker',
+  description: 'Track your expenses and manage your finances with ease',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Teman Tumbuh',
+  },
+  icons: {
+    apple: '/icons/apple-touch-icon.png',
+  },
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body>
-        <ErrorBoundary>
-          <LayoutWrapper>{children}</LayoutWrapper>
-        </ErrorBoundary>
-        <SpeedInsights />
+        <NextIntlClientProvider messages={messages}>
+          <ErrorBoundary>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </ErrorBoundary>
+          <ServiceWorkerRegistration />
+          <InstallPrompt />
+          <SpeedInsights />
+          <Analytics />
+        </NextIntlClientProvider>
       </body>
     </html>
   )

@@ -1,8 +1,8 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
+import { Button } from "@/components/ui/atoms/button"
+import { Badge } from "@/components/ui/atoms/badge"
 import { Home, TrendingUp, Calculator, MapPin } from "lucide-react"
-import { EquityNavigation } from "@/components/TopNavigation"
+import { EquityNavigation } from "@/components/features/navigation/TopNavigation"
 import { PageLayout, MainContent, SideContent, ContentWrapper } from "@/components/PageLayout"
 
 export default function EquityPage() {

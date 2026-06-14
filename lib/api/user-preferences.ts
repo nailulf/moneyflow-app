@@ -1,122 +1,67 @@
-import { getSupabaseClient } from '@/lib/supabase'
-import { UserPreference } from '@/types/database'
+import { createClient } from '@/lib/supabase/client'
+import { UserSettings, UserSettingsUpdate } from '@/types/database'
 
-// Get a specific user preference
-export async function getUserPreference<T = unknown>(
-  userId: string, 
-  key: string
-): Promise<T | null> {
-  const { data, error } = await getSupabaseClient()
-    .from('user_preferences')
-    .select('preference_value')
+// Internal: fetch all settings in one query
+async function getSettings(userId: string): Promise<UserSettings | null> {
+  const { data, error } = await createClient()
+    .from('user_settings')
+    .select('*')
     .eq('user_id', userId)
-    .eq('preference_key', key)
     .single()
 
   if (error) {
-    if (error.code === 'PGRST116') {
-      // No rows returned - preference doesn't exist
-      return null
-    }
-    console.error('Error fetching user preference:', error)
-    throw new Error('Failed to fetch user preference')
-  }
-
-  return data?.preference_value || null
-}
-
-// Get all user preferences
-export async function getAllUserPreferences(userId: string): Promise<Record<string, unknown>> {
-  const { data, error } = await getSupabaseClient()
-    .from('user_preferences')
-    .select('preference_key, preference_value')
-    .eq('user_id', userId)
-
-  if (error) {
-    console.error('Error fetching user preferences:', error)
-    throw new Error('Failed to fetch user preferences')
-  }
-
-  const preferences: Record<string, unknown> = {}
-  data?.forEach((pref: { preference_key: string; preference_value: unknown }) => {
-    preferences[pref.preference_key] = pref.preference_value
-  })
-
-  return preferences
-}
-
-// Set a user preference
-export async function setUserPreference<T = unknown>(
-  userId: string,
-  key: string,
-  value: T
-): Promise<UserPreference> {
-  const { data, error } = await getSupabaseClient()
-    .from('user_preferences')
-    .upsert({
-      user_id: userId,
-      preference_key: key,
-      preference_value: value,
-      updated_at: new Date().toISOString()
-    })
-    .select()
-    .single()
-
-  if (error) {
-    console.error('Error setting user preference:', error)
-    throw new Error('Failed to set user preference')
+    if (error.code === 'PGRST116') return null // no row yet
+    console.error('Error fetching user settings:', error)
+    throw new Error('Failed to fetch user settings')
   }
 
   return data
 }
 
-// Delete a user preference
-export async function deleteUserPreference(userId: string, key: string): Promise<void> {
-  const { error } = await getSupabaseClient()
-    .from('user_preferences')
-    .delete()
-    .eq('user_id', userId)
-    .eq('preference_key', key)
+// Internal: upsert one or more columns (creates row if not exists)
+async function upsertSettings(userId: string, updates: UserSettingsUpdate): Promise<void> {
+  const { error } = await createClient()
+    .from('user_settings')
+    .upsert({ user_id: userId, ...updates, updated_at: new Date().toISOString() })
 
   if (error) {
-    console.error('Error deleting user preference:', error)
-    throw new Error('Failed to delete user preference')
+    console.error('Error updating user settings:', error)
+    throw new Error('Failed to update user settings')
   }
 }
 
-// Predefined preference keys
-export const PREFERENCE_KEYS = {
-  DEFAULT_CURRENCY: 'default_currency',
-  THEME: 'theme',
-  LANGUAGE: 'language',
-  NOTIFICATION_SETTINGS: 'notification_settings',
-  BUDGET_ALERTS: 'budget_alerts',
-  CATEGORY_GROUPS: 'category_groups',
-  DASHBOARD_LAYOUT: 'dashboard_layout'
-} as const
-
-export type PreferenceKey = typeof PREFERENCE_KEYS[keyof typeof PREFERENCE_KEYS]
-
-// Type-safe preference getters and setters
+// Public API — same method signatures as before, no callsite changes needed
 export const preferences = {
+  async getLanguage(userId: string): Promise<'en' | 'id'> {
+    const s = await getSettings(userId)
+    return (s?.language as 'en' | 'id') || 'en'
+  },
+
+  async setLanguage(userId: string, language: 'en' | 'id'): Promise<void> {
+    await upsertSettings(userId, { language })
+  },
+
   async getCurrency(userId: string): Promise<string> {
-    return await getUserPreference(userId, PREFERENCE_KEYS.DEFAULT_CURRENCY) || 'IDR'
+    const s = await getSettings(userId)
+    return s?.default_currency || 'IDR'
   },
 
   async setCurrency(userId: string, currency: string): Promise<void> {
-    await setUserPreference(userId, PREFERENCE_KEYS.DEFAULT_CURRENCY, currency)
+    await upsertSettings(userId, { default_currency: currency })
   },
 
   async getTheme(userId: string): Promise<'light' | 'dark' | 'system'> {
-    return await getUserPreference(userId, PREFERENCE_KEYS.THEME) || 'system'
+    const s = await getSettings(userId)
+    return (s?.theme as 'light' | 'dark' | 'system') || 'system'
   },
 
   async setTheme(userId: string, theme: 'light' | 'dark' | 'system'): Promise<void> {
-    await setUserPreference(userId, PREFERENCE_KEYS.THEME, theme)
+    await upsertSettings(userId, { theme })
   },
 
   async getNotificationSettings(userId: string): Promise<Record<string, boolean>> {
-    return await getUserPreference(userId, PREFERENCE_KEYS.NOTIFICATION_SETTINGS) || {
+    const s = await getSettings(userId)
+    return (s?.notification_settings as Record<string, boolean>) || {
       email: true,
       push: true,
       budget_alerts: true,
@@ -125,17 +70,46 @@ export const preferences = {
   },
 
   async setNotificationSettings(userId: string, settings: Record<string, boolean>): Promise<void> {
-    await setUserPreference(userId, PREFERENCE_KEYS.NOTIFICATION_SETTINGS, settings)
+    await upsertSettings(userId, { notification_settings: settings })
   },
 
   async getBudgetAlerts(userId: string): Promise<{ enabled: boolean; threshold: number }> {
-    return await getUserPreference(userId, PREFERENCE_KEYS.BUDGET_ALERTS) || {
-      enabled: true,
-      threshold: 80 // 80% of budget
-    }
+    const s = await getSettings(userId)
+    return { enabled: true, threshold: s?.budget_alert_threshold ?? 80 }
   },
 
   async setBudgetAlerts(userId: string, alerts: { enabled: boolean; threshold: number }): Promise<void> {
-    await setUserPreference(userId, PREFERENCE_KEYS.BUDGET_ALERTS, alerts)
-  }
+    await upsertSettings(userId, { budget_alert_threshold: alerts.threshold })
+  },
+
+  async getCountry(userId: string): Promise<string> {
+    const s = await getSettings(userId)
+    return s?.country || 'Indonesia'
+  },
+
+  async setCountry(userId: string, country: string): Promise<void> {
+    await upsertSettings(userId, { country })
+  },
+
+  async getUserGoal(userId: string): Promise<string | null> {
+    const s = await getSettings(userId)
+    return s?.user_goal || null
+  },
+
+  async setUserGoal(userId: string, goal: string): Promise<void> {
+    await upsertSettings(userId, { user_goal: goal })
+  },
+
+  async getActivationBannerDismissedAt(userId: string): Promise<string | null> {
+    const s = await getSettings(userId)
+    return s?.activation_banner_dismissed_at || null
+  },
+
+  async dismissActivationBanner(userId: string): Promise<void> {
+    await upsertSettings(userId, { activation_banner_dismissed_at: new Date().toISOString() })
+  },
+
+  async resetActivationBannerDismissed(userId: string): Promise<void> {
+    await upsertSettings(userId, { activation_banner_dismissed_at: null })
+  },
 }

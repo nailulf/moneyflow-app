@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { parseStatementWithAI } from '@/lib/statement-parser';
-import { createServerComponentClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 // @ts-ignore
 import pdf from 'pdf-parse/lib/pdf-parse.js';
 
@@ -11,10 +11,16 @@ export const maxDuration = 60; // Increase timeout for AI processing
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const useAI = formData.get('useAI') === 'true';
-    const userId = formData.get('userId') as string;
+    const userId = user.id;
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -110,24 +116,20 @@ export async function POST(request: NextRequest) {
 
     // Parse with AI
     try {
-        // Fetch user categories if userId is present
+        // Fetch user categories (authenticated user only)
         let availableCategories: { id: string; name: string }[] = [];
-        if (userId) {
-            try {
-                const supabase = createServerComponentClient();
-                const { data: categories } = await supabase
-                    .from('categories')
-                    .select('id, name')
-                    .eq('user_id', userId)
-                    .eq('is_active', true);
-                
-                if (categories) {
-                    availableCategories = categories;
-                }
-            } catch (error) {
-                console.warn("Failed to fetch user categories", error);
-                // Continue without categories
+        try {
+            const { data: categories } = await supabase
+                .from('categories')
+                .select('id, name')
+                .eq('user_id', userId)
+                .eq('is_active', true);
+
+            if (categories) {
+                availableCategories = categories;
             }
+        } catch (error) {
+            console.warn("Failed to fetch user categories", error);
         }
 
         const { transactions, metadata } = await parseStatementWithAI(text, availableCategories);

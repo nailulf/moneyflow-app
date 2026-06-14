@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Transaction, TransactionInsert, TransactionUpdate } from '@/types/database'
 import { toast } from 'sonner'
@@ -115,17 +116,19 @@ export function useTransactionsQuery(options: UseTransactionsQueryOptions) {
 export function useAllTransactions(options: UseTransactionsQueryOptions) {
   const query = useTransactionsQuery(options)
 
-  // Automatically fetch all pages in the background
-  if (query.hasNextPage && !query.isFetchingNextPage && !query.isLoading) {
-    // Check safety limit to prevent infinite loops (e.g. max 100 pages = 10,000 transactions)
-    const currentPages = query.data?.pages.length || 0
-    if (currentPages < 100) {
-      // Use setTimeout to avoid blocking the main thread, increased to 500ms to reduce UI jank
-      setTimeout(() => {
+  const currentPages = query.data?.pages.length || 0
+
+  // Fetch remaining pages in the background. Must be in useEffect to avoid
+  // scheduling side effects during render, which caused cascading re-renders
+  // and UI freezing on every mutation.
+  useEffect(() => {
+    if (query.hasNextPage && !query.isFetchingNextPage && !query.isLoading && currentPages < 100) {
+      const timer = setTimeout(() => {
         query.fetchNextPage()
       }, 500)
+      return () => clearTimeout(timer)
     }
-  }
+  }, [query.hasNextPage, query.isFetchingNextPage, query.isLoading, currentPages, query.fetchNextPage])
 
   return {
     transactions: query.transactions,
@@ -173,7 +176,7 @@ export function useTransactionMutations(userId: string) {
     },
     onSuccess: (transaction: Transaction) => {
       invalidateRelatedQueries()
-      toast.success('Transaction added successfully')
+      toast.success('Transaction added successfully', { id: 'tx-add' })
       Analytics.track('transaction_created', {
         transaction_id: transaction.id,
         amount: transaction.amount,
@@ -186,7 +189,7 @@ export function useTransactionMutations(userId: string) {
       })
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      toast.error(error.message, { id: 'tx-add' })
     },
   })
 
@@ -207,7 +210,7 @@ export function useTransactionMutations(userId: string) {
     },
     onSuccess: (transaction: Transaction, variables) => {
       invalidateRelatedQueries()
-      toast.success('Transaction updated successfully')
+      toast.success('Transaction updated successfully', { id: 'tx-edit' })
       Analytics.track('transaction_updated', {
         transaction_id: variables.id,
         fields_changed: Object.keys(variables.data),
@@ -216,7 +219,7 @@ export function useTransactionMutations(userId: string) {
       })
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      toast.error(error.message, { id: 'tx-edit' })
     },
   })
 
@@ -235,14 +238,14 @@ export function useTransactionMutations(userId: string) {
     },
     onSuccess: (deletedId: string) => {
       invalidateRelatedQueries()
-      toast.success('Transaction deleted successfully')
+      toast.success('Transaction deleted successfully', { id: 'tx-delete' })
       Analytics.track('transaction_deleted', {
         transaction_id: deletedId,
         timestamp: new Date().toISOString()
       })
     },
     onError: (error: Error) => {
-      toast.error(error.message)
+      toast.error(error.message, { id: 'tx-delete' })
     },
   })
 

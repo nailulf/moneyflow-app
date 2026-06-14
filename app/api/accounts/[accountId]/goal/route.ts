@@ -1,10 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateGoalProgress } from '@/lib/goals/calculations'
-import { FinancialGoalInsert, FinancialGoalUpdate, GoalType } from '@/types/database'
+import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
+import { AccountDB, FinancialGoalInsert, FinancialGoalUpdate, GoalType } from '@/types/database'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/database'
 
 interface RouteParams {
   params: Promise<{ accountId: string }>
+}
+
+/** Fetch an account's transactions and compute its live balance.
+ *  No currency-rate map is passed: goal accounts are effectively single-currency,
+ *  and the rare foreign-currency transaction falls back to its raw amount — acceptable for goal progress.
+ */
+async function computeCurrentBalance(
+  supabase: SupabaseClient<Database>,
+  account: { id: string; user_id: string; balance: number; type: AccountDB['type']; currency: string }
+): Promise<number> {
+  const { data: txns } = await supabase
+    .from('transactions')
+    .select('amount, type, date, account_id, to_account_id, currency')
+    .eq('user_id', account.user_id)
+    .or(`account_id.eq.${account.id},to_account_id.eq.${account.id}`)
+  return calculateAccountBalanceAtDate(
+    txns || [],
+    new Date(),
+    account.type,
+    account.balance,
+    account.id,
+    account.currency || 'IDR'
+  )
 }
 
 // GET /api/accounts/[accountId]/goal - Get goal for specific account
@@ -22,7 +48,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
     // Verify account belongs to user and get balance
     const { data: account, error: accountError } = await supabase
       .from('accounts')
-      .select('id, user_id, balance')
+      .select('id, user_id, balance, type, currency')
       .eq('id', accountId)
       .single()
 
@@ -51,8 +77,13 @@ export async function GET(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ goal: null, progress: null })
     }
 
-    // Calculate progress
-    const progress = calculateGoalProgress(account.balance, goal.target_amount)
+    // Calculate progress using computed live balance (opening anchor + Σ transactions)
+    const currentBalance = await computeCurrentBalance(supabase, {
+      ...account,
+      type: account.type as AccountDB['type'],
+      currency: account.currency || 'IDR',
+    })
+    const progress = calculateGoalProgress(currentBalance, goal.target_amount)
 
     return NextResponse.json({ goal, progress })
   } catch (error) {
@@ -76,7 +107,7 @@ export async function POST(request: NextRequest, context: RouteParams) {
     // Verify account belongs to user and get balance
     const { data: account, error: accountError } = await supabase
       .from('accounts')
-      .select('id, user_id, balance, type')
+      .select('id, user_id, balance, type, currency')
       .eq('id', accountId)
       .single()
 
@@ -153,8 +184,13 @@ export async function POST(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ error: 'Failed to create goal' }, { status: 500 })
     }
 
-    // Calculate progress
-    const progress = calculateGoalProgress(account.balance, goal.target_amount)
+    // Calculate progress using computed live balance (opening anchor + Σ transactions)
+    const currentBalance = await computeCurrentBalance(supabase, {
+      ...account,
+      type: account.type as AccountDB['type'],
+      currency: account.currency || 'IDR',
+    })
+    const progress = calculateGoalProgress(currentBalance, goal.target_amount)
 
     return NextResponse.json({ goal, progress }, { status: 201 })
   } catch (error) {
@@ -178,7 +214,7 @@ export async function PUT(request: NextRequest, context: RouteParams) {
     // Verify account belongs to user
     const { data: account, error: accountError } = await supabase
       .from('accounts')
-      .select('id, user_id, balance')
+      .select('id, user_id, balance, type, currency')
       .eq('id', accountId)
       .single()
 
@@ -241,8 +277,13 @@ export async function PUT(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ error: 'Failed to update goal' }, { status: 500 })
     }
 
-    // Calculate progress
-    const progress = calculateGoalProgress(account.balance, goal.target_amount)
+    // Calculate progress using computed live balance (opening anchor + Σ transactions)
+    const currentBalance = await computeCurrentBalance(supabase, {
+      ...account,
+      type: account.type as AccountDB['type'],
+      currency: account.currency || 'IDR',
+    })
+    const progress = calculateGoalProgress(currentBalance, goal.target_amount)
 
     return NextResponse.json({ goal, progress })
   } catch (error) {

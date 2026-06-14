@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/molecules/card"
+import { Button } from "@/components/ui/atoms/button"
+import { Badge } from "@/components/ui/atoms/badge"
 import { Plus, TrendingUp, TrendingDown } from "lucide-react"
 import { formatCurrency } from "@/lib/data-utils"
 import {
@@ -17,7 +17,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart"
+} from "@/components/ui/organisms/chart"
 import { mockNetWorthData, mockAssets, type TimePeriod } from "@/lib/mock-data"
 
 const timePeriods: { value: TimePeriod; label: string }[] = [
@@ -72,7 +72,7 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
     <Card className="w-full">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+          <CardTitle className="text-sm leading-body-sm font-medium text-muted-foreground uppercase tracking-wide">
             NET WORTH
           </CardTitle>
           <Button
@@ -86,7 +86,7 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
         </div>
         
         <div className="space-y-2">
-          <div className="text-3xl font-bold">
+          <div className="text-3xl leading-title-2 font-bold">
             {formatCurrency(currentNetWorth)}
           </div>
           <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
               <TrendingDown className="h-4 w-4 text-destructive" />
             )}
             <span
-              className={`text-sm font-medium ${
+              className={`text-sm leading-body-sm font-medium ${
                 isPositiveChange ? "text-success" : "text-destructive"
               }`}
             >
@@ -158,8 +158,8 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
         {/* Assets Breakdown */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">Assets</h3>
-            <span className="text-sm text-muted-foreground">
+            <h3 className="text-sm leading-body-sm font-medium">Assets</h3>
+            <span className="text-sm leading-body-sm text-muted-foreground">
               {formatCurrency(currentNetWorth)}
             </span>
           </div>
@@ -189,10 +189,10 @@ export default function NetWorthCard({ onAddAssets }: NetWorthCardProps) {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: asset.color }}
                   />
-                  <span className="text-sm font-medium">{asset.name}</span>
+                  <span className="text-sm leading-body-sm font-medium">{asset.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">
+                  <span className="text-sm leading-body-sm font-medium">
                     {formatCurrency(asset.value)}
                   </span>
                   <Badge

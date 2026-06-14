@@ -1,23 +1,22 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { SpendingNavigation } from '@/components/TopNavigation'
+import { useTranslations } from 'next-intl'
+import { SpendingNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
-import { CategoryManager } from '@/components/CategoryManager'
-import { AccountManager } from '@/components/AccountManager'
-import { AccountProvider } from '@/contexts/AccountContext'
 import { CashFlowSankey } from '@/components/CashFlowSankey'
 import { PeriodPicker } from '@/components/PeriodPicker'
-import { Card, CardContent } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent } from '@/components/ui/molecules/card'
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/molecules/tabs"
 import { formatCurrency, calculateTotalIncome, calculateTotalSpending } from '@/lib/data-utils'
 import { startOfMonth, endOfMonth, startOfYear, endOfYear, parseISO, isSameMonth, isSameYear, subMonths, subYears, differenceInDays } from 'date-fns'
 import { useCategories } from '@/contexts/CategoryContext'
 import { TrendingUp, TrendingDown, Calendar } from 'lucide-react'
 
 export default function CashFlowPage() {
-  
+  const t = useTranslations('spending.cashflow')
+
   // Use shared transaction context
   const { transactions, loading } = useTransactions()
   const { getCategoryName } = useCategories()
@@ -76,59 +75,48 @@ export default function CashFlowPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation actionButton={
-        <div className="flex items-center gap-2">
-          <CategoryManager />
-          <AccountProvider>
-            <AccountManager />
-          </AccountProvider>
-        </div>
-      } />
+      <SpendingNavigation />
       
       <PageLayout>
         <TopContent>
-          {/* Header Row */}
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight mb-2">Cash Flow</h2>
-              <p className="text-muted-foreground">Visualize your income and expenses flow</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'month' | 'year')} className="w-auto">
-                <TabsList className="grid w-full grid-cols-2 h-9">
-                  <TabsTrigger value="month" className="text-xs">Month</TabsTrigger>
-                  <TabsTrigger value="year" className="text-xs">Year</TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <PeriodPicker 
-                date={selectedDate} 
-                onDateChange={setSelectedDate} 
-                mode={viewMode}
-              />
-            </div>
-          </div>
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              {/* Header Row */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:gap-2 gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight mb-2">{t('title')}</h2>
+                  <p className="text-muted-foreground">{t('description')}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'month' | 'year')} className="w-auto">
+                    <TabsList className="grid w-full grid-cols-2 h-9">
+                      <TabsTrigger value="month" className="text-xs">{t('month')}</TabsTrigger>
+                      <TabsTrigger value="year" className="text-xs">{t('year')}</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <PeriodPicker 
+                    date={selectedDate} 
+                    onDateChange={setSelectedDate} 
+                    mode={viewMode}
+                  />
+                </div>
+              </div>
 
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-0">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+              {/* Metrics Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center justify-between p-4 bg-success/5 rounded-lg">
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Income</p>
+                    <p className="text-sm text-muted-foreground">{t('totalIncome')}</p>
                     <p className="text-2xl font-bold text-success">{formatCurrency(totalIncome)}</p>
                   </div>
                   <TrendingUp className="h-8 w-8 text-success" />
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between p-4 bg-destructive/5 rounded-lg">
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      Total Expenses
+                      {t('totalExpenses')}
                       <span className={`ml-2 text-xs ${expenseChange > 0 ? 'text-destructive' : 'text-success'}`}>
                         {expenseChange > 0 ? '↑' : '↓'} {Math.abs(expenseChange).toFixed(1)}%
                       </span>
@@ -137,14 +125,10 @@ export default function CashFlowPage() {
                   </div>
                   <TrendingDown className="h-8 w-8 text-destructive" />
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+                <div className={`flex items-center justify-between p-4 rounded-lg ${netCashFlow >= 0 ? 'bg-success/5' : 'bg-destructive/5'}`}>
                   <div>
-                    <p className="text-sm text-muted-foreground">Net Cash Flow</p>
+                    <p className="text-sm text-muted-foreground">{t('netCashFlow')}</p>
                     <p className={`text-2xl font-bold ${netCashFlow >= 0 ? 'text-success' : 'text-destructive'}`}>
                       {formatCurrency(netCashFlow)}
                     </p>
@@ -154,9 +138,9 @@ export default function CashFlowPage() {
                     <TrendingDown className="h-8 w-8 text-destructive" />
                   }
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </TopContent>
         
         <ContentWrapper>

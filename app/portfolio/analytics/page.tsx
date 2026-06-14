@@ -1,172 +1,158 @@
-import { PortfolioNavigation } from '@/components/TopNavigation'
+'use client'
+
+import { useMemo } from 'react'
+import { PortfolioNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
-
-interface AnalyticsData {
-  metric: string
-  value: string
-  change: string
-  changeType: 'positive' | 'negative' | 'neutral'
-}
-
-const analyticsData: AnalyticsData[] = [
-  {
-    metric: "Total Return",
-    value: "+$12,450",
-    change: "+8.2%",
-    changeType: "positive"
-  },
-  {
-    metric: "Annualized Return",
-    value: "12.5%",
-    change: "+2.1%",
-    changeType: "positive"
-  },
-  {
-    metric: "Volatility",
-    value: "15.8%",
-    change: "-1.2%",
-    changeType: "positive"
-  },
-  {
-    metric: "Sharpe Ratio",
-    value: "1.42",
-    change: "+0.15",
-    changeType: "positive"
-  },
-  {
-    metric: "Max Drawdown",
-    value: "-8.5%",
-    change: "+2.1%",
-    changeType: "positive"
-  },
-  {
-    metric: "Beta",
-    value: "0.95",
-    change: "-0.05",
-    changeType: "positive"
-  }
-]
-
-const sectorAllocation = [
-  { sector: "Technology", percentage: 45, value: 56250 },
-  { sector: "Healthcare", percentage: 20, value: 25000 },
-  { sector: "Financial", percentage: 15, value: 18750 },
-  { sector: "Consumer", percentage: 12, value: 15000 },
-  { sector: "Energy", percentage: 8, value: 10000 }
-]
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
+import { useAccounts } from '@/contexts/AccountContext'
+import { useAllHoldings } from '@/hooks/useHoldings'
+import { portfolioTotals, allocation } from '@/lib/portfolio-utils'
+import { formatCurrency } from '@/lib/data-utils'
 
 export default function PortfolioAnalyticsPage() {
+  const { accounts } = useAccounts()
+  const { holdings, isLoading } = useAllHoldings()
+
+  const investmentAccounts = useMemo(() => accounts.filter((a) => a.type === 'INVESTMENT'), [accounts])
+  const totals = useMemo(() => portfolioTotals(holdings), [holdings])
+  const slices = useMemo(() => allocation(holdings), [holdings])
+  const baseCurrency = investmentAccounts[0]?.currency ?? 'IDR'
+
   return (
     <div className="flex flex-col h-full">
       <PortfolioNavigation />
-      
+
       <PageLayout>
         <ContentWrapper>
         <MainContent>
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl font-semibold tracking-tight mb-2">Analytics</h2>
-              <p className="text-muted-foreground">Advanced portfolio performance metrics and analysis</p>
+              <p className="text-muted-foreground">Portfolio performance metrics based on your holdings</p>
             </div>
-            
+
+            {isLoading && (
+              <p className="text-sm text-muted-foreground">Loading analytics…</p>
+            )}
+
+            {/* Honest figures — sourced from real holdings */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {analyticsData.map((data) => (
-                <Card key={data.metric} className="rounded-xl">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      {data.metric}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{data.value}</div>
-                    <div className={`text-sm font-medium ${
-                      data.changeType === 'positive' ? 'text-success' : 
-                      data.changeType === 'negative' ? 'text-destructive' : 'text-muted-foreground'
-                    }`}>
-                      {data.change} vs last period
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              <Card className="rounded-xl">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Portfolio Value</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {holdings.length === 0 ? '—' : formatCurrency(totals.totalValue, baseCurrency)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Current market value</div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-xl">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Cost Basis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {holdings.length === 0 ? '—' : formatCurrency(totals.totalCostBasis, baseCurrency)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total invested at purchase price</div>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-xl">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Unrealised Gain / Loss</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${totals.totalGainLoss >= 0 ? 'text-success' : 'text-destructive'}`}>
+                    {totals.totalCostBasis === 0
+                      ? '—'
+                      : `${totals.totalGainLoss >= 0 ? '+' : ''}${totals.totalGainLossPct.toFixed(1)}%`}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {totals.totalCostBasis === 0
+                      ? 'Add holdings to see gain/loss'
+                      : `${totals.totalGainLoss >= 0 ? '+' : ''}${formatCurrency(totals.totalGainLoss, baseCurrency)}`}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-            
+
+            {/* Asset-class allocation */}
             <Card className="rounded-xl">
               <CardHeader>
-                <CardTitle>Sector Allocation</CardTitle>
-                <CardDescription>Distribution across different sectors</CardDescription>
+                <CardTitle>Asset Class Allocation</CardTitle>
+                <CardDescription>Distribution across asset classes based on current value</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {sectorAllocation.map((sector) => (
-                    <div key={sector.sector} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{sector.sector}</span>
-                        <div className="text-right">
-                          <span className="text-sm font-medium">{sector.percentage}%</span>
-                          <span className="text-xs text-muted-foreground ml-2">
-                            ${sector.value.toLocaleString()}
-                          </span>
+                {slices.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No holdings yet. Add assets to see allocation.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {slices.map((s) => (
+                      <div key={s.assetClass} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">{s.assetClass}</span>
+                          <div className="text-right">
+                            <span className="text-sm font-medium">{s.pct}%</span>
+                            <span className="text-xs text-muted-foreground ml-2">
+                              {formatCurrency(s.value, baseCurrency)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2">
+                          <div
+                            className="bg-primary h-2 rounded-full transition-all"
+                            style={{ width: `${s.pct}%` }}
+                          />
                         </div>
                       </div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div 
-                          className="bg-primary h-2 rounded-full transition-all" 
-                          style={{ width: `${sector.percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Metrics that require price history — not fabricated */}
+            <Card className="rounded-xl border-dashed">
+              <CardHeader>
+                <CardTitle className="text-muted-foreground">Advanced Metrics</CardTitle>
+                <CardDescription>
+                  Annualised return, volatility, Sharpe ratio, beta, and max drawdown require historical
+                  price data — not yet available. These will appear once price-history tracking is added.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground italic">
+                  Needs price history — coming in a future release.
+                </p>
               </CardContent>
             </Card>
           </div>
         </MainContent>
-        
+
         <SideContent>
           <div className="space-y-4">
             <Card className="rounded-xl">
               <CardHeader>
-                <CardTitle>Risk Metrics</CardTitle>
-                <CardDescription>Portfolio risk assessment</CardDescription>
+                <CardTitle>Holdings Count</CardTitle>
+                <CardDescription>Number of positions</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Risk Score</span>
-                    <span className="font-medium text-chart-5">Medium</span>
+                    <span className="text-sm text-muted-foreground">Total Positions</span>
+                    <span className="font-medium">{holdings.length}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Diversification</span>
-                    <span className="font-medium text-success">Good</span>
+                    <span className="text-sm text-muted-foreground">Asset Classes</span>
+                    <span className="font-medium">{slices.length}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Correlation</span>
-                    <span className="font-medium">0.72</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="rounded-xl">
-              <CardHeader>
-                <CardTitle>Performance vs Benchmark</CardTitle>
-                <CardDescription>Comparison with S&P 500</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Your Portfolio</span>
-                    <span className="font-medium text-success">+8.2%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">S&P 500</span>
-                    <span className="font-medium">+6.7%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Outperformance</span>
-                    <span className="font-medium text-success">+1.5%</span>
+                    <span className="text-sm text-muted-foreground">Accounts</span>
+                    <span className="font-medium">{investmentAccounts.length}</span>
                   </div>
                 </div>
               </CardContent>

@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const budgetId = searchParams.get('budgetId')
 
@@ -10,12 +16,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Budget ID is required' }, { status: 400 })
     }
 
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
-    }
+    // Verify budget ownership before returning its items
+    const { data: budget } = await supabase
+      .from('budgets')
+      .select('user_id')
+      .eq('id', budgetId)
+      .single()
 
-    const supabase = createServerComponentClient()
+    if (!budget || budget.user_id !== user.id) {
+      return NextResponse.json({ error: 'Budget not found or access denied' }, { status: 404 })
+    }
 
     // Query budget_categories with category information
     const { data, error } = await supabase
@@ -43,7 +53,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch budget items' }, { status: 500 })
     }
 
-    // Transform the data to match the expected BudgetItem interface
     const budgetItems = data.map(item => {
       const category = Array.isArray(item.categories) ? item.categories[0] : item.categories
       return {

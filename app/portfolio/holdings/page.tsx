@@ -1,71 +1,33 @@
-import { PortfolioNavigation } from '@/components/TopNavigation'
+'use client'
+
+import { useMemo } from 'react'
+import { PortfolioNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-
-interface Holding {
-  symbol: string
-  name: string
-  shares: number
-  currentPrice: number
-  totalValue: number
-  dayChange: number
-  dayChangePercent: number
-  allocation: number
-}
-
-const mockHoldings: Holding[] = [
-  {
-    symbol: "AAPL",
-    name: "Apple Inc.",
-    shares: 50,
-    currentPrice: 175.20,
-    totalValue: 8760,
-    dayChange: 2.50,
-    dayChangePercent: 1.45,
-    allocation: 35.2
-  },
-  {
-    symbol: "MSFT",
-    name: "Microsoft Corp.",
-    shares: 30,
-    currentPrice: 380.50,
-    totalValue: 11415,
-    dayChange: -5.20,
-    dayChangePercent: -1.35,
-    allocation: 45.8
-  },
-  {
-    symbol: "GOOGL",
-    name: "Alphabet Inc.",
-    shares: 15,
-    currentPrice: 142.80,
-    totalValue: 2142,
-    dayChange: 1.80,
-    dayChangePercent: 1.28,
-    allocation: 8.6
-  },
-  {
-    symbol: "TSLA",
-    name: "Tesla Inc.",
-    shares: 10,
-    currentPrice: 258.90,
-    totalValue: 2589,
-    dayChange: -8.50,
-    dayChangePercent: -3.18,
-    allocation: 10.4
-  }
-]
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
+import { Badge } from "@/components/ui/atoms/badge"
+import { useAccounts } from '@/contexts/AccountContext'
+import { useAllHoldings } from '@/hooks/useHoldings'
+import { portfolioTotals, allocation, gainLoss, gainLossPct } from '@/lib/portfolio-utils'
+import { formatCurrency } from '@/lib/data-utils'
 
 export default function PortfolioHoldingsPage() {
-  const totalPortfolioValue = mockHoldings.reduce((sum, holding) => sum + holding.totalValue, 0)
-  const totalDayChange = mockHoldings.reduce((sum, holding) => sum + holding.dayChange * holding.shares, 0)
-  const totalDayChangePercent = (totalDayChange / totalPortfolioValue) * 100
+  const { accounts } = useAccounts()
+  const { holdings, isLoading } = useAllHoldings()
+
+  const investmentAccounts = useMemo(() => accounts.filter((a) => a.type === 'INVESTMENT'), [accounts])
+  const totals = useMemo(() => portfolioTotals(holdings), [holdings])
+  const slices = useMemo(() => allocation(holdings), [holdings])
+  const baseCurrency = investmentAccounts[0]?.currency ?? 'IDR'
+
+  const allocationPct = (holdingValue: number): number => {
+    if (totals.totalValue === 0) return 0
+    return Math.round((holdingValue / totals.totalValue) * 1000) / 10
+  }
 
   return (
     <div className="flex flex-col h-full">
       <PortfolioNavigation />
-      
+
       <PageLayout>
         <ContentWrapper>
         <MainContent>
@@ -74,41 +36,60 @@ export default function PortfolioHoldingsPage() {
               <h2 className="text-2xl font-semibold tracking-tight mb-2">Holdings</h2>
               <p className="text-muted-foreground">Detailed view of your investment positions</p>
             </div>
-            
+
+            {isLoading && (
+              <p className="text-sm text-muted-foreground">Loading holdings…</p>
+            )}
+
+            {!isLoading && holdings.length === 0 && (
+              <Card className="rounded-xl">
+                <CardContent className="p-6">
+                  <p className="text-sm text-muted-foreground">
+                    No holdings yet. Add assets to an investment account to see them here.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="space-y-4">
-              {mockHoldings.map((holding) => (
-                <Card key={holding.symbol} className="rounded-xl">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h3 className="font-semibold">{holding.symbol}</h3>
-                            <Badge variant="outline">{holding.allocation.toFixed(1)}%</Badge>
+              {holdings.map((holding) => {
+                const gl = gainLoss(holding)
+                const glPct = gainLossPct(holding)
+                const allocPct = allocationPct(holding.current_value)
+                return (
+                  <Card key={holding.id} className="rounded-xl">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <h3 className="font-semibold">{holding.symbol ?? holding.name}</h3>
+                              <Badge variant="outline">{allocPct.toFixed(1)}%</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{holding.name}</p>
+                            <p className="text-xs text-muted-foreground">{holding.quantity} units · {holding.asset_class}</p>
                           </div>
-                          <p className="text-sm text-muted-foreground">{holding.name}</p>
-                          <p className="text-xs text-muted-foreground">{holding.shares} shares</p>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="font-semibold">{formatCurrency(holding.current_value, holding.currency)}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Cost: {formatCurrency(holding.purchase_price * holding.quantity, holding.currency)}
+                          </div>
+                          <div className={`text-sm font-medium ${glPct >= 0 ? 'text-success' : 'text-destructive'}`}>
+                            {glPct >= 0 ? '+' : ''}{glPct.toFixed(1)}%
+                            ({gl >= 0 ? '+' : ''}{formatCurrency(gl, holding.currency)})
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="text-right">
-                        <div className="font-semibold">${holding.totalValue.toLocaleString()}</div>
-                        <div className="text-sm text-muted-foreground">${holding.currentPrice.toFixed(2)} per share</div>
-                        <div className={`text-sm font-medium ${
-                          holding.dayChangePercent >= 0 ? 'text-success' : 'text-destructive'
-                        }`}>
-                          {holding.dayChangePercent >= 0 ? '+' : ''}{holding.dayChangePercent.toFixed(2)}%
-                          ({holding.dayChangePercent >= 0 ? '+' : ''}${holding.dayChange.toFixed(2)})
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </div>
         </MainContent>
-        
+
         <SideContent>
           <div className="space-y-4">
             <Card className="rounded-xl">
@@ -120,43 +101,40 @@ export default function PortfolioHoldingsPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Total Value</span>
-                    <span className="font-semibold">${totalPortfolioValue.toLocaleString()}</span>
+                    <span className="font-semibold">{formatCurrency(totals.totalValue, baseCurrency)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Day Change</span>
-                    <span className={`font-medium ${
-                      totalDayChangePercent >= 0 ? 'text-success' : 'text-destructive'
-                    }`}>
-                      {totalDayChangePercent >= 0 ? '+' : ''}{totalDayChangePercent.toFixed(2)}%
+                    <span className="text-sm text-muted-foreground">Total Gain / Loss</span>
+                    <span className={`font-medium ${totals.totalGainLoss >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      {totals.totalGainLoss >= 0 ? '+' : ''}{totals.totalGainLossPct.toFixed(1)}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Total Positions</span>
-                    <span className="font-medium">{mockHoldings.length}</span>
+                    <span className="font-medium">{holdings.length}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="rounded-xl">
               <CardHeader>
-                <CardTitle>Top Performers</CardTitle>
-                <CardDescription>Best performing holdings today</CardDescription>
+                <CardTitle>Asset Class Breakdown</CardTitle>
+                <CardDescription>Distribution by asset type</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {mockHoldings
-                    .filter(h => h.dayChangePercent > 0)
-                    .sort((a, b) => b.dayChangePercent - a.dayChangePercent)
-                    .slice(0, 3)
-                    .map((holding) => (
-                      <div key={holding.symbol} className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{holding.symbol}</span>
-                        <span className="text-sm text-success">+{holding.dayChangePercent.toFixed(2)}%</span>
+                {slices.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No holdings yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {slices.map((s) => (
+                      <div key={s.assetClass} className="flex justify-between items-center">
+                        <span className="text-sm font-medium">{s.assetClass}</span>
+                        <span className="text-sm text-muted-foreground">{s.pct}%</span>
                       </div>
-                    ))
-                  }
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

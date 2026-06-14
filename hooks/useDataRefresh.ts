@@ -14,6 +14,9 @@ export const queryKeys = {
   budgets: (userId?: string) => userId ? ['budgets', userId] : ['budgets'],
   netWorth: (userId?: string) => userId ? ['net-worth', userId] : ['net-worth'],
   onboarding: (userId?: string) => userId ? ['onboarding', userId] : ['onboarding'],
+  forecastScenarios: () => ['forecast', 'scenarios'] as const,
+  forecastEvents: (scenarioId: string) => ['forecast', 'events', scenarioId] as const,
+  forecastCashflow: () => ['forecast', 'cashflow'] as const,
   all: () => ['all'],
 }
 

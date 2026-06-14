@@ -1,21 +1,25 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Settings, Search, X, Loader2, Trash2, Pencil, Check } from 'lucide-react'
+import { Button } from '@/components/ui/atoms/button'
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/organisms/sheet'
+import { Input } from '@/components/ui/atoms/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/molecules/select'
+import { Plus, Settings, Search, X, Loader2, Trash2, Pencil, Check, ArrowLeft } from 'lucide-react'
 import { CategoryGroupDB, CategoryDB } from '@/types/database'
 import { useAuth } from '@/contexts/AuthContext'
 import { SEMANTIC_COLORS } from '@/lib/constants'
 import { useAutoRefresh } from '@/hooks/useDataRefresh'
 import { Analytics } from '@/lib/analytics/amplitude'
 
+type Mode = 'list' | 'create-group' | 'delete-group'
+
 interface CategoryManagerProps {
   onCategoryUpdated?: () => void
   className?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  variant?: 'sheet' | 'embedded'
 }
 
 interface DisplayGroup {
@@ -30,32 +34,49 @@ interface DisplayGroup {
 // Internal component that contains all the logic
 function CategoryManagerInternal({
   onCategoryUpdated,
-  className = ''
+  className = '',
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  variant = 'sheet'
 }: CategoryManagerProps) {
   const { user } = useAuth()
   const userId = user?.id || ''
   const { onCategoryChange } = useAutoRefresh(userId)
-  
-  const [isOpen, setIsOpen] = useState(false)
+
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const isOpen = isControlled ? controlledOpen : internalOpen
+  const setIsOpen = isControlled ? (controlledOnOpenChange ?? setInternalOpen) : setInternalOpen
+  const isEmbedded = variant === 'embedded'
+
+  const [mode, setMode] = useState<Mode>('list')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null)
   const [newCategoryName, setNewCategoryName] = useState('')
   const [newCategoryColor, setNewCategoryColor] = useState(SEMANTIC_COLORS[0].value)
-  const [isNewGroupDialogOpen, setIsNewGroupDialogOpen] = useState(false)
   const [newGroupName, setNewGroupName] = useState('')
   const [newGroupType, setNewGroupType] = useState<'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM'>('EXPENSE')
   const [newGroupColor, setNewGroupColor] = useState(SEMANTIC_COLORS[0].value)
   const [deleteGroupId, setDeleteGroupId] = useState<string | null>(null)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
   const [editingCategoryName, setEditingCategoryName] = useState('')
-  
+
   // Data states
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroupDB[]>([])
   const [categories, setCategories] = useState<CategoryDB[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const resetToList = () => {
+    setMode('list')
+    setDeleteGroupId(null)
+  }
+
+  const handleSheetOpenChange = (open: boolean) => {
+    if (!open) resetToList()
+    setIsOpen(open)
+  }
 
   // Fetch category groups
   const fetchCategoryGroups = useCallback(async () => {
@@ -69,7 +90,7 @@ function CategoryManagerInternal({
     } catch (err) {
       console.error('Error fetching category groups:', err)
       setError('Failed to load category groups')
-      setCategoryGroups([]) // Set empty array as fallback
+      setCategoryGroups([])
     }
   }, [userId])
 
@@ -85,7 +106,7 @@ function CategoryManagerInternal({
     } catch (err) {
       console.error('Error fetching categories:', err)
       setError('Failed to load categories')
-      setCategories([]) // Set empty array as fallback
+      setCategories([])
     }
   }, [userId])
 
@@ -112,13 +133,13 @@ function CategoryManagerInternal({
   // Create display groups by mapping categories to their groups
   const displayGroups: DisplayGroup[] = React.useMemo(() => {
     const groups: DisplayGroup[] = []
-    
+
     // Add category groups
     categoryGroups.forEach(group => {
-      const groupCategories = categories.filter(cat => 
+      const groupCategories = categories.filter(cat =>
         cat.category_group_id === group.id
       )
-      
+
       groups.push({
         id: group.id,
         name: group.name,
@@ -128,7 +149,7 @@ function CategoryManagerInternal({
         categories: groupCategories
       })
     })
-    
+
     // Add categories without category_group_id, grouped by type
     const orphanCategories = categories.filter(cat => !cat.category_group_id)
     const typeGroups = orphanCategories.reduce((acc, cat) => {
@@ -139,9 +160,8 @@ function CategoryManagerInternal({
       acc[type].push(cat)
       return acc
     }, {} as Record<string, CategoryDB[]>)
-    
+
     Object.entries(typeGroups).forEach(([type, cats]) => {
-      // Check if we already have a group for this type
       const existingGroup = groups.find(g => g.type === type)
       if (existingGroup) {
         existingGroup.categories.push(...cats)
@@ -156,12 +176,14 @@ function CategoryManagerInternal({
         })
       }
     })
-    
+
     return groups.sort((a, b) => {
       const order = { 'EXPENSE': 1, 'INCOME': 2, 'TRANSFER': 3, 'CUSTOM': 4 }
       return (order[a.type] || 5) - (order[b.type] || 5)
     })
   }, [categoryGroups, categories])
+
+  const deleteGroup = displayGroups.find(g => g.id === deleteGroupId)
 
   // Create new category
   const handleAddCategory = async () => {
@@ -173,7 +195,7 @@ function CategoryManagerInternal({
       if (!selectedGroup) {
         throw new Error('Selected group not found')
       }
-      
+
       const categoryData = {
         user_id: userId,
         name: newCategoryName.trim(),
@@ -182,12 +204,10 @@ function CategoryManagerInternal({
         category_group_id: selectedGroup.id.startsWith('type-') ? undefined : selectedGroup.id,
         is_custom: true
       }
-      
+
       const response = await fetch('/api/categories', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(categoryData),
       })
 
@@ -197,7 +217,6 @@ function CategoryManagerInternal({
 
       const newCategory = await response.json()
 
-      // Track category creation
       Analytics.track('Category Created', {
         category_id: newCategory.id,
         category_name: newCategory.name,
@@ -207,7 +226,7 @@ function CategoryManagerInternal({
       })
 
       await loadData()
-      onCategoryChange() // Refresh related data across the app
+      onCategoryChange()
       onCategoryUpdated?.()
       setNewCategoryName('')
       setNewCategoryColor(SEMANTIC_COLORS[0].value)
@@ -216,7 +235,6 @@ function CategoryManagerInternal({
       console.error('Failed to add category:', err)
       setError('Failed to create category')
 
-      // Track category creation failure
       Analytics.track('Category Creation Failed', {
         category_name: newCategoryName.trim(),
         error_message: err instanceof Error ? err.message : 'Unknown error'
@@ -240,7 +258,6 @@ function CategoryManagerInternal({
       }
 
       if (categoryToDelete) {
-        // Track category deletion
         Analytics.track('Category Deleted', {
           category_id: categoryToDelete.id,
           category_name: categoryToDelete.name,
@@ -248,13 +265,12 @@ function CategoryManagerInternal({
         })
       }
       await loadData()
-      onCategoryChange() // Refresh related data across the app
+      onCategoryChange()
       onCategoryUpdated?.()
     } catch (err) {
       console.error('Failed to delete category:', err)
       setError('Failed to delete category')
 
-      // Track category deletion failure
       Analytics.track('Category Deletion Failed', {
         category_id: categoryId,
         error_message: err instanceof Error ? err.message : 'Unknown error'
@@ -291,9 +307,7 @@ function CategoryManagerInternal({
     try {
       const response = await fetch('/api/categories', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: editingCategoryId,
           name: editingCategoryName.trim(),
@@ -305,7 +319,6 @@ function CategoryManagerInternal({
       }
 
       if (originalCategory) {
-        // Track category update
         Analytics.track('Category Updated', {
           category_id: editingCategoryId,
           old_name: originalCategory.name,
@@ -314,7 +327,7 @@ function CategoryManagerInternal({
         })
       }
       await loadData()
-      onCategoryChange() // Refresh related data across the app
+      onCategoryChange()
       onCategoryUpdated?.()
       setEditingCategoryId(null)
       setEditingCategoryName('')
@@ -322,7 +335,6 @@ function CategoryManagerInternal({
       console.error('Failed to update category:', err)
       setError('Failed to update category')
 
-      // Track category update failure
       Analytics.track('Category Update Failed', {
         category_id: editingCategoryId,
         error_message: err instanceof Error ? err.message : 'Unknown error'
@@ -335,7 +347,7 @@ function CategoryManagerInternal({
   // Create new category group
   const handleAddNewGroup = async () => {
     if (!newGroupName.trim()) return
-    
+
     setIsSubmitting(true)
     try {
       const groupData = {
@@ -345,20 +357,17 @@ function CategoryManagerInternal({
         color: newGroupColor,
         is_default: false
       }
-      
+
       const response = await fetch('/api/category-groups', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(groupData),
       })
-      
+
       if (!response.ok) {
         throw new Error('Failed to create category group')
       }
 
-      // Track category group creation
       Analytics.track('Category Group Created', {
         group_name: newGroupName.trim(),
         group_type: newGroupType,
@@ -366,17 +375,16 @@ function CategoryManagerInternal({
       })
 
       await loadData()
-      onCategoryChange() // Refresh related data across the app
+      onCategoryChange()
       onCategoryUpdated?.()
       setNewGroupName('')
       setNewGroupType('EXPENSE')
       setNewGroupColor(SEMANTIC_COLORS[0].value)
-      setIsNewGroupDialogOpen(false)
+      resetToList()
     } catch (err) {
       console.error('Failed to add group:', err)
       setError('Failed to create category group')
 
-      // Track category group creation failure
       Analytics.track('Category Group Creation Failed', {
         group_name: newGroupName.trim(),
         group_type: newGroupType,
@@ -401,24 +409,20 @@ function CategoryManagerInternal({
         throw new Error('Failed to delete category group')
       }
 
-      const deletedGroup = categoryGroups.find(g => g.id === deleteGroupId)
-      // Track category group deletion
       Analytics.track('Category Group Deleted', {
         group_id: deleteGroupId,
-        group_name: deletedGroup?.name,
-        group_type: deletedGroup?.type
+        group_name: deleteGroup?.name,
+        group_type: deleteGroup?.type
       })
 
       await loadData()
-      onCategoryChange() // Refresh related data across the app
+      onCategoryChange()
       onCategoryUpdated?.()
-      setIsDeleteDialogOpen(false)
-      setDeleteGroupId(null)
+      resetToList()
     } catch (err) {
       console.error('Failed to delete group:', err)
       setError('Failed to delete category group')
 
-      // Track category group deletion failure
       Analytics.track('Category Group Deletion Failed', {
         group_id: deleteGroupId,
         error_message: err instanceof Error ? err.message : 'Unknown error'
@@ -428,12 +432,18 @@ function CategoryManagerInternal({
     }
   }
 
-  const openDeleteDialog = (groupId: string) => {
+  const openCreateGroupMode = () => {
+    setNewGroupName('')
+    setNewGroupType('EXPENSE')
+    setNewGroupColor(SEMANTIC_COLORS[0].value)
+    setMode('create-group')
+    Analytics.track('Add Category Group Form Opened', { trigger: 'add_button' })
+  }
+
+  const openDeleteGroupMode = (groupId: string) => {
     const group = categoryGroups.find(g => g.id === groupId)
     setDeleteGroupId(groupId)
-    setIsDeleteDialogOpen(true)
-
-    // Track delete group dialog opened
+    setMode('delete-group')
     Analytics.track('Delete Category Group Dialog Opened', {
       group_id: groupId,
       group_name: group?.name,
@@ -441,49 +451,31 @@ function CategoryManagerInternal({
     })
   }
 
-  const openNewGroupDialog = () => {
-    setIsNewGroupDialogOpen(true)
+  const listContent = (
+    <>
+      <SheetHeader>
+        <SheetTitle>MANAGE CATEGORIES</SheetTitle>
+        <SheetDescription>
+          Create, edit, and organize your budget categories
+        </SheetDescription>
+      </SheetHeader>
 
-    // Track add group form opened
-    Analytics.track('Add Category Group Form Opened', {
-      trigger: 'add_button'
-    })
-  }
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3 mb-4">
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        )}
 
-  return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className={className}>
-          <Settings className="h-4 w-4 mr-2" />
-          Manage Categories
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[540px]">
-        <SheetHeader>
-          <SheetTitle>MANAGE CATEGORIES</SheetTitle>
-          <SheetDescription>
-            Create, edit, and organize your budget categories
-          </SheetDescription>
-        </SheetHeader>
-        
-        <div className="mt-6">
-            {error && (
-              <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3 mb-4">
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
-            )}
-        
-        {loading && (
+        {loading ? (
           <div className="text-center py-8">
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="h-4 w-4 animate-spin" />
               <p className="text-muted-foreground">Loading categories...</p>
             </div>
           </div>
-        )}
-        
-        {!loading && (
-          <div className="mt-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
+        ) : (
+          <div className="space-y-6">
             {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -498,10 +490,10 @@ function CategoryManagerInternal({
             {/* Category Groups */}
             <div className="space-y-6">
               {displayGroups.map((group) => {
-                const groupCategories = group.categories.filter(cat => 
+                const groupCategories = group.categories.filter(cat =>
                   cat.name.toLowerCase().includes(searchTerm.toLowerCase())
                 )
-                
+
                 return (
                   <div key={group.id} className="space-y-3">
                     {/* Group Header */}
@@ -510,11 +502,11 @@ function CategoryManagerInternal({
                         {group.name}
                       </div>
                       {!group.isDefault && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           className="text-xs px-3 py-1 h-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => openDeleteDialog(group.id)}
+                          onClick={() => openDeleteGroupMode(group.id)}
                           disabled={isSubmitting}
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
@@ -522,13 +514,12 @@ function CategoryManagerInternal({
                         </Button>
                       )}
                     </div>
-                    
+
                     {/* Categories in this group */}
                     <div className="space-y-2">
                       {groupCategories.map((category) => (
                         <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                           {editingCategoryId === category.id ? (
-                            // Edit mode
                             <>
                               <div className="flex items-center space-x-3 flex-1">
                                 <div
@@ -573,7 +564,6 @@ function CategoryManagerInternal({
                               </div>
                             </>
                           ) : (
-                            // View mode
                             <>
                               <div className="flex items-center space-x-3">
                                 <div
@@ -608,13 +598,13 @@ function CategoryManagerInternal({
                           )}
                         </div>
                       ))}
-                      
+
                       {/* Add new category for this group */}
                       {selectedGroupId === group.id && (
                         <div className="flex items-center space-x-2 p-3 border-2 border-dashed border-muted rounded-lg">
                           <Select value={newCategoryColor} onValueChange={setNewCategoryColor}>
                             <SelectTrigger className="w-[60px] h-8 p-1">
-                              <div 
+                              <div
                                 className="w-full h-full rounded"
                                 style={{ backgroundColor: newCategoryColor }}
                               />
@@ -622,8 +612,8 @@ function CategoryManagerInternal({
                             <SelectContent>
                               <div className="grid grid-cols-5 gap-2 p-2">
                                 {SEMANTIC_COLORS.map((color) => (
-                                  <SelectItem 
-                                    key={color.name} 
+                                  <SelectItem
+                                    key={color.name}
                                     value={color.value}
                                     className="p-0 h-6 w-6 rounded-full cursor-pointer focus:ring-2 focus:ring-offset-2"
                                     style={{ backgroundColor: color.value }}
@@ -645,8 +635,8 @@ function CategoryManagerInternal({
                               }
                             }}
                           />
-                          <Button 
-                            onClick={handleAddCategory} 
+                          <Button
+                            onClick={handleAddCategory}
                             size="sm"
                             disabled={!newCategoryName.trim() || isSubmitting}
                             className="h-8 w-8 p-0"
@@ -659,7 +649,7 @@ function CategoryManagerInternal({
                           </Button>
                         </div>
                       )}
-                      
+
                       {/* Create new category button */}
                       {selectedGroupId !== group.id && (
                         <Button
@@ -677,144 +667,157 @@ function CategoryManagerInternal({
                   </div>
                 )
               })}
-              
+
               {/* Add New Group Button */}
               <div className="pt-4 border-t">
-                <Dialog open={isNewGroupDialogOpen} onOpenChange={setIsNewGroupDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-xs px-3 py-2 h-10"
-                      disabled={isSubmitting}
-                      onClick={openNewGroupDialog}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      NEW GROUP
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Create New Category Group</DialogTitle>
-                      <DialogDescription>
-                        Add a new category group to organize your categories.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <label htmlFor="group-name" className="text-right text-sm font-medium">
-                          Name
-                        </label>
-                        <Input
-                          id="group-name"
-                          value={newGroupName}
-                          onChange={(e) => setNewGroupName(e.target.value)}
-                          placeholder="Group name"
-                          className="col-span-3"
-                        />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <label htmlFor="group-type" className="text-right text-sm font-medium">
-                          Type
-                        </label>
-                        <Select value={newGroupType} onValueChange={(value: 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM') => setNewGroupType(value)}>
-                          <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="EXPENSE">Expense</SelectItem>
-                            <SelectItem value="INCOME">Income</SelectItem>
-                            <SelectItem value="TRANSFER">Transfer</SelectItem>
-                            <SelectItem value="CUSTOM">Custom</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <label htmlFor="group-color" className="text-right text-sm font-medium">
-                          Color
-                        </label>
-                        <div className="col-span-3 flex items-center space-x-2">
-                          <Select value={newGroupColor} onValueChange={setNewGroupColor}>
-                            <SelectTrigger className="w-full h-10">
-                              <div className="flex items-center gap-2">
-                                <div 
-                                  className="w-6 h-6 rounded-full"
-                                  style={{ backgroundColor: newGroupColor }}
-                                />
-                                <span className="text-muted-foreground">
-                                  {SEMANTIC_COLORS.find(c => c.value === newGroupColor)?.name || 'Select Color'}
-                                </span>
-                              </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                              {SEMANTIC_COLORS.map((color) => (
-                                <SelectItem key={color.name} value={color.value}>
-                                  <div className="flex items-center gap-2">
-                                    <div 
-                                      className="w-4 h-4 rounded-full" 
-                                      style={{ backgroundColor: color.value }}
-                                    />
-                                    {color.name}
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsNewGroupDialogOpen(false)}
-                        disabled={isSubmitting}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={handleAddNewGroup}
-                        disabled={!newGroupName.trim() || isSubmitting}
-                      >
-                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Create Group
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs px-3 py-2 h-10"
+                  disabled={isSubmitting}
+                  onClick={openCreateGroupMode}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  NEW GROUP
+                </Button>
               </div>
             </div>
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Delete Category Group</DialogTitle>
-                  <DialogDescription>
-                    Are you sure you want to delete this category group? This action cannot be undone and will also delete all categories within this group.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsDeleteDialogOpen(false)}
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={handleDeleteGroup}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Delete Group
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
         )}
+      </div>
+    </>
+  )
+
+  const createGroupContent = (
+    <>
+      <SheetHeader>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={resetToList} className="h-8 w-8 -ml-1">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <SheetTitle>Create New Group</SheetTitle>
         </div>
+        <SheetDescription>Add a new category group to organize your categories.</SheetDescription>
+      </SheetHeader>
+
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        <div className="space-y-2">
+          <label htmlFor="group-name" className="text-sm font-medium">Name</label>
+          <Input
+            id="group-name"
+            value={newGroupName}
+            onChange={(e) => setNewGroupName(e.target.value)}
+            placeholder="Group name"
+          />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="group-type" className="text-sm font-medium">Type</label>
+          <Select value={newGroupType} onValueChange={(value: 'EXPENSE' | 'INCOME' | 'TRANSFER' | 'CUSTOM') => setNewGroupType(value)}>
+            <SelectTrigger id="group-type">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="EXPENSE">Expense</SelectItem>
+              <SelectItem value="INCOME">Income</SelectItem>
+              <SelectItem value="TRANSFER">Transfer</SelectItem>
+              <SelectItem value="CUSTOM">Custom</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="group-color" className="text-sm font-medium">Color</label>
+          <Select value={newGroupColor} onValueChange={setNewGroupColor}>
+            <SelectTrigger id="group-color" className="w-full h-10">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-6 h-6 rounded-full"
+                  style={{ backgroundColor: newGroupColor }}
+                />
+                <span className="text-muted-foreground">
+                  {SEMANTIC_COLORS.find(c => c.value === newGroupColor)?.name || 'Select Color'}
+                </span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {SEMANTIC_COLORS.map((color) => (
+                <SelectItem key={color.name} value={color.value}>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: color.value }}
+                    />
+                    {color.name}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <SheetFooter>
+        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>Cancel</Button>
+        <Button onClick={handleAddNewGroup} disabled={!newGroupName.trim() || isSubmitting}>
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Create Group
+        </Button>
+      </SheetFooter>
+    </>
+  )
+
+  const deleteGroupContent = (
+    <>
+      <SheetHeader>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={resetToList} className="h-8 w-8 -ml-1">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <SheetTitle>Delete Category Group</SheetTitle>
+        </div>
+        <SheetDescription>
+          Are you sure you want to delete this category group? This action cannot be undone and will also delete all categories within this group.
+        </SheetDescription>
+      </SheetHeader>
+
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="p-4 border rounded-lg bg-muted/50">
+          <p className="font-medium text-sm">{deleteGroup?.name}</p>
+          <p className="text-xs text-muted-foreground capitalize">{deleteGroup?.type?.toLowerCase()}</p>
+        </div>
+      </div>
+
+      <SheetFooter>
+        <Button variant="outline" onClick={resetToList} disabled={isSubmitting}>Cancel</Button>
+        <Button variant="destructive" onClick={handleDeleteGroup} disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Delete Group
+        </Button>
+      </SheetFooter>
+    </>
+  )
+
+  const currentContent = {
+    'list': listContent,
+    'create-group': createGroupContent,
+    'delete-group': deleteGroupContent,
+  }[mode]
+
+  if (isEmbedded) {
+    return <div className="flex flex-col gap-2">{currentContent}</div>
+  }
+
+  return (
+    <Sheet open={isOpen} onOpenChange={handleSheetOpenChange}>
+      {!isControlled && (
+        <SheetTrigger asChild>
+          <Button variant="outline" size="sm" className={className}>
+            <Settings className="h-4 w-4 mr-2" />
+            Manage Categories
+          </Button>
+        </SheetTrigger>
+      )}
+      <SheetContent className="w-[400px] sm:w-[540px]">
+        {currentContent}
       </SheetContent>
     </Sheet>
   )
@@ -823,7 +826,7 @@ function CategoryManagerInternal({
 // Wrapper component that handles client-side mounting
 export function CategoryManager(props: CategoryManagerProps) {
   const [isMounted, setIsMounted] = useState(false)
-  
+
   useEffect(() => {
     setIsMounted(true)
   }, [])

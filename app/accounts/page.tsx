@@ -1,30 +1,65 @@
 'use client'
 
-import React, { useState } from 'react'
-import Link from 'next/link'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
-import { Card, CardContent } from '@/components/ui/card'
-import { CreditCard, Wallet, TrendingUp, Building2, Loader2, Plus, ChevronRight, Target } from 'lucide-react'
+import { Card, CardContent, CardHeader } from '@/components/ui/molecules/card'
+import { CreditCard, Wallet, TrendingUp, Building2, Loader2, ChevronRight, Target, Home, Car, Landmark, Smartphone } from 'lucide-react'
 import { useAccounts } from '@/contexts/AccountContext'
 import { formatCurrency } from '@/lib/data-utils'
 import { useGoalsSummary } from '@/hooks/useGoalsQuery'
 import { getGoalIcon, isGoalOnTrack, getProgressColor } from '@/lib/goals/calculations'
-import { AccountNavigation } from '@/components/TopNavigation'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { AccountNavigation } from '@/components/features/navigation/TopNavigation'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/molecules/dialog'
+import { Sheet, SheetContent } from '@/components/ui/organisms/sheet'
 import { AccountDetailView } from '@/components/AccountDetailView'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { WalletsScreen } from '@/components/features/wallets/WalletsScreen'
 
 const ACCOUNT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   BANK: Building2,
   CREDIT_CARD: CreditCard,
   CASH: Wallet,
   INVESTMENT: TrendingUp,
-  OTHER: CreditCard
+  PROPERTY: Home,
+  VEHICLE: Car,
+  MORTGAGE: Landmark,
+  OTHER: CreditCard,
+  DIGITAL_WALLET: Smartphone,
 }
 
 function AccountsPageContent() {
+  const t = useTranslations('accounts')
+  const tAccountDetail = useTranslations('accountDetail')
   const { accounts, loading: accountsLoading } = useAccounts()
   const { data: goalsSummary, isLoading: goalsLoading } = useGoalsSummary()
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null)
+  const isMobile = useIsMobile()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const accountIdParam = searchParams.get('accountId')
+
+  useEffect(() => {
+    if (accountIdParam) {
+      setSelectedAccountId(accountIdParam)
+    }
+  }, [accountIdParam])
+
+  const openAccountDetail = useCallback((accountId: string) => {
+    setSelectedAccountId(accountId)
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('accountId', accountId)
+    router.push(`/accounts?${params.toString()}`)
+  }, [router, searchParams])
+
+  const closeAccountDetail = useCallback(() => {
+    setSelectedAccountId(null)
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('accountId')
+    const query = params.toString()
+    router.replace(query ? `/accounts?${query}` : '/accounts')
+  }, [router, searchParams])
 
   const loading = accountsLoading || goalsLoading
 
@@ -38,12 +73,15 @@ function AccountsPageContent() {
     const aHasGoal = goalsSummary?.goals.some(g => g.accountId === a.id) ? 1 : 0
     const bHasGoal = goalsSummary?.goals.some(g => g.accountId === b.id) ? 1 : 0
     if (aHasGoal !== bHasGoal) return bHasGoal - aHasGoal
-    return b.balance - a.balance
+    const aBalance = a.currentBalance ?? a.balance
+    const bBalance = b.currentBalance ?? b.balance
+    return bBalance - aBalance
   })
 
-  // Filter accounts that can have goals
   const savingsAccounts = sortedAccounts.filter(a => ['BANK', 'INVESTMENT'].includes(a.type))
-  const otherAccounts = sortedAccounts.filter(a => !['BANK', 'INVESTMENT'].includes(a.type))
+  const assetAccounts = sortedAccounts.filter(a => ['PROPERTY', 'VEHICLE'].includes(a.type))
+  const liabilityAccounts = sortedAccounts.filter(a => ['MORTGAGE'].includes(a.type))
+  const otherAccounts = sortedAccounts.filter(a => !['BANK', 'INVESTMENT', 'PROPERTY', 'VEHICLE', 'MORTGAGE'].includes(a.type))
 
   if (loading) {
     return (
@@ -54,32 +92,40 @@ function AccountsPageContent() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
+      <WalletsScreen onOpenAccount={openAccountDetail} />
+      <div className="hidden h-full flex-col md:flex">
       <AccountNavigation />
-
       <PageLayout>
         <TopContent>
           {/* Summary Cards */}
-          {goalsSummary && goalsSummary.goals.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {goalsSummary && goalsSummary.goals.length >= 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
               <Card>
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Total Savings Progress</p>
+                <CardHeader>
+                  <p>{t('totalSavingsProgress')}</p>
+                </CardHeader>
+                <CardContent className="p-2">
                   <p className="text-2xl font-bold">
                     {formatCurrency(goalsSummary.totalSavings)}
                   </p>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Active Goals</p>
-                  <p className="text-2xl font-bold">{goalsSummary.activeGoalsCount}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <p className="text-sm text-muted-foreground mb-1">Completed Goals</p>
-                  <p className="text-2xl font-bold text-success">{goalsSummary.completedGoalsCount}</p>
+                <CardHeader>
+                  <p>{t('goalProgress')}</p>
+                </CardHeader>
+                <CardContent className="p-2">
+                  <div className="flex flex-col grid grid-cols-2">
+                    <div className="col-span-1 flex gap-2">
+                      <p className="text-sm text-muted-foreground mb-1">{t('activeGoals')}</p>
+                      <p className="text-2xl font-bold">{goalsSummary.activeGoalsCount}</p>
+                    </div>
+                    <div className="col-span-1 flex gap-2">
+                      <p className="text-sm text-muted-foreground mb-1">{t('completedGoals')}</p>
+                      <p className="text-2xl font-bold text-success">{goalsSummary.completedGoalsCount}</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -91,7 +137,7 @@ function AccountsPageContent() {
             {/* Savings & Investment Accounts */}
             {savingsAccounts.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-4">Savings & Investment Accounts</h3>
+                <h3 className="text-lg font-semibold mb-4">{t('savingsAndInvestment')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {savingsAccounts.map((account) => {
                     const Icon = ACCOUNT_ICONS[account.type] || CreditCard
@@ -101,7 +147,7 @@ function AccountsPageContent() {
                       : null
 
                     return (
-                      <div key={account.id} onClick={() => setSelectedAccountId(account.id)} className="cursor-pointer">
+                      <div key={account.id} onClick={() => openAccountDetail(account.id)} className="cursor-pointer">
                         <Card className="hover:shadow-md transition-shadow h-full">
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-3">
@@ -121,7 +167,7 @@ function AccountsPageContent() {
 
                             <div className="mb-3">
                               <p className="text-2xl font-bold">
-                                {formatCurrency(account.balance, account.currency)}
+                                {formatCurrency(account.currentBalance ?? account.balance, account.currency)}
                               </p>
                             </div>
 
@@ -140,14 +186,14 @@ function AccountsPageContent() {
                                 </div>
                                 <div className="flex justify-between text-xs text-muted-foreground">
                                   <span>{goal.progressPercentage.toFixed(1)}%</span>
-                                  <span>Target: {formatCurrency(goal.targetAmount, goal.currency)}</span>
+                                  <span>{t('target', { amount: formatCurrency(goal.targetAmount, goal.currency) })}</span>
                                 </div>
                               </div>
                             ) : (
                               <div className="pt-3 border-t">
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <Target className="w-4 h-4" />
-                                  <span className="text-sm">No goal set</span>
+                                  <span className="text-sm">{t('noGoalSet')}</span>
                                 </div>
                               </div>
                             )}
@@ -160,16 +206,15 @@ function AccountsPageContent() {
               </div>
             )}
 
-            {/* Other Accounts */}
-            {otherAccounts.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Other Accounts</h3>
+            {/* Asset Accounts (Property & Vehicle) */}
+            {assetAccounts.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4">{t('assetsAccounts')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {otherAccounts.map((account) => {
+                  {assetAccounts.map((account) => {
                     const Icon = ACCOUNT_ICONS[account.type] || CreditCard
-
                     return (
-                      <div key={account.id} onClick={() => setSelectedAccountId(account.id)} className="cursor-pointer">
+                      <div key={account.id} onClick={() => openAccountDetail(account.id)} className="cursor-pointer">
                         <Card className="hover:shadow-md transition-shadow h-full">
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
@@ -185,8 +230,87 @@ function AccountsPageContent() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <p className={`text-lg font-bold ${account.balance >= 0 ? '' : 'text-destructive'}`}>
-                                  {formatCurrency(account.balance, account.currency)}
+                                <p className="text-lg font-bold">
+                                  {formatCurrency(account.currentBalance ?? account.balance, account.currency)}
+                                </p>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Liability Accounts (Mortgage/KPR) */}
+            {liabilityAccounts.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4">{t('liabilitiesAccounts')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {liabilityAccounts.map((account) => {
+                    const Icon = ACCOUNT_ICONS[account.type] || CreditCard
+                    return (
+                      <div key={account.id} onClick={() => openAccountDetail(account.id)} className="cursor-pointer">
+                        <Card className="hover:shadow-md transition-shadow h-full">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-muted">
+                                  <Icon className="w-5 h-5 text-muted-foreground" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold">{account.name}</h4>
+                                  <p className="text-sm text-muted-foreground capitalize">
+                                    {account.type.toLowerCase().replace('_', ' ')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <p className={`text-lg font-bold text-destructive`}>
+                                  {formatCurrency(account.currentBalance ?? account.balance, account.currency)}
+                                </p>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Other Accounts */}
+            {otherAccounts.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-4">{t('otherAccounts')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {otherAccounts.map((account) => {
+                    const Icon = ACCOUNT_ICONS[account.type] || CreditCard
+
+                    return (
+                      <div key={account.id} onClick={() => openAccountDetail(account.id)} className="cursor-pointer">
+                        <Card className="hover:shadow-md transition-shadow h-full">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-muted">
+                                  <Icon className="w-5 h-5 text-muted-foreground" />
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold">{account.name}</h4>
+                                  <p className="text-sm text-muted-foreground capitalize">
+                                    {account.type.toLowerCase().replace('_', ' ')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <p className={`text-lg font-bold ${(account.currentBalance ?? account.balance) >= 0 ? '' : 'text-destructive'}`}>
+                                  {formatCurrency(account.currentBalance ?? account.balance, account.currency)}
                                 </p>
                                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
                               </div>
@@ -204,27 +328,43 @@ function AccountsPageContent() {
             {accounts.length === 0 && (
               <div className="text-center py-12">
                 <CreditCard className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Accounts Yet</h3>
+                <h3 className="text-lg font-semibold mb-2">{t('noAccountsTitle')}</h3>
                 <p className="text-muted-foreground mb-4">
-                  Create your first account to start tracking your finances
+                  {t('noAccountsDescription')}
                 </p>
               </div>
             )}
           </MainContent>
         </ContentWrapper>
       </PageLayout>
+      </div>
 
-      {/* Account Detail Modal */}
-      <Dialog open={!!selectedAccountId} onOpenChange={(open) => !open && setSelectedAccountId(null)}>
-        <DialogContent className="sm:max-w-[80vw] w-[80vw] h-[80vh] overflow-y-auto">
-          {selectedAccountId && (
-            <AccountDetailView 
-              accountId={selectedAccountId} 
-              isModal={true} 
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Account Detail - Bottom Sheet on mobile, Dialog on desktop */}
+      {isMobile ? (
+        <Sheet open={!!selectedAccountId} onOpenChange={(open) => !open && closeAccountDetail()}>
+          <SheetContent side="bottom" className="h-[95vh] w-full overflow-y-auto rounded-t-2xl px-4 pt-2 pb-6">
+            <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+            {selectedAccountId && (
+              <AccountDetailView
+                accountId={selectedAccountId}
+                isModal={true}
+              />
+            )}
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <Dialog open={!!selectedAccountId} onOpenChange={(open) => !open && closeAccountDetail()}>
+          <DialogContent className="sm:max-w-[80vw] w-[80vw] h-[80vh] overflow-y-auto">
+            <DialogTitle className="sr-only">{tAccountDetail('details.title')}</DialogTitle>
+            {selectedAccountId && (
+              <AccountDetailView
+                accountId={selectedAccountId}
+                isModal={true}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

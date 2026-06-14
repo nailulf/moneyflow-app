@@ -1,0 +1,1344 @@
+{
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Enter your email below to login to your account",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Login",
+      "orContinueWith": "Or continue with",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "successLoggedIn": "Logged in successfully",
+      "errors": {
+        "invalidEmail": "Invalid email address",
+        "passwordTooShort": "Password must be at least 6 characters"
+      }
+    },
+    "register": {
+      "title": "Create an account",
+      "subtitle": "Enter your details below to create your account",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "primaryCurrency": "Primary Currency",
+      "currencyPlaceholder": "Currency",
+      "country": "Country",
+      "countryPlaceholder": "Country",
+      "goal": "What's your main goal?",
+      "goalOptional": "(optional)",
+      "submit": "Sign Up",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "verificationNotice": "We'll send a verification link to your email address. You'll need to click it before you can sign in.",
+      "verificationConsent": "I understand that I will need to verify my email address to access my account.",
+      "successDev": "Registration successful! You are now signed in.",
+      "successProd": "Registration successful! Please check your email to verify your account.",
+      "errors": {
+        "fullNameTooShort": "Full name must be at least 2 characters",
+        "invalidEmail": "Invalid email address",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "passwordNeedsNumber": "Password must contain at least one number",
+        "passwordsDontMatch": "Passwords don't match",
+        "selectCountry": "Please select your country",
+        "mustAcknowledgeVerification": "You must acknowledge the email verification requirement"
+      },
+      "goals": {
+        "networth_tracking": "Manage and track my networth",
+        "expense_management": "Manage personal expenses & budgets",
+        "family_budget": "Manage and prepare family budget & expenses",
+        "saving_goals": "Manage saving to achieve targets",
+        "debt_payoff": "Manage debt"
+      }
+    },
+    "layout": {
+      "tagline": "Know where your money goes—and where it can take you.",
+      "ctaText": "See every expense clearly, so your money feels under control. Get started with MoneyFlow today.",
+      "termsPrefix": "By logging in, you agree to our",
+      "termsOfService": "terms of service",
+      "and": "and",
+      "privacyPolicy": "privacy policy",
+      "features": {
+        "uploadExpenses": "Upload Expenses",
+        "manageBudgets": "Manage Budgets",
+        "cashFlowClarity": "Cash Flow Clarity",
+        "networthTracker": "Networth Tracker",
+        "connectCFP": "Connect CFP",
+        "aiPowered": "AI powered"
+      }
+    },
+    "verifyEmail": {
+      "title": "Check your email",
+      "description": "We've sent a verification link to",
+      "instruction": "Click the link in the email to verify your account. If you don't see it, check your spam folder.",
+      "resendCountdown": "Resend email in {countdown}s",
+      "resendButton": "Resend verification email",
+      "backToLogin": "Back to Login",
+      "needHelp": "Need help?",
+      "contactSupport": "Contact Support",
+      "toasts": {
+        "emailMissing": "Email address is missing",
+        "sentSuccess": "Verification email sent successfully",
+        "rateLimited": "Please wait a moment before trying again",
+        "sendFailed": "Failed to resend verification email"
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email address and we'll send you a link to reset your password",
+      "email": "Email",
+      "emailPlaceholder": "m@example.com",
+      "submit": "Send Reset Link",
+      "rememberPassword": "Remember your password?",
+      "signIn": "Sign in",
+      "successEmailSent": "Check your email for the password reset link",
+      "errorFailed": "Failed to send password reset email",
+      "errors": {
+        "invalidEmail": "Invalid email address"
+      }
+    },
+    "social": {
+      "orContinueWith": "Or continue with",
+      "oauthError": "Failed to connect with {provider}. Please try again."
+    }
+  },
+  "nav": {
+    "upgradeLabel": "Upgrade to Pro",
+    "manageCategories": "Manage Categories",
+    "manageAccounts": "Manage Accounts",
+    "account": "Account",
+    "billing": "Billing",
+    "notifications": "Notifications",
+    "logOut": "Log out",
+    "language": "Language",
+    "languageOptions": {
+      "en": "English",
+      "id": "Indonesian"
+    }
+  },
+  "layout": {
+    "pageTitle": {
+      "spending": "Spending",
+      "accounts": "Accounts",
+      "portfolio": "Portfolio",
+      "forecast": "Forecast",
+      "budget": "Budget",
+      "transactions": "Transactions",
+      "charts": "Charts",
+      "invest": "Invest",
+      "advice": "Advice",
+      "tax": "Tax",
+      "equity": "Equity",
+      "estatePlanning": "Estate Planning",
+      "dashboard": "Dashboard"
+    }
+  },
+  "spending": {
+    "breakdown": {
+      "title": "Budget Report",
+      "description": "View your budget performance and spending patterns"
+    },
+    "cashflow": {
+      "title": "Cash Flow",
+      "description": "Visualize your income and expenses flow",
+      "totalIncome": "Total Income",
+      "totalExpenses": "Total Expenses",
+      "netCashFlow": "Net Cash Flow",
+      "month": "Month",
+      "year": "Year"
+    },
+    "transactions": {
+      "allTransactions": "All Transactions",
+      "recurringTransactions": "Recurring Transactions"
+    }
+  },
+  "cashflowBreakdown": {
+    "title": "Cash Flow Breakdown",
+    "viewBy": "View by",
+    "tabs": {
+      "expenses": "Expenses",
+      "budget": "Budget",
+      "income": "Income"
+    },
+    "noData": "No data available",
+    "noExpenseData": "No expense data available",
+    "noIncomeData": "No income data available",
+    "expensesTitle": "Expenses",
+    "totalSpending": "Total spending this month: {amount}",
+    "expensesBreakdown": "Expenses Breakdown",
+    "expenseCategories": "{count} expense categories",
+    "incomeSources": "Income Sources",
+    "incomeBreakdown": "Income Breakdown",
+    "totalIncome": "Total income this month: {amount}",
+    "incomeCounts": "{count} income sources",
+    "budgetPerformance": "Budget Performance",
+    "upcoming": "Upcoming",
+    "projectedBudget": "Projected budget for this period",
+    "budgetUsed": "{percent}% of budget used",
+    "editBudget": "Edit budget",
+    "categoryBreakdown": "Category Breakdown",
+    "budgetCategoriesCount": "{count} budget categories",
+    "noBudgetCategories": "No budget categories",
+    "noBudgetForPeriod": "No budget set for this period",
+    "createBudgetPrompt": "Create a budget to track your spending against targets.",
+    "setupBudget": "Set up your budget",
+    "errorLoading": "Error loading budget data.",
+    "status": {
+      "over": "Over",
+      "warning": "Warning",
+      "onTrack": "On track"
+    },
+    "amounts": {
+      "spent": "Spent",
+      "budget": "Budget",
+      "left": "Left"
+    }
+  },
+  "cashflowSummary": {
+    "title": "Cash Flow",
+    "income": "Income",
+    "spending": "Spending",
+    "netCashFlow": "Net Cash Flow"
+  },
+  "budgetFilterBar": {
+    "period": "Period",
+    "year": "Year",
+    "month": "Month",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "filterPeriod": "Filter Period",
+    "createBudget": "Create Budget",
+    "budget": "Budget"
+  },
+  "accounts": {
+    "totalSavingsProgress": "Total Savings Progress",
+    "activeGoals": "Active Goals",
+    "goalProgress": "Goal Progress",
+    "completedGoals": "Completed Goals",
+    "savingsAndInvestment": "Savings & Investment Accounts",
+    "assetsAccounts": "Assets",
+    "liabilitiesAccounts": "Liabilities",
+    "otherAccounts": "Other Accounts",
+    "noAccountsTitle": "No Accounts Yet",
+    "noAccountsDescription": "Create your first account to start tracking your finances",
+    "noGoalSet": "No goal set",
+    "target": "Target: {amount}"
+  },
+  "transactions": {
+    "title": "TRANSACTIONS",
+    "recentTransactions": "Recent Transactions",
+    "loading": "Loading...",
+    "noTransactionsFound": "No transactions found",
+    "search": "Search",
+    "allCategories": "All Categories",
+    "allMerchants": "All Merchants",
+    "filters": "Filters",
+    "dateRange": "Date Range",
+    "category": "Category",
+    "merchant": "Merchant",
+    "applyFilters": "Apply Filters",
+    "summary": {
+      "total": "Total transactions",
+      "dateRange": "Date range",
+      "noTransactions": "No transactions",
+      "totalExpenses": "Total expenses",
+      "totalIncome": "Total income",
+      "balance": "Balance"
+    },
+    "columns": {
+      "merchantDescription": "Merchant / Description",
+      "category": "Category",
+      "amount": "Amount"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "loadMore": "Load More ({remaining} remaining)",
+    "loadingMore": "Loading more transactions...",
+    "allLoaded": "All transactions loaded ({total} total)",
+    "confirmCategoryChange": {
+      "title": "Confirm Category Change",
+      "description": "Are you sure you want to change the category for \"{description}\" to \"{category}\"?",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "updating": "Updating..."
+    },
+    "confirmDelete": {
+      "title": "Delete Transaction",
+      "description": "Are you sure you want to delete this transaction? This action cannot be undone.",
+      "details": "Transaction Details:",
+      "merchantLabel": "Merchant",
+      "amountLabel": "Amount",
+      "dateLabel": "Date",
+      "notAvailable": "N/A",
+      "cancel": "Cancel",
+      "delete": "Delete Transaction",
+      "deleting": "Deleting..."
+    },
+    "noDescription": "No description",
+    "form": {
+      "addTitle": "Add New Transaction",
+      "editTitle": "Edit Transaction",
+      "addTrigger": "Add Transaction",
+      "manualEntry": "Manual Entry",
+      "uploadPdf": "Upload PDF",
+      "date": "Date",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter description",
+      "amount": "Amount",
+      "type": "Type",
+      "selectType": "Select type",
+      "typeExpense": "Expense",
+      "typeIncome": "Income",
+      "typeTransfer": "Transfer",
+      "category": "Category",
+      "categoryLoading": "Loading categories...",
+      "noCategoriesForType": "No categories for this type",
+      "loadingShort": "Loading...",
+      "selectCategory": "Select category",
+      "noCategoriesAvailable": "No categories available for this type",
+      "account": "From Account",
+      "selectAccount": "Select account",
+      "toAccount": "To Account",
+      "selectToAccount": "Select destination account",
+      "currency": "Currency",
+      "noAccountsAvailable": "No accounts available",
+      "merchantOpt": "Merchant (Opt)",
+      "merchantPlaceholder": "Enter merchant name",
+      "recurringTransaction": "Recurring Transaction",
+      "frequency": "Frequency",
+      "selectFrequency": "Select frequency",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "period": "Period",
+      "continuous": "Continuous (No end date)",
+      "endDate": "End Date",
+      "cancel": "Cancel",
+      "adding": "Adding...",
+      "addButton": "Add Transaction",
+      "updating": "Updating...",
+      "updateButton": "Update Transaction",
+      "uploadProcess": "Upload & Process"
+    },
+    "confirmation": {
+      "title": "Confirm Transaction Import",
+      "transactionsLabel": "Transactions",
+      "credits": "Credits ({count})",
+      "debits": "Debits ({count})",
+      "netAmount": "Net Amount",
+      "importDetails": "Import Details",
+      "targetAccount": "Target Account:",
+      "dateRange": "Date Range:",
+      "categoryBreakdown": "Category Breakdown",
+      "transactionsBadge": "transactions",
+      "transactionPreview": "Transaction Preview",
+      "showLess": "Show Less",
+      "showAll": "Show All ({count})",
+      "headerDate": "Date",
+      "headerDescription": "Description",
+      "headerAmount": "Amount",
+      "headerCategory": "Category",
+      "showing": "Showing {shown} of {total} transactions",
+      "previous": "Previous",
+      "page": "Page {page} of {total}",
+      "next": "Next",
+      "uncategorized": "Uncategorized",
+      "alertTitle": "Ready to Import",
+      "alertDescription": "You are about to import {count} transactions into {account}. This action cannot be undone.",
+      "alertReview": "Please review the transaction details above and click \"Import Transactions\" to proceed.",
+      "backToPreview": "Back to Preview",
+      "importing": "Importing...",
+      "importButton": "Import Transactions"
+    },
+    "statementProcessor": {
+      "dropHere": "Drop your file here",
+      "clickToBrowse": "or click to browse",
+      "takePhoto": "Take Photo",
+      "uploadImage": "Upload Image",
+      "fileSupport": "Supports PDF bank statements · JPG, PNG, WEBP receipts & invoices",
+      "selectAccount": "Select Account",
+      "chooseAccount": "Choose account...",
+      "noAccountsAvailable": "No accounts available",
+      "useAI": "Use AI for enhanced extraction & categorization",
+      "processingStatement": "Processing statement...",
+      "cancel": "Cancel",
+      "uploadProcess": "Upload & Process",
+      "reviewTitle": "Review Transactions",
+      "reviewDescription": "{selected} of {total} selected. Review and edit before importing.",
+      "account": "Account:",
+      "currency": "Currency:",
+      "searchPlaceholder": "Search description or merchant...",
+      "allTypes": "All Types",
+      "incomeOnly": "Income Only",
+      "expenseOnly": "Expense Only",
+      "recategorize": "Re-categorize",
+      "headerDate": "Date",
+      "headerType": "Type",
+      "headerDescription": "Description",
+      "headerMerchant": "Merchant",
+      "headerNotes": "Notes",
+      "headerCategory": "Category",
+      "headerAmount": "Amount",
+      "noTransactions": "No transactions found",
+      "noTransactionsFromFile": "We couldn't extract any transactions from the uploaded file.",
+      "noTransactionsFilter": "Try adjusting your filters to see more results.",
+      "possibleDuplicate": "Possible duplicate",
+      "uncategorized": "Uncategorized",
+      "expensesGroup": "Expenses",
+      "incomeGroup": "Income",
+      "transfersGroup": "Transfers",
+      "typeIncome": "Income",
+      "typeExpense": "Expense",
+      "typeTransfer": "Transfer",
+      "selected": "Selected: {count}",
+      "totalAmount": "Total: {amount}",
+      "cancelReview": "Cancel",
+      "addTransactions": "Add transactions",
+      "discardTitle": "Discard changes?",
+      "discardDescription": "Are you sure you want to close? Unsaved progress will be lost.",
+      "discardCancel": "Cancel",
+      "discardConfirm": "Discard"
+    },
+    "screen": {
+      "title": "Transactions",
+      "searchPlaceholder": "Search transactions",
+      "tabs": { "all": "All", "income": "Income", "expense": "Expense", "transfer": "Transfer" },
+      "summary": { "income": "Income", "expense": "Exp" },
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "uncategorized": "Uncategorized",
+      "noAccount": "No account",
+      "empty": "No transactions",
+      "emptyFiltered": "No transactions match your filters",
+      "reset": "Reset",
+      "filter": { "title": "Filters", "titleWithCount": "Filters ({count} active)", "categories": "Categories", "accounts": "Accounts", "amountMin": "Min amount", "amountMax": "Max amount", "apply": "Apply", "reset": "Reset" }
+    }
+  },
+  "navigation": {
+    "sidebar": {
+      "tagline": "Personal Finance"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "accounts": "Accounts",
+      "spending": "Spending",
+      "portfolio": "Portfolio",
+      "forecast": "Forecast",
+      "advice": "Advice",
+      "home": "Home",
+      "spend": "Spend",
+      "invest": "Invest",
+      "wallets": "Wallets",
+      "budget": "Budget",
+      "transactions": "Transactions",
+      "equity": "Equity",
+      "charts": "Charts",
+      "more": "More",
+      "comingSoon": "Coming soon",
+      "addTransaction": "Add Transaction"
+    },
+    "topNav": {
+      "overview": "Overview",
+      "breakdown": "Breakdown",
+      "cashFlow": "Cash Flow",
+      "transaction": "Transaction",
+      "holdings": "Holdings",
+      "analytics": "Analytics",
+      "forecast": "Forecast"
+    }
+  },
+  "onboarding": {
+    "modal": {
+      "title": "Complete your setup",
+      "progress": "{completed} of {total} complete",
+      "stepOf": "Step {current} of {total}",
+      "skipSetup": "Skip setup for now",
+      "srTitle": "Complete your setup"
+    },
+    "steps": {
+      "accountSetup": {
+        "title": "Create your first account",
+        "description": "Set up a bank account, credit card, or e-wallet"
+      },
+      "categories": {
+        "title": "Review your categories",
+        "description": "We've set up default categories for you"
+      },
+      "budgetSetup": {
+        "title": "Set up your budget",
+        "description": "Create a spending plan for the month"
+      }
+    },
+    "stepItem": {
+      "done": "Done",
+      "pending": "Pending"
+    },
+    "welcome": {
+      "heading": "Welcome, {name} 👋",
+      "tagline": "In 3 minutes, we'll set up your first account and budget.",
+      "helpIntro": "We'll help you:",
+      "bullets": {
+        "account": "Add your first account · 60s",
+        "categories": "Pick spending categories · 60s",
+        "budget": "Set a simple budget · 60s"
+      },
+      "features": {
+        "track": {
+          "title": "Track expenses across all accounts",
+          "description": "Connect your bank accounts, credit cards, and e-wallets in one place"
+        },
+        "budgets": {
+          "title": "Create budgets that actually work",
+          "description": "Set spending limits and get alerts before you overspend"
+        },
+        "insights": {
+          "title": "Understand where your money goes",
+          "description": "Visual insights and reports to help you make better financial decisions"
+        }
+      },
+      "setupTime": "Setup takes about 3 minutes",
+      "startSetup": "Start Setup",
+      "skipForNow": "Skip for now",
+      "skipNote": "You can always complete the setup later from your dashboard"
+    },
+    "completion": {
+      "finishing": "Finishing setup...",
+      "titleWithName": "You're all set, {name}! 🎉",
+      "title": "You're all set! 🎉",
+      "description": "Your workspace is ready. Now let's do the one thing that makes this app useful:",
+      "summary": {
+        "title": "Setup Summary",
+        "accountCreated": "{count} account created",
+        "accountsCreated": "{count} accounts created",
+        "accountsReady": "Accounts ready (add later)",
+        "categoriesConfigured": "{count} categories configured",
+        "budgetCreated": "Budget created",
+        "budgetReady": "Budget ready (create when you want)"
+      },
+      "firstExpense": {
+        "title": "Record your first expense",
+        "subtitle": "Takes under 30 seconds"
+      },
+      "addFirstExpense": "Add first expense",
+      "skipToDashboard": "Skip for now · go to dashboard",
+      "goToDashboard": "Go to Dashboard"
+    },
+    "accountSetup": {
+      "accountTypeLabel": "Account Type *",
+      "selectAccountType": "Select account type",
+      "moreTypes": "More types…",
+      "autoFilledFromBank": "Auto-filled from bank selection",
+      "currencyFromRegistration": "Using the currency from your registration",
+      "bankInstitution": "Bank / Institution",
+      "optional": "(optional)",
+      "searchBanks": "Search banks & e-wallets…",
+      "banks": "Banks",
+      "eWallets": "E-Wallets",
+      "noResults": "No results for \"{search}\"",
+      "accountNameLabel": "Account Name *",
+      "accountNamePlaceholder": "e.g., My BCA Checking, Main Cash",
+      "atLeast3Chars": "At least 3 characters required",
+      "currencyLabel": "Currency *",
+      "selectCurrency": "Select currency",
+      "startingBalance": "Starting Balance",
+      "balanceNote": "Enter your current balance — you can update this anytime",
+      "errors": {
+        "enterName": "Please enter an account name",
+        "minChars": "Account name must be at least 3 characters",
+        "notAuthenticated": "User not authenticated",
+        "failedToCreate": "Failed to create account. Please try again."
+      },
+      "skip": "Skip this step",
+      "creating": "Creating…",
+      "continue": "Continue",
+      "accountTypes": {
+        "BANK": {
+          "label": "Bank Account",
+          "description": "Checking or savings account"
+        },
+        "CREDIT_CARD": {
+          "label": "Credit Card",
+          "description": "Credit card account"
+        },
+        "CASH": {
+          "label": "Cash",
+          "description": "Cash on hand"
+        },
+        "INVESTMENT": {
+          "label": "Investment",
+          "description": "Stocks, bonds, mutual funds"
+        },
+        "PROPERTY": {
+          "label": "Property",
+          "description": "House, apartment, or land"
+        },
+        "VEHICLE": {
+          "label": "Vehicle",
+          "description": "Car, motorcycle, etc."
+        },
+        "MORTGAGE": {
+          "label": "Mortgage / KPR",
+          "description": "Home loan or mortgage"
+        },
+        "DIGITAL_WALLET": { "label": "Digital Wallet", "description": "GoPay, OVO, Dana, etc." },
+        "OTHER": {
+          "label": "Other",
+          "description": "Anything else"
+        }
+      },
+      "assetDetails": {
+        "propertyType": "Property Type",
+        "propertyTypePlaceholder": "Select property type",
+        "propertyTypes": {
+          "house": "House",
+          "apartment": "Apartment",
+          "land": "Land"
+        },
+        "location": "Location (optional)",
+        "locationPlaceholder": "e.g., Jakarta Selatan",
+        "depreciationRate": "Annual Depreciation Rate (%)",
+        "depreciationRatePlaceholder": "15",
+        "depreciationRateHint": "Default 15% per year",
+        "monthlyPayment": "Monthly Payment",
+        "mortgageEndDate": "Final Payment Month",
+        "mortgageEndDateHint": "The month and year of your last mortgage payment",
+        "balanceLabel": {
+          "property": "Current Value",
+          "vehicle": "Current Value",
+          "mortgage": "Outstanding Balance"
+        },
+        "balanceHint": {
+          "property": "Enter the current estimated value of the property",
+          "vehicle": "Enter the current estimated value of the vehicle",
+          "mortgage": "Enter the outstanding (remaining) mortgage balance"
+        }
+      }
+    },
+    "budgetSetup": {
+      "monthlyIncomeLabel": "Monthly Income (after tax)",
+      "incomePlaceholder": "e.g., 10000000",
+      "chooseBudgetTemplate": "Choose a Budget Template",
+      "needs": "Needs",
+      "wants": "Wants",
+      "savings": "Savings",
+      "budgetPreview": "Budget Preview",
+      "incomeAllocated": "{percent}% of income allocated",
+      "editNote": "You can create or edit budgets anytime from your dashboard",
+      "skipBudget": "Skip budget",
+      "back": "Back",
+      "creating": "Creating...",
+      "createBudget": "Create Budget",
+      "errors": {
+        "incomeRequired": "Enter your monthly income",
+        "incomeInvalid": "Enter a valid number",
+        "incomeMin": "Income must be 0 or greater",
+        "incomeMax": "That amount is too large"
+      }
+    }
+  },
+  "accountManager": {
+    "title": "MANAGE ACCOUNTS",
+    "description": "Create, edit, and organize your bank accounts",
+    "loadingAccounts": "Loading accounts...",
+    "searchPlaceholder": "Search accounts...",
+    "addNewAccount": "Add New Account",
+    "yourAccounts": "Your Accounts ({count})",
+    "default": "Default",
+    "noAccountsSearch": "No accounts found matching your search.",
+    "noAccounts": "No accounts found. Create your first account!",
+    "close": "Close",
+    "addAccount": "Add Account",
+    "manageAccounts": "Manage Accounts",
+    "create": {
+      "title": "Add New Account",
+      "description": "Create a new account to track your transactions.",
+      "name": "Name",
+      "type": "Type",
+      "currency": "Currency",
+      "initialBalance": "Initial Balance",
+      "namePlaceholder": "e.g., Chase Checking",
+      "balancePlaceholder": "0.00",
+      "cancel": "Cancel",
+      "createAccount": "Create Account"
+    },
+    "edit": {
+      "title": "Edit Account",
+      "description": "Update account information.",
+      "name": "Name",
+      "type": "Type",
+      "currency": "Currency",
+      "namePlaceholder": "Account name",
+      "cancel": "Cancel",
+      "updateAccount": "Update Account"
+    },
+    "delete": {
+      "title": "Delete Account",
+      "description": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+      "defaultWarning": "This is your default account and cannot be deleted.",
+      "cancel": "Cancel",
+      "deleteAccount": "Delete Account"
+    },
+    "accountTypes": {
+      "bank": "Bank",
+      "creditCard": "Credit Card",
+      "cash": "Cash",
+      "investment": "Investment",
+      "other": "Other",
+      "property": "Property",
+      "vehicle": "Vehicle",
+      "mortgage": "Mortgage / KPR", "digitalWallet": "Digital Wallet"
+    },
+    "groups": {
+      "savingsInvestment": "Savings & Investment",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "other": "Other"
+    },
+    "assetDetails": {
+      "propertyType": "Property Type",
+      "propertyTypePlaceholder": "Select property type",
+      "propertyTypes": {
+        "house": "House",
+        "apartment": "Apartment",
+        "land": "Land"
+      },
+      "location": "Location (optional)",
+      "locationPlaceholder": "e.g., Jakarta Selatan",
+      "depreciationRate": "Annual Depreciation Rate (%)",
+      "depreciationRatePlaceholder": "15",
+      "depreciationRateHint": "Default 15% per year",
+      "monthlyPayment": "Monthly Payment",
+      "monthlyPaymentPlaceholder": "e.g., 3500000",
+      "mortgageEndDate": "Final Payment Month",
+      "mortgageEndDateHint": "The month and year of your last mortgage payment",
+      "balanceHint": {
+        "property": "Enter the current estimated value of the property",
+        "vehicle": "Enter the current estimated value of the vehicle",
+        "mortgage": "Enter the outstanding (remaining) mortgage balance"
+      }
+    }
+  },
+  "accountDetail": {
+    "backToAccounts": "Back to Accounts",
+    "tabs": {
+      "overview": "Overview",
+      "transactions": "Transactions"
+    },
+    "details": {
+      "title": "Account Details",
+      "accountType": "Account Type",
+      "currency": "Currency",
+      "initialBalance": "Initial Balance",
+      "currentBalance": "Current Balance",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "descriptionLabel": "Description"
+    },
+    "default": "Default",
+    "actions": {
+      "edit": "Edit",
+      "export": "Export",
+      "adjust": "Adjust",
+      "delete": "Delete"
+    },
+    "editDialog": {
+      "title": "Edit Account",
+      "subtitle": "Make changes to your account details here.",
+      "name": "Name",
+      "type": "Type",
+      "balance": "Balance",
+      "currency": "Currency",
+      "amount": "Amount",
+      "currencyChangedNote": "Currency changed from {from} to {to}. How would you like to handle the balance?",
+      "keepValue": "Keep the same numeric value ({balance} {currency})",
+      "convertAmount": "Convert amount (coming soon)",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "selectAccountType": "Select account type",
+      "selectCurrency": "Select currency",
+      "cancel": "Cancel",
+      "saveChanges": "Save changes"
+    },
+    "deleteDialog": {
+      "title": "Delete Account",
+      "description": "Are you sure you want to delete this account? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "adjustDialog": {
+      "title": "Adjust Balance",
+      "subtitle": "Set the correct current balance. Your existing transactions will not be changed.",
+      "currentBalance": "Current",
+      "newBalance": "New Balance",
+      "date": "Date",
+      "note": "Note",
+      "notePlaceholder": "e.g. Bank statement reconciliation",
+      "adjustment": "Adjustment",
+      "cancel": "Cancel",
+      "confirm": "Adjust Balance",
+      "adjusting": "Adjusting..."
+    },
+    "adjustments": {
+      "title": "Balance History"
+    },
+    "chart": {
+      "title": "Balance Over Time"
+    }
+  },
+  "dashboard": {
+    "netWorth": {
+      "totalNetWorth": "Total Net Worth",
+      "noData": "No data available",
+      "netWorth": "Net Worth",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "noAssetsRecorded": "No assets recorded",
+      "noLiabilitiesRecorded": "No liabilities recorded",
+      "added": "Added",
+      "recently": "recently",
+      "periods": {
+        "allTime": "all time",
+        "lastWeek": "last week",
+        "lastMonth": "last month",
+        "last3Months": "last 3 months",
+        "lastYear": "last year",
+        "last5Years": "last 5 years"
+      }
+    },
+    "budget": {
+      "budgetIn": "Budget in {period}",
+      "failedToLoad": "Failed to load budget",
+      "noBudgetSet": "No budget set"
+    },
+    "onboarding": {
+      "title": "Complete Your Setup",
+      "description": "You haven't finished setting up MoneyFlow. Complete the setup to unlock all features.",
+      "features": {
+        "trackExpenses": "Track expenses across all accounts",
+        "createBudgets": "Create budgets that work",
+        "understandSpending": "Understand your spending"
+      },
+      "completeSetup": "Complete Setup",
+      "maybeLater": "Maybe Later"
+    },
+    "activationBanner": {
+      "ariaLabel": "Activation checklist",
+      "greeting": "Welcome, {name} 👋",
+      "greetingFallback": "Welcome 👋",
+      "subtitle": "Here are a few things you can do this week to get the most out of your dashboard.",
+      "title": "Get set up",
+      "progress": "{completed} of {total} complete · unlocks your insights",
+      "dismiss": "Dismiss",
+      "steps": {
+        "nextStep": "Next step",
+        "firstExpense": {
+          "title": "Record first expense",
+          "subtitle": "Start tracking your spending",
+          "done": "Done"
+        },
+        "categories": {
+          "title": "Add 4 more this week",
+          "subtitle": "Build up your history",
+          "done": "Done"
+        },
+        "firstGoal": {
+          "title": "Set your first goal",
+          "subtitle": "Emergency, vacation, or anything",
+          "done": "Done"
+        },
+        "uploadStatement": {
+          "title": "Upload a bank statement",
+          "subtitle": "Auto-import transactions",
+          "done": "Done"
+        }
+      }
+    },
+    "goals": {
+      "title": "Financial Goals",
+      "subtitle": "Track progress towards your savings targets",
+      "failedToLoad": "Failed to load financial goals",
+      "emptyTitle": "Start Your Savings Journey",
+      "emptyDescription": "Set financial goals for your bank and investment accounts to track your progress towards your dreams.",
+      "setFirstGoal": "Set Your First Goal",
+      "manageGoals": "Manage Goals",
+      "goalsCount": "Goals",
+      "completedCount": "Completed",
+      "target": "Target"
+    }
+  },
+  "forecast": {
+    "tabs": {
+      "netWorth": "Net Worth",
+      "cashFlow": "Cash Flow",
+      "simulation": "Simulation"
+    },
+    "addEventsCustomize": "Add events or customize",
+    "summary": "Summary",
+    "chart": {
+      "currentNetWorth": "Current net worth",
+      "futureNetWorthAt": "Future net worth at {age}",
+      "netWorth": "Net Worth",
+      "eventCost": "Event cost",
+      "topRange": "Top range",
+      "midRange": "Mid range",
+      "median": "Median",
+      "bottomRange": "Bottom range",
+      "income": "Income",
+      "expense": "Expense",
+      "computing": "Computing projection...",
+      "noProjection": "No projection available",
+      "preRetire": "Pre-retire",
+      "postRetire": "Post-retire",
+      "average": "Average",
+      "avgPerYear": "{amount} avg/year",
+      "chanceOfSuccess": "Chance of success",
+      "medianNetWorthAt": "Median net worth at {age}",
+      "avgProjectedReturn": "Average projected annual return",
+      "successDescriptionHigh": "After factoring in your events, you meet or exceed your target net worth in {rate}% of the simulations.",
+      "successDescriptionLow": "After factoring in your events, you may not reach your target net worth in {rate}% of the simulations.",
+      "medianDescription": "Most outcomes are concentrated around {amount}, the median result.",
+      "returnDescription": "Projected to grow at {rate}% per year for {years} years, adjusted for inflation.",
+      "today": "TODAY",
+      "yearN": "YEAR {n}"
+    },
+    "insights": {
+      "lowSuccess": "Less than half of simulated paths end {targetLabel}. Review return assumptions or increase contributions.",
+      "highSuccess": "Strong forecast: 90%+ of simulations end {targetLabel} at the horizon.",
+      "belowToday": "Projected median wealth ends below today. Consider increasing contributions or reducing withdrawals.",
+      "negativeCashflowMonths": "Negative median cashflow ({months}-month sample) drags the forecast.",
+      "negativeCashflow": "Negative average cashflow drags the forecast.",
+      "highVolatility": "High volatility increases downside risk. Balance allocations to smooth returns.",
+      "onTrack": "Scenario is on track. Keep monitoring contributions and adjust if goals change.",
+      "targetAbove": "above target ({amount})",
+      "targetPositive": "positive"
+    },
+    "customize": {
+      "title": "Customize Forecast",
+      "description": "Add life events and adjust scenario settings.",
+      "tabEvents": "Life Events",
+      "tabSettings": "Settings"
+    },
+    "categories": {
+      "PROPERTY": { "label": "Property", "template": "Buy a home" },
+      "WEDDING": { "label": "Wedding", "template": "Plan a wedding" },
+      "KIDS": { "label": "Kids", "template": "Have a kid" },
+      "EDUCATION": { "label": "Education", "template": "College savings" },
+      "HAJJ": { "label": "Hajj", "template": "Hajj pilgrimage" },
+      "VEHICLE": { "label": "Vehicle", "template": "Buy a vehicle" },
+      "RETIREMENT": { "label": "Retirement", "template": "Plan retirement" },
+      "OTHER": { "label": "Other", "template": "Custom event" }
+    },
+    "events": {
+      "yourEvents": "Your events",
+      "addEvent": "Add event",
+      "eventTitle": "Event title",
+      "year": "Year",
+      "purchaseYear": "Purchase year",
+      "homePrice": "Home price",
+      "vehiclePrice": "Vehicle price",
+      "paymentType": "Payment type",
+      "loan": "Loan",
+      "cash": "Cash",
+      "downPayment": "Down payment (%)",
+      "loanTerm": "Loan term",
+      "years": "{n} years",
+      "interestRate": "Interest rate (%)",
+      "estMonthlyPayment": "Estimated monthly payment",
+      "totalCost": "Total cost",
+      "annualCost": "Annual cost",
+      "annualCostHint": "Estimated yearly cost of raising a child.",
+      "untilAge": "Until age",
+      "annualTuition": "Annual tuition",
+      "duration": "Duration (years)",
+      "recurring": "Recurring",
+      "numberOfYears": "Number of years",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "settings": {
+      "scenarioSection": "Scenario",
+      "scenarioSectionDescription": "Pick the scenario to edit or create a new one.",
+      "scenarioActions": "Scenario actions",
+      "newScenario": "New scenario",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "details": "Details",
+      "name": "Name",
+      "description": "Description",
+      "timelineGoal": "Timeline & goal",
+      "startDate": "Start Date",
+      "horizonYears": "Horizon (years)",
+      "targetNetWorth": "Target Net Worth",
+      "targetHint": "Success rate measures the percentage of simulations ending above this value.",
+      "marketAssumptions": "Market assumptions",
+      "marketAssumptionsDescription": "Return, risk, and inflation drive the projection.",
+      "annualReturn": "Annual Return",
+      "volatility": "Volatility",
+      "inflation": "Inflation",
+      "useHistoricalCagr": "Use your historical CAGR: {value}%",
+      "cashflow": "Cashflow",
+      "cashflowDescription": "Monthly income and expenses that feed the forecast.",
+      "monthlyIncome": "Monthly Income",
+      "monthlyExpenses": "Monthly Expenses",
+      "cashflowGrowthHint": "Income grows with inflation plus return rate; expenses grow with inflation only.",
+      "useActualCashflow": "Use actual cashflow",
+      "cashflowFromMonths": "Median from {months} months: {amount}/mo",
+      "cashflowFallback": "Uses median monthly net cashflow from recent transactions.",
+      "options": "Options",
+      "defaultScenario": "Default scenario",
+      "defaultScenarioHint": "Make this the scenario used by default on the forecast page.",
+      "selectScenario": "Select scenario",
+      "saveScenario": "Save Scenario",
+      "saving": "Saving..."
+    },
+    "simulationTable": {
+      "title": "Forecast Simulation Table",
+      "description": "Year-by-year breakdown of income, expenses, events, and net worth growth.",
+      "startingNetWorth": "Starting Net Worth",
+      "annualReturn": "Annual Return",
+      "inflationRate": "Inflation Rate",
+      "nominalMonthlyRate": "Nominal Monthly Rate",
+      "year1Income": "Year 1 Income",
+      "year1Expense": "Year 1 Expense",
+      "retirementYear": "Retirement Year",
+      "events": "Events",
+      "eventsCount": "{count} events",
+      "none": "None",
+      "columnYear": "Year",
+      "columnInflation": "Inflation ×",
+      "columnIncome": "Income",
+      "columnExpense": "Expense",
+      "columnEventsLabel": "Events",
+      "columnNetCashflow": "Net Cashflow",
+      "columnStartNW": "Start NW",
+      "columnReturn": "Return ({rate}%)",
+      "columnEndNW": "End NW",
+      "retire": "(retire)"
+    }
+  },
+  "pwa": {
+    "updateAvailable": "A new version is available",
+    "reload": "Reload",
+    "installTitle": "Install Teman Tumbuh for quick access.",
+    "install": "Install",
+    "dismiss": "Dismiss"
+  },
+  "accountCreate": {
+    "typeSelect": {
+      "title": "Add Account",
+      "choose": "Choose account type",
+      "close": "Close",
+      "types": {
+        "bank": "Bank Account",
+        "digitalWallet": "Digital Wallet",
+        "property": "Property",
+        "vehicle": "Vehicle",
+        "creditCard": "Credit Card",
+        "investment": "Investment Account"
+      }
+    },
+    "common": { "save": "Save", "back": "Back" },
+    "bank": {
+      "title": "Bank / Wallet",
+      "segBank": "Bank Account",
+      "segWallet": "Digital Wallet",
+      "nameLabel": "Account Name",
+      "namePlaceholder": "e.g. BCA Savings",
+      "walletPlaceholder": "e.g. GoPay",
+      "balanceLabel": "Initial Balance",
+      "submit": "Add Account"
+    },
+    "property": {
+      "title": "Property Asset",
+      "nameLabel": "Property Name",
+      "namePlaceholder": "e.g. House — Depok",
+      "valueLabel": "Current Value",
+      "purchaseDateLabel": "Purchase Date",
+      "mortgage": "Mortgage Details",
+      "downPayment": "Down Payment",
+      "interestRate": "Interest Rate (%/year)",
+      "monthlyPayment": "Monthly Payment",
+      "loanTermYears": "Loan Term (years)",
+      "submit": "Add Property"
+    },
+    "vehicle": {
+      "title": "Vehicle Asset",
+      "segCar": "Car",
+      "segMotorcycle": "Motorcycle",
+      "segTruck": "Truck",
+      "nameLabel": "Vehicle Name",
+      "namePlaceholder": "e.g. Honda HR-V 2021",
+      "priceLabel": "Purchase Price",
+      "depreciationLabel": "Depreciation Rate (%/year)",
+      "submit": "Add Vehicle"
+    },
+    "creditCard": {
+      "title": "Credit Card",
+      "nameLabel": "Card Name",
+      "namePlaceholder": "e.g. BCA Platinum",
+      "limitLabel": "Credit Limit",
+      "statementLabel": "Statement Date (day)",
+      "dueLabel": "Due Date (day)",
+      "info": "Spending is tracked as expenses. Balance reflects remaining available credit.",
+      "submit": "Add Credit Card"
+    },
+    "investment": {
+      "title": "Investment Account",
+      "nameLabel": "Account Name",
+      "namePlaceholder": "e.g. Stockbit — Growth",
+      "brokerLabel": "Broker",
+      "brokerPlaceholder": "e.g. Stockbit, Bibit, IPOT",
+      "info": "Your portfolio is created after setup. Add stocks, bonds, and funds from the account page.",
+      "goalLabel": "Investment Goal",
+      "optional": "Optional",
+      "goalPlaceholder": "or type your own goal…",
+      "goals": {
+        "capitalGain": "Capital Gain",
+        "dividend": "Dividend Investing",
+        "education": "Education Fund",
+        "retirement": "Retirement Fund"
+      },
+      "submit": "Create Account"
+    },
+    "success": {
+      "title": "Account created!",
+      "typeLabels": {
+        "BANK": "Bank Account",
+        "DIGITAL_WALLET": "Digital Wallet",
+        "PROPERTY": "Property",
+        "VEHICLE": "Vehicle",
+        "CREDIT_CARD": "Credit Card",
+        "INVESTMENT": "Investment Account"
+      },
+      "investmentInfo": "It's now in your Portfolio tab. Add the assets you own to start tracking.",
+      "addAsset": "+ Add your first asset",
+      "viewPortfolio": "I'll do it later — view portfolio",
+      "backToWallets": "Back to Wallets",
+      "mortgageCreated": "Linked mortgage added to Loans & Mortgages."
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "brokerRequired": "Broker is required",
+      "amountInvalid": "Enter a valid amount",
+      "dayRange": "Enter a day between 1 and 31",
+      "dateRequired": "Select a date",
+      "mortgageIncomplete": "Fill in all mortgage fields",
+      "downPaymentTooLarge": "Down payment must be below the value",
+      "termInvalid": "Enter a valid loan term",
+      "createFailed": "Could not create the account. Try again.",
+      "mortgageRolledBack": "Mortgage failed — the property was not saved. Try again."
+    }
+  },
+  "wallets": {
+    "title": "Wallets & Accounts",
+    "subtitle": "{accounts} accounts · {liabilities} liabilities",
+    "add": "Add",
+    "netWorth": {
+      "label": "Net Worth",
+      "assets": "Assets",
+      "liabilities": "Liabilities"
+    },
+    "groups": {
+      "bank": "Bank Accounts",
+      "digitalWallets": "Digital Wallets",
+      "assets": "Assets",
+      "cashOther": "Cash & Other",
+      "loans": "Loans & Mortgages"
+    },
+    "empty": "No accounts yet — add your first one."
+  },
+  "budgetCreate": {
+    "createTitle": "Create Budget",
+    "editTitle": "Edit Budget",
+    "stepOf": "{step} of {total}",
+    "periodType": { "monthly": "Monthly", "monthlyHint": "Set limits per category each month", "yearly": "Yearly", "yearlyHint": "Plan annual big-ticket expenses" },
+    "income": "Income this period: {amount}",
+    "lockedTitle": "Monthly budget (locked)",
+    "lockedBanner": "Yearly categories can't overlap your monthly budget",
+    "annualIncome": "Annual income ≈ {amount}",
+    "ofYearlyIncome": "{pct}% of yearly income",
+    "lockedCount": "{count} locked",
+    "yearlyPreview": {
+      "heroLabel": "Annual Budget · {year}",
+      "monthlyTotal": "Monthly total",
+      "timesTwelve": "{amount} × 12",
+      "yearlyOnly": "Yearly only",
+      "grandTotal": "Grand total",
+      "splitTitle": "Budget type split",
+      "monthlyRecurring": "Monthly recurring",
+      "perMonth": "{amount} / mo",
+      "yearlyOneTime": "Yearly one-time",
+      "perYear": "{amount} / yr",
+      "categoriesTitle": "Yearly categories",
+      "save": "Save Yearly Budget"
+    },
+    "yearlyAmounts": {
+      "available": "Available for yearly budget",
+      "categoryCount": "{count} categories",
+      "selectedCount": "{selected} of {total} categories selected",
+      "yearlyTotal": "{amount} yearly"
+    },
+    "startFrom": {
+      "title": "Start from",
+      "copy": "Copy from last period",
+      "copyHint": "No previous budget found",
+      "template": "Use a template",
+      "templateHint": "50/30/20, Conservative, Balanced",
+      "scratch": "Start from scratch",
+      "scratchHint": "Set each category manually"
+    },
+    "next": "Set Category Amounts",
+    "amounts": {
+      "suggestToggle": "Suggested amounts",
+      "suggested": "Suggested {amount}",
+      "addCategory": "Add another category",
+      "remove": "Remove {name}",
+      "total": "Total budget",
+      "pickCategory": "Add category",
+      "preview": "Preview Budget"
+    },
+    "preview": {
+      "income": "Income",
+      "budgeted": "Budgeted",
+      "savings": "Savings",
+      "breakdown": "Category breakdown",
+      "ofIncome": "{pct}% of income",
+      "save": "Save Budget"
+    },
+    "created": { "title": "Budget created!", "cta": "Back to Budget" },
+    "confirm": {
+      "title": "Apply changes to budget?",
+      "effect": "Changes apply to this period's tracking immediately. Past months are not affected.",
+      "cancel": "Cancel",
+      "apply": "Apply Changes"
+    },
+    "applyChanges": "Apply Changes",
+    "noChanges": "No changes yet",
+    "monthlyLabel": "{month} · Monthly Budget",
+    "yearlyLabel": "{year} · Yearly Budget",
+    "errors": { "loadFailed": "Couldn't load. Try again.", "saveFailed": "Couldn't save the budget. Try again.", "totalRequired": "Allocate at least one category" }
+  },
+  "budgetTab": {
+    "error": "Couldn't load this period's budget. Try again.",
+    "retry": "Retry",
+    "title": "Budget",
+    "prevPeriod": "Previous period",
+    "nextPeriod": "Next period",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "overview": {
+      "title": "Overview",
+      "edit": "Edit",
+      "budget": "Budget",
+      "spent": "Spent",
+      "left": "Left",
+      "used": "{pct}%"
+    },
+    "categories": {
+      "title": "Category Budgets",
+      "add": "Add",
+      "over": "Over",
+      "spentSub": "{amount} spent",
+      "empty": "No category budgets in this period."
+    },
+    "empty": {
+      "title": "No budget yet",
+      "description": "Set spending limits per category and track how you're doing.",
+      "cta": "Create budget"
+    }
+  },
+  "home": {
+    "greeting": {
+      "morning": "Good morning 👋",
+      "afternoon": "Good afternoon 👋",
+      "evening": "Good evening 👋"
+    },
+    "today": { "title": "Today, {date}", "logged": "{count} logged" },
+    "hero": {
+      "totalNetWorth": "Total Net Worth",
+      "thisMonth": "{pct}% this month",
+      "legendNetWorth": "Net worth",
+      "legendSpending": "Monthly spending",
+      "income": "Income",
+      "expenses": "Expenses",
+      "saved": "Saved"
+    },
+    "accounts": {
+      "title": "My Accounts",
+      "seeAll": "See all →",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "accountsCount": "{count} accounts",
+      "loansCount": "{count} loans",
+      "more": "+{count} more"
+    },
+    "budget": {
+      "title": "{month} Budget",
+      "viewAll": "View all →",
+      "onTrack": "On track",
+      "overBudget": "Over budget",
+      "of": "of {amount}",
+      "used": "{pct}% used",
+      "left": "{amount} left",
+      "noBudget": "No budget set for this month yet."
+    },
+    "goals": {
+      "title": "Financial Goals",
+      "viewAll": "View all →",
+      "of": "{current} of {target}"
+    },
+    "upcoming": {
+      "title": "Upcoming",
+      "subtitle": "Dates with scheduled payments",
+      "empty": "No scheduled payments in the next 30 days."
+    },
+    "biggest": {
+      "title": "Biggest This Month",
+      "seeAll": "See all →",
+      "empty": "No expenses recorded this month yet."
+    }
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "newAccount": "New Account",
+    "hero": { "totalValue": "Total Portfolio Value", "assets": "{count} assets" },
+    "accounts": { "title": "Investment Accounts", "seeAll": "See all →", "holdings": "{count} holdings", "empty": "No investment accounts yet." },
+    "allocation": { "title": "Asset Allocation" },
+    "top": { "title": "Top Holdings", "empty": "No holdings yet — add assets to an investment account." },
+    "class": { "IDX_STOCK": "IDX Stocks", "US_STOCK": "US Stocks", "MUTUAL_FUND": "Mutual Funds", "ETF": "ETF", "BOND": "Bonds", "OTHER": "Other" },
+    "classHint": { "IDX_STOCK": "Indonesia stocks on IDX", "US_STOCK": "NYSE & NASDAQ listed", "MUTUAL_FUND": "Managed mutual funds", "ETF": "Exchange-traded funds", "BOND": "Government & corporate bonds", "OTHER": "Anything else" },
+    "detail": { "investmentAccount": "Investment Account", "addAsset": "Add Asset", "back": "Back", "emptyTitle": "No assets yet", "emptyDescription": "What do you hold in this account? Pick a type to add your first one:", "emptyTip": "Tip: add your holdings with their buy price — we'll calculate returns automatically." },
+    "manage": { "edit": "Edit", "remove": "Remove from portfolio", "currentValue": "Current value", "cancel": "Cancel", "save": "Save", "removeWarning": "This removes the asset and its history. The account balance will update.", "confirmRemove": "Remove", "saveFailed": "Couldn't update the asset.", "deleteFailed": "Couldn't remove the asset." },
+    "emptyCta": "Create investment account"
+  },
+  "holdingCreate": {
+    "selectTitle": "Add Investment",
+    "selectPrompt": "What type of asset?",
+    "selectSubtitle": "Select the asset class to add to your portfolio",
+    "close": "Close",
+    "back": "Back",
+    "save": "Save",
+    "titleFor": "Add {class}",
+    "tickerLabel": "Stock / Ticker",
+    "tickerPlaceholder": "e.g. BBCA",
+    "lotsLabel": "Number of Lots",
+    "lotsHelper": "1 lot = 100 shares",
+    "unitsLabel": "Units",
+    "priceLabel": "Purchase Price / Unit",
+    "dateLabel": "Purchase Date",
+    "estimatedTotal": "Estimated Total",
+    "submit": "Add to Portfolio",
+    "errors": { "tickerRequired": "Enter a ticker", "amountInvalid": "Enter a valid amount", "createFailed": "Couldn't add the asset. Try again." }
+  }
+}

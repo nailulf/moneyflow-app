@@ -3,7 +3,7 @@
 import { PieChart, Pie, Cell } from 'recharts'
 import { Transaction } from '@/types/database'
 import { getCategoryBreakdown, formatCurrency } from '@/lib/data-utils'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/molecules/card'
 import {
   ChartContainer,
   ChartTooltip,
@@ -11,7 +11,7 @@ import {
   ChartLegend,
   ChartLegendContent,
   type ChartConfig,
-} from '@/components/ui/chart'
+} from '@/components/ui/organisms/chart'
 
 interface SpendingChartProps {
   transactions: Transaction[]
@@ -54,7 +54,7 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-foreground">Spending Breakdown</CardTitle>
+          <CardTitle className="text-lg leading-title-5 font-semibold text-foreground">Spending Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -74,7 +74,7 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-foreground">Spending</CardTitle>
+        <CardTitle className="text-lg leading-title-5 font-semibold text-foreground">Spending</CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer
@@ -107,7 +107,6 @@ export function SpendingChart({ transactions }: SpendingChartProps) {
                 />
               }
             />
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <ChartLegend content={({ payload }) => <ChartLegendContent payload={payload as any} />} />
           </PieChart>
         </ChartContainer>

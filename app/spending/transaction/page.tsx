@@ -1,19 +1,17 @@
 'use client'
 
-import React from 'react'
-import { TransactionTable } from '@/components/TransactionTable'
-import { SpendingNavigation } from '@/components/TopNavigation'
+import { useTranslations } from 'next-intl'
+import { TransactionTable } from '@/components/features/transaction/TransactionTable'
+import { SpendingNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, ContentWrapper, TopContent } from '@/components/PageLayout'
 import { useTransactions } from '@/contexts/TransactionContext'
-import { CategoryManager } from '@/components/CategoryManager'
-import { AccountManager } from '@/components/AccountManager'
-import { AccountProvider } from '@/contexts/AccountContext'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { RecurringTransactionsList } from '@/components/RecurringTransactionsList'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/molecules/tabs'
+import { RecurringTransactionsList } from '@/components/features/transaction/RecurringTransactionsList'
 
 
 export default function SpendingTransactionPage() {
-  
+  const t = useTranslations('spending.transactions')
+
   // Use shared transaction context
   const { transactions, addTransaction } = useTransactions()
 
@@ -22,22 +20,15 @@ export default function SpendingTransactionPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <SpendingNavigation actionButton={
-        <div className="flex items-center gap-2">
-          <CategoryManager />
-          <AccountProvider>
-            <AccountManager />
-          </AccountProvider>
-        </div>
-      } />
+      <SpendingNavigation />
       
       <PageLayout>
         <TopContent>
           <Tabs defaultValue="all" className="w-full">
             <div className="flex items-center justify-between mb-4">
               <TabsList>
-                <TabsTrigger value="all">All Transactions</TabsTrigger>
-                <TabsTrigger value="recurring">Recurring Transactions</TabsTrigger>
+                <TabsTrigger value="all">{t('allTransactions')}</TabsTrigger>
+                <TabsTrigger value="recurring">{t('recurringTransactions')}</TabsTrigger>
               </TabsList>
             </div>
             

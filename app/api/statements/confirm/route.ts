@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerComponentClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
 import { ParsedTransaction } from '@/lib/bank-parsers/types';
 import { z } from 'zod';
 import { apiTransactionSchema } from '@/lib/validations';
+
+const normalizeText = (value?: string | null) =>
+  (value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+const normalizeDate = (value?: string | null) => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toISOString().slice(0, 10);
+};
+
+const toKey = (date: string, amount: number, descriptor: string) =>
+  `${date}|${amount.toFixed(2)}|${descriptor}`;
 
 interface ConfirmStatementRequest {
   userId: string;
@@ -27,12 +43,7 @@ interface ConfirmStatementRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check environment variables
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 });
-    }
-
-    const supabase = createServerComponentClient();
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -69,6 +80,29 @@ export async function POST(request: NextRequest) {
     console.log(`[Statement Confirm] Starting processing of ${transactions.length} transactions`);
 
     try {
+      if (file.checksum) {
+        const { data: existingStatement, error: existingError } = await supabase
+          .from('statements')
+          .select('id, file_name, created_at')
+          .eq('user_id', userId)
+          .eq('file_checksum', file.checksum)
+          .maybeSingle();
+
+        if (existingError) {
+          console.error('Error checking statement checksum:', existingError);
+        }
+
+        if (existingStatement) {
+          return NextResponse.json({
+            success: false,
+            error: 'Duplicate statement detected',
+            isDuplicate: true,
+            duplicateStatementId: existingStatement.id,
+            message: 'This statement has already been uploaded'
+          }, { status: 409 });
+        }
+      }
+
       // Create statement record
       const statementData = {
         user_id: userId,
@@ -97,6 +131,22 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (statementError) {
+        if (statementError.code === '23505') {
+          const { data: existingStatement } = await supabase
+            .from('statements')
+            .select('id, file_name, created_at')
+            .eq('user_id', userId)
+            .eq('file_checksum', file.checksum)
+            .maybeSingle();
+
+          return NextResponse.json({
+            success: false,
+            error: 'Duplicate statement detected',
+            isDuplicate: true,
+            duplicateStatementId: existingStatement?.id,
+            message: 'This statement has already been uploaded'
+          }, { status: 409 });
+        }
         console.error('Error creating statement:', statementError);
         return NextResponse.json({ 
           error: 'Failed to create statement record', 
@@ -170,9 +220,54 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
       }
 
+      if (accountId) {
+        const dates = validTransactions
+          .map((t: any) => normalizeDate(t.posting_date || t.date))
+          .filter(Boolean)
+          .sort();
+
+        if (dates.length > 0) {
+          const minDate = dates[0];
+          const maxDate = dates[dates.length - 1];
+
+          const { data: existingTransactions, error: existingError } = await supabase
+            .from('transactions')
+            .select('id, date, amount, description, merchant')
+            .eq('user_id', userId)
+            .eq('account_id', accountId)
+            .gte('date', minDate)
+            .lte('date', maxDate);
+
+          if (existingError) {
+            console.error('Error checking for duplicate transactions:', existingError);
+          }
+
+          const existingMap = new Map<string, { id: string }>();
+          (existingTransactions || []).forEach((existing: any) => {
+            const existingDate = normalizeDate(existing.date);
+            const descriptor = normalizeText(existing.merchant || existing.description);
+            const key = toKey(existingDate, Number(existing.amount), descriptor);
+            if (!existingMap.has(key)) {
+              existingMap.set(key, { id: existing.id });
+            }
+          });
+
+          validTransactions.forEach((transaction: any) => {
+            const descriptor = normalizeText(transaction.merchant || transaction.description);
+            const transactionDate = normalizeDate(transaction.posting_date || transaction.date);
+            const key = toKey(transactionDate, Number(transaction.amount), descriptor);
+            const match = existingMap.get(key);
+            if (match) {
+              transaction.is_duplicate = true;
+              transaction.duplicate_of = match.id;
+            }
+          });
+        }
+      }
+
       // Insert transactions in batches
       const batchSize = 100;
-      const insertedTransactions = [];
+      const insertedTransactions: Array<{ amount: number }> = [];
       
       for (let i = 0; i < validTransactions.length; i += batchSize) {
         const batch = validTransactions.slice(i, i + batchSize);
@@ -223,9 +318,9 @@ export async function POST(request: NextRequest) {
         transactions: insertedTransactions,
         summary: {
           totalTransactions: insertedTransactions.length,
-          totalAmount: insertedTransactions.reduce((sum, t) => sum + t.amount, 0),
-          incomeCount: insertedTransactions.filter(t => t.amount >= 0).length,
-          expenseCount: insertedTransactions.filter(t => t.amount < 0).length
+          totalAmount: insertedTransactions.reduce((sum: number, t: { amount: number }) => sum + t.amount, 0),
+          incomeCount: insertedTransactions.filter((t: { amount: number }) => t.amount >= 0).length,
+          expenseCount: insertedTransactions.filter((t: { amount: number }) => t.amount < 0).length
         },
         performance: {
           durationMs: duration,
@@ -260,7 +355,7 @@ export async function GET(request: NextRequest) {
     const statementId = searchParams.get('statementId');
     const paramUserId = searchParams.get('userId');
 
-    const supabase = createServerComponentClient();
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
@@ -323,9 +418,9 @@ export async function GET(request: NextRequest) {
       transactions: transactions || [],
       summary: {
         totalTransactions: transactions?.length || 0,
-        totalAmount: transactions?.reduce((sum, t) => sum + t.amount, 0) || 0,
-        incomeCount: transactions?.filter(t => t.amount >= 0).length || 0,
-        expenseCount: transactions?.filter(t => t.amount < 0).length || 0
+        totalAmount: transactions?.reduce((sum: number, t: { amount: number }) => sum + t.amount, 0) || 0,
+        incomeCount: transactions?.filter((t: { amount: number }) => t.amount >= 0).length || 0,
+        expenseCount: transactions?.filter((t: { amount: number }) => t.amount < 0).length || 0
       }
     });
 

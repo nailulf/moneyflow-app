@@ -9,6 +9,7 @@ export const transactionFormSchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE', 'TRANSFER']),
   category_id: z.string().min(1, 'Category is required'),
   account_id: z.string().optional().nullable(),
+  to_account_id: z.string().optional().nullable(),
   merchant: z.string().optional().nullable(),
   currency: z.string().length(3),
   notes: z.string().optional().nullable(),
@@ -16,7 +17,10 @@ export const transactionFormSchema = z.object({
   is_recurring: z.boolean().optional(),
   recurring_frequency: z.enum(['daily', 'weekly', 'monthly', 'yearly']).optional().nullable(),
   recurring_end_date: z.string().optional().nullable(),
-})
+}).refine(
+  (data) => data.type !== 'TRANSFER' || (data.to_account_id && data.to_account_id !== data.account_id),
+  { message: 'Transfer requires a different destination account', path: ['to_account_id'] }
+)
 
 export const apiTransactionSchema = z.object({
   user_id: z.string().uuid({ message: "Invalid user_id" }),
@@ -26,14 +30,19 @@ export const apiTransactionSchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE', 'TRANSFER']),
   category_id: z.string().uuid().optional().nullable(),
   account_id: z.string().uuid().optional().nullable(),
+  to_account_id: z.string().uuid().optional().nullable(),
   merchant: z.string().optional().nullable(),
   currency: z.string().length(3).optional().default('IDR'),
   notes: z.string().optional().nullable(),
   tags: z.array(z.string()).optional(),
   is_recurring: z.boolean().optional(),
+  is_balance_adjustment: z.boolean().optional(),
   recurring_frequency: z.string().optional(),
   recurring_end_date: z.string().optional()
-})
+}).refine(
+  (d) => d.type !== 'TRANSFER' || (!!d.to_account_id && d.to_account_id !== d.account_id),
+  { message: 'TRANSFER requires a destination account different from the source', path: ['to_account_id'] }
+)
 
 export const reviewTransactionSchema = z.object({
   date: z.string().min(1, 'Date is required').refine((val) => !isNaN(Date.parse(val)), 'Invalid date format'),

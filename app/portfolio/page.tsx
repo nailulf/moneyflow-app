@@ -1,106 +1,142 @@
-import { PortfolioNavigation } from '@/components/TopNavigation'
+'use client'
+
+import { useMemo } from 'react'
+import { PortfolioNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
+import { PortfolioScreen } from '@/components/features/portfolio/PortfolioScreen'
+import { useAccounts } from '@/contexts/AccountContext'
+import { useAllHoldings } from '@/hooks/useHoldings'
+import { useHoldingsInBase } from '@/hooks/useHoldingsInBase'
+import { portfolioTotals, allocation } from '@/lib/portfolio-utils'
+import { formatCurrency } from '@/lib/data-utils'
+
+const BASE_CURRENCY = 'IDR'
 
 export default function PortfolioPage() {
+  const { accounts } = useAccounts()
+  const { holdings } = useAllHoldings()
+
+  const investmentAccounts = useMemo(() => accounts.filter((a) => a.type === 'INVESTMENT'), [accounts])
+  // Convert mixed-currency holdings to IDR so totals/allocation aren't a naive cross-currency sum.
+  const displayHoldings = useHoldingsInBase(holdings, BASE_CURRENCY)
+  const totals = useMemo(() => portfolioTotals(displayHoldings), [displayHoldings])
+  const slices = useMemo(() => allocation(displayHoldings), [displayHoldings])
+  const baseCurrency = BASE_CURRENCY
+
+  const gainLossLabel = totals.totalGainLoss >= 0
+    ? `+${totals.totalGainLossPct}% all-time gain`
+    : `${totals.totalGainLossPct}% all-time loss`
+
   return (
     <div className="flex flex-col h-full">
-      <PortfolioNavigation />
-      
-      <PageLayout>
-        <ContentWrapper>
-        <MainContent>
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight mb-2">Portfolio Overview</h2>
-              <p className="text-muted-foreground">Track your investment performance and allocation</p>
-            </div>
-            
-            <div className="grid gap-4 md:grid-cols-2">
+      {/* Mobile root screen (md:hidden is applied inside PortfolioScreen) */}
+      <PortfolioScreen />
+
+      {/* Desktop layout */}
+      <div className="hidden md:flex md:flex-col md:h-full">
+        <PortfolioNavigation />
+
+        <PageLayout>
+          <ContentWrapper>
+          <MainContent>
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight mb-2">Portfolio Overview</h2>
+                <p className="text-muted-foreground">Track your investment performance and allocation</p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card className="rounded-xl">
+                  <CardHeader>
+                    <CardTitle>Total Portfolio Value</CardTitle>
+                    <CardDescription>Your current investment portfolio</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {holdings.length === 0 && investmentAccounts.length === 0
+                        ? 'No investment accounts yet'
+                        : formatCurrency(totals.totalValue, baseCurrency)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{gainLossLabel}</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="rounded-xl">
+                  <CardHeader>
+                    <CardTitle>Total Gain / Loss</CardTitle>
+                    <CardDescription>Unrealised gain/loss vs cost basis</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className={`text-2xl font-bold ${totals.totalGainLoss >= 0 ? 'text-success' : 'text-destructive'}`}>
+                      {totals.totalCostBasis === 0
+                        ? '—'
+                        : `${totals.totalGainLoss >= 0 ? '+' : ''}${formatCurrency(totals.totalGainLoss, baseCurrency)}`}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {totals.totalCostBasis === 0
+                        ? 'Add holdings to see performance'
+                        : `Cost basis: ${formatCurrency(totals.totalCostBasis, baseCurrency)}`}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
               <Card className="rounded-xl">
                 <CardHeader>
-                  <CardTitle>Total Portfolio Value</CardTitle>
-                  <CardDescription>Your current investment portfolio</CardDescription>
+                  <CardTitle>Investment Accounts</CardTitle>
+                  <CardDescription>Your connected investment accounts</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">$125,430.50</div>
-                  <p className="text-xs text-muted-foreground">+2.5% from last month</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="rounded-xl">
-                <CardHeader>
-                  <CardTitle>Performance</CardTitle>
-                  <CardDescription>Year-to-date returns</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-success">+8.2%</div>
-                  <p className="text-xs text-muted-foreground">Outperforming market by 1.5%</p>
+                  {investmentAccounts.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No investment accounts yet. Create one to start tracking your portfolio.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {investmentAccounts.map((a) => (
+                        <div key={a.id} className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{a.name}</p>
+                            {a.broker && <p className="text-sm text-muted-foreground">{a.broker}</p>}
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium">{formatCurrency(a.currentBalance ?? a.balance, a.currency)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
-            
-            <Card className="rounded-xl">
-              <CardHeader>
-                <CardTitle>Recent Transactions</CardTitle>
-                <CardDescription>Your latest portfolio activities</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">AAPL - Apple Inc.</p>
-                      <p className="text-sm text-muted-foreground">Bought 10 shares</p>
+          </MainContent>
+
+          <SideContent>
+            <div className="space-y-4">
+              <Card className="rounded-xl">
+                <CardHeader>
+                  <CardTitle>Asset Allocation</CardTitle>
+                  <CardDescription>Distribution of your investments</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {slices.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No holdings yet.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {slices.map((s) => (
+                        <div key={s.assetClass} className="flex justify-between">
+                          <span className="text-sm">{s.assetClass}</span>
+                          <span className="text-sm font-medium">{s.pct}%</span>
+                        </div>
+                      ))}
                     </div>
-                    <div className="text-right">
-                      <p className="font-medium">$1,750.00</p>
-                      <p className="text-sm text-muted-foreground">2 days ago</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">MSFT - Microsoft Corp.</p>
-                      <p className="text-sm text-muted-foreground">Sold 5 shares</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">$1,650.00</p>
-                      <p className="text-sm text-muted-foreground">1 week ago</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </MainContent>
-        
-        <SideContent>
-          <div className="space-y-4">
-            <Card className="rounded-xl">
-              <CardHeader>
-                <CardTitle>Asset Allocation</CardTitle>
-                <CardDescription>Distribution of your investments</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Stocks</span>
-                    <span className="text-sm font-medium">65%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Bonds</span>
-                    <span className="text-sm font-medium">25%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Cash</span>
-                    <span className="text-sm font-medium">10%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </SideContent>
-        </ContentWrapper>
-      </PageLayout>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </SideContent>
+          </ContentWrapper>
+        </PageLayout>
+      </div>
     </div>
   )
 }

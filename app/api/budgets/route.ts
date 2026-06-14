@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
-
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabase = createServerComponentClient()
+    const { searchParams } = new URL(request.url)
+    const paramUserId = searchParams.get('userId')
+    if (paramUserId && paramUserId !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { data, error } = await supabase
       .from('budgets')
@@ -28,7 +30,7 @@ export async function GET(request: NextRequest) {
           )
         )
       `)
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .eq('is_active', true)
       .order('created_at', { ascending: true })
 
@@ -46,8 +48,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
-    const { userId, name, total_amount, amount, period, type, year, month, currency, categories } = body
+    const { name, total_amount, amount, period, type, year, month, currency, categories } = body
 
     // Handle legacy field names if necessary (amount -> total_amount, type -> period)
     const finalTotalAmount = total_amount || amount
@@ -56,15 +64,13 @@ export async function POST(request: NextRequest) {
     const finalMonth = month || (finalPeriod === 'monthly' ? new Date().getMonth() + 1 : null)
     const finalCurrency = currency || 'IDR'
 
-    if (!userId || !name || !finalTotalAmount) {
+    if (!name || !finalTotalAmount) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const supabase = createServerComponentClient()
-    
-    // 1. Create the budget
+    // 1. Create the budget — always use authenticated user's ID
     const insertData = {
-      user_id: userId,
+      user_id: user.id,
       name,
       period: finalPeriod,
       total_amount: finalTotalAmount,
@@ -89,11 +95,11 @@ export async function POST(request: NextRequest) {
 
     // 2. Create budget categories if provided
     if (categories && Array.isArray(categories) && categories.length > 0) {
-      const budgetCategoriesData = categories.map((cat: any) => ({
+      const budgetCategoriesData = categories.map((cat: { category_id: string; allocated_amount: number }) => ({
         budget_id: budget.id,
         category_id: cat.category_id,
         allocated_amount: cat.allocated_amount,
-        spent_amount: 0, // Initial spent amount is 0
+        spent_amount: 0,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }))
@@ -104,9 +110,9 @@ export async function POST(request: NextRequest) {
 
       if (categoriesError) {
         console.error('Error creating budget categories:', categoriesError)
-        // Note: We don't rollback the budget creation here, but we could return a warning
-        // or delete the budget if strict atomicity is required.
-        // For now, we'll log it and return the budget (user can edit categories later).
+        // Rollback: delete the budget we just created
+        await supabase.from('budgets').delete().eq('id', budget.id).eq('user_id', user.id)
+        return NextResponse.json({ error: 'Failed to create budget categories' }, { status: 500 })
       }
     }
 
@@ -127,11 +133,12 @@ export async function POST(request: NextRequest) {
         )
       `)
       .eq('id', budget.id)
+      .eq('user_id', user.id)
       .single()
 
     if (fetchError) {
       console.error('Error fetching complete budget:', fetchError)
-      return NextResponse.json(budget) // Return basic budget if fetch fails
+      return NextResponse.json(budget)
     }
 
     return NextResponse.json(completeBudget)
@@ -143,19 +150,33 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { id, ...updates } = body
 
-    if(!id){
+    if (!id) {
       return NextResponse.json({ error: 'Budget ID is required' }, { status: 400 })
     }
 
-    // Check if we're in build time
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ error: 'Environment variables not configured' }, { status: 500 })
+    // Strip any user_id from updates — never allow changing ownership
+    delete updates.user_id
+
+    // Verify ownership before update
+    const { data: existing } = await supabase
+      .from('budgets')
+      .select('user_id')
+      .eq('id', id)
+      .single()
+
+    if (!existing || existing.user_id !== user.id) {
+      return NextResponse.json({ error: 'Budget not found or access denied' }, { status: 404 })
     }
 
-    const supabase = createServerComponentClient()
     const { data, error } = await supabase
       .from('budgets')
       .update({
@@ -163,10 +184,11 @@ export async function PUT(request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
-      if (error) {
+    if (error) {
       console.error('Error updating budgets:', error)
       return NextResponse.json({ error: 'Failed to update budgets' }, { status: 500 })
     }
@@ -180,6 +202,12 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('budget_id')
 
@@ -187,7 +215,17 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Budget ID is required' }, { status: 400 })
     }
 
-    const supabase = createServerComponentClient()
+    // Verify ownership before delete
+    const { data: existing } = await supabase
+      .from('budgets')
+      .select('user_id')
+      .eq('id', id)
+      .single()
+
+    if (!existing || existing.user_id !== user.id) {
+      return NextResponse.json({ error: 'Budget not found or access denied' }, { status: 404 })
+    }
+
     const { error } = await supabase
       .from('budgets')
       .update({
@@ -195,6 +233,7 @@ export async function DELETE(request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
       console.error('Error deleting budget:', error)
