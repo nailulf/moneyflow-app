@@ -13,6 +13,7 @@ import { groupAccounts } from '@/lib/wallets-utils'
 import { NavUser } from '@/components/features/navigation/nav-user'
 import { NetWorthStrip } from './NetWorthStrip'
 import { AccountGroupCard } from './AccountGroupCard'
+import { StickyScreenHeader } from '@/components/features/navigation/StickyScreenHeader'
 
 interface WalletsScreenProps {
   onOpenAccount: (accountId: string) => void
@@ -43,7 +44,7 @@ export function WalletsScreen({ onOpenAccount }: WalletsScreenProps) {
 
   return (
     <div className="flex flex-col gap-5 pt-3 md:hidden">
-      <header className="flex items-center justify-between gap-2">
+      <StickyScreenHeader>
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-bold leading-title-3 text-foreground">{t('title')}</h1>
           <p className="text-sm leading-body-sm text-muted-foreground">
@@ -61,7 +62,7 @@ export function WalletsScreen({ onOpenAccount }: WalletsScreenProps) {
           </button>
           <NavUser user={userData} />
         </div>
-      </header>
+      </StickyScreenHeader>
 
       <NetWorthStrip
         netWorth={netWorth?.currentNetWorth ?? split.assetsTotal - split.liabilitiesTotal}

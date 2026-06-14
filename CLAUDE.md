@@ -205,7 +205,10 @@ scrolls:
 - **Header pinned to the top** — `components/features/accounts/create/CreateFlowHeader.tsx` (back +
   title + optional step/save) uses plain `sticky top-0 z-20` with a translucent `bg-background/90`
   + `backdrop-blur` band. Sticky is sufficient at the top: a top-anchored element sits at the top
-  even when the page fits.
+  even when the page fits. The main mobile **tab** screens (Home, Transactions, Wallets, Budget,
+  Portfolio) get the identical treatment via `components/features/navigation/StickyScreenHeader.tsx`
+  — wrap the screen's title/actions row in it instead of a bare `<header>`. It reverts to a plain
+  static header on `md+`, where the app shell (`LayoutWrapper`) renders its own header.
 - **Primary CTA pinned to the bottom** — wrap it in
   `components/features/budget/StickyCtaBar.tsx`, which uses **`position: fixed` + an in-flow spacer +
   a gradient fade**, NOT `sticky`. Sticky-bottom only pins while scrolling, so on a short page the CTA
