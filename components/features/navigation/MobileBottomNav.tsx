@@ -2,14 +2,14 @@
 
 import { Home, Wallet, Plus, PieChart, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { isFullScreenFlow } from '@/lib/nav-visibility'
-import { AddTransactionForm } from '@/components/features/transaction/AddTransactionForm'
 
 export function MobileBottomNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const t = useTranslations('navigation.items')
 
   // Full-screen flows draw without the tab bar (design 08*, budget 2a–2d).
@@ -52,18 +52,15 @@ export function MobileBottomNav() {
       <div className="flex h-14 items-center justify-between gap-0.5 rounded-[28px] bg-card/95 p-1.5 shadow-floating backdrop-blur-xl">
         {navItems.slice(0, 2).map(renderTab)}
 
-        {/* Center add button — sits inside the bar, opens the Add-Transaction sheet */}
-        <AddTransactionForm
-          trigger={
-            <button
-              type="button"
-              aria-label={t('addTransaction')}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95"
-            >
-              <Plus className="h-6 w-6" />
-            </button>
-          }
-        />
+        {/* Center add button — navigates to the full-screen Add Transaction flow */}
+        <button
+          type="button"
+          aria-label={t('addTransaction')}
+          onClick={() => router.push('/transactions/new')}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
 
         {navItems.slice(2, 4).map(renderTab)}
       </div>
