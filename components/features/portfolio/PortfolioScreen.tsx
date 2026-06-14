@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAllHoldings } from '@/hooks/useHoldings'
+import { useHoldingsInBase } from '@/hooks/useHoldingsInBase'
 import { portfolioTotals, allocation, gainLoss } from '@/lib/portfolio-utils'
 import { topHoldings } from '@/lib/portfolio-screen-utils'
 import { NavUser } from '@/components/features/navigation/nav-user'
@@ -16,6 +17,7 @@ import { AllocationBars } from './AllocationBars'
 import { TopHoldingsCard, type TopHoldingRow } from './TopHoldingsCard'
 
 const TOP_N = 5
+const BASE_CURRENCY = 'IDR'
 
 export function PortfolioScreen() {
   const t = useTranslations('portfolio')
@@ -25,14 +27,18 @@ export function PortfolioScreen() {
   const { holdings } = useAllHoldings()
 
   const investmentAccounts = useMemo(() => accounts.filter((a) => a.type === 'INVESTMENT'), [accounts])
-  const totals = useMemo(() => portfolioTotals(holdings), [holdings])
-  const slices = useMemo(() => allocation(holdings), [holdings])
+
+  // Accounts can be priced in different currencies — convert all holdings to IDR before totalling,
+  // allocating, and ranking so the figures aren't a naive cross-currency sum.
+  const displayHoldings = useHoldingsInBase(holdings, BASE_CURRENCY)
+  const totals = useMemo(() => portfolioTotals(displayHoldings), [displayHoldings])
+  const slices = useMemo(() => allocation(displayHoldings), [displayHoldings])
   const top: TopHoldingRow[] = useMemo(
-    () => topHoldings(holdings, TOP_N).map((h) => ({
+    () => topHoldings(displayHoldings, TOP_N).map((h) => ({
       id: h.id, symbol: h.symbol, name: h.name, assetClass: h.asset_class,
       value: h.current_value, gainLoss: gainLoss(h), currency: h.currency,
     })),
-    [holdings]
+    [displayHoldings]
   )
 
   const userData = {
@@ -40,7 +46,6 @@ export function PortfolioScreen() {
     email: user?.email || '',
     avatar: user?.user_metadata?.avatar_url || '/avatars/01.svg',
   }
-  const baseCurrency = investmentAccounts[0]?.currency ?? 'IDR'
   const holdingsByAccount = (id: string) => holdings.filter((h) => h.account_id === id).length
 
   return (
@@ -59,7 +64,7 @@ export function PortfolioScreen() {
 
       <PortfolioValueHero
         totalValue={totals.totalValue} totalGainLoss={totals.totalGainLoss}
-        totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={baseCurrency}
+        totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={BASE_CURRENCY}
       />
 
       <section className="flex flex-col gap-3">

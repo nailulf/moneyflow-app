@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { ParsedTransaction } from '@/lib/bank-parsers/types'
 import { UnifiedStatementProcessor } from '@/components/features/transaction/UnifiedStatementProcessor'
@@ -237,15 +237,27 @@ describe('UnifiedStatementProcessor', () => {
     })
   })
 
+  // The "Upload & Process" button lives in the parent sheet footer (AddTransactionForm),
+  // which triggers the upload through the uploadTriggerRef prop.
+  const renderProcessor = (props: Record<string, unknown> = {}) => {
+    const uploadTriggerRef: { current: (() => void) | null } = { current: null }
+    render(<UnifiedStatementProcessor defaultAccountId="acc1" uploadTriggerRef={uploadTriggerRef} {...props} />)
+    const triggerUpload = async () => {
+      await act(async () => {
+        await uploadTriggerRef.current?.()
+      })
+    }
+    return { triggerUpload }
+  }
+
   const uploadFile = async () => {
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
-    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
-    
+    const { triggerUpload } = renderProcessor()
+
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
-    
-    const uploadButton = screen.getByText(/Upload & Process/i)
-    fireEvent.click(uploadButton)
+
+    await triggerUpload()
 
     await waitFor(() => {
       expect(screen.getByText(/Review Transactions/i)).toBeInTheDocument()
@@ -255,7 +267,14 @@ describe('UnifiedStatementProcessor', () => {
   it('renders upload state initially', () => {
     render(<UnifiedStatementProcessor />)
     expect(screen.getByText(/Drop your file here/i)).toBeInTheDocument()
-    expect(screen.getByText(/Upload & Process/i)).toBeDisabled()
+    expect(screen.getByText(/Take Photo/i)).toBeInTheDocument()
+    expect(screen.getByText(/Upload Image/i)).toBeInTheDocument()
+  })
+
+  it('rejects upload trigger when no file is selected', async () => {
+    const { triggerUpload } = renderProcessor()
+    await triggerUpload()
+    expect(toast.error).toHaveBeenCalledWith('Please select a file')
   })
 
   it('handles file upload and transitions to review modal', async () => {
@@ -591,16 +610,7 @@ describe('UnifiedStatementProcessor', () => {
   })
 
   it('handles modal close cancellation', async () => {
-    // Inline uploadFile logic to avoid scope issues
-    const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
-    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
-    fireEvent.change(fileInput, { target: { files: [file] } })
-    const uploadButton = screen.getByText(/Upload & Process/i)
-    fireEvent.click(uploadButton)
-    await waitFor(() => {
-      expect(screen.getByText(/Review Transactions/i)).toBeInTheDocument()
-    })
+    await uploadFile()
     
     const closeBtn = screen.getByTestId('dialog-close')
     fireEvent.click(closeBtn)
@@ -631,7 +641,7 @@ describe('UnifiedStatementProcessor', () => {
 
   it('handles invalid currency gracefully', async () => {
     // Override fetch for this test
-    (global.fetch as jest.Mock).mockImplementationOnce((url) => {
+    (global.fetch as jest.Mock).mockImplementation((url) => {
         if (url.includes('/api/statements/parse')) {
             return Promise.resolve({
                 ok: true,
@@ -676,10 +686,10 @@ describe('UnifiedStatementProcessor', () => {
     })
 
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
-    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
+    const { triggerUpload } = renderProcessor()
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
-    fireEvent.click(screen.getByText(/Upload & Process/i))
+    await triggerUpload()
 
     await waitFor(() => {
       expect(screen.getByText(/Review Transactions/i)).toBeInTheDocument()
@@ -954,14 +964,13 @@ describe('UnifiedStatementProcessor', () => {
     })
     
     // We can't use uploadFile() helper because it expects success
-    render(<UnifiedStatementProcessor defaultAccountId="acc1" />)
+    const { triggerUpload } = renderProcessor()
     const file = new File(['dummy'], 'test.pdf', { type: 'application/pdf' })
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     fireEvent.change(fileInput, { target: { files: [file] } })
-    
-    const uploadButton = screen.getByText(/Upload & Process/i)
-    fireEvent.click(uploadButton)
-    
+
+    await triggerUpload()
+
     await waitFor(() => {
       const toast = require('sonner').toast
       expect(toast.error).toHaveBeenCalledWith('Upload failed')

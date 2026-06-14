@@ -30,7 +30,7 @@ export function TransactionFilterSheet({ open, onOpenChange, categories, account
       setDraftCats(filters.categoryIds); setDraftAccts(filters.accountIds)
       setMin(filters.amountMin?.toString() ?? ''); setMax(filters.amountMax?.toString() ?? '')
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [open])
 
   const toggle = (arr: string[], id: string) => (arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id])

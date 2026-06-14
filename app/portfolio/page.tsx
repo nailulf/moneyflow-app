@@ -7,17 +7,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PortfolioScreen } from '@/components/features/portfolio/PortfolioScreen'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAllHoldings } from '@/hooks/useHoldings'
+import { useHoldingsInBase } from '@/hooks/useHoldingsInBase'
 import { portfolioTotals, allocation } from '@/lib/portfolio-utils'
 import { formatCurrency } from '@/lib/data-utils'
+
+const BASE_CURRENCY = 'IDR'
 
 export default function PortfolioPage() {
   const { accounts } = useAccounts()
   const { holdings } = useAllHoldings()
 
   const investmentAccounts = useMemo(() => accounts.filter((a) => a.type === 'INVESTMENT'), [accounts])
-  const totals = useMemo(() => portfolioTotals(holdings), [holdings])
-  const slices = useMemo(() => allocation(holdings), [holdings])
-  const baseCurrency = investmentAccounts[0]?.currency ?? 'IDR'
+  // Convert mixed-currency holdings to IDR so totals/allocation aren't a naive cross-currency sum.
+  const displayHoldings = useHoldingsInBase(holdings, BASE_CURRENCY)
+  const totals = useMemo(() => portfolioTotals(displayHoldings), [displayHoldings])
+  const slices = useMemo(() => allocation(displayHoldings), [displayHoldings])
+  const baseCurrency = BASE_CURRENCY
 
   const gainLossLabel = totals.totalGainLoss >= 0
     ? `+${totals.totalGainLossPct}% all-time gain`

@@ -4,7 +4,7 @@ const path = require('path')
 
 const SRC = path.join(__dirname, '..', 'public', 'icons', 'icon-512x512.png')
 const OUT = path.join(__dirname, '..', 'public', 'icons', 'icon-maskable-512.png')
-const BRAND = { r: 0x20, g: 0x57, b: 0x81, alpha: 1 } // #205781
+const BRAND = { r: 0x20, g: 0x50, b: 0x7f, alpha: 1 } // #20507F
 
 async function run() {
   // Inner logo occupies ~62% of the canvas → ~19% margin each side (maskable safe zone ≥10%).

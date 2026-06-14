@@ -2,7 +2,7 @@ import manifest from '@/app/manifest'
 
 describe('PWA manifest', () => {
   const m = manifest()
-  it('uses the brand theme color', () => { expect(m.theme_color).toBe('#205781') })
+  it('uses the brand theme color', () => { expect(m.theme_color).toBe('#20507F') })
   it('declares a maskable icon', () => {
     expect(m.icons?.some((i) => i.purpose?.includes('maskable'))).toBe(true)
   })
