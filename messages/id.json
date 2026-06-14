@@ -127,6 +127,9 @@
       "accounts": "Akun & Aset",
       "portfolio": "Portofolio",
       "forecast": "Prakiraan",
+      "budget": "Anggaran",
+      "transactions": "Transaksi",
+      "charts": "Grafik",
       "invest": "Investasi",
       "advice": "Konsultasi",
       "tax": "Pajak",
@@ -587,9 +590,10 @@
           "label": "KPR / Kredit Properti",
           "description": "Cicilan rumah atau KPR"
         },
+        "DIGITAL_WALLET": { "label": "Dompet Digital", "description": "GoPay, OVO, Dana, dll." },
         "OTHER": {
-          "label": "E-Wallet / Lainnya",
-          "description": "GoPay, OVO, Dana, dll."
+          "label": "Lainnya",
+          "description": "Akun lainnya"
         }
       },
       "assetDetails": {
@@ -692,7 +696,7 @@
       "other": "Lainnya",
       "property": "Properti",
       "vehicle": "Kendaraan",
-      "mortgage": "KPR / Kredit Properti"
+      "mortgage": "KPR / Kredit Properti", "digitalWallet": "Dompet Digital"
     },
     "groups": {
       "savingsInvestment": "Tabungan & Investasi",
@@ -1029,5 +1033,312 @@
     "installTitle": "Instal Teman Tumbuh untuk akses cepat.",
     "install": "Instal",
     "dismiss": "Tutup"
+  },
+  "accountCreate": {
+    "typeSelect": {
+      "title": "Tambah Akun",
+      "choose": "Pilih jenis akun",
+      "close": "Tutup",
+      "types": {
+        "bank": "Rekening Bank",
+        "digitalWallet": "Dompet Digital",
+        "property": "Properti",
+        "vehicle": "Kendaraan",
+        "creditCard": "Kartu Kredit",
+        "investment": "Akun Investasi"
+      }
+    },
+    "common": { "save": "Simpan", "back": "Kembali" },
+    "bank": {
+      "title": "Bank / Dompet",
+      "segBank": "Rekening Bank",
+      "segWallet": "Dompet Digital",
+      "nameLabel": "Nama Akun",
+      "namePlaceholder": "mis. Tabungan BCA",
+      "walletPlaceholder": "mis. GoPay",
+      "balanceLabel": "Saldo Awal",
+      "submit": "Tambah Akun"
+    },
+    "property": {
+      "title": "Aset Properti",
+      "nameLabel": "Nama Properti",
+      "namePlaceholder": "mis. Rumah — Depok",
+      "valueLabel": "Nilai Saat Ini",
+      "purchaseDateLabel": "Tanggal Pembelian",
+      "mortgage": "Detail KPR",
+      "downPayment": "Uang Muka",
+      "interestRate": "Suku Bunga (%/tahun)",
+      "monthlyPayment": "Angsuran Bulanan",
+      "loanTermYears": "Tenor (tahun)",
+      "submit": "Tambah Properti"
+    },
+    "vehicle": {
+      "title": "Aset Kendaraan",
+      "segCar": "Mobil",
+      "segMotorcycle": "Motor",
+      "segTruck": "Truk",
+      "nameLabel": "Nama Kendaraan",
+      "namePlaceholder": "mis. Honda HR-V 2021",
+      "priceLabel": "Harga Beli",
+      "depreciationLabel": "Tingkat Depresiasi (%/tahun)",
+      "submit": "Tambah Kendaraan"
+    },
+    "creditCard": {
+      "title": "Kartu Kredit",
+      "nameLabel": "Nama Kartu",
+      "namePlaceholder": "mis. BCA Platinum",
+      "limitLabel": "Limit Kredit",
+      "statementLabel": "Tanggal Cetak Tagihan (hari)",
+      "dueLabel": "Tanggal Jatuh Tempo (hari)",
+      "info": "Pengeluaran dicatat sebagai expense. Saldo menunjukkan sisa limit kredit.",
+      "submit": "Tambah Kartu Kredit"
+    },
+    "investment": {
+      "title": "Akun Investasi",
+      "nameLabel": "Nama Akun",
+      "namePlaceholder": "mis. Stockbit — Growth",
+      "brokerLabel": "Broker",
+      "brokerPlaceholder": "mis. Stockbit, Bibit, IPOT",
+      "info": "Portofolio dibuat setelah setup. Tambahkan saham, obligasi, dan reksa dana dari halaman akun.",
+      "goalLabel": "Tujuan Investasi",
+      "optional": "Opsional",
+      "goalPlaceholder": "atau tulis tujuanmu sendiri…",
+      "goals": {
+        "capitalGain": "Capital Gain",
+        "dividend": "Investasi Dividen",
+        "education": "Tabungan Sekolah Anak",
+        "retirement": "Tabungan Pensiun"
+      },
+      "submit": "Buat Akun"
+    },
+    "success": {
+      "title": "Akun dibuat!",
+      "typeLabels": {
+        "BANK": "Rekening Bank",
+        "DIGITAL_WALLET": "Dompet Digital",
+        "PROPERTY": "Properti",
+        "VEHICLE": "Kendaraan",
+        "CREDIT_CARD": "Kartu Kredit",
+        "INVESTMENT": "Akun Investasi"
+      },
+      "investmentInfo": "Sudah ada di tab Portofolio. Tambahkan aset yang kamu miliki untuk mulai melacak.",
+      "addAsset": "+ Tambah aset pertamamu",
+      "viewPortfolio": "Nanti saja — lihat portofolio",
+      "backToWallets": "Kembali ke Dompet",
+      "mortgageCreated": "KPR tertaut ditambahkan ke Pinjaman & KPR."
+    },
+    "errors": {
+      "nameRequired": "Nama wajib diisi",
+      "brokerRequired": "Broker wajib diisi",
+      "amountInvalid": "Masukkan jumlah yang valid",
+      "dayRange": "Masukkan hari antara 1 dan 31",
+      "dateRequired": "Pilih tanggal",
+      "mortgageIncomplete": "Lengkapi semua kolom KPR",
+      "downPaymentTooLarge": "Uang muka harus lebih kecil dari nilai",
+      "termInvalid": "Masukkan tenor yang valid",
+      "createFailed": "Gagal membuat akun. Coba lagi.",
+      "mortgageRolledBack": "KPR gagal — properti tidak disimpan. Coba lagi."
+    }
+  },
+  "wallets": {
+    "title": "Dompet & Akun",
+    "subtitle": "{accounts} akun · {liabilities} liabilitas",
+    "add": "Tambah",
+    "netWorth": {
+      "label": "Kekayaan Bersih",
+      "assets": "Aset",
+      "liabilities": "Liabilitas"
+    },
+    "groups": {
+      "bank": "Rekening Bank",
+      "digitalWallets": "Dompet Digital",
+      "assets": "Aset",
+      "cashOther": "Tunai & Lainnya",
+      "loans": "Pinjaman & KPR"
+    },
+    "empty": "Belum ada akun — tambahkan yang pertama."
+  },
+  "budgetCreate": {
+    "createTitle": "Buat Anggaran",
+    "editTitle": "Ubah Anggaran",
+    "stepOf": "{step} dari {total}",
+    "periodType": { "monthly": "Bulanan", "monthlyHint": "Atur batas per kategori tiap bulan", "yearly": "Tahunan", "yearlyHint": "Rencanakan pengeluaran besar tahunan" },
+    "income": "Pemasukan periode ini: {amount}",
+    "lockedTitle": "Anggaran bulanan (terkunci)",
+    "lockedBanner": "Kategori tahunan tidak boleh tumpang tindih dengan anggaran bulanan",
+    "annualIncome": "Pendapatan tahunan ≈ {amount}",
+    "ofYearlyIncome": "{pct}% dari pendapatan tahunan",
+    "lockedCount": "{count} terkunci",
+    "yearlyPreview": {
+      "heroLabel": "Anggaran Tahunan · {year}",
+      "monthlyTotal": "Total bulanan",
+      "timesTwelve": "{amount} × 12",
+      "yearlyOnly": "Tahunan saja",
+      "grandTotal": "Total keseluruhan",
+      "splitTitle": "Pembagian jenis anggaran",
+      "monthlyRecurring": "Berulang bulanan",
+      "perMonth": "{amount} / bln",
+      "yearlyOneTime": "Sekali setahun",
+      "perYear": "{amount} / thn",
+      "categoriesTitle": "Kategori tahunan",
+      "save": "Simpan Anggaran Tahunan"
+    },
+    "yearlyAmounts": {
+      "available": "Tersedia untuk anggaran tahunan",
+      "categoryCount": "{count} kategori",
+      "selectedCount": "{selected} dari {total} kategori dipilih",
+      "yearlyTotal": "{amount} per tahun"
+    },
+    "startFrom": {
+      "title": "Mulai dari",
+      "copy": "Salin dari periode lalu",
+      "copyHint": "Belum ada anggaran sebelumnya",
+      "template": "Pakai template",
+      "templateHint": "50/30/20, Konservatif, Seimbang",
+      "scratch": "Mulai dari awal",
+      "scratchHint": "Atur tiap kategori manual"
+    },
+    "next": "Atur Jumlah Kategori",
+    "amounts": {
+      "suggestToggle": "Jumlah yang disarankan",
+      "suggested": "Saran {amount}",
+      "addCategory": "Tambah kategori lain",
+      "remove": "Hapus {name}",
+      "total": "Total anggaran",
+      "pickCategory": "Tambah kategori",
+      "preview": "Pratinjau Anggaran"
+    },
+    "preview": {
+      "income": "Pemasukan",
+      "budgeted": "Dianggarkan",
+      "savings": "Tabungan",
+      "breakdown": "Rincian kategori",
+      "ofIncome": "{pct}% dari pemasukan",
+      "save": "Simpan Anggaran"
+    },
+    "created": { "title": "Anggaran dibuat!", "cta": "Kembali ke Anggaran" },
+    "confirm": {
+      "title": "Terapkan perubahan anggaran?",
+      "effect": "Perubahan langsung berlaku untuk periode ini. Bulan-bulan sebelumnya tidak terpengaruh.",
+      "cancel": "Batal",
+      "apply": "Terapkan"
+    },
+    "applyChanges": "Terapkan Perubahan",
+    "noChanges": "Belum ada perubahan",
+    "monthlyLabel": "{month} · Anggaran Bulanan",
+    "yearlyLabel": "{year} · Anggaran Tahunan",
+    "errors": { "loadFailed": "Gagal memuat. Coba lagi.", "saveFailed": "Gagal menyimpan anggaran. Coba lagi.", "totalRequired": "Alokasikan minimal satu kategori" }
+  },
+  "budgetTab": {
+    "error": "Gagal memuat anggaran periode ini. Coba lagi.",
+    "retry": "Coba lagi",
+    "title": "Anggaran",
+    "prevPeriod": "Periode sebelumnya",
+    "nextPeriod": "Periode berikutnya",
+    "monthly": "Bulanan",
+    "yearly": "Tahunan",
+    "overview": {
+      "title": "Ringkasan",
+      "edit": "Ubah",
+      "budget": "Anggaran",
+      "spent": "Terpakai",
+      "left": "Sisa",
+      "used": "{pct}%"
+    },
+    "categories": {
+      "title": "Anggaran Kategori",
+      "add": "Tambah",
+      "over": "Lebih",
+      "spentSub": "{amount} terpakai",
+      "empty": "Belum ada anggaran kategori di periode ini."
+    },
+    "empty": {
+      "title": "Belum ada anggaran",
+      "description": "Atur batas pengeluaran per kategori dan pantau perkembangannya.",
+      "cta": "Buat anggaran"
+    }
+  },
+  "home": {
+    "greeting": {
+      "morning": "Selamat pagi 👋",
+      "afternoon": "Selamat siang 👋",
+      "evening": "Selamat malam 👋"
+    },
+    "today": { "title": "Hari ini, {date}", "logged": "{count} tercatat" },
+    "hero": {
+      "totalNetWorth": "Total Kekayaan Bersih",
+      "thisMonth": "{pct}% bulan ini",
+      "legendNetWorth": "Kekayaan bersih",
+      "legendSpending": "Pengeluaran bulanan",
+      "income": "Pemasukan",
+      "expenses": "Pengeluaran",
+      "saved": "Tersimpan"
+    },
+    "accounts": {
+      "title": "Akun Saya",
+      "seeAll": "Lihat semua →",
+      "assets": "Aset",
+      "liabilities": "Liabilitas",
+      "accountsCount": "{count} akun",
+      "loansCount": "{count} pinjaman",
+      "more": "+{count} lagi"
+    },
+    "budget": {
+      "title": "Anggaran {month}",
+      "viewAll": "Lihat semua →",
+      "onTrack": "Sesuai rencana",
+      "overBudget": "Melebihi anggaran",
+      "of": "dari {amount}",
+      "used": "{pct}% terpakai",
+      "left": "Sisa {amount}",
+      "noBudget": "Belum ada anggaran untuk bulan ini."
+    },
+    "goals": {
+      "title": "Target Keuangan",
+      "viewAll": "Lihat semua →",
+      "of": "{current} dari {target}"
+    },
+    "upcoming": {
+      "title": "Mendatang",
+      "subtitle": "Tanggal dengan pembayaran terjadwal",
+      "empty": "Tidak ada pembayaran terjadwal dalam 30 hari ke depan."
+    },
+    "biggest": {
+      "title": "Terbesar Bulan Ini",
+      "seeAll": "Lihat semua →",
+      "empty": "Belum ada pengeluaran tercatat bulan ini."
+    }
+  },
+  "portfolio": {
+    "title": "Portofolio",
+    "newAccount": "Akun Baru",
+    "hero": { "totalValue": "Total Nilai Portofolio", "assets": "{count} aset" },
+    "accounts": { "title": "Akun Investasi", "seeAll": "Lihat semua →", "holdings": "{count} aset", "empty": "Belum ada akun investasi." },
+    "allocation": { "title": "Alokasi Aset" },
+    "top": { "title": "Aset Terbesar", "empty": "Belum ada aset — tambahkan ke akun investasi." },
+    "class": { "IDX_STOCK": "Saham IDX", "US_STOCK": "Saham AS", "MUTUAL_FUND": "Reksa Dana", "ETF": "ETF", "BOND": "Obligasi", "OTHER": "Lainnya" },
+    "classHint": { "IDX_STOCK": "Saham Indonesia di IDX", "US_STOCK": "Terdaftar NYSE & NASDAQ", "MUTUAL_FUND": "Reksa dana terkelola", "ETF": "Dana yang diperdagangkan di bursa", "BOND": "Obligasi pemerintah & korporasi", "OTHER": "Lainnya" },
+    "detail": { "investmentAccount": "Akun Investasi", "addAsset": "Tambah Aset", "back": "Kembali", "emptyTitle": "Belum ada aset", "emptyDescription": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:", "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis." },
+    "manage": { "edit": "Ubah", "remove": "Hapus dari portofolio", "currentValue": "Nilai saat ini", "cancel": "Batal", "save": "Simpan", "removeWarning": "Ini menghapus aset dan riwayatnya. Saldo akun akan diperbarui.", "confirmRemove": "Hapus", "saveFailed": "Gagal memperbarui aset.", "deleteFailed": "Gagal menghapus aset." },
+    "emptyCta": "Buat akun investasi"
+  },
+  "holdingCreate": {
+    "selectTitle": "Tambah Investasi",
+    "selectPrompt": "Jenis aset apa?",
+    "selectSubtitle": "Pilih kelas aset untuk portofoliomu",
+    "close": "Tutup",
+    "back": "Kembali",
+    "save": "Simpan",
+    "titleFor": "Tambah {class}",
+    "tickerLabel": "Saham / Ticker",
+    "tickerPlaceholder": "mis. BBCA",
+    "lotsLabel": "Jumlah Lot",
+    "lotsHelper": "1 lot = 100 lembar",
+    "unitsLabel": "Unit",
+    "priceLabel": "Harga Beli / Unit",
+    "dateLabel": "Tanggal Beli",
+    "estimatedTotal": "Estimasi Total",
+    "submit": "Tambah ke Portofolio",
+    "errors": { "tickerRequired": "Masukkan ticker", "amountInvalid": "Masukkan jumlah yang valid", "createFailed": "Gagal menambah aset. Coba lagi." }
   }
 }

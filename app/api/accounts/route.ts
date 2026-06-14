@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 import { getExchangeRate, SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
+import { sanitizeAccountPayload, sanitizeAccountUpdate } from '@/lib/account-payload'
 
 /**
  * Build a Map of "FROM-TO" → rate for converting any supported currency
@@ -149,7 +150,32 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(accounts)
+    if (!accounts || accounts.length === 0) return NextResponse.json([])
+
+    const liveAccountIds = accounts.map(a => a.id)
+    const accountIdList = liveAccountIds.map(id => `"${id}"`).join(',')
+    const { data: txns, error: txErr } = await supabase
+      .from('transactions')
+      .select('amount, type, date, account_id, to_account_id, currency')
+      .eq('user_id', user.id)
+      .or(`account_id.in.(${accountIdList}),to_account_id.in.(${accountIdList})`)
+    if (txErr) {
+      console.error('❌ Error fetching transactions for balances:', txErr)
+      return NextResponse.json({ error: 'Failed to compute balances' }, { status: 500 })
+    }
+
+    const uniqueCurrencies = [...new Set(accounts.map(a => a.currency || 'IDR'))]
+    const rateMaps = new Map<string, Map<string, number>>()
+    await Promise.all(uniqueCurrencies.map(async (cur) => { rateMaps.set(cur, await buildCrossRateMap(cur)) }))
+
+    const now = new Date()
+    const withBalances = accounts.map(account => {
+      const accountTxns = (txns || []).filter(t => t.account_id === account.id || t.to_account_id === account.id)
+      const cur = account.currency || 'IDR'
+      const computed = calculateAccountBalanceAtDate(accountTxns, now, account.type, account.balance, account.id, cur, rateMaps.get(cur))
+      return { ...account, balance: computed }
+    })
+    return NextResponse.json(withBalances)
   } catch (error: unknown) {
     console.error('❌ API Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -159,7 +185,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, type, balance, currency, is_default, description, property_type, asset_location, depreciation_rate, monthly_payment, mortgage_end_date } = body
 
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -168,12 +193,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!name) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    const result = sanitizeAccountPayload(body)
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
     // If this is being set as default, unset other defaults first
-    if (is_default) {
+    if (result.data.is_default) {
       await supabase
         .from('accounts')
         .update({ is_default: false, updated_at: new Date().toISOString() })
@@ -183,20 +209,10 @@ export async function POST(request: NextRequest) {
 
     const insertData = {
       user_id: user.id,
-      name,
-      type: (type || 'BANK').toUpperCase(),
-      balance: balance || 0.00,
-      currency: currency || 'IDR',
-      is_default: is_default || false,
+      ...result.data,
       is_active: true,
-      description: description || null,
-      property_type: property_type || null,
-      asset_location: asset_location || null,
-      depreciation_rate: depreciation_rate ?? null,
-      monthly_payment: monthly_payment ?? null,
-      mortgage_end_date: mortgage_end_date || null,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     }
 
     const { data, error } = await supabase
@@ -220,10 +236,15 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, name, type, balance, currency, is_default, is_active, description, property_type, asset_location, depreciation_rate, monthly_payment, mortgage_end_date } = body
+    const { id } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Account ID is required' }, { status: 400 })
+    }
+
+    const result = sanitizeAccountUpdate(body)
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
     const supabase = await createClient()
@@ -249,7 +270,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // If this is being set as default, unset other defaults first
-    if (is_default) {
+    if (result.data.is_default) {
       await supabase
         .from('accounts')
         .update({ is_default: false, updated_at: new Date().toISOString() })
@@ -257,22 +278,10 @@ export async function PUT(request: NextRequest) {
         .eq('is_default', true)
     }
 
-    const updateData: any = {
-      updated_at: new Date().toISOString()
+    const updateData = {
+      ...result.data,
+      updated_at: new Date().toISOString(),
     }
-
-    if (name !== undefined) updateData.name = name
-    if (type !== undefined) updateData.type = type.toUpperCase()
-    if (balance !== undefined) updateData.balance = balance
-    if (currency !== undefined) updateData.currency = currency
-    if (is_default !== undefined) updateData.is_default = is_default
-    if (is_active !== undefined) updateData.is_active = is_active
-    if (description !== undefined) updateData.description = description
-    if (property_type !== undefined) updateData.property_type = property_type || null
-    if (asset_location !== undefined) updateData.asset_location = asset_location || null
-    if (depreciation_rate !== undefined) updateData.depreciation_rate = depreciation_rate ?? null
-    if (monthly_payment !== undefined) updateData.monthly_payment = monthly_payment ?? null
-    if (mortgage_end_date !== undefined) updateData.mortgage_end_date = mortgage_end_date || null
 
     const { data, error } = await supabase
       .from('accounts')

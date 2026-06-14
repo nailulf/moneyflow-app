@@ -10,7 +10,6 @@ interface Props {
   groups: TransactionGroup[]
   todayKey: string
   getCategoryName: (id: string | null) => string
-  getCategoryColor: (id: string | null) => string
   getAccountName: (id: string | null) => string
   onSelect: (t: Transaction) => void
   isLoading: boolean
@@ -18,14 +17,14 @@ interface Props {
   onReset?: () => void
 }
 
-export function TransactionGroupedList({ groups, todayKey, getCategoryName, getCategoryColor, getAccountName, onSelect, isLoading, isFiltered = false, onReset }: Props) {
+export function TransactionGroupedList({ groups, todayKey, getCategoryName, getAccountName, onSelect, isLoading, isFiltered = false, onReset }: Props) {
   const t = useTranslations('transactions.screen')
   const locale = useLocale()
 
   if (isLoading && groups.length === 0) {
     return (
       <div className="flex flex-col gap-2" aria-busy="true">
-        {[0, 1, 2, 3].map((i) => <div key={i} className="h-14 animate-pulse rounded-xl bg-muted/50" />)}
+        {[0, 1, 2, 3].map((i) => <div key={i} className="h-16 animate-pulse rounded-2xl bg-card shadow-card" />)}
       </div>
     )
   }
@@ -49,18 +48,19 @@ export function TransactionGroupedList({ groups, todayKey, getCategoryName, getC
   return (
     <div className="flex flex-col gap-4">
       {groups.map((g) => (
-        <section key={g.dateKey} className="flex flex-col gap-1">
-          <h2 className="px-2 text-xs font-medium text-muted-foreground">{groupLabel(g.dateKey)}</h2>
-          {g.items.map((tx) => (
-            <TransactionRow
-              key={tx.id}
-              transaction={tx}
-              categoryName={tx.category_id ? getCategoryName(tx.category_id) : t('uncategorized')}
-              categoryColor={getCategoryColor(tx.category_id)}
-              accountName={tx.account_id ? getAccountName(tx.account_id) : t('noAccount')}
-              onSelect={onSelect}
-            />
-          ))}
+        <section key={g.dateKey} className="flex flex-col gap-1.5">
+          <h2 className="px-2 text-xs leading-caption font-medium text-muted-foreground">{groupLabel(g.dateKey)}</h2>
+          <div className="divide-y divide-muted overflow-hidden rounded-2xl bg-card shadow-card">
+            {g.items.map((tx) => (
+              <TransactionRow
+                key={tx.id}
+                transaction={tx}
+                categoryName={tx.category_id ? getCategoryName(tx.category_id) : t('uncategorized')}
+                accountName={tx.account_id ? getAccountName(tx.account_id) : t('noAccount')}
+                onSelect={onSelect}
+              />
+            ))}
+          </div>
         </section>
       ))}
     </div>

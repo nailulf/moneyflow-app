@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { createElement, useState } from 'react'
 import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { Button } from '@/components/ui/atoms/button'
@@ -15,67 +15,19 @@ import {
   X,
   Trash2,
   Plus,
-  Utensils,
-  Car,
-  ShoppingBag,
-  Film,
-  Receipt,
-  HeartPulse,
-  GraduationCap,
-  Plane,
-  Package,
-  Banknote,
-  Briefcase,
-  TrendingUp,
-  ArrowLeftRight,
-  PiggyBank,
-  CreditCard,
 } from 'lucide-react'
 import { CategoryDB } from '@/types/database'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAutoRefresh } from '@/hooks/useDataRefresh'
 import { invalidateCategoriesCache } from '@/lib/api/categories'
+import { getCategoryIcon } from '@/lib/category-style'
 import { cn } from '@/lib/utils'
 
-// Render a flat Lucide icon for a given category. We can't alias a dynamic
-// component during render (the lint rule `react-hooks/static-components`
-// flags it) so we render each icon literal inside a switch.
-function CategoryIcon({ name, groupType, className }: { name: string, groupType: string, className?: string }) {
-  switch (name) {
-    case 'Food & Dining':
-      return <Utensils className={className} />
-    case 'Transportation':
-      return <Car className={className} />
-    case 'Shopping':
-      return <ShoppingBag className={className} />
-    case 'Entertainment':
-      return <Film className={className} />
-    case 'Bills & Utilities':
-      return <Receipt className={className} />
-    case 'Healthcare':
-      return <HeartPulse className={className} />
-    case 'Education':
-      return <GraduationCap className={className} />
-    case 'Travel':
-      return <Plane className={className} />
-    case 'Income':
-      return <Banknote className={className} />
-    case 'Salary':
-      return <Briefcase className={className} />
-    case 'Investment':
-      return <TrendingUp className={className} />
-    case 'Transfer':
-      return <ArrowLeftRight className={className} />
-    case 'Savings transfer':
-      return <PiggyBank className={className} />
-    case 'Credit card payment':
-      return <CreditCard className={className} />
-    default:
-      // Fallback per group type when the name isn't in the table above
-      if (groupType === 'INCOME') return <Banknote className={className} />
-      if (groupType === 'TRANSFER') return <ArrowLeftRight className={className} />
-      return <Package className={className} />
-  }
+// getCategoryIcon returns static module-level components, but aliasing one
+// into JSX (`const Icon = ...; <Icon />`) trips `react-hooks/static-components`
+// — the linter can't see through the lookup. createElement sidesteps the alias.
+function CategoryIcon({ name, className }: { name: string, className?: string }) {
+  return createElement(getCategoryIcon(name), { className })
 }
 
 interface AddCategoryTileProps {
@@ -205,7 +157,7 @@ function EditableCategory({ category, onSave, onDelete, isBusy, disableDelete }:
   if (isEditing) {
     return (
       <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 text-sm">
-        <CategoryIcon name={category.name} groupType={category.group_type} className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <CategoryIcon name={category.name} className="h-4 w-4 shrink-0 text-muted-foreground" />
         <Input
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
@@ -244,7 +196,7 @@ function EditableCategory({ category, onSave, onDelete, isBusy, disableDelete }:
 
   return (
     <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50 text-sm hover:bg-muted transition-colors">
-      <CategoryIcon name={category.name} groupType={category.group_type} className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <CategoryIcon name={category.name} className="h-4 w-4 shrink-0 text-muted-foreground" />
       <button
         type="button"
         onClick={() => setIsEditing(true)}

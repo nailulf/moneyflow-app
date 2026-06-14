@@ -8,6 +8,7 @@ import { FinancialGoalsSection } from '@/components/features/goals'
 import { BudgetStatus } from '@/components/BudgetStatus'
 import { useBudgetSnapshot } from '@/hooks/useBudgetSnapshot'
 import { useTransactions } from '@/contexts/TransactionContext'
+import { MobileHome } from '@/components/features/home/MobileHome'
 
 export default function Home() {
   const now = new Date()
@@ -32,16 +33,18 @@ export default function Home() {
   }, [transactions, currentYear, currentMonth])
 
   return (
-     <div className="flex flex-col h-full">
-      <PageLayout>
-        <TopContent>
-          <OnboardingBanner />
-        </TopContent>
-        <ContentWrapper>
-          <MainContent>
-            <NetWorthOverview />
-          </MainContent>
-          <SideContent>
+    <>
+      <MobileHome />
+      <div className="hidden h-full flex-col md:flex">
+        <PageLayout>
+          <TopContent>
+            <OnboardingBanner />
+          </TopContent>
+          <ContentWrapper>
+            <MainContent>
+              <NetWorthOverview />
+            </MainContent>
+            <SideContent>
               <div className="space-y-2">
                 <FinancialGoalsSection />
                 <BudgetStatus
@@ -55,10 +58,10 @@ export default function Home() {
                   transactions={currentMonthTransactions}
                 />
               </div>
-          </SideContent>
-        </ContentWrapper>
-      </PageLayout>
-
+            </SideContent>
+          </ContentWrapper>
+        </PageLayout>
       </div>
+    </>
   )
 }

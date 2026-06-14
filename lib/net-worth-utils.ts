@@ -1,4 +1,5 @@
 import { AccountDB } from '@/types/database'
+import { computeAccountBalance } from '@/lib/account-balance'
 
 /** Minimal transaction shape needed for balance calculations. */
 export type BalanceTransaction = {
@@ -88,41 +89,38 @@ export function calculateAccountBalanceAtDate(
   accountCurrency?: string,
   currencyRates?: Map<string, number>
 ): number {
-  const filteredTransactions = transactions.filter(
-    transaction => new Date(transaction.date) <= targetDate
-  )
-
-  const convert = (amount: number, txCurrency?: string | null): number => {
-    if (!accountCurrency || !currencyRates || !txCurrency || txCurrency === accountCurrency) {
-      return amount
-    }
-    const rate = currencyRates.get(`${txCurrency}-${accountCurrency}`)
-    return rate ? amount * rate : amount
+  // INVESTMENT accounts are holdings-driven: their `balance` is kept = SUM(holdings.current_value)
+  // by a dedicated DB trigger (migration 049), NOT an opening anchor. Computing opening + Σ(tx)
+  // would double-count, so pass the live column through unchanged.
+  if (accountType === 'INVESTMENT') {
+    return initialBalance
   }
-
-  let balance = initialBalance
-  for (const transaction of filteredTransactions) {
-    const amount = convert(transaction.amount, transaction.currency)
-    switch (transaction.type) {
-      case 'INCOME':
-        balance += amount
-        break
-      case 'EXPENSE':
-        balance -= amount
-        break
-      case 'TRANSFER':
-        if (accountId && transaction.to_account_id) {
-          if (transaction.account_id === accountId) {
-            balance -= amount
-          } else if (transaction.to_account_id === accountId) {
-            balance += amount
-          }
-        }
-        break
+  if (!accountId) {
+    // Legacy path: no account context, apply INCOME/EXPENSE unconditionally (no transfer direction).
+    // Real callers always pass accountId; this branch preserves backward compat for existing tests.
+    const convert = (amount: number, txCurrency?: string | null): number => {
+      if (!accountCurrency || !currencyRates || !txCurrency || txCurrency === accountCurrency) return amount
+      const rate = currencyRates.get(`${txCurrency}-${accountCurrency}`)
+      return rate ? amount * rate : amount
     }
+    let balance = initialBalance
+    for (const t of transactions) {
+      if (new Date(t.date) > targetDate) continue
+      const amount = convert(t.amount, t.currency)
+      if (t.type === 'INCOME') balance += amount
+      else if (t.type === 'EXPENSE') balance -= amount
+      // TRANSFER skipped: no account_id context to determine direction
+    }
+    return balance
   }
-
-  return balance
+  return computeAccountBalance({
+    accountId,
+    opening: initialBalance,
+    transactions,
+    asOf: targetDate,
+    accountCurrency,
+    currencyRates,
+  })
 }
 
 /**
@@ -135,6 +133,7 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
   const accountGroups: { [key: string]: AccountWithBalance[] } = {
     CASH: [],
     BANK: [],
+    DIGITAL_WALLET: [],
     INVESTMENT: [],
     PROPERTY: [],
     VEHICLE: [],
@@ -183,6 +182,22 @@ export function categorizeAccounts(accounts: AccountWithBalance[]): AccountCateg
         ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
         : 0,
       color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
+    })
+  }
+
+  // Digital wallets
+  if (accountGroups.DIGITAL_WALLET.length > 0) {
+    const totalRaw = accountGroups.DIGITAL_WALLET.reduce((sum, acc) => sum + getAccountBalance(acc), 0)
+    const isLiability = totalRaw < 0
+    const total = isLiability ? -Math.abs(totalRaw) : totalRaw
+    categories.push({
+      name: 'Digital Wallets',
+      accounts: accountGroups.DIGITAL_WALLET,
+      total,
+      percentage: totalNetWorth > 0
+        ? (isLiability ? (Math.abs(total) / totalNetWorth) * 100 : (total / totalNetWorth) * 100)
+        : 0,
+      color: isLiability ? 'hsl(var(--destructive))' : 'hsl(var(--success))'
     })
   }
 

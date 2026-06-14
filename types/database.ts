@@ -25,6 +25,7 @@ export interface Database {
           posting_date: string | null
           is_duplicate: boolean
           duplicate_of: string | null
+          is_balance_adjustment: boolean
           created_at: string
           updated_at: string
         }
@@ -51,6 +52,7 @@ export interface Database {
           posting_date?: string | null
           is_duplicate?: boolean
           duplicate_of?: string | null
+          is_balance_adjustment?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -77,6 +79,7 @@ export interface Database {
           posting_date?: string | null
           is_duplicate?: boolean
           duplicate_of?: string | null
+          is_balance_adjustment?: boolean
           updated_at?: string
         }
       }
@@ -139,6 +142,7 @@ export interface Database {
           adjustment_amount: number
           note: string | null
           adjustment_date: string
+          transaction_id: string | null
           created_at: string
         }
         Insert: {
@@ -150,6 +154,7 @@ export interface Database {
           adjustment_amount: number
           note?: string | null
           adjustment_date?: string
+          transaction_id?: string | null
           created_at?: string
         }
         Update: Record<string, never>
@@ -159,7 +164,7 @@ export interface Database {
           id: string
           user_id: string
           name: string
-          type: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
+          type: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance: number
           currency: string
           is_default: boolean
@@ -170,6 +175,16 @@ export interface Database {
           depreciation_rate: number | null
           monthly_payment: number | null
           mortgage_end_date: string | null
+          purchase_date: string | null
+          credit_limit: number | null
+          statement_day: number | null
+          due_day: number | null
+          vehicle_type: 'CAR' | 'MOTORCYCLE' | 'TRUCK' | null
+          broker: string | null
+          interest_rate: number | null
+          loan_term_months: number | null
+          down_payment: number | null
+          investment_goal: string | null
           created_at: string
           updated_at: string
         }
@@ -177,7 +192,7 @@ export interface Database {
           id?: string
           user_id: string
           name: string
-          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
+          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance?: number
           currency?: string
           is_default?: boolean
@@ -188,6 +203,16 @@ export interface Database {
           depreciation_rate?: number | null
           monthly_payment?: number | null
           mortgage_end_date?: string | null
+          purchase_date?: string | null
+          credit_limit?: number | null
+          statement_day?: number | null
+          due_day?: number | null
+          vehicle_type?: 'CAR' | 'MOTORCYCLE' | 'TRUCK' | null
+          broker?: string | null
+          interest_rate?: number | null
+          loan_term_months?: number | null
+          down_payment?: number | null
+          investment_goal?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -195,7 +220,7 @@ export interface Database {
           id?: string
           user_id?: string
           name?: string
-          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE'
+          type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance?: number
           currency?: string
           is_default?: boolean
@@ -206,6 +231,16 @@ export interface Database {
           depreciation_rate?: number | null
           monthly_payment?: number | null
           mortgage_end_date?: string | null
+          purchase_date?: string | null
+          credit_limit?: number | null
+          statement_day?: number | null
+          due_day?: number | null
+          vehicle_type?: 'CAR' | 'MOTORCYCLE' | 'TRUCK' | null
+          broker?: string | null
+          interest_rate?: number | null
+          loan_term_months?: number | null
+          down_payment?: number | null
+          investment_goal?: string | null
           updated_at?: string
         }
       }
@@ -693,6 +728,52 @@ export interface Database {
           target_amount?: number
           target_date?: string
           status?: 'active' | 'completed' | 'cancelled'
+          updated_at?: string
+        }
+      }
+      portfolio_holdings: {
+        Row: {
+          id: string
+          account_id: string
+          user_id: string
+          asset_class: 'IDX_STOCK' | 'US_STOCK' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'OTHER'
+          symbol: string | null
+          name: string
+          quantity: number
+          purchase_price: number
+          current_value: number
+          purchase_date: string | null
+          currency: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          account_id: string
+          user_id: string
+          asset_class: 'IDX_STOCK' | 'US_STOCK' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'OTHER'
+          symbol?: string | null
+          name: string
+          quantity: number
+          purchase_price: number
+          current_value: number
+          purchase_date?: string | null
+          currency?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          account_id?: string
+          user_id?: string
+          asset_class?: 'IDX_STOCK' | 'US_STOCK' | 'MUTUAL_FUND' | 'ETF' | 'BOND' | 'OTHER'
+          symbol?: string | null
+          name?: string
+          quantity?: number
+          purchase_price?: number
+          current_value?: number
+          purchase_date?: string | null
+          currency?: string
           updated_at?: string
         }
       }

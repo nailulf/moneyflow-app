@@ -14,6 +14,7 @@ import {
   Coins,
   CreditCard,
   ChevronDown,
+  Smartphone,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
@@ -98,6 +99,8 @@ function getAccountIcon(type: string) {
       return <Car className="h-4 w-4" />
     case 'MORTGAGE':
       return <Landmark className="h-4 w-4" />
+    case 'DIGITAL_WALLET':
+      return <Smartphone className="h-4 w-4" />
     default:
       return <Wallet className="h-4 w-4" />
   }
@@ -117,6 +120,8 @@ function AccountRow({
   }
 }) {
   const t = useTranslations('dashboard.netWorth')
+  // Captured once on mount so render stays pure (react-hooks/purity)
+  const [now] = useState(() => Date.now())
   const currency = account.currency || 'IDR'
   const base = account.baseCurrency || 'IDR'
   const showConversion = currency !== base && account.currentBalanceInBase !== undefined
@@ -130,7 +135,7 @@ function AccountRow({
         <div className="min-w-0">
           <p className="text-sm font-medium truncate">{account.name}</p>
           {account.created_at &&
-            Date.now() - new Date(account.created_at).getTime() <= 7 * 24 * 60 * 60 * 1000 && (
+            now - new Date(account.created_at).getTime() <= 7 * 24 * 60 * 60 * 1000 && (
               <p className="text-[length:var(--font-size-xs)] leading-[var(--leading-caption)] text-muted-foreground">
                 {t('added')} {t('recently')}
               </p>

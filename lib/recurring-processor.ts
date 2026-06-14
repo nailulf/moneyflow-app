@@ -14,6 +14,32 @@ export interface ProcessingResult {
   }>
 }
 
+export function buildGeneratedTransaction(
+  template: {
+    user_id: string; account_id: string | null; to_account_id?: string | null
+    type: 'INCOME' | 'EXPENSE' | 'TRANSFER'; amount: number; description: string
+    category_id: string | null; merchant: string | null; notes: string | null
+    tags: string[] | null; currency?: string | null
+  },
+  todayISO: string // YYYY-MM-DD
+) {
+  return {
+    user_id: template.user_id,
+    account_id: template.account_id,
+    to_account_id: template.to_account_id ?? null, // FIX: was dropped
+    date: todayISO,
+    description: template.description,
+    amount: template.amount,
+    type: template.type,
+    category_id: template.category_id,
+    merchant: template.merchant,
+    notes: template.notes,
+    tags: template.tags,
+    currency: template.currency ?? 'IDR', // FIX: was dropped
+    is_recurring: false,
+  }
+}
+
 export async function processRecurringTransactions(): Promise<ProcessingResult> {
   const supabase = createServerComponentClient()
   const now = new Date()
@@ -106,18 +132,8 @@ export async function processRecurringTransactions(): Promise<ProcessingResult> 
 
       // Create new transaction based on the recurring one
       const newTransaction = {
-        user_id: transaction.user_id,
-        account_id: transaction.account_id,
-        date: now.toISOString().split('T')[0], // Format as YYYY-MM-DD
-        description: transaction.description,
-        amount: transaction.amount,
-        type: transaction.type,
-        category_id: transaction.category_id,
-        merchant: transaction.merchant,
-        notes: transaction.notes,
-        tags: transaction.tags,
-        is_recurring: false, // New transaction is not recurring itself
-        created_at: new Date().toISOString()
+        ...buildGeneratedTransaction(transaction, now.toISOString().split('T')[0]),
+        created_at: new Date().toISOString(),
       }
 
       // Insert the new transaction
