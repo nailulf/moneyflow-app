@@ -18,4 +18,7 @@ describe('isFullScreenFlow', () => {
     expect(isFullScreenFlow('/transactions/abc-123/edit')).toBe(true)
     expect(isFullScreenFlow('/transactions')).toBe(false)
   })
+  it.each(['/start', '/start/intent', '/start/goal/emergency-fund', '/start/health-check', '/start/save'])(
+    'hides chrome on the guest funnel %s', (path) => expect(isFullScreenFlow(path)).toBe(true)
+  )
 })

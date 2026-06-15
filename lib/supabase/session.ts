@@ -8,7 +8,10 @@ const publicRoutes = [
   '/register',
   '/verify-email',
   '/forgot-password',
-  '/auth'
+  '/auth',
+  // Guest onboarding funnel: a logged-out visitor must reach /start/* without
+  // a login redirect (an anonymous session is created lazily mid-funnel).
+  '/start'
 ]
 
 // Onboarding is now handled via modal on the dashboard

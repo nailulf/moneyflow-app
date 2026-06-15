@@ -63,10 +63,11 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     window.history.replaceState({}, '', url.toString())
   }, [searchParams])
 
-  // Standalone pages (auth + offline) render without the sidebar layout.
-  // Checked before `loading` so /offline still renders when the auth fetch
-  // can't resolve (no network).
-  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth') || pathname.startsWith('/verify-email') || pathname.startsWith('/offline')) {
+  // Standalone pages (auth + offline + guest funnel) render without the
+  // sidebar layout. Checked before `loading` so /offline still renders when
+  // the auth fetch can't resolve (no network), and so the logged-out /start
+  // funnel renders full-screen without the authed shell or a login redirect.
+  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth') || pathname.startsWith('/verify-email') || pathname.startsWith('/offline') || pathname.startsWith('/start')) {
     return <>{children}</>
   }
 
