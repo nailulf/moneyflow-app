@@ -1,5 +1,5 @@
 /** Routes that render as full-screen flows: no bottom tab bar, no nav clearance padding. */
-const FULL_SCREEN_FLOW_PREFIXES = ['/accounts/new', '/budget/create', '/budget/edit']
+const FULL_SCREEN_FLOW_PREFIXES = ['/accounts/new', '/budget/create', '/budget/edit', '/transactions/new']
 
 // Portfolio drill-ins (/portfolio/<accountId>[/add]) are full-screen, but the bare
 // /portfolio root and the desktop sub-pages (/portfolio/holdings, /portfolio/analytics) are not.
@@ -9,5 +9,12 @@ function isPortfolioDetail(pathname: string): boolean {
   return m !== null && !PORTFOLIO_NON_DETAIL.has(m[1])
 }
 
+// /transactions/<id>/edit is full-screen; /transactions (list) is NOT.
+function isTransactionEdit(pathname: string): boolean {
+  return /^\/transactions\/[^/]+\/edit$/.test(pathname)
+}
+
 export const isFullScreenFlow = (pathname: string): boolean =>
-  FULL_SCREEN_FLOW_PREFIXES.some((prefix) => pathname.startsWith(prefix)) || isPortfolioDetail(pathname)
+  FULL_SCREEN_FLOW_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
+  isPortfolioDetail(pathname) ||
+  isTransactionEdit(pathname)

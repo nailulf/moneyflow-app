@@ -309,10 +309,17 @@ export function useCategories() {
     [categoryGroups]
   )
   
+  // Picker-compatible shape (id, name, group_type) for CategoryPickerSheet
+  const categories = useMemo(
+    () => allCategories.map((c) => ({ id: c.id, name: c.name, group_type: c.groupType as string })),
+    [allCategories]
+  )
+
   return {
     allCategories,
     expenseCategories,
     incomeCategories,
+    categories,
     categoryGroups,
     isLoading,
     error

@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
-import { Transaction, TransactionUpdate } from '@/types/database'
-import { TransactionFormData } from '@/lib/validations'
+import React, { useState, useMemo, useCallback } from 'react'
+import { Transaction } from '@/types/database'
 import { formatCurrency } from '@/lib/data-utils'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
@@ -30,10 +29,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/molecules/dropdown-menu'
-import { EditTransactionForm } from '@/components/features/transaction/EditTransactionForm'
+import { useRouter } from 'next/navigation'
 import { useTransactions } from '@/contexts/TransactionContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { updateTransaction, deleteTransaction } from '@/lib/api/transactions'
 import { toast } from 'sonner'
 
 interface RecurringTransactionsListProps {
@@ -44,14 +42,13 @@ type SortField = 'description' | 'amount' | 'next_date' | 'frequency'
 type SortDirection = 'asc' | 'desc'
 
 export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
+  const router = useRouter()
   const { user } = useAuth()
   const userId = user?.id || ''
-  const { transactions, refreshTransactions, editTransaction } = useTransactions()
+  const { transactions, editTransaction } = useTransactions()
   const [searchTerm, setSearchTerm] = useState('')
   const [sortField, setSortField] = useState<SortField>('next_date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [frequencyFilter, setFrequencyFilter] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
@@ -134,11 +131,9 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
     }
   }
 
-  const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction)
-    // Defer Sheet open until DropdownMenu's DismissableLayer has fully unmounted.
-    setTimeout(() => setIsEditModalOpen(true), 0)
-  }
+  const handleEdit = useCallback((transaction: Transaction) => {
+    router.push(`/transactions/${transaction.id}/edit`)
+  }, [router])
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to stop this recurring transaction? This will remove the recurring flag but keep the transaction history.')) {
@@ -149,17 +144,6 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
         console.error('Failed to stop recurring transaction:', error)
         toast.error('Failed to stop recurring transaction')
       }
-    }
-  }
-
-  const handleTransactionUpdated = async (id: string, data: Partial<TransactionFormData>) => {
-    try {
-      await editTransaction(id, data)
-      setEditingTransaction(null)
-      setIsEditModalOpen(false)
-    } catch (error) {
-      console.error('Failed to update transaction:', error)
-      // Toast is handled by the context
     }
   }
 
@@ -338,12 +322,6 @@ export function RecurringTransactionsList({}: RecurringTransactionsListProps) {
         </div>
       )}
 
-      <EditTransactionForm
-        transaction={editingTransaction}
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
-        onTransactionUpdated={handleTransactionUpdated}
-      />
     </div>
   )
 }
