@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { useOnboarding } from '@/contexts/OnboardingContext'
 import { useOnboardingStatus } from '@/hooks/useOnboardingQuery'
 import { preferences } from '@/lib/api/user-preferences'
 import { Analytics } from '@/lib/analytics/amplitude'
@@ -221,8 +221,8 @@ const VARIANT_STYLES: Record<
 
 export function OnboardingBanner({ variant = 'warm' }: OnboardingBannerProps) {
   const t = useTranslations('dashboard.activationBanner')
+  const router = useRouter()
   const { user } = useAuth()
-  const { openModal } = useOnboarding()
   const { data: onboarding, isLoading } = useOnboardingStatus({
     userId: user?.id || '',
     enabled: !!user?.id,
@@ -288,7 +288,10 @@ export function OnboardingBanner({ variant = 'warm' }: OnboardingBannerProps) {
       step: STEPS[completedCount]?.id,
       current_phase: onboarding?.current_phase,
     })
-    openModal()
+    // The legacy post-auth modal stack is gone; the activation steps now lead
+    // straight into the relevant in-app flow. Today every step's primary
+    // action is recording a transaction, so route to the add-transaction flow.
+    router.push('/transactions/new')
   }
 
   // Don't render while we don't yet know whether to show:

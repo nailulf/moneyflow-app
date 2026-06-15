@@ -18,7 +18,6 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { TransactionProvider } from '@/contexts/TransactionContext'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
-import { OnboardingModal } from '@/components/features/onboarding/OnboardingModal'
 import { Loader2 } from 'lucide-react'
 import { MobileScreenHeader } from '@/components/features/navigation/MobileScreenHeader'
 import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'
@@ -118,7 +117,6 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
         <AccountProvider>
           <CategoryProvider>
             <OnboardingProvider>
-              <OnboardingModal />
               <AppSidebar className="hidden md:flex" />
               <SidebarInset>
           <header className="hidden h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:flex">
