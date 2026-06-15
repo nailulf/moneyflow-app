@@ -2,7 +2,14 @@
 [auth]
 enable_anonymous_sign_ins = true
 
+# CAPTCHA is DEFERRED. Abuse protection currently relies on Supabase's built-in
+# rate limit for anonymous sign-ins (30 req/hr/IP). Enabling CAPTCHA is global to
+# all auth flows (login/register/reset would also require a Turnstile token), so it
+# is intentionally a separate later task that wires Turnstile into anon sign-in AND
+# the existing auth pages together. To enable later: set `enabled = true`, provide
+# SUPABASE_AUTH_CAPTCHA_SECRET (local) / the dashboard secret (hosted), and ship the
+# NEXT_PUBLIC_TURNSTILE_SITE_KEY widget on every auth surface.
 [auth.captcha]
-enabled = true
+enabled = false
 provider = "turnstile"
 secret = "env(SUPABASE_AUTH_CAPTCHA_SECRET)"
