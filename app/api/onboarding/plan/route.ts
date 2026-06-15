@@ -7,9 +7,12 @@ import { createServerComponentClient } from '@/lib/supabase'
 // (supabase/migrations/027_create_budget_plan_tables.sql): only 'monthly'
 // and 'yearly' are allowed — there is no 'weekly' plan in this model.
 const PlanSchema = z.object({
-  // The funnel calls this "monthly_income"; the budget_plans table stores the
-  // planned total in `total_amount` (NUMERIC, NOT NULL, default 0). We map one
-  // to the other below.
+  // `monthly_income` is accepted for the onboarding funnel's use but is NOT
+  // persisted: budget_plans has no income column, and adding one is out of
+  // scope for Phase 1 (would require a dedicated future migration).
+  // budget_plans.total_amount is the budget *ceiling* = SUM of category
+  // allocations (see app/budget/{create,edit}/page.tsx and
+  // lib/budget-screen-utils.ts), so it is computed from `allocations` below.
   monthly_income: z.number().min(0).max(1e15),
   period: z.enum(['monthly', 'yearly']).default('monthly'),
   allocations: z
@@ -45,6 +48,9 @@ export async function POST(request: Request) {
   // write stays scoped to the authenticated caller's own user_id.
   const admin = createServerComponentClient()
 
+  // total_amount is the budget ceiling = SUM of the category allocations.
+  const total = parsed.data.allocations.reduce((s, a) => s + a.amount, 0)
+
   // Upsert on the UNIQUE(user_id, period) constraint
   // (budget_plans_user_period_unique).
   const { data: plan, error: planErr } = await admin
@@ -53,7 +59,7 @@ export async function POST(request: Request) {
       {
         user_id: user.id,
         period: parsed.data.period,
-        total_amount: parsed.data.monthly_income,
+        total_amount: total,
       },
       { onConflict: 'user_id,period' }
     )

@@ -25,9 +25,10 @@ describe('POST /api/onboarding/plan', () => {
 
   it('creates a plan and its categories, returns 200', async () => {
     getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
-    const planUpsert = {
-      upsert: () => ({ select: () => ({ single: () => Promise.resolve({ data: { id: 'plan1' }, error: null }) }) }),
-    }
+    const upsert = jest.fn(() => ({
+      select: () => ({ single: () => Promise.resolve({ data: { id: 'plan1' }, error: null }) }),
+    }))
+    const planUpsert = { upsert }
     const catInsert = {
       delete: () => ({ eq: () => Promise.resolve({ error: null }) }),
       insert: () => Promise.resolve({ error: null }),
@@ -42,5 +43,10 @@ describe('POST /api/onboarding/plan', () => {
     )
     expect(res.status).toBe(200)
     expect((await res.json()).plan.id).toBe('plan1')
+    // total_amount must be the allocation SUM (2000000), NOT monthly_income (8500000).
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ total_amount: 2000000 }),
+      expect.anything()
+    )
   })
 })
