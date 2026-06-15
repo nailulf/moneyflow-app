@@ -18,7 +18,15 @@ jest.mock('@/hooks/useTransactionsQuery', () => ({
     isDeleting: false,
   }),
 }))
-jest.mock('@/hooks/use-category-manager', () => ({ useCategories: () => ({ categories: [{ id: 'food', name: 'Food', group_type: 'EXPENSE' }] }) }))
+jest.mock('@/hooks/useTransactionCategories', () => ({
+  useTransactionCategories: () => ({
+    categories: [{ id: 'food', name: 'Food', group_type: 'EXPENSE' }],
+    isLoading: false,
+    error: null,
+    addCategory: jest.fn().mockResolvedValue('new-cat'),
+    isAdding: false,
+  }),
+}))
 jest.mock('@/contexts/AccountContext', () => ({ useAccounts: () => ({ accounts: [{ id: 'A', name: 'BCA', type: 'BANK', balance: 1, currency: 'IDR' }] }) }))
 
 beforeEach(() => {
@@ -32,9 +40,9 @@ it('builds an expense and shows the success view on save', async () => {
   fireEvent.click(screen.getByRole('button', { name: '1' }))
   fireEvent.click(screen.getByRole('button', { name: '2' }))
   fireEvent.click(screen.getByRole('button', { name: '5' }))
-  fireEvent.click(screen.getByText(/choose category/i)); fireEvent.click(await screen.findByText('Food'))
-  fireEvent.click(screen.getByText(/choose account/i)); fireEvent.click(await screen.findByText('BCA'))
-  fireEvent.click(screen.getByRole('button', { name: /save/i }))
+  fireEvent.click(screen.getByText('Food')) // inline category chip
+  fireEvent.click(screen.getByText(/select account/i)); fireEvent.click(await screen.findByText('BCA'))
+  fireEvent.click(screen.getByRole('button', { name: /save transaction/i }))
   await waitFor(() => expect(create).toHaveBeenCalled())
   expect(create.mock.calls[0][0]).toMatchObject({ type: 'EXPENSE', amount: 125, category_id: 'food', account_id: 'A' })
   expect(await screen.findByText(/transaction added/i)).toBeInTheDocument()
@@ -42,9 +50,10 @@ it('builds an expense and shows the success view on save', async () => {
 
 it('changing type to Income clears the chosen category', async () => {
   render(<TransactionForm mode="create" userId="u" onDone={jest.fn()} />)
-  fireEvent.click(screen.getByText(/choose category/i)); fireEvent.click(await screen.findByText('Food'))
+  fireEvent.click(screen.getByText('Food')) // select expense chip
   fireEvent.click(screen.getByRole('button', { name: /income/i }))
-  expect(screen.getByText(/choose category/i)).toBeInTheDocument() // category reset to placeholder
+  // Food is an EXPENSE-only category, so it drops out of the chip row for INCOME
+  expect(screen.queryByText('Food')).toBeNull()
 })
 
 // ---------------------------------------------------------------------------
@@ -60,7 +69,7 @@ const editInitial = {
 it('edit seeds fields and updates via {id,data}', async () => {
   render(<TransactionForm mode="edit" userId="u" initial={editInitial} onDone={jest.fn()} />)
   expect(screen.getByText('300')).toBeInTheDocument()
-  fireEvent.click(screen.getByRole('button', { name: /save/i }))
+  fireEvent.click(screen.getByRole('button', { name: /save transaction/i }))
   await waitFor(() => expect(update).toHaveBeenCalled())
   expect(update.mock.calls[0][0]).toMatchObject({ id: 'e1', data: expect.objectContaining({ amount: 300 }) })
   expect(await screen.findByText(/transaction updated/i)).toBeInTheDocument()

@@ -22,6 +22,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/organisms/sheet'
+import { groupAccounts } from '@/lib/wallets-utils'
 
 // ---------------------------------------------------------------------------
 // Minimal account shape — subset used by the picker
@@ -42,6 +43,8 @@ export interface AccountPickerSheetProps {
   excludeId?: string | null
   onSelect: (id: string) => void
   onOpenChange: (open: boolean) => void
+  /** Show each account's balance on the right. Off in the transaction flow. */
+  showBalance?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -85,8 +88,10 @@ export function AccountPickerSheet({
   excludeId,
   onSelect,
   onOpenChange,
+  showBalance = true,
 }: AccountPickerSheetProps) {
   const t = useTranslations('transactions.form')
+  const tw = useTranslations('wallets')
   const [search, setSearch] = useState('')
 
   function typeLabel(type: string): string {
@@ -109,6 +114,9 @@ export function AccountPickerSheet({
   const filtered = accounts
     .filter((a) => a.id !== excludeId)
     .filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
+
+  // Grouped by account type (same convention as the Wallets dashboard).
+  const groups = groupAccounts(filtered)
 
   const handleSelect = (id: string) => {
     onSelect(id)
@@ -138,57 +146,72 @@ export function AccountPickerSheet({
           />
         </div>
 
-        {/* Account list */}
+        {/* Account list — grouped by type */}
         <div className="flex-1 overflow-y-auto px-4 pb-[max(env(safe-area-inset-bottom),1rem)]">
-          <div className="flex flex-col gap-1">
-            {filtered.map((acct) => {
-              const { Icon, bg, fg } = getAccountStyle(acct.type)
-              const isSelected = acct.id === selectedId
+          {groups.length === 0 && (
+            <p className="px-1 py-3 text-sm leading-body-sm text-muted-foreground">
+              {t('noAccountsForSearch')}
+            </p>
+          )}
+          {groups.map((group) => (
+            <div key={group.key} className="mb-1">
+              {/* Group header */}
+              <p className="px-1 pb-1 pt-3 text-xs leading-caption font-semibold uppercase tracking-wide text-muted-foreground">
+                {tw(`groups.${group.key}`)}
+              </p>
+              <div className="flex flex-col gap-1">
+                {group.accounts.map((acct) => {
+                  const { Icon, bg, fg } = getAccountStyle(acct.type)
+                  const isSelected = acct.id === selectedId
 
-              return (
-                <button
-                  key={acct.id}
-                  type="button"
-                  onClick={() => handleSelect(acct.id)}
-                  className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-3 text-left',
-                    'hover:bg-muted/50 active:bg-muted transition-colors',
-                    isSelected && 'ring-2 ring-primary',
-                  )}
-                >
-                  {/* Account-type icon circle */}
-                  <span
-                    className={cn(
-                      'flex size-11 shrink-0 items-center justify-center rounded-full',
-                      bg,
-                    )}
-                  >
-                    <Icon className={cn('size-5', fg)} />
-                  </span>
+                  return (
+                    <button
+                      key={acct.id}
+                      type="button"
+                      onClick={() => handleSelect(acct.id)}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg px-3 py-3 text-left',
+                        'hover:bg-muted/50 active:bg-muted transition-colors',
+                        isSelected && 'ring-2 ring-primary',
+                      )}
+                    >
+                      {/* Account-type icon circle */}
+                      <span
+                        className={cn(
+                          'flex size-11 shrink-0 items-center justify-center rounded-full',
+                          bg,
+                        )}
+                      >
+                        <Icon className={cn('size-5', fg)} />
+                      </span>
 
-                  {/* Name + type */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm leading-body-sm font-medium text-foreground truncate">
-                      {acct.name}
-                    </p>
-                    <p className="text-xs leading-caption text-muted-foreground">
-                      {typeLabel(acct.type)}
-                    </p>
-                  </div>
+                      {/* Name + type */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm leading-body-sm font-medium text-foreground truncate">
+                          {acct.name}
+                        </p>
+                        <p className="text-xs leading-caption text-muted-foreground">
+                          {typeLabel(acct.type)}
+                        </p>
+                      </div>
 
-                  {/* Right: balance + optional check */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-sm leading-body-sm text-foreground tabular-nums">
-                      {acct.balance.toLocaleString('en-US')} {acct.currency}
-                    </span>
-                    {isSelected && (
-                      <Check className="size-4 text-primary" />
-                    )}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
+                      {/* Right: balance (optional) + selected check */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {showBalance && (
+                          <span className="text-sm leading-body-sm text-foreground tabular-nums">
+                            {acct.balance.toLocaleString('en-US')} {acct.currency}
+                          </span>
+                        )}
+                        {isSelected && (
+                          <Check className="size-4 text-primary" />
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </SheetContent>
     </Sheet>

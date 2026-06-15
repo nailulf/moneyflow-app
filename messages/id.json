@@ -372,7 +372,21 @@
       "addButton": "Tambah Transaksi",
       "updating": "Memperbarui...",
       "updateButton": "Perbarui Transaksi",
-      "uploadProcess": "Upload & Proses"
+      "uploadProcess": "Upload & Proses",
+      "addNewCategory": "Tambah baru",
+      "newCategoryTitle": "Kategori baru",
+      "categoryTypeLabel": "Tipe",
+      "categoryNameLabel": "Nama kategori",
+      "categoryNamePlaceholder": "mis. Belanja",
+      "addCategoryCta": "Tambah kategori",
+      "merchant": "Merchant",
+      "addMerchant": "Tambah merchant…",
+      "noteOptional": "Catatan (opsional)",
+      "recurring": "Berulang",
+      "recurringHint": "Atur jadwal pengulangan",
+      "more": "Lainnya",
+      "saveTransaction": "Simpan Transaksi",
+      "noAccountsForSearch": "Akun tidak ditemukan"
     },
     "confirmation": {
       "title": "Konfirmasi Import Transaksi",

@@ -39,7 +39,7 @@ describe('amountReducer (integer minor units)', () => {
 function base(over: Partial<FormState> = {}): FormState {
   return {
     type: 'EXPENSE', amount: { digits: '125' }, categoryId: 'food',
-    accountId: 'A', toAccountId: null, note: 'lunch', date: '2026-06-14',
+    accountId: 'A', toAccountId: null, merchant: '', note: 'lunch', date: '2026-06-14',
     currency: 'IDR', isRecurring: false, recurringFrequency: null, recurringEndDate: null, ...over,
   }
 }

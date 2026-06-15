@@ -39,6 +39,7 @@ export default function EditTransactionPage() {
     categoryId: txn.category_id ?? null,
     accountId: txn.account_id ?? null,
     toAccountId: txn.to_account_id ?? null,
+    merchant: txn.merchant ?? '',
     note: txn.notes ?? '',
     date: (txn.date || '').slice(0, 10), // YYYY-MM-DD
     currency: txn.currency || 'IDR',

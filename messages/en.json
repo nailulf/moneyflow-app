@@ -372,7 +372,21 @@
       "addButton": "Add Transaction",
       "updating": "Updating...",
       "updateButton": "Update Transaction",
-      "uploadProcess": "Upload & Process"
+      "uploadProcess": "Upload & Process",
+      "addNewCategory": "Add new",
+      "newCategoryTitle": "New category",
+      "categoryTypeLabel": "Type",
+      "categoryNameLabel": "Category name",
+      "categoryNamePlaceholder": "e.g. Groceries",
+      "addCategoryCta": "Add category",
+      "merchant": "Merchant",
+      "addMerchant": "Add merchant…",
+      "noteOptional": "Note (optional)",
+      "recurring": "Recurring",
+      "recurringHint": "Set up a repeat schedule",
+      "more": "More",
+      "saveTransaction": "Save Transaction",
+      "noAccountsForSearch": "No accounts found"
     },
     "confirmation": {
       "title": "Confirm Transaction Import",

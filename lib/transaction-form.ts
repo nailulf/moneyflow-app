@@ -59,6 +59,7 @@ export interface FormState {
   categoryId: string | null
   accountId: string | null
   toAccountId: string | null
+  merchant: string
   note: string
   date: string // YYYY-MM-DD
   currency: string
@@ -67,7 +68,7 @@ export interface FormState {
   recurringEndDate: string | null
 }
 
-/** Switch type, resetting ONLY fields invalidated by the new type. Keeps amount + note + date. */
+/** Switch type, resetting ONLY fields invalidated by the new type. Keeps amount + merchant + note + date. */
 export function reconcileOnTypeChange(prev: FormState, nextType: TxnType): FormState {
   if (nextType === prev.type) return prev
   if (nextType === 'TRANSFER') {
@@ -94,6 +95,7 @@ export interface TransactionPayload {
   account_id: string | null
   to_account_id: string | null
   currency: string
+  merchant: string | null
   notes: string | null
   is_recurring: boolean
   recurring_frequency: string | null
@@ -101,16 +103,18 @@ export interface TransactionPayload {
 }
 
 export function buildTransactionPayload(s: FormState, _mode: 'create' | 'edit', userId: string): TransactionPayload {
+  const merchant = s.merchant.trim()
   return {
     user_id: userId,
     date: new Date(s.date).toISOString(),
-    description: s.note || defaultDescription(s),
+    description: merchant || s.note || defaultDescription(s),
     amount: amountValue(s.amount),
     type: s.type,
     category_id: s.type === 'TRANSFER' ? null : s.categoryId,
     account_id: s.accountId,
     to_account_id: s.type === 'TRANSFER' ? s.toAccountId : null,
     currency: s.currency,
+    merchant: merchant || null,
     notes: s.note || null,
     is_recurring: s.isRecurring,
     recurring_frequency: s.isRecurring ? s.recurringFrequency : null,

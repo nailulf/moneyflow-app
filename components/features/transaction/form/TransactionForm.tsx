@@ -1,14 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronRight, Calendar, FileText, Repeat, Trash2 } from 'lucide-react'
+import { ChevronRight, Calendar, CreditCard, Store, Pencil, Repeat, Trash2, Plus, type LucideIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
+import { getCategoryIcon, getCategoryTint } from '@/lib/category-style'
 import {
   type FormState,
   type TxnType,
   amountReducer,
-  formatAmountDisplay,
+  amountValue,
   fieldsForType,
   reconcileOnTypeChange,
   isFormValid,
@@ -32,7 +33,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/molecules/alert-dialog'
 import { useTransactionMutations } from '@/hooks/useTransactionsQuery'
-import { useCategories } from '@/hooks/use-category-manager'
+import { useTransactionCategories } from '@/hooks/useTransactionCategories'
 import { useAccounts } from '@/contexts/AccountContext'
 
 // ---------------------------------------------------------------------------
@@ -75,6 +76,7 @@ function buildDefaultState(
     categoryId: null,
     accountId: null,
     toAccountId: null,
+    merchant: '',
     note: '',
     date: todayString(),
     currency: 'IDR',
@@ -83,6 +85,34 @@ function buildDefaultState(
     recurringEndDate: null,
   }
   return initial ? { ...base, ...initial } : base
+}
+
+/** Currency symbol shown as the amount prefix (Rp for IDR, else the ISO code). */
+function currencyPrefix(currency: string): string {
+  return currency === 'IDR' ? 'Rp' : currency
+}
+
+/** Locale-grouped amount (IDR uses id-ID dot separators to match the design). */
+function groupedAmount(s: FormState): string {
+  return amountValue(s.amount).toLocaleString(s.currency === 'IDR' ? 'id-ID' : 'en-US')
+}
+
+/** Human date for the detail row, e.g. "Today, Jun 7 2025" / "Jun 7 2025". */
+function formatRowDate(iso: string, todayLabel: string): string {
+  if (!iso) return ''
+  const [y, m, d] = iso.split('-').map(Number)
+  const date = new Date(y, (m || 1) - 1, d || 1)
+  const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return iso === todayString() ? `${todayLabel}, ${formatted}` : formatted
+}
+
+/** Tinted rounded-square icon bubble used on every detail row (design `H6KJp`). */
+function IconBubble({ icon: Icon, bg, fg }: { icon: LucideIcon; bg: string; fg: string }) {
+  return (
+    <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-xl', bg)}>
+      <Icon className={cn('size-5', fg)} />
+    </span>
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -97,7 +127,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
   }))
 
   const { create, update, delete: deleteTxn, isCreating, isUpdating, isDeleting } = useTransactionMutations(userId)
-  const { categories } = useCategories()
+  const { categories, addCategory, isAdding } = useTransactionCategories(userId)
   const { accounts } = useAccounts()
 
   // Core form state
@@ -116,6 +146,21 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
   const [categoryOpen, setCategoryOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
   const [toAccountOpen, setToAccountOpen] = useState(false)
+
+  // Amount keypad visibility — the custom numpad only shows while the amount
+  // field is active. Selecting any other field hides it so the native keyboard
+  // / date picker isn't blocked, and the bottom Save CTA takes its place. On
+  // create, amount is the first input so it starts open; on edit the amount is
+  // already set, so start closed and show the Save CTA.
+  const [keypadOpen, setKeypadOpen] = useState(mode === 'create')
+
+  // Focusing the amount opens the keypad and dismisses any native keyboard.
+  function activateAmount() {
+    if (typeof document !== 'undefined') {
+      (document.activeElement as HTMLElement | null)?.blur?.()
+    }
+    setKeypadOpen(true)
+  }
 
   // Delete confirm dialog
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -187,6 +232,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
   function handleAddAnother() {
     setState(buildDefaultState())
     setShowValidation(false)
+    setKeypadOpen(true)
     setPhase('form')
   }
 
@@ -234,16 +280,13 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
     <form
       id="txn-form"
       onSubmit={handleSubmit}
-      className="flex flex-col gap-4 px-5 py-4"
+      className="flex flex-col gap-4 py-4"
     >
-      {/* Header */}
+      {/* Header — no top Save button; saving happens via the bottom CTA */}
       <CreateFlowHeader
         title={mode === 'create' ? t('addTitle') : t('editTitle')}
         onBack={onDone}
         backLabel={t('back')}
-        formId="txn-form"
-        saveLabel={t('save')}
-        pending={pending}
       />
 
       {/* Type segmented control */}
@@ -253,131 +296,194 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
         onChange={handleTypeChange}
       />
 
-      {/* Amount display */}
-      <div className="flex flex-col items-center gap-1 py-2">
-        <span className="text-xs leading-caption text-muted-foreground uppercase tracking-wide">
-          {state.currency}
-        </span>
-        <p
-          className={cn(
-            'text-4xl leading-title-1 font-bold tabular-nums',
-            state.type === 'INCOME' ? 'text-success' : state.type === 'EXPENSE' ? 'text-destructive' : 'text-foreground',
-          )}
+      {/* Amount + Category card */}
+      <div className="rounded-2xl bg-card p-5 shadow-card">
+        {/* Amount — tap to (re)open the keypad */}
+        <button
+          type="button"
+          onClick={activateAmount}
+          aria-label={t('amount')}
+          className="flex w-full flex-col items-start gap-1.5 text-left"
         >
-          {formatAmountDisplay(state.amount)}
-        </p>
+          <span className="text-sm leading-body-sm text-muted-foreground">{t('amount')}</span>
+          <span className="flex items-baseline gap-2">
+            <span className="text-2xl leading-title-3 font-semibold text-muted-foreground/70">
+              {currencyPrefix(state.currency)}
+            </span>
+            <span
+              className={cn(
+                'text-4xl leading-title-1 font-bold tabular-nums',
+                amountValue(state.amount) === 0 ? 'text-muted-foreground/50' : 'text-foreground',
+              )}
+            >
+              {groupedAmount(state)}
+            </span>
+            {/* Blinking caret marks the amount as the active field */}
+            {keypadOpen && (
+              <span aria-hidden className="h-8 w-0.5 animate-pulse rounded-full bg-primary" />
+            )}
+          </span>
+        </button>
         {showValidation && !state.amount.digits && (
-          <p className="text-xs leading-caption text-destructive">{t('enterAmount')}</p>
+          <p className="mt-1 text-xs leading-caption text-destructive">{t('enterAmount')}</p>
         )}
-        {/* Balance adjustment badge — display-only; only shown when editing a reconciliation row */}
         {isBalanceAdjustment && (
-          <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs leading-caption text-muted-foreground">
+          <span className="mt-2 inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs leading-caption text-muted-foreground">
             {t('balanceAdjustment')}
           </span>
         )}
-      </div>
 
-      {/* Field rows */}
-      <div className="flex flex-col gap-1 rounded-2xl border border-border bg-card overflow-hidden">
-        {/* Category row (not shown for TRANSFER) */}
+        {/* Category chips (not shown for TRANSFER) */}
         {fields.category && (
           <>
-            <button
-              type="button"
-              onClick={() => setCategoryOpen(true)}
-              className={cn(
-                'flex h-[52px] items-center gap-3 px-4',
-                'text-left transition-colors hover:bg-muted/50 active:bg-muted',
-                showValidation && !state.categoryId && 'text-destructive',
-              )}
-            >
-              <span className="flex-1 text-md leading-body-lg text-foreground">
-                {selectedCategory ? selectedCategory.name : (
-                  <span className="text-muted-foreground">{t('chooseCategory')}</span>
-                )}
-              </span>
-              <ChevronRight className="size-4 text-muted-foreground shrink-0" />
-            </button>
-            <div className="h-px bg-border mx-4" />
+            <div className="my-4 h-px bg-border" />
+            <span className="text-sm leading-body-sm text-muted-foreground">{t('category')}</span>
+            <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {categories
+                .filter((c) => c.group_type === state.type)
+                .map((c) => {
+                  const Icon = getCategoryIcon(c.name)
+                  const tint = getCategoryTint(c.name)
+                  const selected = c.id === state.categoryId
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => { setKeypadOpen(false); setState((prev) => ({ ...prev, categoryId: c.id })) }}
+                      className={cn(
+                        'flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 transition-colors',
+                        selected
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'border-border bg-card text-foreground hover:bg-muted/50',
+                      )}
+                    >
+                      <Icon className={cn('size-4 shrink-0', selected ? 'text-primary-foreground' : tint.fg)} />
+                      <span className="text-sm leading-body-sm font-medium whitespace-nowrap">{c.name}</span>
+                    </button>
+                  )
+                })}
+              {/* More — opens the full picker (search, all categories, create) */}
+              <button
+                type="button"
+                onClick={() => { setKeypadOpen(false); setCategoryOpen(true) }}
+                className="flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-border px-3.5 py-2 text-muted-foreground transition-colors hover:bg-muted/50"
+              >
+                <Plus className="size-4 shrink-0" />
+                <span className="text-sm leading-body-sm font-medium whitespace-nowrap">{t('more')}</span>
+              </button>
+            </div>
+            {showValidation && !state.categoryId && (
+              <p className="mt-2 text-xs leading-caption text-destructive">{t('selectCategory')}</p>
+            )}
           </>
         )}
+      </div>
 
+      {/* Detail rows card */}
+      <div className="overflow-hidden rounded-2xl bg-card shadow-card">
         {/* Account row (From account for TRANSFER) */}
         <button
           type="button"
-          onClick={() => setAccountOpen(true)}
-          className={cn(
-            'flex h-[52px] items-center gap-3 px-4',
-            'text-left transition-colors hover:bg-muted/50 active:bg-muted',
-            showValidation && !state.accountId && 'text-destructive',
-          )}
+          onClick={() => { setKeypadOpen(false); setAccountOpen(true) }}
+          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 active:bg-muted"
         >
-          <span className="flex-1 text-md leading-body-lg text-foreground">
-            {selectedAccount ? selectedAccount.name : (
-              <span className="text-muted-foreground">
-                {fields.toAccount ? t('fromAccount') : t('chooseAccount')}
-              </span>
-            )}
+          <IconBubble icon={CreditCard} bg="bg-tint-blue-bg" fg="text-tint-blue-fg" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs leading-caption text-muted-foreground">
+              {fields.toAccount ? t('fromAccount') : t('account')}
+            </span>
+            <span className={cn('block truncate text-md leading-body-lg font-medium', selectedAccount ? 'text-foreground' : 'text-muted-foreground')}>
+              {selectedAccount ? selectedAccount.name : t('selectAccount')}
+            </span>
           </span>
-          <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+          <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
         </button>
 
         {/* To account row (TRANSFER only) */}
         {fields.toAccount && (
           <>
-            <div className="h-px bg-border mx-4" />
+            <div className="ml-[68px] h-px bg-border" />
             <button
               type="button"
-              onClick={() => setToAccountOpen(true)}
-              className={cn(
-                'flex h-[52px] items-center gap-3 px-4',
-                'text-left transition-colors hover:bg-muted/50 active:bg-muted',
-                showValidation && !state.toAccountId && 'text-destructive',
-              )}
+              onClick={() => { setKeypadOpen(false); setToAccountOpen(true) }}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 active:bg-muted"
             >
-              <span className="flex-1 text-md leading-body-lg text-foreground">
-                {selectedToAccount ? selectedToAccount.name : (
-                  <span className="text-muted-foreground">{t('toAccount')}</span>
-                )}
+              <IconBubble icon={CreditCard} bg="bg-tint-teal-bg" fg="text-tint-teal-fg" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs leading-caption text-muted-foreground">{t('toAccount')}</span>
+                <span className={cn('block truncate text-md leading-body-lg font-medium', selectedToAccount ? 'text-foreground' : 'text-muted-foreground')}>
+                  {selectedToAccount ? selectedToAccount.name : t('toAccount')}
+                </span>
               </span>
-              <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+              <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
             </button>
           </>
         )}
 
         {/* Date row */}
-        <div className="h-px bg-border mx-4" />
-        <label className="flex h-[52px] items-center gap-3 px-4 cursor-pointer hover:bg-muted/50 transition-colors">
-          <Calendar className="size-4 text-muted-foreground shrink-0" />
+        <div className="ml-[68px] h-px bg-border" />
+        <label className="relative flex w-full items-center gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-muted/50">
+          <IconBubble icon={Calendar} bg="bg-tint-purple-bg" fg="text-tint-purple-fg" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs leading-caption text-muted-foreground">{t('date')}</span>
+            <span className="block text-md leading-body-lg font-medium text-foreground">{formatRowDate(state.date, t('today'))}</span>
+          </span>
+          <ChevronRight className="size-5 shrink-0 text-muted-foreground" />
+          {/* Transparent native picker overlays the row so tapping anywhere opens it */}
           <input
             type="date"
             value={state.date}
+            onFocus={() => setKeypadOpen(false)}
             onChange={(e) => setState((prev) => ({ ...prev, date: e.target.value }))}
-            className="flex-1 bg-transparent text-md leading-body-lg text-foreground focus:outline-none"
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            aria-label={t('date')}
           />
+        </label>
+
+        {/* Merchant row */}
+        <div className="ml-[68px] h-px bg-border" />
+        <label className="flex w-full items-center gap-3 px-4 py-3">
+          <IconBubble icon={Store} bg="bg-tint-orange-bg" fg="text-tint-orange-fg" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs leading-caption text-muted-foreground">{t('merchant')}</span>
+            <input
+              type="text"
+              placeholder={t('addMerchant')}
+              value={state.merchant}
+              onFocus={() => setKeypadOpen(false)}
+              onChange={(e) => setState((prev) => ({ ...prev, merchant: e.target.value }))}
+              className="block w-full bg-transparent text-md leading-body-lg font-medium text-foreground placeholder:font-normal placeholder:text-muted-foreground focus:outline-none"
+            />
+          </span>
         </label>
 
         {/* Note row */}
-        <div className="h-px bg-border mx-4" />
-        <label className="flex h-[52px] items-center gap-3 px-4">
-          <FileText className="size-4 text-muted-foreground shrink-0" />
-          <input
-            type="text"
-            placeholder={t('addNote')}
-            value={state.note}
-            onChange={(e) => setState((prev) => ({ ...prev, note: e.target.value }))}
-            className={cn(
-              'flex-1 bg-transparent text-md leading-body-lg text-foreground',
-              'placeholder:text-muted-foreground focus:outline-none',
-            )}
-          />
+        <div className="ml-[68px] h-px bg-border" />
+        <label className="flex w-full items-center gap-3 px-4 py-3">
+          <IconBubble icon={Pencil} bg="bg-tint-green-bg" fg="text-tint-green-fg" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs leading-caption text-muted-foreground">{t('noteOptional')}</span>
+            <input
+              type="text"
+              placeholder={t('addNote')}
+              value={state.note}
+              onFocus={() => setKeypadOpen(false)}
+              onChange={(e) => setState((prev) => ({ ...prev, note: e.target.value }))}
+              className="block w-full bg-transparent text-md leading-body-lg font-medium text-foreground placeholder:font-normal placeholder:text-muted-foreground focus:outline-none"
+            />
+          </span>
         </label>
 
-        {/* Repeat toggle */}
-        <div className="h-px bg-border mx-4" />
-        <div className="flex h-[52px] items-center gap-3 px-4">
-          <Repeat className="size-4 text-muted-foreground shrink-0" />
-          <span className="flex-1 text-md leading-body-lg text-foreground">{t('repeat')}</span>
+        {/* Recurring row */}
+        <div className="ml-[68px] h-px bg-border" />
+        <div className="flex w-full items-center gap-3 px-4 py-3">
+          <IconBubble icon={Repeat} bg="bg-tint-blue-bg" fg="text-tint-blue-fg" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-md leading-body-lg font-medium text-foreground">{t('recurring')}</span>
+            {!state.isRecurring && (
+              <span className="block text-xs leading-caption text-muted-foreground">{t('recurringHint')}</span>
+            )}
+          </span>
           <button
             type="button"
             role="switch"
@@ -416,13 +522,6 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
         />
       )}
 
-      {/* Amount keypad */}
-      <AmountKeypad
-        onKey={(action) =>
-          setState((prev) => ({ ...prev, amount: amountReducer(prev.amount, action) }))
-        }
-      />
-
       {/* Delete action — edit mode only */}
       {mode === 'edit' && (
         <button
@@ -439,6 +538,46 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
           <Trash2 className="size-4" />
           {t('delete')}
         </button>
+      )}
+
+      {/* Sticky bottom area — pinned to the viewport bottom. Shows the custom
+          numpad while the amount field is active, otherwise the primary "Save
+          Transaction" CTA (design `L8FhK`). Both use `fixed` (not `sticky`) so
+          they stay docked regardless of scroll; an in-flow spacer lets content
+          clear them. The bottom nav is hidden on this full-screen flow. */}
+      {keypadOpen ? (
+        <>
+          <div aria-hidden className="h-[264px] shrink-0" />
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="mx-auto w-full max-w-md">
+              <AmountKeypad
+                onKey={(action) =>
+                  setState((prev) => ({ ...prev, amount: amountReducer(prev.amount, action) }))
+                }
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div aria-hidden className="h-24 shrink-0" />
+          <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 bg-gradient-to-t from-background via-background to-transparent px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-6">
+            <div className="pointer-events-auto mx-auto w-full max-w-md">
+              <button
+                type="submit"
+                form="txn-form"
+                disabled={pending || !isFormValid(state)}
+                className={cn(
+                  'flex h-[52px] w-full items-center justify-center rounded-2xl text-md leading-body-lg font-semibold transition-colors',
+                  'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80',
+                  'disabled:bg-muted disabled:text-muted-foreground disabled:pointer-events-none',
+                )}
+              >
+                {pending ? t('adding') : t('saveTransaction')}
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Delete confirmation dialog */}
@@ -471,6 +610,8 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
           selectedId={state.categoryId}
           onSelect={(id) => setState((prev) => ({ ...prev, categoryId: id }))}
           onOpenChange={setCategoryOpen}
+          onAddCategory={(name, addType) => addCategory(name, addType)}
+          isAdding={isAdding}
         />
       )}
 
@@ -481,6 +622,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
         selectedId={state.accountId}
         onSelect={handleAccountSelect}
         onOpenChange={setAccountOpen}
+        showBalance={false}
       />
 
       {fields.toAccount && (
@@ -492,6 +634,7 @@ export function TransactionForm({ mode, userId, initial, onDone }: TransactionFo
           excludeId={state.accountId}
           onSelect={(id) => setState((prev) => ({ ...prev, toAccountId: id }))}
           onOpenChange={setToAccountOpen}
+          showBalance={false}
         />
       )}
     </form>
