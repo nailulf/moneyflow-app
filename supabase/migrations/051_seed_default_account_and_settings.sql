@@ -1,6 +1,7 @@
--- Migration: extend handle_new_user() to also seed a hidden default account
--- and a user_settings row for every new auth.users row (including anonymous
--- users created during pre-account onboarding).
+-- Migration: extend handle_new_user() to also seed a default account
+-- (auto-created; no setup form — shown as the user's default wallet) and a
+-- user_settings row for every new auth.users row (including anonymous users
+-- created during pre-account onboarding).
 --
 -- The default CASH account anchors the onboarding goal/plan and satisfies
 -- downstream "an account exists" assumptions. The user_settings row gives the
@@ -70,16 +71,19 @@ BEGIN
     'timestamp', NOW()
   ));
 
-  -- NEW: hidden default account (anchors goal/plan; satisfies downstream "account exists" assumptions)
+  -- NEW: default account (auto-created; no setup form — shown as the user's
+  -- default wallet; anchors goal/plan; satisfies downstream "account exists" assumptions)
   INSERT INTO public.accounts (user_id, name, type, currency, balance, is_default)
-  VALUES (new.id, 'Cash', 'CASH', 'IDR', 0, true);
+  VALUES (new.id, 'Cash', 'CASH', 'IDR', 0, true)
+  ON CONFLICT (user_id, name) DO NOTHING;
 
   -- NEW: user_settings row with column defaults
-  INSERT INTO public.user_settings (user_id) VALUES (new.id);
+  INSERT INTO public.user_settings (user_id) VALUES (new.id)
+  ON CONFLICT (user_id) DO NOTHING;
 
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 COMMENT ON FUNCTION public.handle_new_user() IS
-  'Handles new user registration by creating profile, user role, default category groups, a minimal default category set (5 expense + 1 income + 1 transfer), onboarding record, initial onboarding event, a hidden default CASH account, and a user_settings row. Runs atomically within a single transaction.';
+  'Handles new user registration by creating profile, user role, default category groups, a minimal default category set (5 expense + 1 income + 1 transfer), onboarding record, initial onboarding event, a default CASH account (shown as the user''s default wallet), and a user_settings row. Runs atomically within a single transaction.';

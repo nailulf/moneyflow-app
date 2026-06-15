@@ -17,7 +17,8 @@ d('handle_new_user seeds account + settings', () => {
   })
 
   it('seeds exactly one default account, 7 categories, and a user_settings row', async () => {
-    const { data, error } = await admin.auth.admin.createUser({ email_confirm: true })
+    const email = `test-seed-${crypto.randomUUID()}@example.com`
+    const { data, error } = await admin.auth.admin.createUser({ email, email_confirm: true })
     expect(error).toBeNull()
     userId = data.user!.id
 
