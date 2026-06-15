@@ -1615,6 +1615,31 @@
         "emptySubtitle": "Tell us your goal and income first, and we'll show you when you can reach it.",
         "emptyCta": "Start with a goal"
       }
+    },
+    "health": {
+      "quizTitle": "How healthy is your money?",
+      "quizSubtitle": "A quick check — no account needed.",
+      "incomeLabel": "Monthly income",
+      "spendLabel": "Monthly spending",
+      "emergencyQuestion": "Do you have an emergency fund?",
+      "debtQuestion": "Any debt you are paying off?",
+      "yes": "Yes",
+      "no": "No",
+      "seeScore": "See my score",
+      "scoreOutOf": "out of 100",
+      "bandHealthy": "Healthy",
+      "bandGettingThere": "Getting there",
+      "bandNeedsAttention": "Needs attention",
+      "savingsRate": "You are saving {rate}% of your income",
+      "overspending": "You are spending more than you earn",
+      "tipSaveMore": "Aim to save at least 20% of your income.",
+      "tipBuildFund": "Build an emergency fund of 3–6 months of expenses.",
+      "tipClearDebt": "Prioritise clearing high-interest debt first.",
+      "tipKeepGoing": "Great rate — keep it up and start investing the surplus.",
+      "back": "Back",
+      "skip": "Skip",
+      "saveCta": "Create an account to save this",
+      "guestCta": "Explore as a guest"
     }
   }
 }

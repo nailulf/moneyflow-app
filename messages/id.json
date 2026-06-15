@@ -1615,6 +1615,31 @@
         "emptySubtitle": "Beri tahu tujuan dan pemasukanmu dulu, lalu kami tunjukkan kapan kamu bisa mencapainya.",
         "emptyCta": "Mulai dengan tujuan"
       }
+    },
+    "health": {
+      "quizTitle": "Seberapa sehat keuanganmu?",
+      "quizSubtitle": "Cek singkat — tanpa perlu akun.",
+      "incomeLabel": "Pemasukan bulanan",
+      "spendLabel": "Pengeluaran bulanan",
+      "emergencyQuestion": "Apakah kamu punya dana darurat?",
+      "debtQuestion": "Ada utang yang sedang dilunasi?",
+      "yes": "Ya",
+      "no": "Tidak",
+      "seeScore": "Lihat skor saya",
+      "scoreOutOf": "dari 100",
+      "bandHealthy": "Sehat",
+      "bandGettingThere": "Mulai membaik",
+      "bandNeedsAttention": "Perlu perhatian",
+      "savingsRate": "Kamu menabung {rate}% dari pemasukanmu",
+      "overspending": "Pengeluaranmu lebih besar dari pemasukan",
+      "tipSaveMore": "Usahakan menabung minimal 20% dari pemasukan.",
+      "tipBuildFund": "Bangun dana darurat sebesar 3–6 bulan pengeluaran.",
+      "tipClearDebt": "Prioritaskan melunasi utang berbunga tinggi lebih dulu.",
+      "tipKeepGoing": "Rasio bagus — pertahankan dan mulai investasikan surplusnya.",
+      "back": "Kembali",
+      "skip": "Lewati",
+      "saveCta": "Buat akun untuk menyimpan ini",
+      "guestCta": "Jelajahi sebagai tamu"
     }
   }
 }
