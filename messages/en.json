@@ -1535,7 +1535,7 @@
       "subtitle": "Take a free 2-minute check — no signup, no account needed.",
       "cta": "Start my 2-minute check"
     },
-    "getStarted": "Get started",
+    "createAccountLink": "Already sure? Create an account",
     "intent": {
       "title": "What brings you here today?",
       "subtitle": "We will tailor your first steps around it.",
