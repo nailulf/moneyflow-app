@@ -1,0 +1,153 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import {
+  HeartPulse,
+  PieChart,
+  Target,
+  Sparkles,
+  ArrowRight,
+  type LucideIcon,
+} from 'lucide-react'
+
+import { Button } from '@/components/ui/atoms/button'
+import { cn } from '@/lib/utils'
+
+type Intent = 'health' | 'budget' | 'goal' | 'other'
+
+interface Option {
+  id: Intent
+  testId: string
+  icon: LucideIcon
+  titleKey: string
+  subKey: string
+  /** Where Continue routes once this option is chosen. */
+  destination: string
+}
+
+const OPTIONS: Option[] = [
+  {
+    id: 'health',
+    testId: 'intent-health',
+    icon: HeartPulse,
+    titleKey: 'intent.healthTitle',
+    subKey: 'intent.healthSub',
+    destination: '/start/health-check',
+  },
+  {
+    id: 'budget',
+    testId: 'intent-budget',
+    icon: PieChart,
+    titleKey: 'intent.budgetTitle',
+    subKey: 'intent.budgetSub',
+    destination: '/start/goal/income',
+  },
+  {
+    id: 'goal',
+    testId: 'intent-goal',
+    icon: Target,
+    titleKey: 'intent.goalTitle',
+    subKey: 'intent.goalSub',
+    destination: '/start/goal/type',
+  },
+  {
+    id: 'other',
+    testId: 'intent-other',
+    icon: Sparkles,
+    titleKey: 'intent.otherTitle',
+    subKey: 'intent.otherSub',
+    destination: '/',
+  },
+]
+
+/** Intent picker (design Row A — "What brings you here today?"). */
+export default function IntentPage() {
+  const t = useTranslations('start')
+  const router = useRouter()
+  const [selected, setSelected] = useState<Intent | null>(null)
+
+  const handleContinue = () => {
+    const opt = OPTIONS.find((o) => o.id === selected)
+    if (opt) router.push(opt.destination)
+  }
+
+  return (
+    <div className="flex flex-1 flex-col px-5 pb-10">
+      {/* Header with Skip affordance. Skip proceeds to home as a guest. */}
+      <header className="flex items-start justify-between py-5">
+        <div className="min-w-0 flex-1 pr-4">
+          <h1 className="text-2xl leading-title-3 font-bold text-foreground">
+            {t('intent.title')}
+          </h1>
+          <p className="mt-1.5 text-sm leading-body-sm text-muted-foreground">
+            {t('intent.subtitle')}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => router.push('/')}
+          className="shrink-0 text-sm leading-body-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          {t('intent.skip')}
+        </button>
+      </header>
+
+      {/* Option cards (single-select) */}
+      <div className="mt-2 flex flex-col gap-3">
+        {OPTIONS.map((opt) => {
+          const active = selected === opt.id
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              data-testid={opt.testId}
+              aria-pressed={active}
+              onClick={() => setSelected(opt.id)}
+              className={cn(
+                'flex items-center gap-3 rounded-2xl border bg-card px-4 py-4 text-left shadow-card transition-colors',
+                active
+                  ? 'border-primary bg-selected'
+                  : 'border-border hover:bg-muted/50'
+              )}
+            >
+              <span
+                className={cn(
+                  'flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]',
+                  active ? 'bg-primary/10' : 'bg-muted'
+                )}
+              >
+                <opt.icon
+                  className={cn(
+                    'h-5 w-5',
+                    active ? 'text-selected-foreground' : 'text-muted-foreground'
+                  )}
+                  aria-hidden="true"
+                />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-md leading-body-lg font-semibold text-foreground">
+                  {t(opt.titleKey)}
+                </span>
+                <span className="block text-sm leading-body-sm text-muted-foreground">
+                  {t(opt.subKey)}
+                </span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Continue — disabled until a card is selected */}
+      <Button
+        className="mt-auto h-[52px] w-full gap-2 rounded-[14px] text-md"
+        disabled={selected === null}
+        onClick={handleContinue}
+      >
+        {t('intent.continue')}
+        <ArrowRight className="h-5 w-5" aria-hidden="true" />
+      </Button>
+    </div>
+  )
+}

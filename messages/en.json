@@ -470,8 +470,16 @@
     "screen": {
       "title": "Transactions",
       "searchPlaceholder": "Search transactions",
-      "tabs": { "all": "All", "income": "Income", "expense": "Expense", "transfer": "Transfer" },
-      "summary": { "income": "Income", "expense": "Exp" },
+      "tabs": {
+        "all": "All",
+        "income": "Income",
+        "expense": "Expense",
+        "transfer": "Transfer"
+      },
+      "summary": {
+        "income": "Income",
+        "expense": "Exp"
+      },
       "prevMonth": "Previous month",
       "nextMonth": "Next month",
       "today": "Today",
@@ -481,7 +489,16 @@
       "empty": "No transactions",
       "emptyFiltered": "No transactions match your filters",
       "reset": "Reset",
-      "filter": { "title": "Filters", "titleWithCount": "Filters ({count} active)", "categories": "Categories", "accounts": "Accounts", "amountMin": "Min amount", "amountMax": "Max amount", "apply": "Apply", "reset": "Reset" }
+      "filter": {
+        "title": "Filters",
+        "titleWithCount": "Filters ({count} active)",
+        "categories": "Categories",
+        "accounts": "Accounts",
+        "amountMin": "Min amount",
+        "amountMax": "Max amount",
+        "apply": "Apply",
+        "reset": "Reset"
+      }
     }
   },
   "navigation": {
@@ -650,7 +667,10 @@
           "label": "Mortgage / KPR",
           "description": "Home loan or mortgage"
         },
-        "DIGITAL_WALLET": { "label": "Digital Wallet", "description": "GoPay, OVO, Dana, etc." },
+        "DIGITAL_WALLET": {
+          "label": "Digital Wallet",
+          "description": "GoPay, OVO, Dana, etc."
+        },
         "OTHER": {
           "label": "Other",
           "description": "Anything else"
@@ -756,7 +776,8 @@
       "other": "Other",
       "property": "Property",
       "vehicle": "Vehicle",
-      "mortgage": "Mortgage / KPR", "digitalWallet": "Digital Wallet"
+      "mortgage": "Mortgage / KPR",
+      "digitalWallet": "Digital Wallet"
     },
     "groups": {
       "savingsInvestment": "Savings & Investment",
@@ -990,14 +1011,38 @@
       "tabSettings": "Settings"
     },
     "categories": {
-      "PROPERTY": { "label": "Property", "template": "Buy a home" },
-      "WEDDING": { "label": "Wedding", "template": "Plan a wedding" },
-      "KIDS": { "label": "Kids", "template": "Have a kid" },
-      "EDUCATION": { "label": "Education", "template": "College savings" },
-      "HAJJ": { "label": "Hajj", "template": "Hajj pilgrimage" },
-      "VEHICLE": { "label": "Vehicle", "template": "Buy a vehicle" },
-      "RETIREMENT": { "label": "Retirement", "template": "Plan retirement" },
-      "OTHER": { "label": "Other", "template": "Custom event" }
+      "PROPERTY": {
+        "label": "Property",
+        "template": "Buy a home"
+      },
+      "WEDDING": {
+        "label": "Wedding",
+        "template": "Plan a wedding"
+      },
+      "KIDS": {
+        "label": "Kids",
+        "template": "Have a kid"
+      },
+      "EDUCATION": {
+        "label": "Education",
+        "template": "College savings"
+      },
+      "HAJJ": {
+        "label": "Hajj",
+        "template": "Hajj pilgrimage"
+      },
+      "VEHICLE": {
+        "label": "Vehicle",
+        "template": "Buy a vehicle"
+      },
+      "RETIREMENT": {
+        "label": "Retirement",
+        "template": "Plan retirement"
+      },
+      "OTHER": {
+        "label": "Other",
+        "template": "Custom event"
+      }
     },
     "events": {
       "yourEvents": "Your events",
@@ -1108,7 +1153,10 @@
         "investment": "Investment Account"
       }
     },
-    "common": { "save": "Save", "back": "Back" },
+    "common": {
+      "save": "Save",
+      "back": "Back"
+    },
     "bank": {
       "title": "Bank / Wallet",
       "segBank": "Bank Account",
@@ -1222,7 +1270,12 @@
     "createTitle": "Create Budget",
     "editTitle": "Edit Budget",
     "stepOf": "{step} of {total}",
-    "periodType": { "monthly": "Monthly", "monthlyHint": "Set limits per category each month", "yearly": "Yearly", "yearlyHint": "Plan annual big-ticket expenses" },
+    "periodType": {
+      "monthly": "Monthly",
+      "monthlyHint": "Set limits per category each month",
+      "yearly": "Yearly",
+      "yearlyHint": "Plan annual big-ticket expenses"
+    },
     "income": "Income this period: {amount}",
     "lockedTitle": "Monthly budget (locked)",
     "lockedBanner": "Yearly categories can't overlap your monthly budget",
@@ -1276,7 +1329,10 @@
       "ofIncome": "{pct}% of income",
       "save": "Save Budget"
     },
-    "created": { "title": "Budget created!", "cta": "Back to Budget" },
+    "created": {
+      "title": "Budget created!",
+      "cta": "Back to Budget"
+    },
     "confirm": {
       "title": "Apply changes to budget?",
       "effect": "Changes apply to this period's tracking immediately. Past months are not affected.",
@@ -1287,7 +1343,11 @@
     "noChanges": "No changes yet",
     "monthlyLabel": "{month} · Monthly Budget",
     "yearlyLabel": "{year} · Yearly Budget",
-    "errors": { "loadFailed": "Couldn't load. Try again.", "saveFailed": "Couldn't save the budget. Try again.", "totalRequired": "Allocate at least one category" }
+    "errors": {
+      "loadFailed": "Couldn't load. Try again.",
+      "saveFailed": "Couldn't save the budget. Try again.",
+      "totalRequired": "Allocate at least one category"
+    }
   },
   "budgetTab": {
     "error": "Couldn't load this period's budget. Try again.",
@@ -1324,7 +1384,10 @@
       "afternoon": "Good afternoon 👋",
       "evening": "Good evening 👋"
     },
-    "today": { "title": "Today, {date}", "logged": "{count} logged" },
+    "today": {
+      "title": "Today, {date}",
+      "logged": "{count} logged"
+    },
     "hero": {
       "totalNetWorth": "Total Net Worth",
       "thisMonth": "{pct}% this month",
@@ -1372,14 +1435,58 @@
   "portfolio": {
     "title": "Portfolio",
     "newAccount": "New Account",
-    "hero": { "totalValue": "Total Portfolio Value", "assets": "{count} assets" },
-    "accounts": { "title": "Investment Accounts", "seeAll": "See all →", "holdings": "{count} holdings", "empty": "No investment accounts yet." },
-    "allocation": { "title": "Asset Allocation" },
-    "top": { "title": "Top Holdings", "empty": "No holdings yet — add assets to an investment account." },
-    "class": { "IDX_STOCK": "IDX Stocks", "US_STOCK": "US Stocks", "MUTUAL_FUND": "Mutual Funds", "ETF": "ETF", "BOND": "Bonds", "OTHER": "Other" },
-    "classHint": { "IDX_STOCK": "Indonesia stocks on IDX", "US_STOCK": "NYSE & NASDAQ listed", "MUTUAL_FUND": "Managed mutual funds", "ETF": "Exchange-traded funds", "BOND": "Government & corporate bonds", "OTHER": "Anything else" },
-    "detail": { "investmentAccount": "Investment Account", "addAsset": "Add Asset", "back": "Back", "emptyTitle": "No assets yet", "emptyDescription": "What do you hold in this account? Pick a type to add your first one:", "emptyTip": "Tip: add your holdings with their buy price — we'll calculate returns automatically." },
-    "manage": { "edit": "Edit", "remove": "Remove from portfolio", "currentValue": "Current value", "cancel": "Cancel", "save": "Save", "removeWarning": "This removes the asset and its history. The account balance will update.", "confirmRemove": "Remove", "saveFailed": "Couldn't update the asset.", "deleteFailed": "Couldn't remove the asset." },
+    "hero": {
+      "totalValue": "Total Portfolio Value",
+      "assets": "{count} assets"
+    },
+    "accounts": {
+      "title": "Investment Accounts",
+      "seeAll": "See all →",
+      "holdings": "{count} holdings",
+      "empty": "No investment accounts yet."
+    },
+    "allocation": {
+      "title": "Asset Allocation"
+    },
+    "top": {
+      "title": "Top Holdings",
+      "empty": "No holdings yet — add assets to an investment account."
+    },
+    "class": {
+      "IDX_STOCK": "IDX Stocks",
+      "US_STOCK": "US Stocks",
+      "MUTUAL_FUND": "Mutual Funds",
+      "ETF": "ETF",
+      "BOND": "Bonds",
+      "OTHER": "Other"
+    },
+    "classHint": {
+      "IDX_STOCK": "Indonesia stocks on IDX",
+      "US_STOCK": "NYSE & NASDAQ listed",
+      "MUTUAL_FUND": "Managed mutual funds",
+      "ETF": "Exchange-traded funds",
+      "BOND": "Government & corporate bonds",
+      "OTHER": "Anything else"
+    },
+    "detail": {
+      "investmentAccount": "Investment Account",
+      "addAsset": "Add Asset",
+      "back": "Back",
+      "emptyTitle": "No assets yet",
+      "emptyDescription": "What do you hold in this account? Pick a type to add your first one:",
+      "emptyTip": "Tip: add your holdings with their buy price — we'll calculate returns automatically."
+    },
+    "manage": {
+      "edit": "Edit",
+      "remove": "Remove from portfolio",
+      "currentValue": "Current value",
+      "cancel": "Cancel",
+      "save": "Save",
+      "removeWarning": "This removes the asset and its history. The account balance will update.",
+      "confirmRemove": "Remove",
+      "saveFailed": "Couldn't update the asset.",
+      "deleteFailed": "Couldn't remove the asset."
+    },
     "emptyCta": "Create investment account"
   },
   "holdingCreate": {
@@ -1399,6 +1506,49 @@
     "dateLabel": "Purchase Date",
     "estimatedTotal": "Estimated Total",
     "submit": "Add to Portfolio",
-    "errors": { "tickerRequired": "Enter a ticker", "amountInvalid": "Enter a valid amount", "createFailed": "Couldn't add the asset. Try again." }
+    "errors": {
+      "tickerRequired": "Enter a ticker",
+      "amountInvalid": "Enter a valid amount",
+      "createFailed": "Couldn't add the asset. Try again."
+    }
+  },
+  "start": {
+    "brand": "MoneyFlow",
+    "login": "Log in",
+    "hero": {
+      "headline": "Money that finally makes sense",
+      "subtext": "Track spending, budgets, balance, and hit your goals — all in one place."
+    },
+    "features": {
+      "title": "Everything your money needs",
+      "tracking": "Effortless tracking",
+      "trackingSub": "Every transaction, neatly in one place",
+      "budgets": "Budgets that fit you",
+      "budgetsSub": "Plans built around how you really spend",
+      "goals": "Goals you can keep",
+      "goalsSub": "Save for what matters, on your terms",
+      "netWorth": "Net worth & investing",
+      "netWorthSub": "See the full picture as it grows"
+    },
+    "healthCheck": {
+      "title": "How healthy is your money?",
+      "subtitle": "Take a free 2-minute check — no signup, no account needed.",
+      "cta": "Start my 2-minute check"
+    },
+    "getStarted": "Get started",
+    "intent": {
+      "title": "What brings you here today?",
+      "subtitle": "We will tailor your first steps around it.",
+      "skip": "Skip",
+      "continue": "Continue",
+      "healthTitle": "Check my financial health",
+      "healthSub": "See where you stand at a glance",
+      "budgetTitle": "Build a budget that works",
+      "budgetSub": "Plan spending around your real life",
+      "goalTitle": "Track a financial goal",
+      "goalSub": "Save for something that matters to you",
+      "otherTitle": "Something else",
+      "otherSub": "Tell us what is on your mind"
+    }
   }
 }

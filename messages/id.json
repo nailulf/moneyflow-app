@@ -470,8 +470,16 @@
     "screen": {
       "title": "Transaksi",
       "searchPlaceholder": "Cari transaksi",
-      "tabs": { "all": "Semua", "income": "Pemasukan", "expense": "Pengeluaran", "transfer": "Transfer" },
-      "summary": { "income": "Masuk", "expense": "Keluar" },
+      "tabs": {
+        "all": "Semua",
+        "income": "Pemasukan",
+        "expense": "Pengeluaran",
+        "transfer": "Transfer"
+      },
+      "summary": {
+        "income": "Masuk",
+        "expense": "Keluar"
+      },
       "prevMonth": "Bulan sebelumnya",
       "nextMonth": "Bulan berikutnya",
       "today": "Hari ini",
@@ -481,7 +489,16 @@
       "empty": "Belum ada transaksi",
       "emptyFiltered": "Tidak ada transaksi yang cocok dengan filter",
       "reset": "Atur ulang",
-      "filter": { "title": "Filter", "titleWithCount": "Filter ({count} aktif)", "categories": "Kategori", "accounts": "Akun", "amountMin": "Jumlah min", "amountMax": "Jumlah maks", "apply": "Terapkan", "reset": "Atur ulang" }
+      "filter": {
+        "title": "Filter",
+        "titleWithCount": "Filter ({count} aktif)",
+        "categories": "Kategori",
+        "accounts": "Akun",
+        "amountMin": "Jumlah min",
+        "amountMax": "Jumlah maks",
+        "apply": "Terapkan",
+        "reset": "Atur ulang"
+      }
     }
   },
   "navigation": {
@@ -650,7 +667,10 @@
           "label": "KPR / Kredit Properti",
           "description": "Cicilan rumah atau KPR"
         },
-        "DIGITAL_WALLET": { "label": "Dompet Digital", "description": "GoPay, OVO, Dana, dll." },
+        "DIGITAL_WALLET": {
+          "label": "Dompet Digital",
+          "description": "GoPay, OVO, Dana, dll."
+        },
         "OTHER": {
           "label": "Lainnya",
           "description": "Akun lainnya"
@@ -756,7 +776,8 @@
       "other": "Lainnya",
       "property": "Properti",
       "vehicle": "Kendaraan",
-      "mortgage": "KPR / Kredit Properti", "digitalWallet": "Dompet Digital"
+      "mortgage": "KPR / Kredit Properti",
+      "digitalWallet": "Dompet Digital"
     },
     "groups": {
       "savingsInvestment": "Tabungan & Investasi",
@@ -990,14 +1011,38 @@
       "tabSettings": "Pengaturan"
     },
     "categories": {
-      "PROPERTY": { "label": "Properti", "template": "Beli rumah" },
-      "WEDDING": { "label": "Pernikahan", "template": "Rencanakan pernikahan" },
-      "KIDS": { "label": "Anak", "template": "Punya anak" },
-      "EDUCATION": { "label": "Pendidikan", "template": "Tabungan kuliah" },
-      "HAJJ": { "label": "Haji", "template": "Ibadah haji" },
-      "VEHICLE": { "label": "Kendaraan", "template": "Beli kendaraan" },
-      "RETIREMENT": { "label": "Pensiun", "template": "Rencanakan pensiun" },
-      "OTHER": { "label": "Lainnya", "template": "Peristiwa kustom" }
+      "PROPERTY": {
+        "label": "Properti",
+        "template": "Beli rumah"
+      },
+      "WEDDING": {
+        "label": "Pernikahan",
+        "template": "Rencanakan pernikahan"
+      },
+      "KIDS": {
+        "label": "Anak",
+        "template": "Punya anak"
+      },
+      "EDUCATION": {
+        "label": "Pendidikan",
+        "template": "Tabungan kuliah"
+      },
+      "HAJJ": {
+        "label": "Haji",
+        "template": "Ibadah haji"
+      },
+      "VEHICLE": {
+        "label": "Kendaraan",
+        "template": "Beli kendaraan"
+      },
+      "RETIREMENT": {
+        "label": "Pensiun",
+        "template": "Rencanakan pensiun"
+      },
+      "OTHER": {
+        "label": "Lainnya",
+        "template": "Peristiwa kustom"
+      }
     },
     "events": {
       "yourEvents": "Peristiwa Anda",
@@ -1108,7 +1153,10 @@
         "investment": "Akun Investasi"
       }
     },
-    "common": { "save": "Simpan", "back": "Kembali" },
+    "common": {
+      "save": "Simpan",
+      "back": "Kembali"
+    },
     "bank": {
       "title": "Bank / Dompet",
       "segBank": "Rekening Bank",
@@ -1222,7 +1270,12 @@
     "createTitle": "Buat Anggaran",
     "editTitle": "Ubah Anggaran",
     "stepOf": "{step} dari {total}",
-    "periodType": { "monthly": "Bulanan", "monthlyHint": "Atur batas per kategori tiap bulan", "yearly": "Tahunan", "yearlyHint": "Rencanakan pengeluaran besar tahunan" },
+    "periodType": {
+      "monthly": "Bulanan",
+      "monthlyHint": "Atur batas per kategori tiap bulan",
+      "yearly": "Tahunan",
+      "yearlyHint": "Rencanakan pengeluaran besar tahunan"
+    },
     "income": "Pemasukan periode ini: {amount}",
     "lockedTitle": "Anggaran bulanan (terkunci)",
     "lockedBanner": "Kategori tahunan tidak boleh tumpang tindih dengan anggaran bulanan",
@@ -1276,7 +1329,10 @@
       "ofIncome": "{pct}% dari pemasukan",
       "save": "Simpan Anggaran"
     },
-    "created": { "title": "Anggaran dibuat!", "cta": "Kembali ke Anggaran" },
+    "created": {
+      "title": "Anggaran dibuat!",
+      "cta": "Kembali ke Anggaran"
+    },
     "confirm": {
       "title": "Terapkan perubahan anggaran?",
       "effect": "Perubahan langsung berlaku untuk periode ini. Bulan-bulan sebelumnya tidak terpengaruh.",
@@ -1287,7 +1343,11 @@
     "noChanges": "Belum ada perubahan",
     "monthlyLabel": "{month} · Anggaran Bulanan",
     "yearlyLabel": "{year} · Anggaran Tahunan",
-    "errors": { "loadFailed": "Gagal memuat. Coba lagi.", "saveFailed": "Gagal menyimpan anggaran. Coba lagi.", "totalRequired": "Alokasikan minimal satu kategori" }
+    "errors": {
+      "loadFailed": "Gagal memuat. Coba lagi.",
+      "saveFailed": "Gagal menyimpan anggaran. Coba lagi.",
+      "totalRequired": "Alokasikan minimal satu kategori"
+    }
   },
   "budgetTab": {
     "error": "Gagal memuat anggaran periode ini. Coba lagi.",
@@ -1324,7 +1384,10 @@
       "afternoon": "Selamat siang 👋",
       "evening": "Selamat malam 👋"
     },
-    "today": { "title": "Hari ini, {date}", "logged": "{count} tercatat" },
+    "today": {
+      "title": "Hari ini, {date}",
+      "logged": "{count} tercatat"
+    },
     "hero": {
       "totalNetWorth": "Total Kekayaan Bersih",
       "thisMonth": "{pct}% bulan ini",
@@ -1372,14 +1435,58 @@
   "portfolio": {
     "title": "Portofolio",
     "newAccount": "Akun Baru",
-    "hero": { "totalValue": "Total Nilai Portofolio", "assets": "{count} aset" },
-    "accounts": { "title": "Akun Investasi", "seeAll": "Lihat semua →", "holdings": "{count} aset", "empty": "Belum ada akun investasi." },
-    "allocation": { "title": "Alokasi Aset" },
-    "top": { "title": "Aset Terbesar", "empty": "Belum ada aset — tambahkan ke akun investasi." },
-    "class": { "IDX_STOCK": "Saham IDX", "US_STOCK": "Saham AS", "MUTUAL_FUND": "Reksa Dana", "ETF": "ETF", "BOND": "Obligasi", "OTHER": "Lainnya" },
-    "classHint": { "IDX_STOCK": "Saham Indonesia di IDX", "US_STOCK": "Terdaftar NYSE & NASDAQ", "MUTUAL_FUND": "Reksa dana terkelola", "ETF": "Dana yang diperdagangkan di bursa", "BOND": "Obligasi pemerintah & korporasi", "OTHER": "Lainnya" },
-    "detail": { "investmentAccount": "Akun Investasi", "addAsset": "Tambah Aset", "back": "Kembali", "emptyTitle": "Belum ada aset", "emptyDescription": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:", "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis." },
-    "manage": { "edit": "Ubah", "remove": "Hapus dari portofolio", "currentValue": "Nilai saat ini", "cancel": "Batal", "save": "Simpan", "removeWarning": "Ini menghapus aset dan riwayatnya. Saldo akun akan diperbarui.", "confirmRemove": "Hapus", "saveFailed": "Gagal memperbarui aset.", "deleteFailed": "Gagal menghapus aset." },
+    "hero": {
+      "totalValue": "Total Nilai Portofolio",
+      "assets": "{count} aset"
+    },
+    "accounts": {
+      "title": "Akun Investasi",
+      "seeAll": "Lihat semua →",
+      "holdings": "{count} aset",
+      "empty": "Belum ada akun investasi."
+    },
+    "allocation": {
+      "title": "Alokasi Aset"
+    },
+    "top": {
+      "title": "Aset Terbesar",
+      "empty": "Belum ada aset — tambahkan ke akun investasi."
+    },
+    "class": {
+      "IDX_STOCK": "Saham IDX",
+      "US_STOCK": "Saham AS",
+      "MUTUAL_FUND": "Reksa Dana",
+      "ETF": "ETF",
+      "BOND": "Obligasi",
+      "OTHER": "Lainnya"
+    },
+    "classHint": {
+      "IDX_STOCK": "Saham Indonesia di IDX",
+      "US_STOCK": "Terdaftar NYSE & NASDAQ",
+      "MUTUAL_FUND": "Reksa dana terkelola",
+      "ETF": "Dana yang diperdagangkan di bursa",
+      "BOND": "Obligasi pemerintah & korporasi",
+      "OTHER": "Lainnya"
+    },
+    "detail": {
+      "investmentAccount": "Akun Investasi",
+      "addAsset": "Tambah Aset",
+      "back": "Kembali",
+      "emptyTitle": "Belum ada aset",
+      "emptyDescription": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:",
+      "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis."
+    },
+    "manage": {
+      "edit": "Ubah",
+      "remove": "Hapus dari portofolio",
+      "currentValue": "Nilai saat ini",
+      "cancel": "Batal",
+      "save": "Simpan",
+      "removeWarning": "Ini menghapus aset dan riwayatnya. Saldo akun akan diperbarui.",
+      "confirmRemove": "Hapus",
+      "saveFailed": "Gagal memperbarui aset.",
+      "deleteFailed": "Gagal menghapus aset."
+    },
     "emptyCta": "Buat akun investasi"
   },
   "holdingCreate": {
@@ -1399,6 +1506,49 @@
     "dateLabel": "Tanggal Beli",
     "estimatedTotal": "Estimasi Total",
     "submit": "Tambah ke Portofolio",
-    "errors": { "tickerRequired": "Masukkan ticker", "amountInvalid": "Masukkan jumlah yang valid", "createFailed": "Gagal menambah aset. Coba lagi." }
+    "errors": {
+      "tickerRequired": "Masukkan ticker",
+      "amountInvalid": "Masukkan jumlah yang valid",
+      "createFailed": "Gagal menambah aset. Coba lagi."
+    }
+  },
+  "start": {
+    "brand": "MoneyFlow",
+    "login": "Masuk",
+    "hero": {
+      "headline": "Keuangan yang akhirnya masuk akal",
+      "subtext": "Lacak pengeluaran, anggaran, saldo, dan capai tujuanmu — semua di satu tempat."
+    },
+    "features": {
+      "title": "Semua kebutuhan keuanganmu",
+      "tracking": "Pencatatan tanpa repot",
+      "trackingSub": "Setiap transaksi rapi di satu tempat",
+      "budgets": "Anggaran yang pas untukmu",
+      "budgetsSub": "Rencana sesuai cara kamu membelanjakan",
+      "goals": "Tujuan yang bisa kamu capai",
+      "goalsSub": "Menabung untuk yang penting, sesukamu",
+      "netWorth": "Kekayaan bersih & investasi",
+      "netWorthSub": "Lihat gambaran utuh saat tumbuh"
+    },
+    "healthCheck": {
+      "title": "Seberapa sehat keuanganmu?",
+      "subtitle": "Ikuti cek gratis 2 menit — tanpa daftar, tanpa akun.",
+      "cta": "Mulai cek 2 menit"
+    },
+    "getStarted": "Mulai",
+    "intent": {
+      "title": "Apa yang membawamu ke sini hari ini?",
+      "subtitle": "Kami akan menyesuaikan langkah pertamamu.",
+      "skip": "Lewati",
+      "continue": "Lanjut",
+      "healthTitle": "Cek kesehatan keuanganku",
+      "healthSub": "Lihat posisimu sekilas",
+      "budgetTitle": "Susun anggaran yang berfungsi",
+      "budgetSub": "Rencanakan pengeluaran sesuai hidupmu",
+      "goalTitle": "Lacak tujuan keuangan",
+      "goalSub": "Menabung untuk hal yang berarti bagimu",
+      "otherTitle": "Hal lain",
+      "otherSub": "Ceritakan apa yang ada di pikiranmu"
+    }
   }
 }
