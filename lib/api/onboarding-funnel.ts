@@ -56,3 +56,9 @@ export const saveOnboardingGoal = (input: OnboardingGoalInput) =>
 
 export const saveOnboardingPlan = (input: OnboardingPlanInput) =>
   postJson<{ plan: { id: string } }>('/api/onboarding/plan', input)
+
+/** Funnel-facing phases accepted by POST /api/onboarding/advance (subset of current_phase). */
+export type AdvancePhase = 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion' | 'completed'
+
+export const advanceOnboarding = (phase: AdvancePhase, event?: { event_type: string; metadata?: Record<string, unknown> }) =>
+  postJson<{ onboarding: { current_phase: string } }>('/api/onboarding/advance', { phase, event })
