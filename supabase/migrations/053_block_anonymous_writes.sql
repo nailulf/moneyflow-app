@@ -6,7 +6,7 @@
 -- These are RESTRICTIVE policies: they are AND-ed with the existing permissive
 -- (auth.uid() = user_id) policies, adding an `is_anonymous IS NOT TRUE` gate on writes.
 -- Excluded by design (not user-mutable, so no anon write surface to block):
---   audit_logs, user_roles (SELECT/INSERT-only), budget_templates (global read-only),
+--   user_roles (SELECT/INSERT-only), budget_templates (global read-only),
 --   exchange_rate_snapshots (system/cron, no user_id). user_preferences was dropped in 030.
 
 DO $$
@@ -16,7 +16,7 @@ DECLARE
     'accounts','transactions','categories','category_groups',
     'budgets','budget_categories','budget_plans','budget_plan_categories',
     'budget_snapshots','budget_snapshot_categories','financial_goals',
-    'statements','portfolio_holdings','account_balance_adjustments',
+    'statements','portfolio_holdings','account_balance_adjustments','audit_logs',
     'wealth_forecast_scenarios','wealth_forecast_events',
     'user_settings','user_onboarding','onboarding_events','profiles'
   ];
