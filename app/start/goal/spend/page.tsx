@@ -17,16 +17,6 @@ import { getCategoryIcon, getCategoryTint } from '@/lib/category-style'
 import { formatCurrency } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
 
-// Core spend categories to surface (matches the seeded EXPENSE names). Filtered
-// against the user's real categories so only existing ones render as rows.
-const SPEND_CATEGORY_NAMES = [
-  'Food & Dining',
-  'Transportation',
-  'Bills & Utilities',
-  'Shopping',
-  'Entertainment',
-]
-
 /** Goal flow screen 3 (design Row B-3) — estimate monthly spend by category. */
 export default function GoalSpendPage() {
   const t = useTranslations('start')
@@ -52,13 +42,15 @@ export default function GoalSpendPage() {
 
   const { categories, isLoading } = useTransactionCategories(userId)
 
-  // Order the seeded EXPENSE categories per the design; keep only ones present.
-  const rows = useMemo(() => {
-    const expense = categories.filter((c) => c.group_type === 'EXPENSE')
-    return SPEND_CATEGORY_NAMES.map((name) =>
-      expense.find((c) => c.name === name)
-    ).filter((c): c is (typeof expense)[number] => Boolean(c))
-  }, [categories])
+  // Render all of the user's EXPENSE categories, sorted by name for a stable,
+  // deterministic order (works for any setup, not just the seeded defaults).
+  const rows = useMemo(
+    () =>
+      categories
+        .filter((c) => c.group_type === 'EXPENSE')
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [categories]
+  )
 
   const total = useMemo(
     () => rows.reduce((sum, c) => sum + (spend[c.id] ?? 0), 0),
