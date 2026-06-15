@@ -491,7 +491,7 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          current_phase: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+          current_phase: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed' | 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion'
           current_step: number
           is_completed: boolean
           is_skipped: boolean
@@ -503,7 +503,7 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed' | 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion'
           current_step?: number
           is_completed?: boolean
           is_skipped?: boolean
@@ -515,7 +515,7 @@ export interface Database {
         Update: {
           id?: string
           user_id?: string
-          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed' | 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion'
           current_step?: number
           is_completed?: boolean
           is_skipped?: boolean
@@ -963,5 +963,7 @@ export type BudgetSnapshotCategoryInsert = Database['public']['Tables']['budget_
 export type BudgetSnapshotCategoryUpdate = Database['public']['Tables']['budget_snapshot_categories']['Update']
 
 // Onboarding phase type for convenience
-export type OnboardingPhase = 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+export type OnboardingPhase =
+  | 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+  | 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion'
 export type OnboardingEventType = 'phase_started' | 'phase_completed' | 'step_completed' | 'skipped' | 'resumed' | 'completed'

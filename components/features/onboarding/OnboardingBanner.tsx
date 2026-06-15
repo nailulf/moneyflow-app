@@ -45,6 +45,13 @@ const PHASE_STEP_INDEX: Record<OnboardingPhase, number> = {
   categories: 2,
   budget_setup: 3,
   completed: 4,
+  // Guest-funnel phases are not surfaced by this (legacy, post-auth) banner.
+  // Mapped to 0 so the Record stays exhaustive; wired up properly in Phase 2.
+  intent: 0,
+  goal_setup: 0,
+  health_check: 0,
+  plan: 0,
+  conversion: 0,
 }
 
 interface StepConfig {
