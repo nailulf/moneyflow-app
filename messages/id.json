@@ -1595,6 +1595,25 @@
         "subtitle": "Perkiraan tidak masalah. Ketuk jumlah untuk menyesuaikan.",
         "totalLabel": "Total pengeluaran",
         "cta": "Hitung rencanaku"
+      },
+      "plan": {
+        "savePill": "Kamu bisa menabung",
+        "perMonth": "/bulan",
+        "incomeLabel": "Pemasukan",
+        "expensesLabel": "Pengeluaran",
+        "goalLabel": "Tujuan: {name}",
+        "achievable": "Tercapai",
+        "tight": "Ketat",
+        "reachIn": "Tercapai dalam {months} bulan",
+        "noSurplus": "Tambah pemasukan atau kurangi pengeluaran untuk mulai menabung",
+        "whatIfTitle": "Bagaimana jika?",
+        "whatIfCut": "Kurangi pengeluaran {amount} → {months} bulan",
+        "whatIfSide": "Tambah penghasilan sampingan {amount} → {months} bulan",
+        "saveCta": "Simpan rencanaku",
+        "adjustLink": "Ubah angka",
+        "emptyTitle": "Ayo susun rencanamu",
+        "emptySubtitle": "Beri tahu tujuan dan pemasukanmu dulu, lalu kami tunjukkan kapan kamu bisa mencapainya.",
+        "emptyCta": "Mulai dengan tujuan"
       }
     }
   }

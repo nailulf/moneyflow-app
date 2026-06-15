@@ -1595,6 +1595,25 @@
         "subtitle": "Estimate is okay. Tap an amount to adjust it.",
         "totalLabel": "Total expenses",
         "cta": "Calculate my plan"
+      },
+      "plan": {
+        "savePill": "You can save",
+        "perMonth": "/month",
+        "incomeLabel": "Income",
+        "expensesLabel": "Expenses",
+        "goalLabel": "Goal: {name}",
+        "achievable": "Achievable",
+        "tight": "Tight",
+        "reachIn": "Reach it in {months} months",
+        "noSurplus": "Add some income or cut spending to start saving",
+        "whatIfTitle": "What if?",
+        "whatIfCut": "Cut spending by {amount} → {months} months",
+        "whatIfSide": "Add {amount} side income → {months} months",
+        "saveCta": "Save my plan",
+        "adjustLink": "Adjust numbers",
+        "emptyTitle": "Let's build your plan",
+        "emptySubtitle": "Tell us your goal and income first, and we'll show you when you can reach it.",
+        "emptyCta": "Start with a goal"
       }
     }
   }
