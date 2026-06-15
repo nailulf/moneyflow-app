@@ -3,6 +3,8 @@ import '@testing-library/jest-dom'
 
 jest.mock('next/navigation', () => ({ usePathname: jest.fn(() => '/'), useRouter: () => ({ push: jest.fn() }) }))
 jest.mock('next-intl', () => ({ useTranslations: () => (key: string) => key }))
+// The Add FAB now runs through useGuestGuard → useAuth; provide a permanent user.
+jest.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ user: { is_anonymous: false } }) }))
 
 import { usePathname } from 'next/navigation'
 import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'
