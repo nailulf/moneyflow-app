@@ -16,6 +16,8 @@ export type OnboardingGoalType =
   | 'wedding'
   | 'investment'
   | 'other'
+  | 'debt_payoff'
+  | 'gadget'
 
 export type OnboardingGoalInput = {
   goal_type: OnboardingGoalType

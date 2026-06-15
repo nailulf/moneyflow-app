@@ -14,6 +14,8 @@ const GOAL_TYPES = [
   'wedding',
   'investment',
   'other',
+  'debt_payoff',
+  'gadget',
 ] as const
 
 // Human-readable fallback names, used when the caller omits `name`
@@ -27,6 +29,8 @@ const GOAL_TYPE_LABELS: Record<(typeof GOAL_TYPES)[number], string> = {
   wedding: 'Wedding',
   investment: 'Investment',
   other: 'Savings Goal',
+  debt_payoff: 'Pay Off Debt',
+  gadget: 'New Gadget',
 }
 
 const GoalSchema = z.object({

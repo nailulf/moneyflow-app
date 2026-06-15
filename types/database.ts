@@ -702,7 +702,7 @@ export interface Database {
           id: string
           account_id: string
           name: string
-          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other' | 'debt_payoff' | 'gadget'
           target_amount: number
           target_date: string
           status: 'active' | 'completed' | 'cancelled'
@@ -713,7 +713,7 @@ export interface Database {
           id?: string
           account_id: string
           name: string
-          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other' | 'debt_payoff' | 'gadget'
           target_amount: number
           target_date: string
           status?: 'active' | 'completed' | 'cancelled'
@@ -724,7 +724,7 @@ export interface Database {
           id?: string
           account_id?: string
           name?: string
-          goal_type?: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+          goal_type?: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other' | 'debt_payoff' | 'gadget'
           target_amount?: number
           target_date?: string
           status?: 'active' | 'completed' | 'cancelled'
@@ -943,7 +943,7 @@ export type WealthForecastEventInsert = Database['public']['Tables']['wealth_for
 export type WealthForecastEventUpdate = Database['public']['Tables']['wealth_forecast_events']['Update']
 
 // Goal type for convenience
-export type GoalType = 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+export type GoalType = 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other' | 'debt_payoff' | 'gadget'
 export type GoalStatus = 'active' | 'completed' | 'cancelled'
 
 export type BudgetPlanDB = Database['public']['Tables']['budget_plans']['Row']
