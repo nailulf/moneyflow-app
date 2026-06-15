@@ -10,6 +10,7 @@ import {
   Sparkles,
   ArrowRight,
   ChevronLeft,
+  Check,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -149,6 +150,20 @@ export default function IntentPage() {
                   {t(opt.subKey)}
                 </span>
               </span>
+              {/* Radio indicator (right edge) */}
+              <span
+                className={cn(
+                  'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+                  active
+                    ? 'border-primary bg-primary'
+                    : 'border-muted-foreground/30 bg-transparent'
+                )}
+                aria-hidden="true"
+              >
+                {active && (
+                  <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
+                )}
+              </span>
             </button>
           )
         })}
@@ -163,6 +178,11 @@ export default function IntentPage() {
         {t('intent.continue')}
         <ArrowRight className="h-5 w-5" aria-hidden="true" />
       </Button>
+
+      {/* Guest reassurance — no account required */}
+      <p className="mt-3 text-center text-xs leading-caption text-muted-foreground">
+        {t('intent.guestNote')}
+      </p>
     </div>
   )
 }

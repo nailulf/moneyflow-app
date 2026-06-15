@@ -1552,7 +1552,8 @@
       "goalTitle": "Track a financial goal",
       "goalSub": "Save for something that matters to you",
       "otherTitle": "Something else",
-      "otherSub": "Tell us what is on your mind"
+      "otherSub": "Tell us what is on your mind",
+      "guestNote": "No account needed — explore as a guest"
     }
   }
 }
