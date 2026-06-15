@@ -99,10 +99,15 @@ export async function GET(request: NextRequest) {
     // Users who completed the flow outside the wizard, or who existed before
     // the onboarding feature, may have stale phase/completion state.
     // Note: intentionally no is_active filter — any record counts (matches migration 035).
+    // Anonymous (guest) users are driven solely by the funnel's explicit
+    // advanceOnboarding() calls — they must never be auto-reconciled, regardless
+    // of phase, so they can never be bumped onto the legacy welcome→…→completed
+    // track by activity heuristics.
     if (
       data &&
       !data.is_completed &&
       !data.is_skipped &&
+      !(user as { is_anonymous?: boolean }).is_anonymous &&
       !GUEST_FUNNEL_PHASES.has(data.current_phase as OnboardingPhase)
     ) {
       const [{ count: accountCount }, { count: budgetCount }] = await Promise.all([
