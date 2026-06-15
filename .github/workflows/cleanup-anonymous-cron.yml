@@ -1,0 +1,26 @@
+name: Cleanup Stale Anonymous Users
+
+on:
+  schedule:
+    # Run daily at 03:30 UTC
+    - cron: "30 3 * * *"
+  workflow_dispatch: # Allows manual triggering from GitHub UI
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger anonymous-user cleanup
+        run: |
+          if [ -z "${{ secrets.APP_URL }}" ] || [ -z "${{ secrets.CRON_SECRET }}" ]; then
+            echo "Error: APP_URL and CRON_SECRET secrets are required"; exit 1
+          fi
+          APP_URL="${{ secrets.APP_URL }}"; APP_URL="${APP_URL%/}"
+          response=$(curl -X POST "${APP_URL}/api/admin/cleanup-anonymous" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" -w "\n%{http_code}" -s -L)
+          http_code=$(echo "$response" | tail -n 1)
+          echo "$response" | sed '$d'
+          if [ "$http_code" -ne 200 ]; then echo "Failed: $http_code"; exit 1; fi
+          echo "Cleanup complete"
