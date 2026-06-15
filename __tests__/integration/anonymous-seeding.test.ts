@@ -1,5 +1,9 @@
+/**
+ * @jest-environment node
+ */
 import { loadEnvConfig } from '@next/env'
 loadEnvConfig(process.cwd())
+import { randomUUID } from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 import { createServerComponentClient } from '../../lib/supabase'
 
@@ -18,7 +22,7 @@ d('handle_new_user seeds account + settings', () => {
   })
 
   it('seeds exactly one default account, 7 categories, and a user_settings row', async () => {
-    const email = `test-seed-${crypto.randomUUID()}@example.com`
+    const email = `test-seed-${randomUUID()}@example.com`
     const { data, error } = await admin.auth.admin.createUser({ email, email_confirm: true })
     expect(error).toBeNull()
     userId = data.user!.id
