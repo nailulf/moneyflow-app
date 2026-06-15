@@ -1515,10 +1515,13 @@
   "start": {
     "brand": "MoneyFlow",
     "login": "Masuk",
+    "guestPill": "Kamu menjelajah sebagai tamu",
     "hero": {
       "headline": "Keuangan yang akhirnya masuk akal",
       "subtext": "Lacak pengeluaran, anggaran, saldo, dan capai tujuanmu — semua di satu tempat."
     },
+    "heroStatLabel": "Rata-rata pengguna lebih hemat dalam 3 bulan",
+    "heroStatDelta": "+23%",
     "features": {
       "title": "Semua kebutuhan keuanganmu",
       "tracking": "Pencatatan tanpa repot",
@@ -1539,6 +1542,7 @@
     "intent": {
       "title": "Apa yang membawamu ke sini hari ini?",
       "subtitle": "Kami akan menyesuaikan langkah pertamamu.",
+      "back": "Kembali",
       "skip": "Lewati",
       "continue": "Lanjut",
       "healthTitle": "Cek kesehatan keuanganku",

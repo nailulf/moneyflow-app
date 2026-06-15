@@ -9,6 +9,7 @@ import {
   Target,
   TrendingUp,
   HeartPulse,
+  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -69,8 +70,34 @@ export default function StartPage() {
 
       {/* Navy hero card */}
       <section className="rounded-[20px] bg-hero-gradient p-6 text-hero-foreground shadow-floating">
-        <h1 className="text-3xl leading-title-2 font-bold">{t('hero.headline')}</h1>
+        {/* Guest status badge */}
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-hero-foreground/10 px-2.5 py-1 text-tiny font-medium text-hero-foreground">
+          <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
+          {t('guestPill')}
+        </span>
+
+        <h1 className="mt-4 text-3xl leading-title-2 font-bold">
+          {t('hero.headline')}
+        </h1>
         <p className="mt-3 text-md leading-body-lg text-hero-muted">{t('hero.subtext')}</p>
+
+        {/* Decorative mini bar chart + savings stat */}
+        <div className="mt-6 flex h-16 items-end gap-2" aria-hidden="true">
+          {[30, 45, 40, 60, 75, 90].map((h, i) => (
+            <span
+              key={i}
+              className={`flex-1 rounded-t ${i >= 4 ? 'bg-accent' : 'bg-chart-bar'}`}
+              style={{ height: `${h}%` }}
+            />
+          ))}
+        </div>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-tiny text-hero-muted">{t('heroStatLabel')}</span>
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-hero-success">
+            <TrendingUp className="h-4 w-4" aria-hidden="true" />
+            {t('heroStatDelta')}
+          </span>
+        </div>
       </section>
 
       {/* Feature list */}

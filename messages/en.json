@@ -1515,10 +1515,13 @@
   "start": {
     "brand": "MoneyFlow",
     "login": "Log in",
+    "guestPill": "You're browsing as a guest",
     "hero": {
       "headline": "Money that finally makes sense",
       "subtext": "Track spending, budgets, balance, and hit your goals — all in one place."
     },
+    "heroStatLabel": "Avg. user saves more in 3 months",
+    "heroStatDelta": "+23%",
     "features": {
       "title": "Everything your money needs",
       "tracking": "Effortless tracking",
@@ -1539,6 +1542,7 @@
     "intent": {
       "title": "What brings you here today?",
       "subtitle": "We will tailor your first steps around it.",
+      "back": "Back",
       "skip": "Skip",
       "continue": "Continue",
       "healthTitle": "Check my financial health",
