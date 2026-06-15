@@ -1554,6 +1554,48 @@
       "otherTitle": "Something else",
       "otherSub": "Tell us what is on your mind",
       "guestNote": "No account needed — explore as a guest"
+    },
+    "goal": {
+      "continue": "Continue",
+      "saveError": "We could not save that. Please try again.",
+      "type": {
+        "title": "What's your short-term goal?",
+        "subtitle": "Pick something you want to reach in the near year. We'll build a plan around it.",
+        "emergencyTitle": "Emergency fund",
+        "emergencySub": "3–6 months of expenses",
+        "vacationTitle": "Vacation / Trip",
+        "vacationSub": "Bali, Japan, or anywhere",
+        "gadgetTitle": "New gadget",
+        "gadgetSub": "Phone, laptop, camera",
+        "debtTitle": "Pay off debt",
+        "debtSub": "Clear a loan or balance",
+        "customTitle": "Custom goal",
+        "customSub": "Set your own target",
+        "targetLabel": "Target amount",
+        "horizonLabel": "When do you need it?",
+        "horizon3": "3 months",
+        "horizon6": "6 months",
+        "horizon12": "1 year",
+        "horizonCustom": "Custom"
+      },
+      "income": {
+        "title": "What's your monthly income?",
+        "subtitle": "A rough number is fine — you can fine-tune it later.",
+        "mainLabel": "Main monthly income",
+        "freqLabel": "How often?",
+        "freqMonthly": "Monthly",
+        "freqWeekly": "Weekly",
+        "freqIrregular": "Irregular",
+        "addSource": "Add another source",
+        "otherLabel": "Other income",
+        "removeSource": "Remove income source"
+      },
+      "spend": {
+        "title": "What do you spend monthly?",
+        "subtitle": "Estimate is okay. Tap an amount to adjust it.",
+        "totalLabel": "Total expenses",
+        "cta": "Calculate my plan"
+      }
     }
   }
 }

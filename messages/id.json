@@ -1554,6 +1554,48 @@
       "otherTitle": "Hal lain",
       "otherSub": "Ceritakan apa yang ada di pikiranmu",
       "guestNote": "Tanpa akun — jelajahi sebagai tamu"
+    },
+    "goal": {
+      "continue": "Lanjut",
+      "saveError": "Tidak dapat menyimpan. Silakan coba lagi.",
+      "type": {
+        "title": "Apa tujuan jangka pendekmu?",
+        "subtitle": "Pilih sesuatu yang ingin kamu capai dalam waktu dekat. Kami akan menyusun rencananya.",
+        "emergencyTitle": "Dana darurat",
+        "emergencySub": "Pengeluaran 3–6 bulan",
+        "vacationTitle": "Liburan / Perjalanan",
+        "vacationSub": "Bali, Jepang, atau ke mana saja",
+        "gadgetTitle": "Gadget baru",
+        "gadgetSub": "Ponsel, laptop, kamera",
+        "debtTitle": "Lunasi utang",
+        "debtSub": "Bereskan pinjaman atau tagihan",
+        "customTitle": "Tujuan khusus",
+        "customSub": "Tentukan targetmu sendiri",
+        "targetLabel": "Jumlah target",
+        "horizonLabel": "Kapan kamu membutuhkannya?",
+        "horizon3": "3 bulan",
+        "horizon6": "6 bulan",
+        "horizon12": "1 tahun",
+        "horizonCustom": "Lainnya"
+      },
+      "income": {
+        "title": "Berapa penghasilan bulananmu?",
+        "subtitle": "Angka perkiraan tidak masalah — bisa disesuaikan nanti.",
+        "mainLabel": "Penghasilan bulanan utama",
+        "freqLabel": "Seberapa sering?",
+        "freqMonthly": "Bulanan",
+        "freqWeekly": "Mingguan",
+        "freqIrregular": "Tidak tetap",
+        "addSource": "Tambah sumber lain",
+        "otherLabel": "Penghasilan lain",
+        "removeSource": "Hapus sumber penghasilan"
+      },
+      "spend": {
+        "title": "Berapa pengeluaran bulananmu?",
+        "subtitle": "Perkiraan tidak masalah. Ketuk jumlah untuk menyesuaikan.",
+        "totalLabel": "Total pengeluaran",
+        "cta": "Hitung rencanaku"
+      }
     }
   }
 }
