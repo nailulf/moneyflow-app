@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/atoms/label'
 import { Checkbox } from '@/components/ui/atoms/checkbox'
 import { PasswordInput } from '@/components/ui/molecules/password-input'
 import { AuthErrorMessage } from '@/components/auth/auth-error-message'
+import { LocaleToggle } from '@/components/features/onboarding/LocaleToggle'
 
 type OAuthProvider = 'google' | 'apple'
 
@@ -140,7 +141,11 @@ export default function LoginPage() {
   const busy = isLoading || oauthProvider !== null
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-5 pt-8">
+    <div className="relative flex flex-1 flex-col px-5 pb-5 pt-8">
+      {/* Locale switch — absolutely positioned so it adds no layout height
+          (keeps the tightly-packed login fitting 375×812 with no scroll). */}
+      <LocaleToggle className="absolute right-5 top-5 z-10" />
+
       {/* Brand */}
       <header className="flex flex-col items-center">
         <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[16px] bg-card shadow-card">

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/atoms/button'
+import { LocaleToggle } from '@/components/features/onboarding/LocaleToggle'
 
 /** Feature rows for "Everything your money needs" — each gets its own tint. */
 const FEATURES: Array<{
@@ -60,12 +61,15 @@ export default function StartPage() {
         <span className="text-xl leading-title-4 font-bold text-foreground">
           {t('brand')}
         </span>
-        <Link
-          href="/login"
-          className="text-sm leading-body-sm font-medium text-primary hover:text-primary/80"
-        >
-          {t('login')}
-        </Link>
+        <div className="flex items-center gap-3">
+          <LocaleToggle />
+          <Link
+            href="/login"
+            className="text-sm leading-body-sm font-medium text-primary hover:text-primary/80"
+          >
+            {t('login')}
+          </Link>
+        </div>
       </header>
 
       {/* Navy hero card */}

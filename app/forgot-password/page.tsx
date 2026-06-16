@@ -15,6 +15,7 @@ import { getSiteUrl } from '@/lib/utils/site-url'
 import { Button } from '@/components/ui/atoms/button'
 import { Input } from '@/components/ui/atoms/input'
 import { Label } from '@/components/ui/atoms/label'
+import { LocaleToggle } from '@/components/features/onboarding/LocaleToggle'
 
 /**
  * Forgot-password (request reset link), funnel-styled.
@@ -69,7 +70,10 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-5 pt-8">
+    <div className="relative flex flex-1 flex-col px-5 pb-5 pt-8">
+      {/* Locale switch — absolutely positioned (adds no layout height). */}
+      <LocaleToggle className="absolute right-5 top-5 z-10" />
+
       {/* Brand */}
       <header className="flex flex-col items-center text-center">
         <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[16px] bg-card shadow-card">

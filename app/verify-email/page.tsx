@@ -10,6 +10,7 @@ import { Loader2, MailCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { getSiteUrl } from '@/lib/utils/site-url'
 import { Button } from '@/components/ui/atoms/button'
+import { LocaleToggle } from '@/components/features/onboarding/LocaleToggle'
 
 /**
  * Verify-email (post-signup "check your inbox"), funnel-styled.
@@ -76,7 +77,10 @@ function VerifyEmailContent() {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-5 pt-8">
+    <div className="relative flex flex-1 flex-col px-5 pb-5 pt-8">
+      {/* Locale switch — absolutely positioned (adds no layout height). */}
+      <LocaleToggle className="absolute right-5 top-5 z-10" />
+
       {/* Brand / status icon */}
       <header className="flex flex-col items-center text-center">
         <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[16px] bg-card shadow-card">
