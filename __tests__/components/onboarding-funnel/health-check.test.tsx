@@ -12,13 +12,15 @@ jest.mock('next-intl', () => ({
       const labels: Record<string, string> = {
         continue: 'Continue',
         seeHealth: 'See my health',
-        bandHealthy: 'Healthy',
-        bandCouldBeBetter: 'Could be better',
-        bandNeedsAttention: 'Needs attention',
-        valueSavingsRate: `Saving ${values?.rate}% of income`,
-        valueMonths: `${values?.months} months covered`,
-        saveCta: 'Create an account to save this',
-        guestCta: 'Explore as a guest',
+        bandOnTrack: 'On track',
+        bandCanImprove: 'Can improve',
+        bandNeedsWork: 'Needs work',
+        detailSavings: `${values?.rate}% of income saved`,
+        detailDebt: `${values?.pct}% goes to debt`,
+        detailEmergency: `${values?.months} months of spending`,
+        detailNetWorth: `${values?.amount} · ${values?.sign}`,
+        saveCta: 'Save my results',
+        buildBudgetCta: 'Build a budget to improve it',
       }
       return labels[key] ?? key
     },
@@ -85,9 +87,9 @@ describe('HealthCheckPage (multi-step)', () => {
 
     const scoreEl = screen.getByTestId('hc-score')
     expect(scoreEl).toBeInTheDocument()
-    // Healthy profile (40% savings, 5mo fund, investing, no debt) scores 100.
+    // Healthy profile (40% savings, 5mo fund, positive net worth, no debt) scores 100.
     expect(scoreEl).toHaveTextContent('100')
-    expect(screen.getByText('Healthy')).toBeInTheDocument()
+    expect(screen.getByText('On track')).toBeInTheDocument()
   })
 
   it('logs the score via advanceOnboarding (best-effort)', async () => {
@@ -107,7 +109,7 @@ describe('HealthCheckPage (multi-step)', () => {
     render(<HealthCheckPage />)
     await completeFlow()
 
-    fireEvent.click(screen.getByRole('button', { name: /create an account to save this/i }))
+    fireEvent.click(screen.getByRole('button', { name: /save my results/i }))
     expect(push).toHaveBeenCalledWith('/start/save')
   })
 })

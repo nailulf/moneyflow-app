@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl'
 import {
   ArrowRight,
   ChevronLeft,
+  Lightbulb,
+  Scale,
   PiggyBank,
   ShieldCheck,
   TrendingUp,
@@ -18,9 +20,11 @@ import { CurrencyInput } from '@/components/ui/atoms/currency-input'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 import { advanceOnboarding } from '@/lib/api/onboarding-funnel'
+import { formatCurrencyCompact } from '@/lib/data-utils'
 import {
   financialHealthScore,
   type FinancialHealthResult,
+  type HealthFactor,
   type HealthStatus,
 } from '@/lib/onboarding/plan-math'
 import { cn } from '@/lib/utils'
@@ -30,34 +34,48 @@ type Step = 'income' | 'savings' | 'debts' | 'result'
 /** Order of the input steps; the gauge result is the 4th funnel dot. */
 const STEP_INDEX: Record<Step, number> = { income: 0, savings: 1, debts: 2, result: 3 }
 
-/** Score → band metadata. ≥70 Healthy, 40–69 Could be better, <40 Needs attention. */
-function bandFor(score: number): { labelKey: string; pill: string; arc: string } {
-  if (score >= 70) {
-    return {
-      labelKey: 'bandHealthy',
-      pill: 'bg-tint-green-bg text-tint-green-fg',
-      arc: 'hsl(var(--success))',
-    }
+/**
+ * Score → improvement-pill band shown on the navy hero.
+ * ≥80 On track, 55–79 Can improve, <55 Needs work.
+ * Pill styling reads on the dark hero, so it uses translucent fills + light text.
+ */
+function bandFor(score: number): { labelKey: string; pill: string } {
+  if (score >= 80) {
+    return { labelKey: 'bandOnTrack', pill: 'bg-hero-success/20 text-hero-success' }
   }
-  if (score >= 40) {
-    return {
-      labelKey: 'bandCouldBeBetter',
-      pill: 'bg-tint-amber-bg text-tint-amber-fg',
-      arc: 'hsl(var(--tint-amber-fg))',
-    }
+  if (score >= 55) {
+    return { labelKey: 'bandCanImprove', pill: 'bg-tint-amber-fg/20 text-tint-amber-fg' }
   }
-  return {
-    labelKey: 'bandNeedsAttention',
-    pill: 'bg-tint-orange-bg text-tint-orange-fg',
-    arc: 'hsl(var(--destructive))',
-  }
+  return { labelKey: 'bandNeedsWork', pill: 'bg-hero-danger/20 text-hero-danger' }
 }
 
-/** Status → badge label key + tint classes. */
+/** Status → breakdown badge label key + tint classes. */
 const STATUS_META: Record<HealthStatus, { labelKey: string; pill: string }> = {
   good: { labelKey: 'statusGood', pill: 'bg-tint-green-bg text-tint-green-fg' },
   watch: { labelKey: 'statusWatch', pill: 'bg-tint-amber-bg text-tint-amber-fg' },
   low: { labelKey: 'statusLow', pill: 'bg-tint-orange-bg text-tint-orange-fg' },
+}
+
+/** Per-factor icon + tint for the breakdown rows (matches the d1RzG design). */
+const FACTOR_META: Record<HealthFactor, { icon: LucideIcon; tint: string }> = {
+  savingsRatio: { icon: PiggyBank, tint: 'bg-tint-blue-bg text-tint-blue-fg' },
+  debtToIncome: { icon: Scale, tint: 'bg-tint-teal-bg text-tint-teal-fg' },
+  emergencyFund: { icon: ShieldCheck, tint: 'bg-tint-orange-bg text-tint-orange-fg' },
+  netWorth: { icon: Landmark, tint: 'bg-tint-purple-bg text-tint-purple-fg' },
+}
+
+/** Order the breakdown rows render in (matches the design). */
+const FACTOR_ORDER: HealthFactor[] = ['savingsRatio', 'debtToIncome', 'emergencyFund', 'netWorth']
+
+/**
+ * Pick the single weakest factor to drive the hero summary + the "Top priority" tip.
+ * Lowest status first ('low' < 'watch' < 'good'); ties break by FACTOR_ORDER.
+ */
+function weakestFactor(breakdown: Record<HealthFactor, HealthStatus>): HealthFactor {
+  const rank: Record<HealthStatus, number> = { low: 0, watch: 1, good: 2 }
+  return FACTOR_ORDER.reduce((worst, factor) =>
+    rank[breakdown[factor]] < rank[breakdown[worst]] ? factor : worst
+  )
 }
 
 /** Standalone "financial health check" — 4-step flow ending in a score gauge. No account needed. */
@@ -268,14 +286,18 @@ function Field({
 }
 
 interface BreakdownRow {
-  key: string
+  factor: HealthFactor
   icon: LucideIcon
+  tint: string
   labelKey: string
-  value: string
+  detail: string
   status: HealthStatus
 }
 
-/** Circular-gauge score + categorized breakdown + conversion CTAs. */
+/**
+ * Navy hero banner (gauge + improvement pill + summary) over a white breakdown card,
+ * a "Top priority" tip, then the conversion CTAs — the d1RzG result screen.
+ */
 function ResultStep({
   result,
   onBack,
@@ -288,9 +310,10 @@ function ResultStep({
   t: ReturnType<typeof useTranslations>
 }) {
   const band = bandFor(result.score)
+  const weakest = weakestFactor(result.breakdown)
 
-  // Gauge geometry — a track circle + a progress arc via stroke-dashoffset.
-  const SIZE = 160
+  // Gauge geometry — a track circle + a progress arc via stroke-dashoffset, on navy.
+  const SIZE = 140
   const STROKE = 12
   const radius = (SIZE - STROKE) / 2
   const circumference = 2 * Math.PI * radius
@@ -300,47 +323,28 @@ function ResultStep({
     const months = Number.isFinite(result.emergencyMonths)
       ? Math.round(result.emergencyMonths * 10) / 10
       : 99
-    return [
-      {
-        key: 'netSavings',
-        icon: PiggyBank,
-        labelKey: 'rowNetSavings',
-        value: t('valueSavingsRate', { rate: result.savingsRate }),
-        status: result.breakdown.netSavings,
-      },
-      {
-        key: 'emergencyFund',
-        icon: ShieldCheck,
-        labelKey: 'rowEmergencyFund',
-        value: t('valueMonths', { months }),
-        status: result.breakdown.emergencyFund,
-      },
-      {
-        key: 'investing',
-        icon: TrendingUp,
-        labelKey: 'rowInvesting',
-        value: t(result.breakdown.investing === 'good' ? 'valueInvesting' : 'valueNotInvesting'),
-        status: result.breakdown.investing,
-      },
-      {
-        key: 'debt',
-        icon: Landmark,
-        labelKey: 'rowDebt',
-        value: t(
-          result.breakdown.debt === 'good'
-            ? 'valueDebtLow'
-            : result.breakdown.debt === 'watch'
-              ? 'valueDebtModerate'
-              : 'valueDebtHigh'
-        ),
-        status: result.breakdown.debt,
-      },
-    ]
+    const detailFor: Record<HealthFactor, string> = {
+      savingsRatio: t('detailSavings', { rate: Math.max(0, result.savingsRate) }),
+      debtToIncome: t('detailDebt', { pct: result.debtToIncomePct }),
+      emergencyFund: t('detailEmergency', { months }),
+      netWorth: t('detailNetWorth', {
+        amount: formatCurrencyCompact(result.netWorth),
+        sign: t(result.netWorth >= 0 ? 'signPositive' : 'signNegative'),
+      }),
+    }
+    return FACTOR_ORDER.map((factor) => ({
+      factor,
+      icon: FACTOR_META[factor].icon,
+      tint: FACTOR_META[factor].tint,
+      labelKey: `row_${factor}`,
+      detail: detailFor[factor],
+      status: result.breakdown[factor],
+    }))
   }, [result, t])
 
   return (
     <div className="flex flex-1 flex-col px-5 pb-32">
-      <header className="py-5">
+      <header className="py-4">
         <div className="flex items-center justify-between">
           <button
             type="button"
@@ -361,9 +365,19 @@ function ResultStep({
         </div>
       </header>
 
-      <div className="flex flex-col gap-4">
-        {/* Circular gauge */}
-        <div className="flex flex-col items-center">
+      <div className="flex flex-col gap-3">
+        {/* Navy hero banner — improvement pill + gauge + summary */}
+        <div className="flex flex-col items-center gap-3 rounded-3xl bg-hero-gradient px-5 py-4 text-hero-foreground shadow-card">
+          <span
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-tiny font-bold',
+              band.pill
+            )}
+          >
+            <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
+            {t(band.labelKey)}
+          </span>
+
           <div className="relative" style={{ width: SIZE, height: SIZE }}>
             <svg
               width={SIZE}
@@ -377,7 +391,7 @@ function ResultStep({
                 cy={SIZE / 2}
                 r={radius}
                 fill="none"
-                stroke="hsl(var(--muted))"
+                stroke="hsl(var(--hero-foreground) / 0.15)"
                 strokeWidth={STROKE}
               />
               <circle
@@ -385,7 +399,7 @@ function ResultStep({
                 cy={SIZE / 2}
                 r={radius}
                 fill="none"
-                stroke={band.arc}
+                stroke="hsl(var(--hero-success))"
                 strokeWidth={STROKE}
                 strokeLinecap="round"
                 strokeDasharray={circumference}
@@ -394,57 +408,76 @@ function ResultStep({
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span data-testid="hc-score" className="text-4xl leading-title-1 font-bold text-foreground">
+              <span
+                data-testid="hc-score"
+                className="text-4xl leading-title-1 font-bold text-hero-foreground"
+              >
                 {result.score}
               </span>
-              <span className="text-xs leading-caption text-muted-foreground">
-                {t('scoreOutOf')}
-              </span>
+              <span className="text-xs leading-caption text-hero-muted">{t('scoreOutOf')}</span>
             </div>
           </div>
-          <span
-            className={cn(
-              'mt-4 inline-flex items-center rounded-full px-3 py-1 text-tiny font-semibold uppercase tracking-wide',
-              band.pill
-            )}
-          >
-            {t(band.labelKey)}
-          </span>
+
+          <p className="text-center text-sm leading-body-sm text-hero-muted">
+            {t(`summary_${weakest}`)}
+          </p>
         </div>
 
         {/* Breakdown card */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-          <div className="flex flex-col gap-4">
-            {rows.map((row) => (
-              <div key={row.key} className="flex items-center gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-tint-blue-bg text-tint-blue-fg">
-                  <row.icon className="h-4 w-4" aria-hidden="true" />
+        <div className="rounded-2xl bg-card px-4 shadow-card">
+          {rows.map((row, i) => (
+            <div
+              key={row.factor}
+              className={cn(
+                'flex items-center gap-3 py-3',
+                i < rows.length - 1 && 'border-b border-border/60'
+              )}
+            >
+              <span
+                className={cn(
+                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px]',
+                  row.tint
+                )}
+              >
+                <row.icon className="h-[18px] w-[18px]" aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm leading-body-sm font-semibold text-foreground">
+                  {t(row.labelKey)}
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm leading-body-sm font-medium text-foreground">
-                    {t(row.labelKey)}
-                  </span>
-                  <span className="block text-xs leading-caption text-muted-foreground">
-                    {row.value}
-                  </span>
+                <span className="block text-xs leading-caption text-muted-foreground">
+                  {row.detail}
                 </span>
-                <span
-                  className={cn(
-                    'shrink-0 rounded-full px-2.5 py-1 text-tiny font-semibold',
-                    STATUS_META[row.status].pill
-                  )}
-                >
-                  {t(STATUS_META[row.status].labelKey)}
-                </span>
-              </div>
-            ))}
-          </div>
+              </span>
+              <span
+                className={cn(
+                  'shrink-0 rounded-full px-2.5 py-1 text-tiny font-semibold',
+                  STATUS_META[row.status].pill
+                )}
+              >
+                {t(STATUS_META[row.status].labelKey)}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Top priority tip */}
+        <div className="flex gap-2.5 rounded-2xl bg-muted/50 p-3.5">
+          <Lightbulb className="mt-0.5 h-[18px] w-[18px] shrink-0 text-primary" aria-hidden="true" />
+          <span className="min-w-0">
+            <span className="block text-sm leading-body-sm font-bold text-foreground">
+              {t('tipTitle')}
+            </span>
+            <span className="block text-xs leading-caption text-muted-foreground">
+              {t(`tip_${weakest}`)}
+            </span>
+          </span>
         </div>
       </div>
 
       {/* Sticky bottom CTA */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-background via-background to-transparent px-5 pb-6 pt-8">
-        <div className="pointer-events-auto mx-auto flex max-w-md flex-col items-center gap-3">
+        <div className="pointer-events-auto mx-auto flex max-w-md flex-col items-center gap-2">
           <Button
             className="h-[52px] w-full gap-2 rounded-[14px] text-md"
             onClick={() => router.push('/start/save')}
@@ -454,10 +487,11 @@ function ResultStep({
           </Button>
           <button
             type="button"
-            onClick={() => router.push('/')}
-            className="text-sm leading-body-sm font-medium text-muted-foreground hover:text-foreground"
+            // TODO: point to /start/budget when Flow 2 is built
+            onClick={() => router.push('/start/intent')}
+            className="py-1 text-sm leading-body-sm font-semibold text-primary hover:text-primary/80"
           >
-            {t('guestCta')}
+            {t('buildBudgetCta')}
           </button>
         </div>
       </div>

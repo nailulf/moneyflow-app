@@ -17,6 +17,9 @@ export function healthScore({ income, spend }: { income: number; spend: number }
 
 export type HealthStatus = 'good' | 'watch' | 'low'
 
+/** The four factors the design's breakdown card grades. */
+export type HealthFactor = 'savingsRatio' | 'debtToIncome' | 'emergencyFund' | 'netWorth'
+
 export interface FinancialHealthInput {
   income: number
   spending: number
@@ -31,23 +34,22 @@ export interface FinancialHealthResult {
   score: number
   /** Monthly savings rate as a whole-number percent: (income − spending) / income × 100. */
   savingsRate: number
+  /** Debt-to-income as a whole-number percent: monthly repayment / monthly income × 100. */
+  debtToIncomePct: number
   /** Months of spending the emergency fund covers: savings / spending. */
   emergencyMonths: number
-  breakdown: {
-    netSavings: HealthStatus
-    emergencyFund: HealthStatus
-    investing: HealthStatus
-    debt: HealthStatus
-  }
+  /** Net worth in the same currency as the inputs: savings + investments − debt. */
+  netWorth: number
+  breakdown: Record<HealthFactor, HealthStatus>
 }
 
 /** Weights summing to 100 — drive the composite score. */
-const WEIGHTS = {
-  savingsRate: 35,
+const WEIGHTS: Record<HealthFactor, number> = {
+  savingsRatio: 35,
   emergencyFund: 25,
-  debt: 25,
-  investing: 15,
-} as const
+  debtToIncome: 25,
+  netWorth: 15,
+}
 
 /** Map a status to the fraction of its weight earned. */
 function statusFactor(status: HealthStatus): number {
@@ -59,54 +61,70 @@ function statusFactor(status: HealthStatus): number {
 /**
  * Pure, total financial-health assessment from a few self-reported numbers.
  *
- * Four factors, each graded good/watch/low, then weighted into a 0–100 score:
- * - savings rate (35): good ≥20%, watch 1–19%, low ≤0%
+ * Four factors (matching the result-screen breakdown card), each graded
+ * good/watch/low, then weighted into a 0–100 score:
+ * - savings ratio (35): good ≥20%, watch 1–19%, low ≤0%
  * - emergency fund (25): good ≥3 months covered, watch 1–3, low <1
- * - debt (25): debt-to-annual-income — good <0.5, watch <1.0, low ≥1.0 (none ⇒ good)
- * - investing (15): good if investments > 0, else low
+ * - debt-to-income (25): monthly repayment / income — good ≤20%, watch 21–40%, low >40%
+ * - net worth (15): savings + investments − debt — good if positive, watch if ~0, low if negative
  *
  * Non-positive income short-circuits to a score of 0.
  */
 export function financialHealthScore(input: FinancialHealthInput): FinancialHealthResult {
-  const { income, spending, savings, investments, debt } = input
+  const { income, spending, savings, investments, debt, debtPayment } = input
+
+  const netWorth = savings + investments - debt
 
   if (income <= 0) {
     return {
       score: 0,
       savingsRate: 0,
+      debtToIncomePct: 0,
       emergencyMonths: 0,
-      breakdown: { netSavings: 'low', emergencyFund: 'low', investing: 'low', debt: 'low' },
+      netWorth,
+      breakdown: {
+        savingsRatio: 'low',
+        emergencyFund: 'low',
+        debtToIncome: 'low',
+        netWorth: netWorth > 0 ? 'good' : netWorth < 0 ? 'low' : 'watch',
+      },
     }
   }
 
-  // Savings rate
+  // Savings ratio — share of income kept.
   const savingsRate = Math.round(((income - spending) / income) * 100)
-  const netSavings: HealthStatus =
+  const savingsRatio: HealthStatus =
     savingsRate >= 20 ? 'good' : savingsRate >= 1 ? 'watch' : 'low'
 
-  // Emergency fund (months of spending covered)
+  // Emergency fund — months of spending the savings cover.
   const emergencyMonths = spending > 0 ? savings / spending : savings > 0 ? Infinity : 0
   const emergencyFund: HealthStatus =
     emergencyMonths >= 3 ? 'good' : emergencyMonths >= 1 ? 'watch' : 'low'
 
-  // Investing
-  const investing: HealthStatus = investments > 0 ? 'good' : 'low'
+  // Debt-to-income — share of monthly income going to debt repayment.
+  const debtToIncomePct = Math.round((debtPayment / income) * 100)
+  const debtToIncome: HealthStatus =
+    debtPayment <= 0 || debtToIncomePct <= 20 ? 'good' : debtToIncomePct <= 40 ? 'watch' : 'low'
 
-  // Debt — relative to annual income
-  const annualIncome = income * 12
-  const debtToIncome = annualIncome > 0 ? debt / annualIncome : 0
-  const debtStatus: HealthStatus =
-    debt <= 0 || debtToIncome < 0.5 ? 'good' : debtToIncome < 1.0 ? 'watch' : 'low'
+  // Net worth — assets minus liabilities.
+  const netWorthStatus: HealthStatus = netWorth > 0 ? 'good' : netWorth < 0 ? 'low' : 'watch'
+
+  const breakdown: Record<HealthFactor, HealthStatus> = {
+    savingsRatio,
+    emergencyFund,
+    debtToIncome,
+    netWorth: netWorthStatus,
+  }
 
   const score = Math.max(
     0,
     Math.min(
       100,
       Math.round(
-        statusFactor(netSavings) * WEIGHTS.savingsRate +
-          statusFactor(emergencyFund) * WEIGHTS.emergencyFund +
-          statusFactor(debtStatus) * WEIGHTS.debt +
-          statusFactor(investing) * WEIGHTS.investing
+        (Object.keys(WEIGHTS) as HealthFactor[]).reduce(
+          (acc, factor) => acc + statusFactor(breakdown[factor]) * WEIGHTS[factor],
+          0
+        )
       )
     )
   )
@@ -114,7 +132,9 @@ export function financialHealthScore(input: FinancialHealthInput): FinancialHeal
   return {
     score,
     savingsRate,
+    debtToIncomePct,
     emergencyMonths,
-    breakdown: { netSavings, emergencyFund, investing, debt: debtStatus },
+    netWorth,
+    breakdown,
   }
 }
