@@ -168,4 +168,104 @@ describe('POST /api/onboarding/merge', () => {
     // anonymous user reaped after the import
     expect(deleteUser).toHaveBeenCalledWith('A')
   })
+
+  it('500s and does NOT delete the anonymous user when an import insert errors', async () => {
+    getUser.mockResolvedValue({ data: { user: { id: 'B' } }, error: null })
+    adminGetUser.mockResolvedValue({ data: { user: { id: 'A', is_anonymous: true } }, error: null })
+
+    // Same setup as the happy path, but the goal insert fails. Because the merge
+    // is destructive, a failed write must abort before deleteUser so A's source
+    // data survives for a retry.
+    const goalInsert = jest.fn().mockResolvedValue({ error: { message: 'boom' } })
+    const planCatInsert = jest.fn().mockResolvedValue({ error: null })
+    const planInsert = jest.fn().mockReturnValue({
+      select: () => ({ single: () => Promise.resolve({ data: { id: 'newplan' }, error: null }) }),
+    })
+
+    adminFrom.mockImplementation((table: string) => {
+      if (table === 'financial_goals') {
+        return {
+          select: (cols: string) => {
+            if (cols.includes('*')) {
+              return {
+                eq: () => ({
+                  maybeSingle: () =>
+                    Promise.resolve({
+                      data: {
+                        name: 'Emergency Fund',
+                        goal_type: 'emergency_fund',
+                        target_amount: 1000,
+                        target_date: '2026-12-31',
+                      },
+                      error: null,
+                    }),
+                }),
+              }
+            }
+            return { eq: () => Promise.resolve({ data: [], error: null }) }
+          },
+          insert: goalInsert,
+        }
+      }
+      if (table === 'budget_plans') {
+        return {
+          select: (cols: string) => ({
+            eq: () =>
+              cols === 'period'
+                ? Promise.resolve({ data: [], error: null })
+                : {
+                    maybeSingle: () =>
+                      Promise.resolve({ data: { id: 'gplan', period: 'monthly' }, error: null }),
+                  },
+          }),
+          insert: planInsert,
+        }
+      }
+      if (table === 'budget_plan_categories') {
+        return {
+          select: () => ({
+            eq: () =>
+              Promise.resolve({
+                data: [
+                  {
+                    allocated_amount: 500,
+                    categories: { name: 'Food & Dining', group_type: 'EXPENSE' },
+                  },
+                ],
+                error: null,
+              }),
+          }),
+          insert: planCatInsert,
+        }
+      }
+      if (table === 'categories') {
+        return {
+          select: () => ({
+            eq: () =>
+              Promise.resolve({
+                data: [{ id: 'b1', name: 'Food & Dining', group_type: 'EXPENSE' }],
+                error: null,
+              }),
+          }),
+        }
+      }
+      if (table === 'accounts') {
+        return {
+          select: () => ({
+            eq: () => ({
+              eq: () => ({
+                single: () => Promise.resolve({ data: { id: 'accB' }, error: null }),
+              }),
+            }),
+          }),
+        }
+      }
+      throw new Error(`unexpected table ${table}`)
+    })
+
+    const res = await POST(req({ anonAccessToken: 'tok-abcabcabc' }))
+    expect(res.status).toBe(500)
+    // The anonymous user (and its data) MUST survive so the merge can be retried.
+    expect(deleteUser).not.toHaveBeenCalled()
+  })
 })

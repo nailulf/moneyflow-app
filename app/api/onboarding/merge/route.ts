@@ -120,10 +120,14 @@ export async function POST(request: Request) {
   )
 
   // --- 6. Execute the import (service-role) ---
+  // This merge is destructive: it ends by deleting A. So EVERY write that the
+  // planner decided to run for an 'import' action must be checked, and ANY error
+  // aborts BEFORE deleteUser — leaving A and its source data intact for a retry.
+  // Writes the planner marked 'discard' are simply skipped (not run, not errors).
   if (plan.goal.action === 'import' && gGoal.data) {
     // name + target_date are NOT NULL in financial_goals (migration 026); carry
     // them over from A's goal.
-    await admin.from('financial_goals').insert({
+    const { error: goalErr } = await admin.from('financial_goals').insert({
       account_id: plan.goal.account_id,
       name: gGoal.data.name,
       goal_type: gGoal.data.goal_type,
@@ -131,6 +135,9 @@ export async function POST(request: Request) {
       target_date: gGoal.data.target_date,
       status: 'active',
     })
+    if (goalErr) {
+      return NextResponse.json({ error: 'Merge failed', detail: goalErr.message }, { status: 500 })
+    }
   }
 
   if (plan.plan.action === 'import') {
@@ -144,18 +151,31 @@ export async function POST(request: Request) {
       })
       .select()
       .single()
-    if (!planErr && np && plan.plan.allocations.length) {
-      await admin.from('budget_plan_categories').insert(
+    if (planErr || !np) {
+      return NextResponse.json(
+        { error: 'Merge failed', detail: planErr?.message ?? 'plan insert returned no row' },
+        { status: 500 }
+      )
+    }
+    if (plan.plan.allocations.length) {
+      const { error: catErr } = await admin.from('budget_plan_categories').insert(
         plan.plan.allocations.map((a) => ({
           plan_id: np.id,
           category_id: a.category_id,
           allocated_amount: a.amount,
         }))
       )
+      if (catErr) {
+        return NextResponse.json(
+          { error: 'Merge failed', detail: catErr.message },
+          { status: 500 }
+        )
+      }
     }
   }
 
   // --- 7. Reap the orphaned anonymous user (FK cascade clears its seeded rows) ---
+  // Reached only after ALL required import writes succeeded.
   await admin.auth.admin.deleteUser(anon.id)
 
   return NextResponse.json({ merged: true, plan })
