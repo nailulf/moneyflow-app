@@ -37,8 +37,10 @@ describe('convertWithEmail', () => {
     expect(signInWithPassword).toHaveBeenCalledWith({ email: 'taken@x.com', password: 'pw12345' })
     expect(mergeFetch).toHaveBeenCalledWith('/api/onboarding/merge', expect.objectContaining({
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ anonAccessToken: 'ANON_TOKEN' }),
     }))
+    expect(advanceOnboarding).toHaveBeenCalledWith('completed')
     expect(r.merged).toBe(true)
   })
 

@@ -58,9 +58,21 @@ export async function convertWithEmail(
 
   const res = await fetch('/api/onboarding/merge', {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ anonAccessToken }),
   })
   if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error ?? 'Merge failed')
+
+  // Mark onboarding complete on the merge path too. The session is now user B's
+  // (signed in above via signInWithPassword), so this correctly targets the
+  // existing account — otherwise B can be left on a stale onboarding phase
+  // (e.g. the legacy activation banner) after merging. Best-effort: never block
+  // the conversion if it fails.
+  try {
+    await advanceOnboarding('completed')
+  } catch {
+    // Non-fatal: the data was already merged.
+  }
   return { merged: true }
 }
 
@@ -75,6 +87,9 @@ export async function convertWithEmail(
 export async function resendConfirmation(email: string): Promise<boolean> {
   const supabase = createClient()
   try {
+    // `email_change` (not `signup`): promoting an anonymous user via
+    // `updateUser({ email })` goes through Supabase's email-change confirmation
+    // flow, so the resend must use the matching type to reissue that link.
     const { error } = await supabase.auth.resend({ type: 'email_change', email })
     return !error
   } catch {
