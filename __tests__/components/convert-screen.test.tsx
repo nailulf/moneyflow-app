@@ -1,5 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
+
+jest.mock('sonner', () => ({
+  toast: { success: jest.fn(), error: jest.fn() },
+}))
 
 global.ResizeObserver =
   global.ResizeObserver ||
@@ -19,10 +23,12 @@ jest.mock('next-intl', () => ({
 const convertWithEmail = jest.fn().mockResolvedValue({ merged: false })
 const convertWithOAuth = jest.fn().mockResolvedValue(undefined)
 const continueAsGuest = jest.fn().mockResolvedValue(undefined)
+const resendConfirmation = jest.fn().mockResolvedValue(true)
 jest.mock('@/lib/onboarding/convert', () => ({
   convertWithEmail: (...args: unknown[]) => convertWithEmail(...args),
   convertWithOAuth: (...args: unknown[]) => convertWithOAuth(...args),
   continueAsGuest: (...args: unknown[]) => continueAsGuest(...args),
+  resendConfirmation: (...args: unknown[]) => resendConfirmation(...args),
 }))
 
 import ConvertPage from '@/app/start/save/page'
@@ -31,8 +37,11 @@ describe('ConvertPage', () => {
   beforeEach(() => {
     push.mockClear()
     convertWithEmail.mockClear()
+    convertWithEmail.mockResolvedValue({ merged: false })
     convertWithOAuth.mockClear()
     continueAsGuest.mockClear()
+    resendConfirmation.mockClear()
+    resendConfirmation.mockResolvedValue(true)
   })
 
   it('calls continueAsGuest when "Continue as guest" is clicked on the intro step', () => {
@@ -63,5 +72,33 @@ describe('ConvertPage', () => {
     fireEvent.click(submit)
 
     expect(convertWithEmail).toHaveBeenCalledWith('jane@example.com', 'secret123')
+  })
+
+  it('shows the verify-email state (and does not navigate) when conversion is pending verification', async () => {
+    convertWithEmail.mockResolvedValue({ merged: false, pendingVerification: true })
+    render(<ConvertPage />)
+
+    fireEvent.click(screen.getByRole('button', { name: /intro\.createCta/i }))
+    fireEvent.change(screen.getByTestId('convert-email'), {
+      target: { value: 'jane@example.com' },
+    })
+    fireEvent.change(screen.getByTestId('convert-password'), {
+      target: { value: 'secret123' },
+    })
+    fireEvent.click(screen.getByTestId('convert-terms'))
+    fireEvent.click(screen.getByTestId('convert-submit'))
+
+    // Verify state renders…
+    expect(await screen.findByText('verify.title')).toBeInTheDocument()
+    const resend = screen.getByRole('button', { name: /verify\.resendCta/i })
+    expect(resend).toBeInTheDocument()
+    // …and we did NOT navigate to the home page.
+    expect(push).not.toHaveBeenCalled()
+
+    // Resend triggers resendConfirmation with the entered email.
+    fireEvent.click(resend)
+    await waitFor(() =>
+      expect(resendConfirmation).toHaveBeenCalledWith('jane@example.com'),
+    )
   })
 })

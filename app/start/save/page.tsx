@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   ChevronLeft,
   Loader2,
+  MailCheck,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -22,6 +23,7 @@ import {
   convertWithEmail,
   convertWithOAuth,
   continueAsGuest,
+  resendConfirmation,
 } from '@/lib/onboarding/convert'
 
 /** Benefit rows for the "Your plan is ready" celebration — each gets its own tint. */
@@ -101,20 +103,41 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export default function ConvertPage() {
   const t = useTranslations('start.convert')
   const router = useRouter()
-  const [step, setStep] = useState<'intro' | 'form'>('intro')
+  const [step, setStep] = useState<'intro' | 'form' | 'verify'>('intro')
+  // The email awaiting confirmation — captured when an email conversion lands
+  // in the pending-verification state, so the verify view can show & resend it.
+  const [pendingEmail, setPendingEmail] = useState('')
 
-  return step === 'intro' ? (
-    <IntroStep
-      t={t}
-      onCreate={() => setStep('form')}
-      onLogin={() => router.push('/login')}
-    />
-  ) : (
+  if (step === 'intro') {
+    return (
+      <IntroStep
+        t={t}
+        onCreate={() => setStep('form')}
+        onLogin={() => router.push('/login')}
+      />
+    )
+  }
+
+  if (step === 'verify') {
+    return (
+      <VerifyStep
+        t={t}
+        email={pendingEmail}
+        onContinue={() => router.push('/')}
+      />
+    )
+  }
+
+  return (
     <FormStep
       t={t}
       onBack={() => setStep('intro')}
       onLogin={() => router.push('/login')}
       onConverted={() => router.push('/')}
+      onPendingVerification={(email) => {
+        setPendingEmail(email)
+        setStep('verify')
+      }}
     />
   )
 }
@@ -217,11 +240,13 @@ function FormStep({
   onBack,
   onLogin,
   onConverted,
+  onPendingVerification,
 }: {
   t: T
   onBack: () => void
   onLogin: () => void
   onConverted: () => void
+  onPendingVerification: (email: string) => void
 }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -254,7 +279,13 @@ function FormStep({
     }
     setSubmitting(true)
     try {
-      await convertWithEmail(email, password)
+      const result = await convertWithEmail(email, password)
+      // Email conversions need confirmation; surface the verify state. The
+      // merge (conflict) path lands in an existing, confirmed account → home.
+      if (result.pendingVerification) {
+        onPendingVerification(email)
+        return
+      }
       onConverted()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('form.errorGeneric'))
@@ -382,6 +413,76 @@ function FormStep({
           {t('form.loginLink')}
         </button>
       </p>
+    </div>
+  )
+}
+
+/**
+ * step 'verify' — "Check your email". Reached after an email conversion: the
+ * user is already signed in on their own data (same user_id), but the new email
+ * is unconfirmed until they click the link. We guide them without blocking app
+ * access — they can resend or continue and confirm later.
+ */
+function VerifyStep({
+  t,
+  email,
+  onContinue,
+}: {
+  t: T
+  email: string
+  onContinue: () => void
+}) {
+  const [resending, setResending] = useState(false)
+
+  const handleResend = async () => {
+    setResending(true)
+    try {
+      const ok = await resendConfirmation(email)
+      if (ok) {
+        toast.success(t('verify.resendSuccess'))
+      } else {
+        toast.error(t('verify.resendError'))
+      }
+    } catch {
+      toast.error(t('verify.resendError'))
+    } finally {
+      setResending(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center px-5 pb-10 text-center">
+      <span className="flex h-16 w-16 items-center justify-center rounded-full bg-tint-blue-bg text-tint-blue-fg">
+        <MailCheck className="h-8 w-8" aria-hidden="true" />
+      </span>
+
+      <h1 className="mt-6 text-2xl leading-title-3 font-bold text-foreground">
+        {t('verify.title')}
+      </h1>
+      <p className="mt-2 max-w-xs text-sm leading-body-sm text-muted-foreground">
+        {t('verify.body', { email })}
+      </p>
+
+      <div className="mt-8 flex w-full flex-col gap-3">
+        <Button
+          variant="outline"
+          className="h-[52px] w-full rounded-[14px] text-md"
+          onClick={handleResend}
+          disabled={resending}
+        >
+          {resending && (
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          )}
+          {resending ? t('verify.resending') : t('verify.resendCta')}
+        </Button>
+        <button
+          type="button"
+          onClick={onContinue}
+          className="py-2 text-sm leading-body-sm font-medium text-primary hover:text-primary/80"
+        >
+          {t('verify.continueCta')}
+        </button>
+      </div>
     </div>
   )
 }

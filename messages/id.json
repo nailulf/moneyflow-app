@@ -1678,6 +1678,15 @@
         "passwordTooShort": "Kata sandi minimal 6 karakter.",
         "errorGeneric": "Terjadi kesalahan. Silakan coba lagi.",
         "oauthError": "Tidak dapat memulai proses masuk. Silakan coba lagi."
+      },
+      "verify": {
+        "title": "Periksa email Anda",
+        "body": "Kami mengirim tautan konfirmasi ke {email}. Klik tautan tersebut untuk menyelesaikan penyiapan akun Anda.",
+        "resendCta": "Kirim ulang email",
+        "resending": "Mengirim ulang…",
+        "resendSuccess": "Email konfirmasi terkirim.",
+        "resendError": "Tidak dapat mengirim ulang email. Silakan coba lagi.",
+        "continueCta": "Lanjut ke aplikasi"
       }
     }
   }

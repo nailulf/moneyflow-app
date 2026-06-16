@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
+import { advanceOnboarding } from '@/lib/api/onboarding-funnel'
 
 /**
  * Detects the Supabase "email already registered" error returned by
@@ -20,10 +21,15 @@ const EMAIL_EXISTS = (e: { code?: string; message?: string } | null) =>
  * and hand the captured anon token to the service-role merge endpoint, which
  * reassigns the bounded guest data into the existing account.
  *
- * @returns `{ merged: false }` when the anon user became permanent in place,
+ * @returns `{ merged: false, pendingVerification: true }` when the anon user
+ *          became permanent in place — Supabase requires the user to confirm
+ *          the new email before `email_confirmed_at` is set.
  *          `{ merged: true }` when data was merged into a pre-existing account.
  */
-export async function convertWithEmail(email: string, password: string): Promise<{ merged: boolean }> {
+export async function convertWithEmail(
+  email: string,
+  password: string,
+): Promise<{ merged: boolean; pendingVerification?: boolean }> {
   const supabase = createClient()
 
   // Capture the anon token first — updateUser/signIn can replace the session.
@@ -31,7 +37,18 @@ export async function convertWithEmail(email: string, password: string): Promise
   const anonAccessToken = session?.access_token
 
   const { error } = await supabase.auth.updateUser({ email, password })
-  if (!error) return { merged: false }
+  if (!error) {
+    // The anon user is now permanent on the same user_id (data intact), but the
+    // new email stays unconfirmed until they click the link. Mark onboarding
+    // complete so the funnel doesn't re-trigger — best-effort, never block the
+    // conversion if it fails.
+    try {
+      await advanceOnboarding('completed')
+    } catch {
+      // Non-fatal: the account is already converted.
+    }
+    return { merged: false, pendingVerification: true }
+  }
   if (!EMAIL_EXISTS(error)) throw new Error(error.message)
 
   // Conflict: the email belongs to an existing account. Sign into it, then
@@ -45,6 +62,24 @@ export async function convertWithEmail(email: string, password: string): Promise
   })
   if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error ?? 'Merge failed')
   return { merged: true }
+}
+
+/**
+ * Re-send the confirmation email after an email conversion
+ * (`convertWithEmail` → `updateUser({ email })`). Promoting an anon user to a
+ * permanent email triggers Supabase's email-change confirmation flow, so we
+ * resend with `type: 'email_change'`.
+ *
+ * @returns `true` if the resend request succeeded, `false` otherwise.
+ */
+export async function resendConfirmation(email: string): Promise<boolean> {
+  const supabase = createClient()
+  try {
+    const { error } = await supabase.auth.resend({ type: 'email_change', email })
+    return !error
+  } catch {
+    return false
+  }
 }
 
 /**

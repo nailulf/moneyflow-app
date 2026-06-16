@@ -8,6 +8,11 @@ jest.mock('@/lib/supabase/client', () => ({
 const mergeFetch = jest.fn()
 global.fetch = ((...a: unknown[]) => mergeFetch(...a)) as never
 
+const advanceOnboarding = jest.fn().mockResolvedValue(undefined)
+jest.mock('@/lib/api/onboarding-funnel', () => ({
+  advanceOnboarding: (...a: unknown[]) => advanceOnboarding(...a),
+}))
+
 import { convertWithEmail } from '@/lib/onboarding/convert'
 
 describe('convertWithEmail', () => {
@@ -18,6 +23,7 @@ describe('convertWithEmail', () => {
     updateUser.mockResolvedValue({ data: { user: { id: 'same' } }, error: null })
     const r = await convertWithEmail('new@x.com', 'pw12345')
     expect(r.merged).toBe(false)
+    expect(r.pendingVerification).toBe(true)
     expect(signInWithPassword).not.toHaveBeenCalled()
   })
 
