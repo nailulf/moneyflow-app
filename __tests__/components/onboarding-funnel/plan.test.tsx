@@ -10,6 +10,7 @@ jest.mock('next-intl', () => ({
     () =>
     (key: string, values?: Record<string, string | number>) => {
       const labels: Record<string, string> = {
+        'goal.plan.savePill': 'You can save',
         'goal.plan.perMonth': '/month',
         'goal.plan.incomeLabel': 'Income',
         'goal.plan.expensesLabel': 'Expenses',
@@ -17,10 +18,12 @@ jest.mock('next-intl', () => ({
         'goal.plan.tight': 'Tight',
         'goal.plan.saveCta': 'Save my plan',
         'goal.type.vacationTitle': 'Vacation / Trip',
-        'goal.plan.reachIn': `Reach it in ${values?.months} months`,
+        'goal.plan.reachIn': `Reach it in ~${values?.months} months · ${values?.date}`,
         'goal.plan.goalLabel': `Goal: ${values?.name}`,
-        'goal.plan.whatIfCut': `Cut spending by ${values?.amount} → ${values?.months} months`,
-        'goal.plan.whatIfSide': `Add ${values?.amount} side income → ${values?.months} months`,
+        'goal.plan.whatIfTitle': 'What if?',
+        'goal.plan.whatIfCut': `Cut lifestyle by ${values?.amount}`,
+        'goal.plan.whatIfSide': `Add side income ${values?.amount}`,
+        'goal.plan.whatIfMonths': `${values?.months} months`,
       }
       return labels[key] ?? key
     },
@@ -42,7 +45,7 @@ describe('GoalPlanPage', () => {
       targetAmount: 12_000_000,
       horizonMonths: 6,
       monthlyIncome: 8_500_000,
-      otherIncome: 0,
+      incomeSources: [],
       spend: { food: 3_000_000, transport: 1_100_000, fun: 2_000_000 },
     })
   })
@@ -56,8 +59,26 @@ describe('GoalPlanPage', () => {
 
   it('shows the months-to-goal and an Achievable badge', () => {
     render(<GoalPlanPage />)
-    expect(screen.getByText('Reach it in 5 months')).toBeInTheDocument()
+    expect(screen.getByText(/Reach it in ~5 months/)).toBeInTheDocument()
     expect(screen.getByText('Achievable')).toBeInTheDocument()
+  })
+
+  it('counts named income sources toward the surplus', () => {
+    // +1.6M from a side source pushes surplus to 4_000_000.
+    act(() =>
+      useFunnelStore.setState({
+        incomeSources: [{ name: 'Freelance', amount: 1_600_000 }],
+      })
+    )
+    render(<GoalPlanPage />)
+    expect(screen.getByText(formatCurrency(4_000_000))).toBeInTheDocument()
+  })
+
+  it('renders a What if? card with right-aligned month pills', () => {
+    render(<GoalPlanPage />)
+    expect(screen.getByText('What if?')).toBeInTheDocument()
+    // Two suggestion rows → two month pills.
+    expect(screen.getAllByText(/months$/).length).toBeGreaterThanOrEqual(2)
   })
 
   it('pushes to /start/save when Save my plan is clicked', () => {

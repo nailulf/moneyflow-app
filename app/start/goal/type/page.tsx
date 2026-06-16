@@ -8,8 +8,8 @@ import {
   ShieldCheck,
   Plane,
   Smartphone,
-  TrendingDown,
-  Target,
+  CreditCard,
+  Pencil,
   ArrowRight,
   ChevronLeft,
   Check,
@@ -65,7 +65,7 @@ const GOAL_OPTIONS: GoalOption[] = [
   {
     id: 'debt_payoff',
     testId: 'goal-debt_payoff',
-    icon: TrendingDown,
+    icon: CreditCard,
     titleKey: 'goal.type.debtTitle',
     subKey: 'goal.type.debtSub',
     tint: 'bg-tint-pink-bg text-tint-pink-fg',
@@ -73,7 +73,7 @@ const GOAL_OPTIONS: GoalOption[] = [
   {
     id: 'custom',
     testId: 'goal-custom',
-    icon: Target,
+    icon: Pencil,
     titleKey: 'goal.type.customTitle',
     subKey: 'goal.type.customSub',
     tint: 'bg-tint-slate-bg text-tint-slate-fg',
@@ -123,6 +123,12 @@ export default function GoalTypePage() {
     })
   }, [])
 
+  // Design default: "Vacation / Trip" pre-selected (blue border + filled radio).
+  // Run once on mount; we intentionally don't re-apply if the user clears it.
+  useEffect(() => {
+    if (!useFunnelStore.getState().goalType) setGoalType('vacation')
+  }, [setGoalType])
+
   const canContinue = !!goalType && !!targetAmount && targetAmount > 0 && !saving
 
   const handleContinue = async () => {
@@ -144,8 +150,8 @@ export default function GoalTypePage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-10">
-      <header className="py-5">
+    <div className="flex flex-1 flex-col px-5 pb-4">
+      <header className="pt-4 pb-3">
         {/* Top row: back · progress dots · Skip */}
         <div className="flex items-center justify-between">
           <button
@@ -166,18 +172,18 @@ export default function GoalTypePage() {
           </button>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-4">
           <h1 className="text-2xl leading-title-3 font-bold text-foreground">
             {t('goal.type.title')}
           </h1>
-          <p className="mt-1.5 text-sm leading-body-sm text-muted-foreground">
+          <p className="mt-1 text-sm leading-body-sm text-muted-foreground">
             {t('goal.type.subtitle')}
           </p>
         </div>
       </header>
 
-      {/* Goal option cards (single-select) */}
-      <div className="flex flex-col gap-3">
+      {/* Goal option cards (single-select) — compact / dense */}
+      <div className="flex flex-col gap-2.5">
         {GOAL_OPTIONS.map((opt) => {
           const active = goalType === opt.id
           return (
@@ -188,7 +194,7 @@ export default function GoalTypePage() {
               aria-pressed={active}
               onClick={() => setGoalType(opt.id)}
               className={cn(
-                'flex items-center gap-3 rounded-2xl border bg-card px-4 py-4 text-left shadow-card transition-colors',
+                'flex items-center gap-3 rounded-2xl border bg-card px-3.5 py-3 text-left shadow-card transition-colors',
                 active ? 'border-primary bg-selected' : 'border-border hover:bg-muted/50'
               )}
             >
@@ -204,7 +210,7 @@ export default function GoalTypePage() {
                 <span className="block text-md leading-body-lg font-semibold text-foreground">
                   {t(opt.titleKey)}
                 </span>
-                <span className="block text-sm leading-body-sm text-muted-foreground">
+                <span className="block text-xs leading-caption text-muted-foreground">
                   {t(opt.subKey)}
                 </span>
               </span>
@@ -225,7 +231,7 @@ export default function GoalTypePage() {
       </div>
 
       {/* Target amount */}
-      <div className="mt-6">
+      <div className="mt-4">
         <label
           htmlFor="target-amount"
           className="block text-sm leading-body-sm font-medium text-foreground"
@@ -237,16 +243,16 @@ export default function GoalTypePage() {
           data-testid="target-amount"
           value={targetAmount ?? 0}
           onChange={setTargetAmount}
-          className="mt-2 h-[52px] rounded-[14px] text-lg"
+          className="mt-1.5 h-[52px] rounded-[14px] text-lg"
         />
       </div>
 
       {/* Horizon segmented pills */}
-      <div className="mt-6">
+      <div className="mt-4">
         <p className="text-sm leading-body-sm font-medium text-foreground">
           {t('goal.type.horizonLabel')}
         </p>
-        <div className="mt-2 grid grid-cols-4 gap-2">
+        <div className="mt-1.5 grid grid-cols-4 gap-2">
           {HORIZONS.map((h) => {
             const active =
               h.months === null ? horizonIsCustom : !horizonIsCustom && horizonMonths === h.months
@@ -264,7 +270,7 @@ export default function GoalTypePage() {
                   }
                 }}
                 className={cn(
-                  'h-11 rounded-[12px] border text-sm leading-body-sm font-medium transition-colors',
+                  'h-10 rounded-[12px] border text-sm leading-body-sm font-medium transition-colors',
                   active
                     ? 'border-primary bg-selected text-selected-foreground'
                     : 'border-border bg-card text-muted-foreground hover:bg-muted/50'
@@ -279,7 +285,7 @@ export default function GoalTypePage() {
 
       {/* Continue — disabled until goal type + target set */}
       <Button
-        className="mt-auto h-[52px] w-full gap-2 rounded-[14px] text-md"
+        className="mt-5 h-[52px] w-full gap-2 rounded-[14px] text-md"
         disabled={!canContinue}
         onClick={handleContinue}
       >

@@ -12,14 +12,20 @@ export type FunnelGoalType =
   | 'debt_payoff'
   | 'custom'
 
+/** A named extra income stream the guest adds on the goal income screen. */
+export interface IncomeSource {
+  name: string
+  amount: number
+}
+
 interface FunnelState {
   goalType?: FunnelGoalType
   targetAmount?: number
   /** 3 | 6 | 12 | custom value (months). Defaults to 12 in the UI. */
   horizonMonths?: number
   monthlyIncome?: number
-  /** Sum of additional income sources (single optional number for now). */
-  otherIncome?: number
+  /** Named extra income streams; total income = main + sum(sources). */
+  incomeSources: IncomeSource[]
   /** categoryId → monthly spend amount. */
   spend: Record<string, number>
 
@@ -49,7 +55,8 @@ interface FunnelState {
   setTargetAmount: (targetAmount: number) => void
   setHorizonMonths: (horizonMonths: number) => void
   setMonthlyIncome: (monthlyIncome: number) => void
-  setOtherIncome: (otherIncome: number | undefined) => void
+  addIncomeSource: (source: IncomeSource) => void
+  removeIncomeSource: (index: number) => void
   setSpend: (categoryId: string, amount: number) => void
   setBudgetIncome: (budgetIncome: number) => void
   setSavingsAmount: (savingsAmount: number) => void
@@ -65,6 +72,7 @@ interface FunnelState {
  */
 export const useFunnelStore = create<FunnelState>((set) => ({
   horizonMonths: 12,
+  incomeSources: [],
   spend: {},
   budgetSpend: {},
 
@@ -72,7 +80,10 @@ export const useFunnelStore = create<FunnelState>((set) => ({
   setTargetAmount: (targetAmount) => set({ targetAmount }),
   setHorizonMonths: (horizonMonths) => set({ horizonMonths }),
   setMonthlyIncome: (monthlyIncome) => set({ monthlyIncome }),
-  setOtherIncome: (otherIncome) => set({ otherIncome }),
+  addIncomeSource: (source) =>
+    set((state) => ({ incomeSources: [...state.incomeSources, source] })),
+  removeIncomeSource: (index) =>
+    set((state) => ({ incomeSources: state.incomeSources.filter((_, i) => i !== index) })),
   setSpend: (categoryId, amount) =>
     set((state) => ({ spend: { ...state.spend, [categoryId]: amount } })),
   setBudgetIncome: (budgetIncome) => set({ budgetIncome }),
@@ -83,12 +94,12 @@ export const useFunnelStore = create<FunnelState>((set) => ({
   reset: () =>
     set({
       horizonMonths: 12,
+      incomeSources: [],
       spend: {},
       budgetSpend: {},
       goalType: undefined,
       targetAmount: undefined,
       monthlyIncome: undefined,
-      otherIncome: undefined,
       budgetIncome: undefined,
       savingsAmount: undefined,
       budgetSavingsChoice: undefined,

@@ -23,12 +23,20 @@ jest.mock('@/lib/api/onboarding-funnel', () => ({
 jest.mock('sonner', () => ({ toast: { error: jest.fn() } }))
 
 jest.mock('@/hooks/useTransactionCategories', () => ({
-  useTransactionCategories: () => ({ categories: [], isLoading: false }),
+  useTransactionCategories: () => ({
+    categories: [
+      { id: 'food', name: 'Food', group_type: 'EXPENSE' },
+      { id: 'transport', name: 'Transport', group_type: 'EXPENSE' },
+    ],
+    isLoading: false,
+  }),
 }))
 
 // Reset the in-memory funnel store between tests.
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
 import GoalTypePage from '@/app/start/goal/type/page'
+import GoalIncomePage from '@/app/start/goal/income/page'
+import GoalSpendPage from '@/app/start/goal/spend/page'
 
 describe('GoalTypePage', () => {
   beforeEach(() => {
@@ -79,6 +87,67 @@ describe('GoalTypePage', () => {
     await waitFor(() => expect(saveOnboardingGoal).toHaveBeenCalledTimes(1))
     expect(saveOnboardingGoal).toHaveBeenCalledWith(
       expect.objectContaining({ goal_type: 'other' })
+    )
+  })
+
+  it('defaults to the vacation goal selected on mount', () => {
+    render(<GoalTypePage />)
+    expect(useFunnelStore.getState().goalType).toBe('vacation')
+  })
+})
+
+describe('GoalIncomePage', () => {
+  beforeEach(() => {
+    push.mockClear()
+    useFunnelStore.getState().reset()
+  })
+
+  it('disables Continue until main income is set', () => {
+    render(<GoalIncomePage />)
+    expect(screen.getByRole('button', { name: /continue/i })).toBeDisabled()
+    fireEvent.change(screen.getByTestId('monthly-income'), { target: { value: '8000000' } })
+    expect(screen.getByRole('button', { name: /continue/i })).not.toBeDisabled()
+  })
+
+  it('adds a named income source to the store', () => {
+    render(<GoalIncomePage />)
+    fireEvent.click(screen.getByTestId('add-source'))
+    fireEvent.change(screen.getByTestId('source-name'), { target: { value: 'Freelance' } })
+    fireEvent.change(screen.getByTestId('source-amount'), { target: { value: '1500000' } })
+    fireEvent.click(screen.getByTestId('confirm-source'))
+
+    expect(useFunnelStore.getState().incomeSources).toEqual([
+      { name: 'Freelance', amount: 1_500_000 },
+    ])
+  })
+})
+
+describe('GoalSpendPage', () => {
+  beforeEach(() => {
+    push.mockClear()
+    saveOnboardingPlan.mockClear()
+    advanceOnboarding.mockClear()
+    useFunnelStore.getState().reset()
+  })
+
+  it('renders categories without a Total expenses row', async () => {
+    render(<GoalSpendPage />)
+    expect(await screen.findByLabelText('Food')).toBeInTheDocument()
+    expect(screen.queryByText('goal.spend.totalLabel')).not.toBeInTheDocument()
+  })
+
+  it('saves total income including named sources', async () => {
+    useFunnelStore.setState({
+      monthlyIncome: 8_000_000,
+      incomeSources: [{ name: 'Rent', amount: 2_000_000 }],
+    })
+    render(<GoalSpendPage />)
+    fireEvent.change(await screen.findByLabelText('Food'), { target: { value: '1000000' } })
+    fireEvent.click(screen.getByRole('button', { name: /goal.spend.cta/i }))
+
+    await waitFor(() => expect(saveOnboardingPlan).toHaveBeenCalledTimes(1))
+    expect(saveOnboardingPlan).toHaveBeenCalledWith(
+      expect.objectContaining({ monthly_income: 10_000_000 })
     )
   })
 })

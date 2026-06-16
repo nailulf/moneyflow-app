@@ -14,7 +14,6 @@ import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 import { saveOnboardingPlan, advanceOnboarding } from '@/lib/api/onboarding-funnel'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
 import { getCategoryIcon, getCategoryTint } from '@/lib/category-style'
-import { formatCurrency } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
 
 /** Goal flow screen 3 (design Row B-3) — estimate monthly spend by category. */
@@ -23,7 +22,7 @@ export default function GoalSpendPage() {
   const router = useRouter()
 
   const monthlyIncome = useFunnelStore((s) => s.monthlyIncome)
-  const otherIncome = useFunnelStore((s) => s.otherIncome)
+  const incomeSources = useFunnelStore((s) => s.incomeSources)
   const spend = useFunnelStore((s) => s.spend)
   const setSpend = useFunnelStore((s) => s.setSpend)
 
@@ -52,19 +51,16 @@ export default function GoalSpendPage() {
     [categories]
   )
 
-  const total = useMemo(
-    () => rows.reduce((sum, c) => sum + (spend[c.id] ?? 0), 0),
-    [rows, spend]
-  )
-
   const handleCalculate = async () => {
     setSaving(true)
     try {
       const allocations = rows
         .map((c) => ({ category_id: c.id, amount: spend[c.id] ?? 0 }))
         .filter((a) => a.amount > 0)
+      const totalIncome =
+        (monthlyIncome ?? 0) + incomeSources.reduce((sum, s) => sum + s.amount, 0)
       await saveOnboardingPlan({
-        monthly_income: (monthlyIncome ?? 0) + (otherIncome ?? 0),
+        monthly_income: totalIncome,
         period: 'monthly',
         allocations,
       })
@@ -114,15 +110,12 @@ export default function GoalSpendPage() {
           <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col divide-y divide-border rounded-2xl bg-card shadow-card">
           {rows.map((cat) => {
             const Icon = getCategoryIcon(cat.name)
             const tint = getCategoryTint(cat.name)
             return (
-              <div
-                key={cat.id}
-                className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-card"
-              >
+              <div key={cat.id} className="flex items-center gap-3 px-4 py-3">
                 <span
                   className={cn(
                     'flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]',
@@ -145,16 +138,6 @@ export default function GoalSpendPage() {
               </div>
             )
           })}
-
-          {/* Total expenses summary */}
-          <div className="mt-2 flex items-center justify-between rounded-2xl bg-hero-gradient px-4 py-4 text-hero-foreground shadow-floating">
-            <span className="text-sm leading-body-sm font-medium text-hero-muted">
-              {t('goal.spend.totalLabel')}
-            </span>
-            <span className="text-xl leading-title-4 font-bold">
-              {formatCurrency(total)}
-            </span>
-          </div>
         </div>
       )}
 
