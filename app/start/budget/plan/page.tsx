@@ -1,36 +1,59 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
-  ArrowRight,
   ChevronLeft,
+  ChevronRight,
   PiggyBank,
-  Wallet,
-  Coins,
+  Smile,
+  Target,
+  Flame,
+  SlidersHorizontal,
   type LucideIcon,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/atoms/button'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
+import { StickyCtaBar } from '@/components/features/budget/StickyCtaBar'
+import { useTransactionCategories } from '@/hooks/useTransactionCategories'
+import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
+import { saveOnboardingPlan, advanceOnboarding } from '@/lib/api/onboarding-funnel'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
-import { formatCurrency } from '@/lib/data-utils'
+import { formatCurrencyCompact } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
 
-interface BreakdownRow {
-  key: string
-  icon: LucideIcon
-  tint: string
-  label: string
-  /** Optional sub-line (e.g. savings rate). */
-  detail?: string
-  amount: number
-  /** Render the amount in the over-budget warning color. */
-  warn?: boolean
+/** Seeded TRANSFER category the savings allocation is booked against. */
+const SAVINGS_TRANSFER_NAME = 'Savings transfer'
+
+/**
+ * Canonical English names for the design's fixed spend categories, used for the
+ * find-or-create at save time. The design's labels differ from the app's seeded
+ * categories — see the controller flag in the task report.
+ */
+const SPEND_CATEGORY_NAMES: Record<string, string> = {
+  housing: 'Housing & rent',
+  food: 'Food & groceries',
+  transport: 'Transport',
+  bills: 'Bills & subscriptions',
+  lifestyle: 'Lifestyle & fun',
 }
 
-/** Budget flow step 4 (design tAKTn) — "Your savings options" result. */
+type OptionKey = 'relaxed' | 'on_target' | 'ambitious'
+
+interface PlanOption {
+  key: OptionKey
+  icon: LucideIcon
+  tint: { bg: string; fg: string }
+  title: string
+  subtitle: string
+  amount: number
+  recommended?: boolean
+}
+
+/** Budget flow step 4 (design tAKTn / BU4) — "Your savings options". */
 export default function BudgetPlanPage() {
   const t = useTranslations('start')
   const router = useRouter()
@@ -38,17 +61,41 @@ export default function BudgetPlanPage() {
   const budgetIncome = useFunnelStore((s) => s.budgetIncome)
   const savingsAmount = useFunnelStore((s) => s.savingsAmount)
   const budgetSpend = useFunnelStore((s) => s.budgetSpend)
+  const setBudgetSavingsChoice = useFunnelStore((s) => s.setBudgetSavingsChoice)
+
+  const [userId, setUserId] = useState<string | undefined>()
+  const [selected, setSelected] = useState<OptionKey>('on_target')
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    ensureAnonymousSession()
+      .then(setUserId)
+      .catch(() => {
+        /* save will surface the error via toast */
+      })
+  }, [])
+
+  const { categories, addCategory } = useTransactionCategories(userId)
 
   const computed = useMemo(() => {
     const income = budgetIncome ?? 0
     const savings = savingsAmount ?? 0
     const totalSpend = Object.values(budgetSpend).reduce((sum, v) => sum + v, 0)
-    const leftover = income - savings - totalSpend
-    const savingsRate = income > 0 ? Math.round((savings / income) * 100) : 0
-    return { income, savings, totalSpend, leftover, savingsRate }
+    const available = Math.max(0, income - totalSpend)
+    const onTrack = savings <= available
+
+    const relaxed = available
+    const onTarget = savings
+    const ambitious = onTrack
+      ? Math.round(available + 0.15 * income)
+      : Math.max(savings, 2 * savings - available)
+
+    const pct = (amt: number) => (income > 0 ? Math.round((amt / income) * 100) : 0)
+
+    return { income, savings, totalSpend, available, onTrack, relaxed, onTarget, ambitious, pct }
   }, [budgetIncome, savingsAmount, budgetSpend])
 
-  const { income, savings, totalSpend, leftover, savingsRate } = computed
+  const { income, totalSpend, available, onTrack, relaxed, onTarget, ambitious, pct } = computed
 
   // Deep-link guard: no draft → gentle empty state, no NaN/zeros.
   const hasDraft = (budgetIncome ?? 0) > 0 && (savingsAmount ?? 0) > 0
@@ -74,35 +121,99 @@ export default function BudgetPlanPage() {
     )
   }
 
-  const rows: BreakdownRow[] = [
+  const trim1 = Math.max(0, onTarget - available)
+  const trim2 = Math.max(0, ambitious - available)
+
+  const options: PlanOption[] = [
     {
-      key: 'savings',
-      icon: PiggyBank,
-      tint: 'bg-tint-blue-bg text-tint-blue-fg',
-      label: t('budget.plan.savingsLabel'),
-      detail: t('budget.plan.savingsRate', { pct: savingsRate }),
-      amount: savings,
+      key: 'relaxed',
+      icon: Smile,
+      tint: { bg: 'bg-tint-slate-bg', fg: 'text-tint-slate-fg' },
+      title: t('budget.plan.relaxedTitle'),
+      subtitle: onTrack
+        ? t('budget.plan.relaxedOnTrackSubtitle')
+        : t('budget.plan.relaxedSubtitle'),
+      amount: relaxed,
     },
     {
-      key: 'spending',
-      icon: Wallet,
-      tint: 'bg-tint-orange-bg text-tint-orange-fg',
-      label: t('budget.plan.spendingLabel'),
-      amount: totalSpend,
+      key: 'on_target',
+      icon: Target,
+      tint: { bg: 'bg-tint-blue-bg', fg: 'text-tint-blue-fg' },
+      title: t('budget.plan.onTargetTitle'),
+      subtitle: onTrack
+        ? t('budget.plan.onTargetOnTrackSubtitle')
+        : t('budget.plan.onTargetSubtitle', { amount: formatCurrencyCompact(trim1) }),
+      amount: onTarget,
+      recommended: true,
     },
     {
-      key: 'leftover',
-      icon: Coins,
-      tint: 'bg-tint-green-bg text-tint-green-fg',
-      label: t('budget.plan.leftoverLabel'),
-      detail: leftover < 0 ? t('budget.plan.overBudget') : undefined,
-      amount: leftover,
-      warn: leftover < 0,
+      key: 'ambitious',
+      icon: Flame,
+      tint: { bg: 'bg-tint-orange-bg', fg: 'text-tint-orange-fg' },
+      title: t('budget.plan.ambitiousTitle'),
+      subtitle: onTrack
+        ? t('budget.plan.ambitiousOnTrackSubtitle')
+        : t('budget.plan.ambitiousSubtitle', { amount: formatCurrencyCompact(trim2) }),
+      amount: ambitious,
     },
   ]
 
+  const selectedAmount = options.find((o) => o.key === selected)?.amount ?? onTarget
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      setBudgetSavingsChoice(selectedAmount)
+
+      // Find-or-create the design's spend categories against the user's real
+      // categories, then build allocations from the non-zero spend rows.
+      const findOrCreate = async (
+        name: string,
+        type: 'EXPENSE' | 'TRANSFER'
+      ): Promise<string | null> => {
+        const existing = categories.find(
+          (c) => c.group_type === type && c.name.toLowerCase() === name.toLowerCase()
+        )
+        if (existing) return existing.id
+        return addCategory(name, type)
+      }
+
+      const allocations: { category_id: string; amount: number }[] = []
+      for (const [key, amount] of Object.entries(budgetSpend)) {
+        if (amount <= 0) continue
+        const name = SPEND_CATEGORY_NAMES[key] ?? key
+        const id = await findOrCreate(name, 'EXPENSE')
+        if (id) allocations.push({ category_id: id, amount })
+      }
+
+      if (selectedAmount > 0) {
+        const savingsId = await findOrCreate(SAVINGS_TRANSFER_NAME, 'TRANSFER')
+        if (savingsId) allocations.push({ category_id: savingsId, amount: selectedAmount })
+      }
+
+      await saveOnboardingPlan({
+        monthly_income: income,
+        period: 'monthly',
+        allocations,
+      })
+      await advanceOnboarding('plan').catch(() => {
+        /* best-effort — plan already persisted */
+      })
+      router.push('/start/save')
+    } catch {
+      toast.error(t('budget.saveError'))
+      setSaving(false)
+    }
+  }
+
+  const summary = [
+    { label: t('budget.plan.summaryIncome'), value: formatCurrencyCompact(income), tone: 'text-foreground' },
+    { label: t('budget.plan.summarySpending'), value: formatCurrencyCompact(totalSpend), tone: 'text-destructive' },
+    { label: t('budget.plan.summaryAvailable'), value: formatCurrencyCompact(available), tone: 'text-success' },
+  ]
+
   return (
-    <div className="flex flex-1 flex-col px-5 pb-32">
+    <div className="flex flex-1 flex-col px-5">
       <header className="py-5">
         <div className="flex items-center justify-between">
           <button
@@ -113,7 +224,7 @@ export default function BudgetPlanPage() {
           >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
-          <FunnelProgress total={4} current={3} />
+          <FunnelProgress total={5} current={4} />
           <button
             type="button"
             onClick={() => router.push('/')}
@@ -127,96 +238,115 @@ export default function BudgetPlanPage() {
           <h1 className="text-2xl leading-title-3 font-bold text-foreground">
             {t('budget.plan.title')}
           </h1>
-        </div>
-      </header>
-
-      <div className="flex flex-col gap-4">
-        {/* Hero savings card */}
-        <div className="rounded-2xl bg-hero-gradient px-5 py-6 text-hero-foreground shadow-floating">
-          <span className="inline-flex w-fit items-center rounded-full bg-hero-success/20 px-3 py-1 text-tiny font-bold uppercase tracking-wide text-hero-success">
-            {t('budget.plan.savePill')}
-          </span>
-          <p className="mt-3 flex items-baseline gap-1.5">
-            <span className="text-4xl leading-title-1 font-bold">
-              {formatCurrency(savings)}
-            </span>
-            <span className="text-md leading-body-lg font-medium text-hero-muted">
-              {t('budget.plan.perMonth')}
-            </span>
-          </p>
-          <p className="mt-3 text-sm leading-body-sm text-hero-muted">
-            {t('budget.plan.breakdownLine', {
-              income: formatCurrency(income),
-              spending: formatCurrency(totalSpend),
+          <p className="mt-1.5 text-sm leading-body-sm text-muted-foreground">
+            {t('budget.plan.subtitle', {
+              income: formatCurrencyCompact(income),
+              spending: formatCurrencyCompact(totalSpend),
             })}
           </p>
         </div>
+      </header>
 
-        {/* Breakdown card */}
-        <div className="rounded-2xl bg-card px-4 shadow-card">
-          {rows.map((row, i) => (
-            <div
-              key={row.key}
+      {/* Summary strip — Income · Spending · Available */}
+      <div className="mt-2 flex items-stretch rounded-2xl bg-card px-2 py-3 shadow-card">
+        {summary.map((col, i) => (
+          <div
+            key={col.label}
+            className={cn(
+              'flex flex-1 flex-col items-center justify-center gap-0.5 px-1',
+              i < summary.length - 1 && 'border-r border-border/60'
+            )}
+          >
+            <span className="text-xs leading-caption text-muted-foreground">{col.label}</span>
+            <span className={cn('text-sm leading-body-sm font-bold', col.tone)}>{col.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Choose how hard to save */}
+      <p className="mt-5 text-sm leading-body-sm font-bold text-foreground">
+        {t('budget.plan.chooseLabel')}
+      </p>
+      <div className="mt-2 flex flex-col gap-2.5">
+        {options.map((opt) => {
+          const isActive = selected === opt.key
+          return (
+            <button
+              key={opt.key}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => setSelected(opt.key)}
               className={cn(
-                'flex items-center gap-3 py-3.5',
-                i < rows.length - 1 && 'border-b border-border/60'
+                'flex items-center gap-3 rounded-2xl border-2 bg-card px-4 py-3 text-left transition-colors',
+                isActive ? 'border-primary bg-selected' : 'border-transparent shadow-card'
               )}
             >
               <span
                 className={cn(
-                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px]',
-                  row.tint
+                  'flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]',
+                  opt.tint.bg,
+                  opt.tint.fg
                 )}
               >
-                <row.icon className="h-[18px] w-[18px]" aria-hidden="true" />
+                <opt.icon className="h-5 w-5" aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm leading-body-sm font-semibold text-foreground">
-                  {row.label}
-                </span>
-                {row.detail && (
-                  <span
-                    className={cn(
-                      'block text-xs leading-caption',
-                      row.warn ? 'text-tint-amber-fg' : 'text-muted-foreground'
-                    )}
-                  >
-                    {row.detail}
+                <span className="flex items-center gap-1.5">
+                  <span className="whitespace-nowrap text-md leading-body-lg font-semibold text-foreground">
+                    {opt.title}
                   </span>
-                )}
+                  {opt.recommended && (
+                    <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-tint-green-bg px-1.5 py-0.5 text-nano font-bold uppercase tracking-wide text-tint-green-fg">
+                      {t('budget.plan.recommended')}
+                    </span>
+                  )}
+                </span>
+                <span className="mt-0.5 block truncate text-xs leading-caption text-muted-foreground">
+                  {opt.subtitle}
+                </span>
               </span>
-              <span
-                className={cn(
-                  'shrink-0 text-md leading-body-lg font-bold',
-                  row.warn ? 'text-destructive' : 'text-foreground'
-                )}
-              >
-                {formatCurrency(row.amount)}
+              <span className="shrink-0 text-right">
+                <span className="block text-md leading-body-lg font-bold text-foreground">
+                  {formatCurrencyCompact(opt.amount)}
+                </span>
+                <span className="block text-tiny font-medium text-muted-foreground">
+                  {t('budget.plan.percentOfIncome', { pct: pct(opt.amount) })}
+                </span>
               </span>
-            </div>
-          ))}
-        </div>
+            </button>
+          )
+        })}
+
+        {/* Action row — build a specific budget by category */}
+        <button
+          type="button"
+          onClick={() => router.push('/start/budget/spend')}
+          className="flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-left hover:bg-muted/40"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-muted text-muted-foreground">
+            <SlidersHorizontal className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-md leading-body-lg font-semibold text-foreground">
+              {t('budget.plan.specificTitle')}
+            </span>
+            <span className="mt-0.5 block text-xs leading-caption text-muted-foreground">
+              {t('budget.plan.specificSubtitle')}
+            </span>
+          </span>
+          <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        </button>
       </div>
 
-      {/* Sticky bottom CTA */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-background via-background to-transparent px-5 pb-6 pt-8">
-        <div className="pointer-events-auto mx-auto flex max-w-md flex-col items-center gap-3">
-          <Button
-            className="h-[52px] w-full gap-2 rounded-[14px] text-md"
-            onClick={() => router.push('/start/save')}
-          >
-            {t('budget.plan.saveCta')}
-            <ArrowRight className="h-5 w-5" aria-hidden="true" />
-          </Button>
-          <button
-            type="button"
-            onClick={() => router.push('/start/budget/spend')}
-            className="text-sm leading-body-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            {t('budget.plan.adjustLink')}
-          </button>
-        </div>
-      </div>
+      <StickyCtaBar>
+        <Button
+          className="h-[52px] w-full gap-2 rounded-[14px] text-md"
+          disabled={saving}
+          onClick={handleSave}
+        >
+          {t('budget.plan.saveCta')}
+        </Button>
+      </StickyCtaBar>
     </div>
   )
 }

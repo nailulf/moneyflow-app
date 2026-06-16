@@ -30,8 +30,20 @@ interface FunnelState {
   budgetIncome?: number
   /** Monthly savings target captured on /start/budget/savings. */
   savingsAmount?: number
-  /** categoryId → estimated monthly spend, from /start/budget/spend. */
+  /**
+   * Estimated monthly spend from /start/budget/spend, keyed by the design's
+   * FIXED spend-category key ('housing' | 'food' | 'transport' | 'bills' |
+   * 'lifestyle' | dynamically-added 'extra-N'). The design's category labels
+   * differ from the app's seeded categories, so these keys are mapped to real
+   * categories (find-or-create) only at save time on the plan screen.
+   */
   budgetSpend: Record<string, number>
+  /**
+   * The savings amount of the option selected on /start/budget/plan
+   * (Relaxed / On target / Ambitious). Persisted as the plan's savings
+   * allocation when the user taps "Save my plan".
+   */
+  budgetSavingsChoice?: number
 
   setGoalType: (goalType: FunnelGoalType) => void
   setTargetAmount: (targetAmount: number) => void
@@ -42,6 +54,7 @@ interface FunnelState {
   setBudgetIncome: (budgetIncome: number) => void
   setSavingsAmount: (savingsAmount: number) => void
   setBudgetSpend: (categoryId: string, amount: number) => void
+  setBudgetSavingsChoice: (budgetSavingsChoice: number) => void
   reset: () => void
 }
 
@@ -66,6 +79,7 @@ export const useFunnelStore = create<FunnelState>((set) => ({
   setSavingsAmount: (savingsAmount) => set({ savingsAmount }),
   setBudgetSpend: (categoryId, amount) =>
     set((state) => ({ budgetSpend: { ...state.budgetSpend, [categoryId]: amount } })),
+  setBudgetSavingsChoice: (budgetSavingsChoice) => set({ budgetSavingsChoice }),
   reset: () =>
     set({
       horizonMonths: 12,
@@ -77,5 +91,6 @@ export const useFunnelStore = create<FunnelState>((set) => ({
       otherIncome: undefined,
       budgetIncome: undefined,
       savingsAmount: undefined,
+      budgetSavingsChoice: undefined,
     }),
 }))
