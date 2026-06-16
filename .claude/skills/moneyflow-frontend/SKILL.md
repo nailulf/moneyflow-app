@@ -38,6 +38,11 @@ patterns. Follow the golden rules; reach for the reference files when you need e
 5. **All user-facing text goes through next-intl** (`useTranslations`). No hardcoded English/Indonesian
    strings in components.
 6. **Mobile-first.** Default styles target the phone; add `sm:`/`lg:` to scale up. Tap targets ≥44px.
+7. **Match the Pencil design — fidelity is a hard requirement, not a nice-to-have.** If a screen/flow
+   exists in `designs/spending-page.pen`, your job is to reproduce it: same structure, copy, components,
+   spacing, states, and per-element styling — not an approximation that "looks reasonable." Open the
+   design and compare before building and again after. "Pixel-perfect to the design" is the bar.
+   See **Design fidelity** below.
 
 ## Design system
 
@@ -112,6 +117,34 @@ import { TrendingUp } from 'lucide-react'
 </div>
 ```
 
+## Design fidelity (match the Pencil design)
+
+For **any** screen or flow that has a design in `designs/spending-page.pen`, treat the design as the
+spec and reproduce it faithfully. Drifting from it (different layout, missing cards/notes, wrong copy,
+approximated component) is a defect even if the result "looks fine" — it's the single most common
+source of rework on this project.
+
+**Workflow (do this for every UI task that has a design):**
+1. **Read the design first.** Use the `pencil` MCP tools on `designs/spending-page.pen`:
+   `get_editor_state` to locate the frame, then `get_screenshot(nodeId)` for the target frame/flow.
+   Onboarding flows live under the `ONBOARDING & LOGIN` frame (`y0TtUf`): Guest Entry/Intent (`dCJhv`),
+   Flow 1 Financial Health (`IlDZo`), Flow 2 Budget (`tAKTn`), Flow 3 Goal (`n8X4lA`), Flow 4
+   Pain-point/Advisor (`WEmQt`), Conversion (`Kko1F`), and the design-system reference (`mGQZc`).
+2. **Inventory every element** in the design before coding: each card, note/callout, label, helper
+   text, chip, icon + its tint, badge, divider, summary row, and the exact copy. Match all of them.
+   If the design shows a structure (e.g. a single card holding rows, a navy hero banner around a gauge,
+   two-line chips with amount + %, a 3-option selectable list), build that structure — not a simpler one.
+3. **Use the design system for the values** (semantic tokens, font/leading tokens, mobile-design-system
+   radii/spacing: h52 controls, r14 buttons, r16 cards, 20px screen padding, 4px grid). The design tells
+   you *what*; the design system tells you the *tokens*.
+4. **Match copy exactly** (and localize it). Headings, subtitles, helper/encouragement notes, button
+   labels, badges ("Recommended"), and empty states should read as in the design.
+5. **Verify after building** by comparing your rendered screen to the design screenshot side by side
+   (browser preview vs `get_screenshot`). Fix discrepancies before calling it done.
+6. **If the design and the data model disagree** (e.g. the design shows category labels that differ from
+   the seeded categories), don't silently diverge — match the design's intent and flag the mismatch for
+   a decision rather than quietly substituting different content.
+
 ## Components
 
 - **Primitives:** `components/ui/` — Radix-based (button, card, dialog, sheet, dropdown, etc.). Reuse
@@ -169,6 +202,9 @@ Mirror an existing form (e.g. `AddTransactionForm`, `EditTransactionForm`) for s
 
 ## Before you call it done
 
+- [ ] **Design match:** if the screen has a Pencil design, compared the rendered result to its
+      `get_screenshot` and reproduced structure, copy, components, spacing, and states — not an
+      approximation. Discrepancies fixed or explicitly flagged.
 - [ ] No hardcoded colors/hex/arbitrary px — only semantic tokens + font/leading tokens.
 - [ ] Works in light **and** dark mode (check token has a `.dark` value; beware `warning`).
 - [ ] All text via `useTranslations`; keys added to `en.json` **and** `id.json`.
