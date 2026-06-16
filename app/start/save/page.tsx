@@ -205,12 +205,14 @@ function IntroStep({
       {/* Actions */}
       <div className="mt-8 flex flex-col gap-3">
         <Button
+          type="button"
           className="h-[52px] w-full rounded-[14px] text-md"
           onClick={onCreate}
         >
           {t('intro.createCta')}
         </Button>
         <Button
+          type="button"
           variant="outline"
           className="h-[52px] w-full rounded-[14px] text-md"
           onClick={handleGuest}
@@ -465,6 +467,7 @@ function VerifyStep({
 
       <div className="mt-8 flex w-full flex-col gap-3">
         <Button
+          type="button"
           variant="outline"
           className="h-[52px] w-full rounded-[14px] text-md"
           onClick={handleResend}
