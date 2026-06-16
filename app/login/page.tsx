@@ -240,7 +240,7 @@ export default function LoginPage() {
           )}
           <Link
             href="/forgot-password"
-            className="self-end text-sm leading-body-sm font-medium text-primary hover:text-primary/80"
+            className="justify-self-end text-sm leading-body-sm font-medium text-primary hover:text-primary/80"
           >
             {t('forgotPassword')}
           </Link>
