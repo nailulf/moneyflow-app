@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -13,8 +13,9 @@ import { StickyCtaBar } from '@/components/features/budget/StickyCtaBar'
 import { useTransactionCategories } from '@/hooks/useTransactionCategories'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
+import { estimateSpend } from '@/lib/onboarding/spend-estimate'
 import { getCategoryIcon, getCategoryTint } from '@/lib/category-style'
-import { formatCurrency } from '@/lib/data-utils'
+import { formatCurrencyCompact } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
 
 /**
@@ -29,6 +30,7 @@ export default function BudgetSpendPage() {
   const t = useTranslations('start')
   const router = useRouter()
 
+  const budgetIncome = useFunnelStore((s) => s.budgetIncome)
   const budgetSpend = useFunnelStore((s) => s.budgetSpend)
   const setBudgetSpend = useFunnelStore((s) => s.setBudgetSpend)
 
@@ -55,6 +57,20 @@ export default function BudgetSpendPage() {
         .sort((a, b) => a.name.localeCompare(b.name)),
     [categories]
   )
+
+  // Pre-fill sensible, income-proportional estimates once the real categories
+  // load (design tAKTn — "Estimate is okay. Tap an amount to adjust it"). Only
+  // fill categories the guest hasn't already entered a value for, and only once,
+  // so editing/clearing a field is never clobbered. Inputs stay fully editable.
+  const prefilled = useRef(false)
+  useEffect(() => {
+    if (prefilled.current || rows.length === 0 || !budgetIncome || budgetIncome <= 0) return
+    prefilled.current = true
+    const current = useFunnelStore.getState().budgetSpend
+    for (const cat of rows) {
+      if (!current[cat.id]) setBudgetSpend(cat.id, estimateSpend(cat.name, budgetIncome))
+    }
+  }, [rows, budgetIncome, setBudgetSpend])
 
   const total = useMemo(
     () => rows.reduce((sum, c) => sum + (budgetSpend[c.id] ?? 0), 0),
@@ -164,7 +180,7 @@ export default function BudgetSpendPage() {
             <span className="flex-1 text-sm leading-body-sm font-medium text-hero-muted">
               {t('budget.spend.totalLabel')}
             </span>
-            <span className="text-lg leading-title-5 font-bold">{formatCurrency(total)}</span>
+            <span className="text-lg leading-title-5 font-bold">{formatCurrencyCompact(total)}</span>
           </div>
         </>
       )}

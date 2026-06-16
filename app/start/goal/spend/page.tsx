@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -13,6 +13,7 @@ import { useTransactionCategories } from '@/hooks/useTransactionCategories'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 import { saveOnboardingPlan, advanceOnboarding } from '@/lib/api/onboarding-funnel'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
+import { estimateSpend } from '@/lib/onboarding/spend-estimate'
 import { getCategoryIcon, getCategoryTint } from '@/lib/category-style'
 import { cn } from '@/lib/utils'
 
@@ -51,14 +52,27 @@ export default function GoalSpendPage() {
     [categories]
   )
 
+  // Pre-fill sensible, income-proportional estimates once the real categories
+  // load (design n8X4lA — "Estimate is okay. Tap an amount to adjust it"). Only
+  // fill categories the guest hasn't already entered a value for, and only once,
+  // so editing/clearing a field is never clobbered. Inputs stay fully editable.
+  const totalIncome = (monthlyIncome ?? 0) + incomeSources.reduce((sum, s) => sum + s.amount, 0)
+  const prefilled = useRef(false)
+  useEffect(() => {
+    if (prefilled.current || rows.length === 0 || totalIncome <= 0) return
+    prefilled.current = true
+    const current = useFunnelStore.getState().spend
+    for (const cat of rows) {
+      if (!current[cat.id]) setSpend(cat.id, estimateSpend(cat.name, totalIncome))
+    }
+  }, [rows, totalIncome, setSpend])
+
   const handleCalculate = async () => {
     setSaving(true)
     try {
       const allocations = rows
         .map((c) => ({ category_id: c.id, amount: spend[c.id] ?? 0 }))
         .filter((a) => a.amount > 0)
-      const totalIncome =
-        (monthlyIncome ?? 0) + incomeSources.reduce((sum, s) => sum + s.amount, 0)
       await saveOnboardingPlan({
         monthly_income: totalIncome,
         period: 'monthly',

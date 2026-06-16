@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/atoms/input'
 import { CurrencyInput } from '@/components/ui/atoms/currency-input'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
-import { formatCurrency } from '@/lib/data-utils'
+import { formatCurrencyCompact } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
 
 type Frequency = 'monthly' | 'weekly' | 'irregular'
@@ -154,7 +154,7 @@ export default function GoalIncomePage() {
                     {src.name}
                   </span>
                   <span className="block text-xs leading-caption text-muted-foreground">
-                    {t('goal.income.perMonth', { amount: formatCurrency(src.amount) })}
+                    {t('goal.income.perMonth', { amount: formatCurrencyCompact(src.amount) })}
                   </span>
                 </span>
                 <button
