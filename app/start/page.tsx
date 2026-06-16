@@ -151,7 +151,7 @@ export default function StartPage() {
 
       {/* Subtle skip-to-signup link (secondary affordance, not a CTA) */}
       <Link
-        href="/register"
+        href="/start/save"
         className="mt-6 text-center text-sm leading-body-sm text-muted-foreground hover:text-foreground"
       >
         {t('createAccountLink')}
