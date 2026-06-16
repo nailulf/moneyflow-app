@@ -301,7 +301,7 @@ export default function BudgetPlanPage() {
                     </span>
                   )}
                 </span>
-                <span className="mt-0.5 block truncate text-xs leading-caption text-muted-foreground">
+                <span className="mt-0.5 block text-xs leading-caption text-muted-foreground">
                   {opt.subtitle}
                 </span>
               </span>
