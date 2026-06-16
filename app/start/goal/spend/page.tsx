@@ -129,17 +129,17 @@ export default function GoalSpendPage() {
             const Icon = getCategoryIcon(cat.name)
             const tint = getCategoryTint(cat.name)
             return (
-              <div key={cat.id} className="flex items-center gap-3 px-4 py-3">
+              <div key={cat.id} className="flex items-center gap-3 px-4 py-2.5">
                 <span
                   className={cn(
-                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]',
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]',
                     tint.bg,
                     tint.fg
                   )}
                 >
-                  <Icon className="h-5 w-5" aria-hidden="true" />
+                  <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
                 </span>
-                <span className="min-w-0 flex-1 truncate text-md leading-body-lg font-medium text-foreground">
+                <span className="min-w-0 flex-1 truncate text-sm leading-body-sm font-medium text-foreground">
                   {cat.name}
                 </span>
                 <CurrencyInput
@@ -147,7 +147,7 @@ export default function GoalSpendPage() {
                   aria-label={cat.name}
                   value={spend[cat.id] ?? 0}
                   onChange={(v) => setSpend(cat.id, v)}
-                  className="h-11 w-32 rounded-[12px] text-right"
+                  className="h-10 w-32 rounded-[10px] text-right text-sm"
                 />
               </div>
             )

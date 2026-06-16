@@ -136,20 +136,20 @@ export default function BudgetSpendPage() {
                 <div
                   key={cat.id}
                   className={cn(
-                    'flex items-center gap-3 py-3',
+                    'flex items-center gap-3 py-2.5',
                     i < rows.length - 1 && 'border-b border-border/60'
                   )}
                 >
                   <span
                     className={cn(
-                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]',
+                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]',
                       tint.bg,
                       tint.fg
                     )}
                   >
-                    <Icon className="h-5 w-5" aria-hidden="true" />
+                    <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-md leading-body-lg font-medium text-foreground">
+                  <span className="min-w-0 flex-1 truncate text-sm leading-body-sm font-medium text-foreground">
                     {cat.name}
                   </span>
                   <CurrencyInput
