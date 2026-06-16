@@ -47,7 +47,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (event === 'SIGNED_OUT') {
           setUser(null)
           setSession(null)
-          router.push('/login')
+          // Re-enter the guest onboarding funnel front door; "Log in" is one
+          // tap away on /start.
+          router.push('/start')
         }
       }
     )
@@ -63,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Reset analytics to clear user data
     Analytics.reset()
     await supabase.auth.signOut()
-    router.push('/login')
+    router.push('/start')
   }
 
   return (
