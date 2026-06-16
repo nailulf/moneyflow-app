@@ -1527,7 +1527,7 @@
     }
   },
   "start": {
-    "brand": "MoneyFlow",
+    "brand": "TemanTumbuh",
     "login": "Log in",
     "guestPill": "You're browsing as a guest",
     "hero": {
@@ -1539,20 +1539,19 @@
     "features": {
       "title": "Everything your money needs",
       "tracking": "Effortless tracking",
-      "trackingSub": "Every transaction, neatly in one place",
+      "trackingSub": "Snap receipts or import statements — AI does the typing.",
       "budgets": "Budgets that fit you",
-      "budgetsSub": "Plans built around how you really spend",
-      "goals": "Goals you can keep",
-      "goalsSub": "Save for what matters, on your terms",
+      "budgetsSub": "Built from your real spending, not a template.",
+      "goals": "Goals you can hit",
+      "goalsSub": "See exactly when you'll reach what you're saving for.",
       "netWorth": "Net worth & investing",
-      "netWorthSub": "See the full picture as it grows"
+      "netWorthSub": "Accounts, assets and portfolio in one picture."
     },
     "healthCheck": {
       "title": "How healthy is your money?",
-      "subtitle": "Take a free 2-minute check — no signup, no account needed.",
+      "subtitle": "Take a free 2-minute check — your goals, income and spending. No account needed.",
       "cta": "Start my 2-minute check"
     },
-    "createAccountLink": "Already sure? Create an account",
     "intent": {
       "title": "What brings you here today?",
       "subtitle": "We will tailor your first steps around it.",
@@ -1560,13 +1559,13 @@
       "skip": "Skip",
       "continue": "Continue",
       "healthTitle": "Check my financial health",
-      "healthSub": "See where you stand at a glance",
+      "healthSub": "See where you stand in 2 minutes",
       "budgetTitle": "Build a budget that works",
       "budgetSub": "Plan spending around your real life",
       "goalTitle": "Track a financial goal",
       "goalSub": "Save for something that matters to you",
-      "otherTitle": "Something else",
-      "otherSub": "Tell us what is on your mind",
+      "otherTitle": "Something else bugs me",
+      "otherSub": "Tell us your money pain point",
       "guestNote": "No account needed — explore as a guest"
     },
     "goal": {
@@ -1702,6 +1701,7 @@
         "resendError": "Could not resend the email. Please try again.",
         "continueCta": "Continue to the app"
       }
-    }
+    },
+    "browseLink": "Just looking? Browse the app first"
   }
 }

@@ -1527,7 +1527,7 @@
     }
   },
   "start": {
-    "brand": "MoneyFlow",
+    "brand": "TemanTumbuh",
     "login": "Masuk",
     "guestPill": "Kamu menjelajah sebagai tamu",
     "hero": {
@@ -1539,20 +1539,19 @@
     "features": {
       "title": "Semua kebutuhan keuanganmu",
       "tracking": "Pencatatan tanpa repot",
-      "trackingSub": "Setiap transaksi rapi di satu tempat",
+      "trackingSub": "Foto struk atau impor rekening — AI yang mengetik.",
       "budgets": "Anggaran yang pas untukmu",
-      "budgetsSub": "Rencana sesuai cara kamu membelanjakan",
+      "budgetsSub": "Dibuat dari pengeluaran nyatamu, bukan template.",
       "goals": "Tujuan yang bisa kamu capai",
-      "goalsSub": "Menabung untuk yang penting, sesukamu",
+      "goalsSub": "Lihat persis kapan kamu mencapai yang sedang kamu tabung.",
       "netWorth": "Kekayaan bersih & investasi",
-      "netWorthSub": "Lihat gambaran utuh saat tumbuh"
+      "netWorthSub": "Rekening, aset, dan portofolio dalam satu gambaran."
     },
     "healthCheck": {
       "title": "Seberapa sehat keuanganmu?",
-      "subtitle": "Ikuti cek gratis 2 menit — tanpa daftar, tanpa akun.",
+      "subtitle": "Ikuti cek gratis 2 menit — tujuan, pemasukan, dan pengeluaranmu. Tanpa akun.",
       "cta": "Mulai cek 2 menit"
     },
-    "createAccountLink": "Sudah yakin? Buat akun",
     "intent": {
       "title": "Apa yang membawamu ke sini hari ini?",
       "subtitle": "Kami akan menyesuaikan langkah pertamamu.",
@@ -1560,13 +1559,13 @@
       "skip": "Lewati",
       "continue": "Lanjut",
       "healthTitle": "Cek kesehatan keuanganku",
-      "healthSub": "Lihat posisimu sekilas",
+      "healthSub": "Lihat posisimu dalam 2 menit",
       "budgetTitle": "Susun anggaran yang berfungsi",
       "budgetSub": "Rencanakan pengeluaran sesuai hidupmu",
       "goalTitle": "Lacak tujuan keuangan",
       "goalSub": "Menabung untuk hal yang berarti bagimu",
-      "otherTitle": "Hal lain",
-      "otherSub": "Ceritakan apa yang ada di pikiranmu",
+      "otherTitle": "Ada hal lain yang mengganjal",
+      "otherSub": "Ceritakan keluhan keuanganmu",
       "guestNote": "Tanpa akun — jelajahi sebagai tamu"
     },
     "goal": {
@@ -1702,6 +1701,7 @@
         "resendError": "Tidak dapat mengirim ulang email. Silakan coba lagi.",
         "continueCta": "Lanjut ke aplikasi"
       }
-    }
+    },
+    "browseLink": "Sekadar lihat-lihat? Jelajahi aplikasinya dulu"
   }
 }

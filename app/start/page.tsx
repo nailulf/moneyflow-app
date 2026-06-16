@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -15,6 +16,7 @@ import {
 
 import { Button } from '@/components/ui/atoms/button'
 import { LocaleToggle } from '@/components/features/onboarding/LocaleToggle'
+import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 
 /** Feature rows for "Everything your money needs" — each gets its own tint. */
 const FEATURES: Array<{
@@ -56,16 +58,28 @@ export default function StartPage() {
 
   return (
     <div className="flex flex-1 flex-col px-5 pb-10">
-      {/* Top bar: brand wordmark + log-in link */}
+      {/* Top bar: app brand (icon + wordmark) + log-in pill */}
       <header className="flex items-center justify-between py-5">
-        <span className="text-xl leading-title-4 font-bold text-foreground">
-          {t('brand')}
+        <span className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-[10px] bg-card shadow-card">
+            <Image
+              src="/icons/icon.png"
+              alt=""
+              width={26}
+              height={26}
+              className="object-contain"
+              priority
+            />
+          </span>
+          <span className="text-xl leading-title-4 font-bold text-foreground">
+            {t('brand')}
+          </span>
         </span>
         <div className="flex items-center gap-3">
           <LocaleToggle />
           <Link
             href="/login"
-            className="text-sm leading-body-sm font-medium text-primary hover:text-primary/80"
+            className="inline-flex items-center rounded-full border border-border px-4 py-1.5 text-sm leading-body-sm font-medium text-foreground hover:bg-muted/50"
           >
             {t('login')}
           </Link>
@@ -109,9 +123,12 @@ export default function StartPage() {
         <h2 className="text-sm leading-body-sm font-semibold text-muted-foreground">
           {t('features.title')}
         </h2>
-        <ul className="mt-4 flex flex-col gap-4">
+        <ul className="mt-4 flex flex-col gap-3">
           {FEATURES.map(({ icon: Icon, titleKey, subKey, tint }) => (
-            <li key={titleKey} className="flex items-start gap-3">
+            <li
+              key={titleKey}
+              className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 shadow-card"
+            >
               <span
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] ${tint}`}
               >
@@ -153,13 +170,18 @@ export default function StartPage() {
         </Button>
       </section>
 
-      {/* Subtle skip-to-signup link (secondary affordance, not a CTA) */}
-      <Link
-        href="/start/save"
+      {/* Subtle "browse as a guest" link (secondary affordance, not a CTA).
+          Creates an anonymous session, then drops the visitor on the homepage. */}
+      <button
+        type="button"
+        onClick={async () => {
+          await ensureAnonymousSession()
+          router.push('/')
+        }}
         className="mt-6 text-center text-sm leading-body-sm text-muted-foreground hover:text-foreground"
       >
-        {t('createAccountLink')}
-      </Link>
+        {t('browseLink')}
+      </button>
     </div>
   )
 }

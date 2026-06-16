@@ -7,7 +7,7 @@ import {
   HeartPulse,
   PieChart,
   Target,
-  Sparkles,
+  MessageCircle,
   ArrowRight,
   ChevronLeft,
   Check,
@@ -26,6 +26,8 @@ interface Option {
   icon: LucideIcon
   titleKey: string
   subKey: string
+  /** Tinted icon-tile classes (multi-color per design G899N). */
+  tint: string
   /** Where Continue routes once this option is chosen. */
   destination: string
 }
@@ -37,6 +39,7 @@ const OPTIONS: Option[] = [
     icon: HeartPulse,
     titleKey: 'intent.healthTitle',
     subKey: 'intent.healthSub',
+    tint: 'bg-tint-teal-bg text-tint-teal-fg',
     destination: '/start/health-check',
   },
   {
@@ -45,6 +48,7 @@ const OPTIONS: Option[] = [
     icon: PieChart,
     titleKey: 'intent.budgetTitle',
     subKey: 'intent.budgetSub',
+    tint: 'bg-tint-blue-bg text-tint-blue-fg',
     destination: '/start/goal/income',
   },
   {
@@ -53,14 +57,16 @@ const OPTIONS: Option[] = [
     icon: Target,
     titleKey: 'intent.goalTitle',
     subKey: 'intent.goalSub',
+    tint: 'bg-tint-blue-bg text-tint-blue-fg',
     destination: '/start/goal/type',
   },
   {
     id: 'other',
     testId: 'intent-other',
-    icon: Sparkles,
+    icon: MessageCircle,
     titleKey: 'intent.otherTitle',
     subKey: 'intent.otherSub',
+    tint: 'bg-tint-amber-bg text-tint-amber-fg',
     destination: '/',
   },
 ]
@@ -131,16 +137,10 @@ export default function IntentPage() {
               <span
                 className={cn(
                   'flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px]',
-                  active ? 'bg-primary/10' : 'bg-muted'
+                  opt.tint
                 )}
               >
-                <opt.icon
-                  className={cn(
-                    'h-5 w-5',
-                    active ? 'text-selected-foreground' : 'text-muted-foreground'
-                  )}
-                  aria-hidden="true"
-                />
+                <opt.icon className="h-5 w-5" aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-md leading-body-lg font-semibold text-foreground">
