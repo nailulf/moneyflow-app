@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
@@ -28,6 +28,7 @@ import {
   resendConfirmation,
 } from '@/lib/onboarding/convert'
 import { useFunnelStore, type PlanSummary } from '@/lib/onboarding/funnel-store'
+import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 
 /** Benefit rows for the "Your plan is ready" celebration — each gets its own tint. */
 const BENEFITS: Array<{
@@ -143,7 +144,7 @@ export default function ConvertPage() {
       t={t}
       onBack={() => setStep('intro')}
       onLogin={() => router.push('/login')}
-      onConverted={() => router.push('/')}
+      onConverted={() => window.location.assign('/')}
       onPendingVerification={(email) => {
         setPendingEmail(email)
         setStep('verify')
@@ -297,6 +298,13 @@ function FormStep({
   const emailValid = EMAIL_RE.test(email)
   const passwordValid = password.length >= 6
   const canSubmit = emailValid && passwordValid && agreed && !submitting
+
+  // Ensure an anonymous session exists so the email conversion (updateUser)
+  // always has a user to upgrade — covers reaching the form without first
+  // going through a flow that created one.
+  useEffect(() => {
+    ensureAnonymousSession().catch(() => {})
+  }, [])
 
   // NOTE: Google/Apple providers must be enabled in Supabase Auth for these to
   // work — they're wired regardless. linkIdentity redirects the browser away.

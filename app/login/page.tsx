@@ -106,8 +106,10 @@ export default function LoginPage() {
       }
 
       toast.success(t('successLoggedIn'))
-      router.push('/')
-      router.refresh()
+      // Hard navigation (not router.push) so the server middleware sees the
+      // freshly-set session cookie and lands the user on the authenticated
+      // dashboard — a client nav can race the cookie and bounce to /start.
+      window.location.assign('/')
     } catch (error: unknown) {
       setAuthError(error)
       const message = error instanceof Error ? error.message : ''

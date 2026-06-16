@@ -357,13 +357,9 @@ function ResultStep({
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
           <FunnelProgress total={4} current={3} />
-          <button
-            type="button"
-            onClick={() => router.push('/')}
-            className="shrink-0 text-sm leading-body-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            {t('skip')}
-          </button>
+          {/* No Skip on the result screen — don't offer an escape at the
+              moment of conversion. Spacer keeps the progress centered. */}
+          <span className="h-9 w-9 shrink-0" aria-hidden="true" />
         </div>
       </header>
 
@@ -494,13 +490,6 @@ function ResultStep({
             {t('saveCta')}
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </Button>
-          <button
-            type="button"
-            onClick={() => router.push('/start/budget/income')}
-            className="py-1 text-sm leading-body-sm font-semibold text-primary hover:text-primary/80"
-          >
-            {t('buildBudgetCta')}
-          </button>
         </div>
       </div>
     </div>

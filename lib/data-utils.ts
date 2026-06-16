@@ -123,7 +123,9 @@ export function formatCurrencyCompact(amount: number, currency: string = DEFAULT
   const sign = amount < 0 ? '-' : ''
 
   const compact = (val: number, suffix: string) => {
-    const formatted = val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)
+    // Up to 2 decimals so e.g. 2,550,000 reads "2.55Jt" instead of a misleading
+    // "2.5Jt"; trailing zeros are trimmed so round values stay clean (2Jt, 2.5Jt).
+    const formatted = val.toFixed(2).replace(/\.?0+$/, '')
     return currency === 'IDR'
       ? `${symbol} ${sign}${formatted}${suffix}`
       : `${symbol}${sign}${formatted}${suffix}`

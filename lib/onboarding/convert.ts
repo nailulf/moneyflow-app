@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import { advanceOnboarding } from '@/lib/api/onboarding-funnel'
+import { isDevToolsEnabled } from '@/lib/utils/environment'
 
 /**
  * Detects the Supabase "email already registered" error returned by
@@ -38,16 +39,31 @@ export async function convertWithEmail(
 
   const { error } = await supabase.auth.updateUser({ email, password })
   if (!error) {
-    // The anon user is now permanent on the same user_id (data intact), but the
-    // new email stays unconfirmed until they click the link. Mark onboarding
-    // complete so the funnel doesn't re-trigger — best-effort, never block the
-    // conversion if it fails.
+    // The anon user is now permanent on the same user_id (data intact). The new
+    // email is unconfirmed until they click the link. In dev/preview there is no
+    // real email, so auto-confirm via the dev-only admin route — otherwise the
+    // account is stuck unconfirmed and the user can neither proceed nor log in.
+    // In production we keep email verification (the verify-email screen).
+    let pendingVerification = true
+    if (isDevToolsEnabled()) {
+      try {
+        const res = await fetch('/api/dev/confirm-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        })
+        if (res.ok) pendingVerification = false
+      } catch {
+        // Fall back to the verify-email flow if the dev confirm route fails.
+      }
+    }
+    // Mark onboarding complete so the funnel doesn't re-trigger — best-effort.
     try {
       await advanceOnboarding('completed')
     } catch {
       // Non-fatal: the account is already converted.
     }
-    return { merged: false, pendingVerification: true }
+    return { merged: false, pendingVerification }
   }
   if (!EMAIL_EXISTS(error)) throw new Error(error.message)
 
