@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { ChevronDown, Loader2 } from 'lucide-react'
+import { ChevronDown, Fingerprint, Loader2, Wallet } from 'lucide-react'
 
 import { createClient } from '@/lib/supabase/client'
 import { getSiteUrl } from '@/lib/utils/site-url'
@@ -146,19 +145,15 @@ export default function LoginPage() {
           (keeps the tightly-packed login fitting 375×812 with no scroll). */}
       <LocaleToggle className="absolute right-5 top-5 z-10" />
 
-      {/* Brand */}
+      {/* Brand — navy tile + wordmark, then the welcome heading */}
       <header className="flex flex-col items-center">
-        <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[16px] bg-card shadow-card">
-          <Image
-            src="/icons/icon.png"
-            alt="Teman Tumbuh"
-            width={40}
-            height={40}
-            className="object-contain"
-            priority
-          />
+        <span className="flex h-14 w-14 items-center justify-center rounded-[16px] bg-hero-gradient shadow-card">
+          <Wallet className="h-7 w-7 text-hero-foreground" aria-hidden="true" />
         </span>
-        <h1 className="mt-4 text-2xl leading-title-3 font-bold text-foreground">
+        <p className="mt-3 text-lg leading-title-5 font-bold text-foreground">
+          {t('brand')}
+        </p>
+        <h1 className="mt-3 text-2xl leading-title-3 font-bold text-foreground">
           {t('title')}
         </h1>
         <p className="mt-1 text-sm leading-body-sm text-muted-foreground">
@@ -186,8 +181,7 @@ export default function LoginPage() {
         </Button>
         <Button
           type="button"
-          variant="outline"
-          className="h-[52px] w-full gap-2 rounded-[14px] text-md"
+          className="h-[52px] w-full gap-2 rounded-[14px] bg-foreground text-md text-background hover:bg-foreground/90"
           onClick={() => handleOAuth('apple')}
           disabled={busy}
         >
@@ -231,15 +225,7 @@ export default function LoginPage() {
         </div>
 
         <div className="grid gap-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="login-password">{t('password')}</Label>
-            <Link
-              href="/forgot-password"
-              className="text-sm leading-body-sm font-medium text-primary hover:text-primary/80"
-            >
-              {t('forgotPassword')}
-            </Link>
-          </div>
+          <Label htmlFor="login-password">{t('password')}</Label>
           <PasswordInput
             id="login-password"
             data-testid="login-password"
@@ -252,6 +238,12 @@ export default function LoginPage() {
               {errors.password.message}
             </p>
           )}
+          <Link
+            href="/forgot-password"
+            className="self-end text-sm leading-body-sm font-medium text-primary hover:text-primary/80"
+          >
+            {t('forgotPassword')}
+          </Link>
         </div>
 
         <Button
@@ -267,8 +259,20 @@ export default function LoginPage() {
         </Button>
       </form>
 
+      {/* Biometric affordance — matches the design; real WebAuthn is deferred. */}
+      <button
+        type="button"
+        onClick={() => toast(t('biometricSoon'))}
+        disabled={busy}
+        className="mt-4 inline-flex items-center justify-center gap-2 self-center text-sm leading-body-sm font-medium text-primary hover:text-primary/80 disabled:opacity-50"
+      >
+        {/* TODO: WebAuthn passkey sign-in */}
+        <Fingerprint className="h-4 w-4" aria-hidden="true" />
+        {t('faceId')}
+      </button>
+
       {/* New-user footer → funnel front door */}
-      <p className="mt-5 text-center text-sm leading-body-sm text-muted-foreground">
+      <p className="mt-4 text-center text-sm leading-body-sm text-muted-foreground">
         {t('newHere')}{' '}
         <button
           type="button"

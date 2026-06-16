@@ -368,8 +368,7 @@ function FormStep({
         </Button>
         <Button
           type="button"
-          variant="outline"
-          className="h-[52px] w-full gap-2 rounded-[14px] text-md"
+          className="h-[52px] w-full gap-2 rounded-[14px] bg-foreground text-md text-background hover:bg-foreground/90"
           onClick={() => handleOAuth('apple')}
           disabled={submitting}
         >

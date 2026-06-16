@@ -1,8 +1,11 @@
 {
   "auth": {
     "login": {
+      "brand": "TemanTumbuh",
       "title": "Selamat datang kembali",
       "subtitle": "Lanjutkan dari tempat Anda berhenti.",
+      "faceId": "Gunakan Face ID / sidik jari",
+      "biometricSoon": "Login biometrik segera hadir",
       "email": "Email",
       "emailPlaceholder": "m@example.com",
       "password": "Kata Sandi",

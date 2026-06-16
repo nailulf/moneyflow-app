@@ -1,8 +1,11 @@
 {
   "auth": {
     "login": {
+      "brand": "TemanTumbuh",
       "title": "Welcome back",
       "subtitle": "Pick up where you left off.",
+      "faceId": "Use Face ID / fingerprint",
+      "biometricSoon": "Biometric login is coming soon",
       "email": "Email",
       "emailPlaceholder": "m@example.com",
       "password": "Password",
