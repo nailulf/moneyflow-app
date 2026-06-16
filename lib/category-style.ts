@@ -1,7 +1,7 @@
 import {
   Utensils, Car, ShoppingBag, Clapperboard, Receipt, HeartPulse,
   GraduationCap, Plane, Briefcase, ArrowLeftRight, PiggyBank, CreditCard, Coffee, Tag,
-  TrendingUp,
+  TrendingUp, Home, Sparkles,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -22,6 +22,18 @@ const TINT = {
   slate:  { bg: 'bg-tint-slate-bg',  fg: 'text-tint-slate-fg' },
   amber:  { bg: 'bg-tint-amber-bg',  fg: 'text-tint-amber-fg' },
 } satisfies Record<string, CategoryTint>
+
+// Exact-name overrides (case-insensitive), checked BEFORE the keyword rules.
+// Needed where the design's seeded names share a keyword with a legacy name but
+// want a different icon/tint — e.g. "Transport" (orange) vs the legacy
+// "Transportation" (blue, via the keyword rules). Keys are lowercased names.
+const EXACT_OVERRIDES: Record<string, [LucideIcon, CategoryTint]> = {
+  'housing & rent':        [Home,     TINT.blue],
+  'food & groceries':      [Utensils, TINT.green],
+  'transport':             [Car,      TINT.orange],
+  'bills & subscriptions': [Receipt,  TINT.slate],
+  'lifestyle & fun':       [Sparkles, TINT.pink],
+}
 
 // Keyword → (icon, tint), first match wins (EN + ID).
 // Order matters: more specific entries (coffee, savings, credit card) before general ones.
@@ -66,11 +78,15 @@ function findRule(name: string): [string[], LucideIcon, CategoryTint] | undefine
 export function getCategoryIcon(categoryName: string | null | undefined): LucideIcon {
   const name = categoryName?.toLowerCase() ?? ''
   if (!name) return Tag
-  return findRule(name)?.[1] ?? Tag
+  return EXACT_OVERRIDES[name]?.[0] ?? findRule(name)?.[1] ?? Tag
 }
 
 export function getCategoryTint(categoryName: string | null | undefined): CategoryTint {
   const name = categoryName?.toLowerCase() ?? ''
   if (!name) return TINT.slate
-  return findRule(name)?.[2] ?? CATEGORY_TINTS[hashName(name) % CATEGORY_TINTS.length]
+  return (
+    EXACT_OVERRIDES[name]?.[1] ??
+    findRule(name)?.[2] ??
+    CATEGORY_TINTS[hashName(name) % CATEGORY_TINTS.length]
+  )
 }

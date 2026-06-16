@@ -1,7 +1,7 @@
 import {
   Utensils, Car, ShoppingBag, Clapperboard, Receipt, HeartPulse,
   GraduationCap, Plane, Briefcase, ArrowLeftRight, PiggyBank, CreditCard, Coffee, Tag,
-  TrendingUp,
+  TrendingUp, Home, Sparkles,
 } from 'lucide-react'
 import { getCategoryIcon, getCategoryTint, CATEGORY_TINTS } from '@/lib/category-style'
 
@@ -51,6 +51,14 @@ describe('getCategoryIcon', () => {
   it('applies rule order, not name order, on multi-keyword names', () => {
     expect(getCategoryIcon('Makan & Hiburan')).toBe(Utensils)
   })
+
+  it('maps the design-aligned seeded categories', () => {
+    expect(getCategoryIcon('Housing & rent')).toBe(Home)
+    expect(getCategoryIcon('Food & groceries')).toBe(Utensils)
+    expect(getCategoryIcon('Transport')).toBe(Car)
+    expect(getCategoryIcon('Bills & subscriptions')).toBe(Receipt)
+    expect(getCategoryIcon('Lifestyle & fun')).toBe(Sparkles)
+  })
 })
 
 describe('getCategoryTint', () => {
@@ -64,6 +72,16 @@ describe('getCategoryTint', () => {
     expect(getCategoryTint('Travel')).toEqual({ bg: 'bg-tint-teal-bg', fg: 'text-tint-teal-fg' })
     expect(getCategoryTint('Income')).toEqual({ bg: 'bg-tint-green-bg', fg: 'text-tint-green-fg' })
     expect(getCategoryTint('Investment')).toEqual({ bg: 'bg-tint-green-bg', fg: 'text-tint-green-fg' })
+  })
+
+  it('maps the design-aligned seeded categories to their tints', () => {
+    expect(getCategoryTint('Housing & rent')).toEqual({ bg: 'bg-tint-blue-bg', fg: 'text-tint-blue-fg' })
+    expect(getCategoryTint('Food & groceries')).toEqual({ bg: 'bg-tint-green-bg', fg: 'text-tint-green-fg' })
+    expect(getCategoryTint('Transport')).toEqual({ bg: 'bg-tint-orange-bg', fg: 'text-tint-orange-fg' })
+    expect(getCategoryTint('Bills & subscriptions')).toEqual({ bg: 'bg-tint-slate-bg', fg: 'text-tint-slate-fg' })
+    expect(getCategoryTint('Lifestyle & fun')).toEqual({ bg: 'bg-tint-pink-bg', fg: 'text-tint-pink-fg' })
+    // Exact override for "Transport" must NOT bleed into legacy "Transportation".
+    expect(getCategoryTint('Transportation')).toEqual({ bg: 'bg-tint-blue-bg', fg: 'text-tint-blue-fg' })
   })
 
   it('is deterministic for unknown names', () => {

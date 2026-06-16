@@ -1655,14 +1655,7 @@
         "addCategory": "Tambah kategori",
         "newCategory": "Kategori baru",
         "totalLabel": "Biaya hidup saat ini",
-        "cta": "Lihat pilihanku",
-        "categories": {
-          "housing": "Tempat tinggal & sewa",
-          "food": "Makanan & belanja",
-          "transport": "Transportasi",
-          "bills": "Tagihan & langganan",
-          "lifestyle": "Gaya hidup & hiburan"
-        }
+        "cta": "Lihat pilihanku"
       },
       "plan": {
         "title": "Pilihan tabunganmu",

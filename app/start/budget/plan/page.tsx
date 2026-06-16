@@ -28,19 +28,6 @@ import { cn } from '@/lib/utils'
 /** Seeded TRANSFER category the savings allocation is booked against. */
 const SAVINGS_TRANSFER_NAME = 'Savings transfer'
 
-/**
- * Canonical English names for the design's fixed spend categories, used for the
- * find-or-create at save time. The design's labels differ from the app's seeded
- * categories — see the controller flag in the task report.
- */
-const SPEND_CATEGORY_NAMES: Record<string, string> = {
-  housing: 'Housing & rent',
-  food: 'Food & groceries',
-  transport: 'Transport',
-  bills: 'Bills & subscriptions',
-  lifestyle: 'Lifestyle & fun',
-}
-
 type OptionKey = 'relaxed' | 'on_target' | 'ambitious'
 
 interface PlanOption {
@@ -75,7 +62,7 @@ export default function BudgetPlanPage() {
       })
   }, [])
 
-  const { categories, addCategory } = useTransactionCategories(userId)
+  const { categories } = useTransactionCategories(userId)
 
   const computed = useMemo(() => {
     const income = budgetIncome ?? 0
@@ -165,30 +152,19 @@ export default function BudgetPlanPage() {
     try {
       setBudgetSavingsChoice(selectedAmount)
 
-      // Find-or-create the design's spend categories against the user's real
-      // categories, then build allocations from the non-zero spend rows.
-      const findOrCreate = async (
-        name: string,
-        type: 'EXPENSE' | 'TRANSFER'
-      ): Promise<string | null> => {
-        const existing = categories.find(
-          (c) => c.group_type === type && c.name.toLowerCase() === name.toLowerCase()
-        )
-        if (existing) return existing.id
-        return addCategory(name, type)
-      }
-
-      const allocations: { category_id: string; amount: number }[] = []
-      for (const [key, amount] of Object.entries(budgetSpend)) {
-        if (amount <= 0) continue
-        const name = SPEND_CATEGORY_NAMES[key] ?? key
-        const id = await findOrCreate(name, 'EXPENSE')
-        if (id) allocations.push({ category_id: id, amount })
-      }
+      // budgetSpend is keyed by real category id (set on the spend screen), so
+      // allocations reference those ids directly — no find-or-create.
+      const allocations: { category_id: string; amount: number }[] = Object.entries(budgetSpend)
+        .filter(([, amount]) => amount > 0)
+        .map(([categoryId, amount]) => ({ category_id: categoryId, amount }))
 
       if (selectedAmount > 0) {
-        const savingsId = await findOrCreate(SAVINGS_TRANSFER_NAME, 'TRANSFER')
-        if (savingsId) allocations.push({ category_id: savingsId, amount: selectedAmount })
+        const savings = categories.find(
+          (c) =>
+            c.group_type === 'TRANSFER' &&
+            c.name.toLowerCase() === SAVINGS_TRANSFER_NAME.toLowerCase()
+        )
+        if (savings) allocations.push({ category_id: savings.id, amount: selectedAmount })
       }
 
       await saveOnboardingPlan({

@@ -20,18 +20,24 @@ jest.mock('@/lib/api/onboarding-funnel', () => ({
 
 jest.mock('sonner', () => ({ toast: { error: jest.fn() } }))
 
-// Seeded categories: the design's spend categories already exist plus the
-// "Savings transfer" TRANSFER row. addCategory is mocked for find-or-create.
+// Seeded, design-aligned categories the spend/plan screens render directly.
+// budgetSpend is keyed by these real ids — no find-or-create at save time.
 const addCategory = jest.fn((name: string) =>
   Promise.resolve(`new-${name.toLowerCase().replace(/\W+/g, '-')}`)
 )
 const CATEGORIES = [
   { id: 'cat-housing', name: 'Housing & rent', group_type: 'EXPENSE' },
   { id: 'cat-food', name: 'Food & groceries', group_type: 'EXPENSE' },
+  { id: 'cat-transport', name: 'Transport', group_type: 'EXPENSE' },
   { id: 'cat-savings', name: 'Savings transfer', group_type: 'TRANSFER' },
 ]
 jest.mock('@/hooks/useTransactionCategories', () => ({
-  useTransactionCategories: () => ({ categories: CATEGORIES, isLoading: false, addCategory }),
+  useTransactionCategories: () => ({
+    categories: CATEGORIES,
+    isLoading: false,
+    addCategory,
+    isAdding: false,
+  }),
 }))
 
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
@@ -83,12 +89,14 @@ describe('Budget-from-income flow', () => {
     expect(push).toHaveBeenCalledWith('/start/budget/spend')
   })
 
-  it('spend screen stores amounts by design key and routes to plan (no persistence yet)', () => {
+  it('spend screen stores amounts by real category id and routes to plan (no persistence yet)', async () => {
     useFunnelStore.setState({ budgetIncome: 10_000_000, savingsAmount: 2_000_000 })
     render(<BudgetSpendPage />)
 
-    fireEvent.change(screen.getByTestId('budget-spend-housing'), { target: { value: '4000000' } })
-    expect(useFunnelStore.getState().budgetSpend.housing).toBe(4_000_000)
+    // Rows render once the anonymous session resolves and categories load.
+    const input = await screen.findByTestId('budget-spend-cat-housing')
+    fireEvent.change(input, { target: { value: '4000000' } })
+    expect(useFunnelStore.getState().budgetSpend['cat-housing']).toBe(4_000_000)
 
     // Spend does NOT persist — that happens on the plan screen's "Save my plan".
     expect(saveOnboardingPlan).not.toHaveBeenCalled()
@@ -101,7 +109,7 @@ describe('Budget-from-income flow', () => {
     useFunnelStore.setState({
       budgetIncome: 10_000_000,
       savingsAmount: 2_000_000,
-      budgetSpend: { housing: 4_000_000, food: 2_000_000 },
+      budgetSpend: { 'cat-housing': 4_000_000, 'cat-food': 2_000_000 },
     })
     render(<BudgetPlanPage />)
 
@@ -113,11 +121,11 @@ describe('Budget-from-income flow', () => {
     await waitFor(() => expect(ensureAnonymousSession).toHaveBeenCalled())
   })
 
-  it('Save my plan persists the selected savings amount then routes to /start/save', async () => {
+  it('Save my plan persists allocations by real category id then routes to /start/save', async () => {
     useFunnelStore.setState({
       budgetIncome: 10_000_000,
       savingsAmount: 2_000_000,
-      budgetSpend: { housing: 4_000_000, food: 2_000_000 },
+      budgetSpend: { 'cat-housing': 4_000_000, 'cat-food': 2_000_000 },
     })
     render(<BudgetPlanPage />)
 
@@ -130,36 +138,18 @@ describe('Budget-from-income flow', () => {
         period: 'monthly',
         allocations: expect.arrayContaining([
           { category_id: 'cat-housing', amount: 4_000_000 },
-          // Default selection is "On target" = the 2,000,000 savings goal.
+          { category_id: 'cat-food', amount: 2_000_000 },
+          // Default selection is "On target" = the 2,000,000 savings goal,
+          // booked against the real "Savings transfer" category by name lookup.
           { category_id: 'cat-savings', amount: 2_000_000 },
         ]),
       })
     )
+    // No find-or-create — categories already exist and are referenced by id.
+    expect(addCategory).not.toHaveBeenCalled()
     // The selected option's amount is mirrored into the store.
     expect(useFunnelStore.getState().budgetSavingsChoice).toBe(2_000_000)
     expect(advanceOnboarding).toHaveBeenCalledWith('plan')
     await waitFor(() => expect(push).toHaveBeenCalledWith('/start/save'))
-  })
-
-  it('Save my plan find-or-creates a missing spend category', async () => {
-    useFunnelStore.setState({
-      budgetIncome: 10_000_000,
-      savingsAmount: 2_000_000,
-      // "transport" is not in the seeded CATEGORIES → must be created.
-      budgetSpend: { transport: 900_000 },
-    })
-    render(<BudgetPlanPage />)
-
-    fireEvent.click(screen.getByRole('button', { name: /budget\.plan\.saveCta/i }))
-
-    await waitFor(() => expect(saveOnboardingPlan).toHaveBeenCalledTimes(1))
-    expect(addCategory).toHaveBeenCalledWith('Transport', 'EXPENSE')
-    expect(saveOnboardingPlan).toHaveBeenCalledWith(
-      expect.objectContaining({
-        allocations: expect.arrayContaining([
-          { category_id: 'new-transport', amount: 900_000 },
-        ]),
-      })
-    )
   })
 })

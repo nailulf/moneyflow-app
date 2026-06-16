@@ -1655,14 +1655,7 @@
         "addCategory": "Add a category",
         "newCategory": "New category",
         "totalLabel": "Cost of living today",
-        "cta": "See my options",
-        "categories": {
-          "housing": "Housing & rent",
-          "food": "Food & groceries",
-          "transport": "Transport",
-          "bills": "Bills & subscriptions",
-          "lifestyle": "Lifestyle & fun"
-        }
+        "cta": "See my options"
       },
       "plan": {
         "title": "Your savings options",
