@@ -30,7 +30,7 @@ jest.mock('next-intl', () => ({
   useLocale: () => 'en',
 }))
 
-import { formatCurrency } from '@/lib/data-utils'
+import { formatCurrencyWhole } from '@/lib/data-utils'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
 import GoalPlanPage from '@/app/start/goal/plan/page'
 
@@ -54,7 +54,7 @@ describe('GoalPlanPage', () => {
 
   it('renders the computed surplus as the hero number', () => {
     render(<GoalPlanPage />)
-    expect(screen.getByText(formatCurrency(2_400_000))).toBeInTheDocument()
+    expect(screen.getByText(formatCurrencyWhole(2_400_000))).toBeInTheDocument()
   })
 
   it('shows the months-to-goal and an Achievable badge', () => {
@@ -71,7 +71,7 @@ describe('GoalPlanPage', () => {
       })
     )
     render(<GoalPlanPage />)
-    expect(screen.getByText(formatCurrency(4_000_000))).toBeInTheDocument()
+    expect(screen.getByText(formatCurrencyWhole(4_000_000))).toBeInTheDocument()
   })
 
   it('renders a What if? card with right-aligned month pills', () => {

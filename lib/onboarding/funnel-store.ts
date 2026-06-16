@@ -18,6 +18,18 @@ export interface IncomeSource {
   amount: number
 }
 
+/**
+ * One-line payoff summary set by a flow's RESULT step right before routing to
+ * `/start/save`, so the conversion intro can echo what the guest just built
+ * instead of a generic celebration. `primary` and `caption` are already
+ * formatted display strings (the result page owns the formatting/i18n).
+ */
+export interface PlanSummary {
+  kind: 'goal' | 'budget' | 'health'
+  primary: string
+  caption: string
+}
+
 interface FunnelState {
   goalType?: FunnelGoalType
   targetAmount?: number
@@ -51,6 +63,12 @@ interface FunnelState {
    */
   budgetSavingsChoice?: number
 
+  /**
+   * Conversion-screen payoff summary, set by each flow's result step. Null
+   * when the guest hit the signup wall directly (no plan built yet).
+   */
+  planSummary?: PlanSummary | null
+
   setGoalType: (goalType: FunnelGoalType) => void
   setTargetAmount: (targetAmount: number) => void
   setHorizonMonths: (horizonMonths: number) => void
@@ -62,6 +80,7 @@ interface FunnelState {
   setSavingsAmount: (savingsAmount: number) => void
   setBudgetSpend: (categoryId: string, amount: number) => void
   setBudgetSavingsChoice: (budgetSavingsChoice: number) => void
+  setPlanSummary: (planSummary: PlanSummary) => void
   reset: () => void
 }
 
@@ -91,6 +110,7 @@ export const useFunnelStore = create<FunnelState>((set) => ({
   setBudgetSpend: (categoryId, amount) =>
     set((state) => ({ budgetSpend: { ...state.budgetSpend, [categoryId]: amount } })),
   setBudgetSavingsChoice: (budgetSavingsChoice) => set({ budgetSavingsChoice }),
+  setPlanSummary: (planSummary) => set({ planSummary }),
   reset: () =>
     set({
       horizonMonths: 12,
@@ -103,5 +123,6 @@ export const useFunnelStore = create<FunnelState>((set) => ({
       budgetIncome: undefined,
       savingsAmount: undefined,
       budgetSavingsChoice: undefined,
+      planSummary: null,
     }),
 }))

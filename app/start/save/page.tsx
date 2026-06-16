@@ -9,6 +9,8 @@ import {
   Target,
   Flame,
   ShieldCheck,
+  PiggyBank,
+  HeartPulse,
   ChevronLeft,
   Loader2,
   MailCheck,
@@ -25,6 +27,7 @@ import {
   continueAsGuest,
   resendConfirmation,
 } from '@/lib/onboarding/convert'
+import { useFunnelStore, type PlanSummary } from '@/lib/onboarding/funnel-store'
 
 /** Benefit rows for the "Your plan is ready" celebration — each gets its own tint. */
 const BENEFITS: Array<{
@@ -52,6 +55,13 @@ const BENEFITS: Array<{
     tint: 'bg-tint-green-bg text-tint-green-fg',
   },
 ]
+
+/** Per-kind icon + pill-label key for the personalized payoff hero. */
+const KIND_HERO: Record<PlanSummary['kind'], { icon: LucideIcon; pillKey: string }> = {
+  goal: { icon: Target, pillKey: 'intro.pillGoal' },
+  budget: { icon: PiggyBank, pillKey: 'intro.pillBudget' },
+  health: { icon: HeartPulse, pillKey: 'intro.pillHealth' },
+}
 
 /** Brand glyph for the Google OAuth button (lucide has no brand icons). */
 function GoogleIcon() {
@@ -154,27 +164,55 @@ function IntroStep({
   onCreate: () => void
   onLogin: () => void
 }) {
+  const planSummary = useFunnelStore((s) => s.planSummary)
+
   const handleGuest = async () => {
     await continueAsGuest()
   }
 
   return (
     <div className="flex flex-1 flex-col px-5 pb-10">
-      {/* Celebratory navy hero */}
-      <section className="mt-5 rounded-[20px] bg-hero-gradient p-6 text-center text-hero-foreground shadow-floating">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-hero-foreground/10">
-          <PartyPopper className="h-8 w-8 text-hero-success" aria-hidden="true" />
-        </span>
-        <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-hero-foreground/10 px-2.5 py-1 text-tiny font-medium uppercase tracking-wide text-hero-foreground">
-          {t('intro.badge')}
-        </span>
-        <h1 className="mt-3 text-3xl leading-title-2 font-bold">
-          {t('intro.headline')}
-        </h1>
-        <p className="mt-3 text-md leading-body-lg text-hero-muted">
-          {t('intro.subtext')}
-        </p>
-      </section>
+      {planSummary ? (
+        /* Personalized payoff hero — echoes what the guest just built */
+        (() => {
+          const { icon: KindIcon, pillKey } = KIND_HERO[planSummary.kind]
+          return (
+            <section className="mt-5 rounded-[20px] bg-hero-gradient p-6 text-center text-hero-foreground shadow-floating">
+              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-hero-foreground/10">
+                <KindIcon className="h-7 w-7 text-hero-foreground" aria-hidden="true" />
+              </span>
+              <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-hero-foreground/10 px-2.5 py-1 text-tiny font-medium uppercase tracking-wide text-hero-foreground">
+                {t(pillKey)}
+              </span>
+              <p className="mt-3 whitespace-nowrap text-3xl leading-title-2 font-bold sm:text-4xl">
+                {planSummary.primary}
+              </p>
+              <p className="mt-1.5 text-md leading-body-lg text-hero-muted">
+                {planSummary.caption}
+              </p>
+              <p className="mt-4 text-sm leading-body-sm text-hero-muted">
+                {t('intro.personalizedSubtext')}
+              </p>
+            </section>
+          )
+        })()
+      ) : (
+        /* Generic celebration hero — signup-wall entry with an empty draft */
+        <section className="mt-5 rounded-[20px] bg-hero-gradient p-6 text-center text-hero-foreground shadow-floating">
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-hero-foreground/10">
+            <PartyPopper className="h-8 w-8 text-hero-success" aria-hidden="true" />
+          </span>
+          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-hero-foreground/10 px-2.5 py-1 text-tiny font-medium uppercase tracking-wide text-hero-foreground">
+            {t('intro.badge')}
+          </span>
+          <h1 className="mt-3 text-3xl leading-title-3 font-bold">
+            {t('intro.headline')}
+          </h1>
+          <p className="mt-3 text-md leading-body-lg text-hero-muted">
+            {t('intro.subtext')}
+          </p>
+        </section>
+      )}
 
       {/* Benefit list */}
       <section className="mt-8">
@@ -203,7 +241,7 @@ function IntroStep({
       </section>
 
       {/* Actions */}
-      <div className="mt-8 flex flex-col gap-3">
+      <div className="mt-8">
         <Button
           type="button"
           className="h-[52px] w-full rounded-[14px] text-md"
@@ -211,27 +249,28 @@ function IntroStep({
         >
           {t('intro.createCta')}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="h-[52px] w-full rounded-[14px] text-md"
-          onClick={handleGuest}
-        >
-          {t('intro.guestCta')}
-        </Button>
       </div>
 
-      {/* Log-in footer */}
-      <p className="mt-6 text-center text-sm leading-body-sm text-muted-foreground">
-        {t('intro.loginPrompt')}{' '}
+      {/* Quiet secondary actions — guest exit demoted to a text link */}
+      <div className="mt-6 flex flex-col items-center gap-3">
         <button
           type="button"
-          onClick={onLogin}
-          className="font-medium text-primary hover:text-primary/80"
+          onClick={handleGuest}
+          className="text-sm leading-body-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
         >
-          {t('intro.loginLink')}
+          {t('intro.guestCta')}
         </button>
-      </p>
+        <p className="text-center text-sm leading-body-sm text-muted-foreground">
+          {t('intro.loginPrompt')}{' '}
+          <button
+            type="button"
+            onClick={onLogin}
+            className="font-medium text-primary hover:text-primary/80"
+          >
+            {t('intro.loginLink')}
+          </button>
+        </p>
+      </div>
     </div>
   )
 }

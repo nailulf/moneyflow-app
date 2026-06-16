@@ -142,6 +142,31 @@ export function formatCurrencyCompact(amount: number, currency: string = DEFAULT
   return `${symbol}${sign}${abs.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 }
 
+/**
+ * Whole-rupiah (zero-decimal) currency formatter for big hero numbers.
+ *
+ * Same locale grouping as `formatCurrency` but with NO decimals — e.g.
+ * `Rp 2.400.000` instead of `Rp 2.400.000,00`. Use this for the large headline
+ * numbers in onboarding result/conversion heroes where the trailing `,00`
+ * reads as noise and makes the number wrap on narrow phones. Other screens
+ * keep using `formatCurrency` (2 decimals) — do not change that one.
+ */
+export function formatCurrencyWhole(amount: number, currency: string = DEFAULT_CURRENCY): string {
+  const symbol = CURRENCY_SYMBOLS[currency] || currency
+  const abs = Math.abs(amount)
+  const sign = amount < 0 ? '-' : ''
+
+  if (currency === 'IDR') {
+    return `${sign}${symbol} ${abs.toLocaleString('id-ID', {
+      maximumFractionDigits: 0,
+    })}`
+  }
+
+  return `${sign}${symbol}${abs.toLocaleString('en-US', {
+    maximumFractionDigits: 0,
+  })}`
+}
+
 export function formatDate(dateString: string): string {
   return format(parseISO(dateString), 'MMM dd, yyyy')
 }

@@ -1634,7 +1634,10 @@
         "adjustLink": "Ubah angka",
         "emptyTitle": "Ayo susun rencanamu",
         "emptySubtitle": "Beri tahu tujuan dan pemasukanmu dulu, lalu kami tunjukkan kapan kamu bisa mencapainya.",
-        "emptyCta": "Mulai dengan tujuan"
+        "emptyCta": "Mulai dengan tujuan",
+        "summaryPrimary": "{amount}/bln",
+        "summaryCaption": "Capai {name} pada {date}",
+        "summaryCaptionNoDate": "Menuju {name}"
       }
     },
     "budget": {
@@ -1688,7 +1691,9 @@
         "saveCta": "Simpan rencanaku",
         "emptyTitle": "Ayo susun anggaranmu",
         "emptySubtitle": "Beri tahu pemasukan dan target tabunganmu dulu, lalu kami tunjukkan rencanamu.",
-        "emptyCta": "Mulai dengan pemasukan"
+        "emptyCta": "Mulai dengan pemasukan",
+        "summaryPrimary": "{amount}/bln",
+        "summaryCaption": "Tabung {pct}% dari penghasilanmu"
       }
     },
     "health": {
@@ -1735,7 +1740,8 @@
       "tip_emergencyFund": "Tingkatkan dana daruratmu menuju ~6 bulan pengeluaran.",
       "tip_netWorth": "Lunasi utang dan terus berinvestasi agar kekayaan bersihmu positif.",
       "buildBudgetCta": "Buat anggaran untuk memperbaikinya",
-      "saveCta": "Simpan hasilku"
+      "saveCta": "Simpan hasilku",
+      "summaryCaption": "dari 100 · {band}"
     },
     "convert": {
       "intro": {
@@ -1752,7 +1758,11 @@
         "createCta": "Buat akun gratis",
         "guestCta": "Lanjutkan sebagai tamu",
         "loginPrompt": "Sudah punya akun?",
-        "loginLink": "Masuk"
+        "loginLink": "Masuk",
+        "pillGoal": "Rencanamu",
+        "pillBudget": "Anggaranmu",
+        "pillHealth": "Kesehatan keuanganmu",
+        "personalizedSubtext": "Buat akun gratis untuk menyimpan ini dan memantau perkembanganmu — tersinkron di semua perangkat dan tidak akan hilang."
       },
       "form": {
         "back": "Kembali",

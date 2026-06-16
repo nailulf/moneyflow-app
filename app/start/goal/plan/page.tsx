@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/atoms/button'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
 import { useFunnelStore, type FunnelGoalType } from '@/lib/onboarding/funnel-store'
 import { monthsToGoal } from '@/lib/onboarding/plan-math'
-import { formatCurrency, formatCurrencyCompact } from '@/lib/data-utils'
+import { formatCurrencyCompact, formatCurrencyWhole } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
 
 /** Friendly goal label keys (reuse the type-screen titles). */
@@ -65,6 +65,7 @@ export default function GoalPlanPage() {
   const monthlyIncome = useFunnelStore((s) => s.monthlyIncome)
   const incomeSources = useFunnelStore((s) => s.incomeSources)
   const spend = useFunnelStore((s) => s.spend)
+  const setPlanSummary = useFunnelStore((s) => s.setPlanSummary)
 
   const computed = useMemo(() => {
     const income =
@@ -160,8 +161,8 @@ export default function GoalPlanPage() {
             {t('goal.plan.savePill')}
           </span>
 
-          <p className="mt-3 flex items-baseline gap-1.5">
-            <span className="text-4xl leading-title-1 font-bold">{formatCurrency(surplus)}</span>
+          <p className="mt-3 flex flex-wrap items-baseline gap-x-1.5">
+            <span className="text-3xl leading-title-2 font-bold">{formatCurrencyWhole(surplus)}</span>
             <span className="text-md leading-body-lg font-medium text-hero-muted">
               {t('goal.plan.perMonth')}
             </span>
@@ -196,7 +197,7 @@ export default function GoalPlanPage() {
                 })}
               </p>
               <p className="text-sm leading-body-sm text-muted-foreground">
-                {formatCurrency(target)}
+                {formatCurrencyWhole(target)}
               </p>
             </div>
           </div>
@@ -269,7 +270,24 @@ export default function GoalPlanPage() {
         <div className="pointer-events-auto mx-auto flex max-w-md flex-col items-center gap-3">
           <Button
             className="h-[52px] w-full gap-2 rounded-[14px] text-md"
-            onClick={() => router.push('/start/save')}
+            onClick={() => {
+              const goalName = goalType
+                ? t(GOAL_LABEL_KEY[goalType])
+                : t('goal.type.customTitle')
+              setPlanSummary({
+                kind: 'goal',
+                primary: t('goal.plan.summaryPrimary', {
+                  amount: formatCurrencyWhole(surplus),
+                }),
+                caption: Number.isFinite(months)
+                  ? t('goal.plan.summaryCaption', {
+                      name: goalName,
+                      date: targetMonthLabel(months, locale),
+                    })
+                  : t('goal.plan.summaryCaptionNoDate', { name: goalName }),
+              })
+              router.push('/start/save')
+            }}
           >
             {t('goal.plan.saveCta')}
             <ArrowRight className="h-5 w-5" aria-hidden="true" />

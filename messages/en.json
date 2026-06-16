@@ -1634,7 +1634,10 @@
         "adjustLink": "Adjust numbers",
         "emptyTitle": "Let's build your plan",
         "emptySubtitle": "Tell us your goal and income first, and we'll show you when you can reach it.",
-        "emptyCta": "Start with a goal"
+        "emptyCta": "Start with a goal",
+        "summaryPrimary": "{amount}/mo",
+        "summaryCaption": "Reach {name} by {date}",
+        "summaryCaptionNoDate": "Toward {name}"
       }
     },
     "budget": {
@@ -1688,7 +1691,9 @@
         "saveCta": "Save my plan",
         "emptyTitle": "Let's build your budget",
         "emptySubtitle": "Tell us your income and savings target first, and we'll show your plan.",
-        "emptyCta": "Start with income"
+        "emptyCta": "Start with income",
+        "summaryPrimary": "{amount}/mo",
+        "summaryCaption": "Save {pct}% of your income"
       }
     },
     "health": {
@@ -1735,7 +1740,8 @@
       "tip_emergencyFund": "Grow your emergency fund toward ~6 months of spending.",
       "tip_netWorth": "Pay down debt and keep investing to push your net worth positive.",
       "buildBudgetCta": "Build a budget to improve it",
-      "saveCta": "Save my results"
+      "saveCta": "Save my results",
+      "summaryCaption": "out of 100 · {band}"
     },
     "convert": {
       "intro": {
@@ -1752,7 +1758,11 @@
         "createCta": "Create free account",
         "guestCta": "Continue as guest",
         "loginPrompt": "Already have an account?",
-        "loginLink": "Log in"
+        "loginLink": "Log in",
+        "pillGoal": "Your plan",
+        "pillBudget": "Your budget",
+        "pillHealth": "Your money health",
+        "personalizedSubtext": "Create a free account to keep this and track your progress — it'll sync across your devices and never get lost."
       },
       "form": {
         "back": "Back",

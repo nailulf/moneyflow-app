@@ -20,6 +20,7 @@ import { CurrencyInput } from '@/components/ui/atoms/currency-input'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 import { advanceOnboarding } from '@/lib/api/onboarding-funnel'
+import { useFunnelStore } from '@/lib/onboarding/funnel-store'
 import { formatCurrencyCompact } from '@/lib/data-utils'
 import {
   financialHealthScore,
@@ -311,6 +312,7 @@ function ResultStep({
 }) {
   const band = bandFor(result.score)
   const weakest = weakestFactor(result.breakdown)
+  const setPlanSummary = useFunnelStore((s) => s.setPlanSummary)
 
   // Gauge geometry — a track circle + a progress arc via stroke-dashoffset, on navy.
   const SIZE = 140
@@ -480,7 +482,14 @@ function ResultStep({
         <div className="pointer-events-auto mx-auto flex max-w-md flex-col items-center gap-2">
           <Button
             className="h-[52px] w-full gap-2 rounded-[14px] text-md"
-            onClick={() => router.push('/start/save')}
+            onClick={() => {
+              setPlanSummary({
+                kind: 'health',
+                primary: `${result.score}`,
+                caption: t('summaryCaption', { band: t(band.labelKey) }),
+              })
+              router.push('/start/save')
+            }}
           >
             {t('saveCta')}
             <ArrowRight className="h-5 w-5" aria-hidden="true" />

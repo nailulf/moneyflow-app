@@ -22,7 +22,7 @@ import { useTransactionCategories } from '@/hooks/useTransactionCategories'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 import { saveOnboardingPlan, advanceOnboarding } from '@/lib/api/onboarding-funnel'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
-import { formatCurrencyCompact } from '@/lib/data-utils'
+import { formatCurrencyCompact, formatCurrencyWhole } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
 
 /** Seeded TRANSFER category the savings allocation is booked against. */
@@ -49,6 +49,7 @@ export default function BudgetPlanPage() {
   const savingsAmount = useFunnelStore((s) => s.savingsAmount)
   const budgetSpend = useFunnelStore((s) => s.budgetSpend)
   const setBudgetSavingsChoice = useFunnelStore((s) => s.setBudgetSavingsChoice)
+  const setPlanSummary = useFunnelStore((s) => s.setPlanSummary)
 
   const [userId, setUserId] = useState<string | undefined>()
   const [selected, setSelected] = useState<OptionKey>('on_target')
@@ -151,6 +152,13 @@ export default function BudgetPlanPage() {
     setSaving(true)
     try {
       setBudgetSavingsChoice(selectedAmount)
+      setPlanSummary({
+        kind: 'budget',
+        primary: t('budget.plan.summaryPrimary', {
+          amount: formatCurrencyWhole(selectedAmount),
+        }),
+        caption: t('budget.plan.summaryCaption', { pct: pct(selectedAmount) }),
+      })
 
       // budgetSpend is keyed by real category id (set on the spend screen), so
       // allocations reference those ids directly — no find-or-create.

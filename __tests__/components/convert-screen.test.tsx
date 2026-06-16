@@ -32,6 +32,7 @@ jest.mock('@/lib/onboarding/convert', () => ({
 }))
 
 import ConvertPage from '@/app/start/save/page'
+import { useFunnelStore } from '@/lib/onboarding/funnel-store'
 
 describe('ConvertPage', () => {
   beforeEach(() => {
@@ -42,12 +43,40 @@ describe('ConvertPage', () => {
     continueAsGuest.mockClear()
     resendConfirmation.mockClear()
     resendConfirmation.mockResolvedValue(true)
+    // Default: no plan summary (signup-wall / generic-hero path).
+    useFunnelStore.getState().reset()
   })
 
-  it('calls continueAsGuest when "Continue as guest" is clicked on the intro step', () => {
+  it('calls continueAsGuest when the "Continue as guest" link is clicked on the intro step', () => {
     render(<ConvertPage />)
-    fireEvent.click(screen.getByRole('button', { name: /intro\.guestCta/i }))
+    // Guest exit is a quiet text link now, not a full button — but still a
+    // <button> element, so query it by its accessible name.
+    fireEvent.click(screen.getByText('intro.guestCta'))
     expect(continueAsGuest).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the generic celebration hero when no plan summary is set', () => {
+    render(<ConvertPage />)
+    expect(screen.getByText('intro.headline')).toBeInTheDocument()
+    expect(screen.getByText('intro.subtext')).toBeInTheDocument()
+  })
+
+  it('renders the personalized payoff hero from the store planSummary', () => {
+    useFunnelStore.getState().setPlanSummary({
+      kind: 'goal',
+      primary: 'Rp 2.400.000/mo',
+      caption: 'Reach Emergency fund by Jun 2027',
+    })
+    render(<ConvertPage />)
+
+    // The personalized primary + caption (pre-formatted strings) render…
+    expect(screen.getByText('Rp 2.400.000/mo')).toBeInTheDocument()
+    expect(screen.getByText('Reach Emergency fund by Jun 2027')).toBeInTheDocument()
+    // …and the goal kind pill + personalized subtext show.
+    expect(screen.getByText('intro.pillGoal')).toBeInTheDocument()
+    expect(screen.getByText('intro.personalizedSubtext')).toBeInTheDocument()
+    // The generic celebration headline is replaced.
+    expect(screen.queryByText('intro.headline')).not.toBeInTheDocument()
   })
 
   it('reveals the form and submits valid credentials via convertWithEmail', async () => {
