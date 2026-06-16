@@ -1640,6 +1640,45 @@
       "skip": "Lewati",
       "saveCta": "Buat akun untuk menyimpan ini",
       "guestCta": "Jelajahi sebagai tamu"
+    },
+    "convert": {
+      "intro": {
+        "badge": "Rencana siap",
+        "headline": "Rencanamu sudah siap!",
+        "subtext": "Buat akun gratis untuk menyimpan rencanamu dan memantau perkembanganmu.",
+        "benefitsTitle": "Yang kamu dapatkan",
+        "benefitGoalTitle": "Simpan tujuanmu & pantau perkembangan",
+        "benefitGoalSub": "Rencanamu diperbarui otomatis seiring waktu.",
+        "benefitStreakTitle": "Catatan pengeluaran harian dengan streak",
+        "benefitStreakSub": "Bangun kebiasaan dan pantau setiap rupiah.",
+        "benefitSyncTitle": "Tersinkron di semua perangkat, cadangan aman",
+        "benefitSyncSub": "Datamu aman dan tersedia di mana saja.",
+        "createCta": "Buat akun gratis",
+        "guestCta": "Lanjutkan sebagai tamu",
+        "loginPrompt": "Sudah punya akun?",
+        "loginLink": "Masuk"
+      },
+      "form": {
+        "back": "Kembali",
+        "title": "Buat akunmu",
+        "subtitle": "Simpan rencanamu dan lanjutkan dari tempat terakhirmu.",
+        "google": "Lanjutkan dengan Google",
+        "apple": "Lanjutkan dengan Apple",
+        "divider": "atau dengan email",
+        "emailLabel": "Email",
+        "emailPlaceholder": "kamu@contoh.com",
+        "passwordLabel": "Kata sandi",
+        "passwordPlaceholder": "Minimal 6 karakter",
+        "terms": "Saya menyetujui Ketentuan & Kebijakan Privasi",
+        "submit": "Buat akun",
+        "submitting": "Membuat akun…",
+        "loginPrompt": "Sudah punya akun?",
+        "loginLink": "Masuk",
+        "invalidEmail": "Masukkan alamat email yang valid.",
+        "passwordTooShort": "Kata sandi minimal 6 karakter.",
+        "errorGeneric": "Terjadi kesalahan. Silakan coba lagi.",
+        "oauthError": "Tidak dapat memulai proses masuk. Silakan coba lagi."
+      }
     }
   }
 }

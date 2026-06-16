@@ -1640,6 +1640,45 @@
       "skip": "Skip",
       "saveCta": "Create an account to save this",
       "guestCta": "Explore as a guest"
+    },
+    "convert": {
+      "intro": {
+        "badge": "Plan ready",
+        "headline": "Your plan is ready!",
+        "subtext": "Create a free account to save your plan and track your progress.",
+        "benefitsTitle": "What you get",
+        "benefitGoalTitle": "Save your goal & track progress",
+        "benefitGoalSub": "Your plan is updated automatically as you go.",
+        "benefitStreakTitle": "Daily spending log with streaks",
+        "benefitStreakSub": "Build a habit and stay on top of every rupiah.",
+        "benefitSyncTitle": "Synced across devices, secure backup",
+        "benefitSyncSub": "Your data is safe and available everywhere.",
+        "createCta": "Create free account",
+        "guestCta": "Continue as guest",
+        "loginPrompt": "Already have an account?",
+        "loginLink": "Log in"
+      },
+      "form": {
+        "back": "Back",
+        "title": "Create your account",
+        "subtitle": "Keep your plan and pick up right where you left off.",
+        "google": "Continue with Google",
+        "apple": "Continue with Apple",
+        "divider": "or with email",
+        "emailLabel": "Email",
+        "emailPlaceholder": "you@example.com",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "At least 6 characters",
+        "terms": "I agree to the Terms & Privacy Policy",
+        "submit": "Create account",
+        "submitting": "Creating account…",
+        "loginPrompt": "Already have an account?",
+        "loginLink": "Log in",
+        "invalidEmail": "Enter a valid email address.",
+        "passwordTooShort": "Password must be at least 6 characters.",
+        "errorGeneric": "Something went wrong. Please try again.",
+        "oauthError": "Could not start sign-in. Please try again."
+      }
     }
   }
 }
