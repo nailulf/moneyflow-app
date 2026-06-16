@@ -1629,6 +1629,45 @@
         "emptyCta": "Mulai dengan tujuan"
       }
     },
+    "budget": {
+      "continue": "Lanjut",
+      "saveError": "Kami tidak bisa menyimpannya. Silakan coba lagi.",
+      "income": {
+        "title": "Ayo susun anggaranmu",
+        "subtitle": "Kami akan menyusun rencana sesuai pemasukanmu.",
+        "label": "Pemasukan bersih per bulan"
+      },
+      "savings": {
+        "title": "Berapa yang ingin kamu tabung?",
+        "subtitle": "Target yang baik adalah 20% dari pemasukan.",
+        "label": "Tabungan bulanan",
+        "preset": "{pct}%",
+        "leftToSpend": "Sisa {amount} untuk dibelanjakan",
+        "overWarning": "Tabungan tidak boleh melebihi pemasukanmu"
+      },
+      "spend": {
+        "title": "Berapa biaya hidupmu saat ini?",
+        "subtitle": "Perkiraan saja cukup — ketuk angka untuk mengubahnya.",
+        "totalLabel": "Total pengeluaran",
+        "cta": "Lihat rencanaku"
+      },
+      "plan": {
+        "title": "Pilihan tabunganmu",
+        "savePill": "Kamu bisa menabung",
+        "perMonth": "/bulan",
+        "breakdownLine": "Pemasukan {income} · Pengeluaran {spending}",
+        "savingsLabel": "Tabungan",
+        "savingsRate": "{pct}% dari pemasukan",
+        "spendingLabel": "Pengeluaran",
+        "leftoverLabel": "Sisa / penyangga",
+        "overBudget": "Melebihi anggaran — kurangi pengeluaran atau tabungan",
+        "saveCta": "Simpan rencanaku",
+        "adjustLink": "Ubah angka",
+        "emptyTitle": "Ayo susun anggaranmu",
+        "emptySubtitle": "Beri tahu pemasukan dan target tabunganmu dulu, lalu kami tunjukkan rencanamu.",
+        "emptyCta": "Mulai dengan pemasukan"
+      }
+    },
     "health": {
       "incomeTitle": "Yuk cek kesehatan keuanganmu",
       "incomeSubtitle": "Gambaran singkat — tanpa perlu akun.",

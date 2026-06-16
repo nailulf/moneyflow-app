@@ -487,8 +487,7 @@ function ResultStep({
           </Button>
           <button
             type="button"
-            // TODO: point to /start/budget when Flow 2 is built
-            onClick={() => router.push('/start/intent')}
+            onClick={() => router.push('/start/budget/income')}
             className="py-1 text-sm leading-body-sm font-semibold text-primary hover:text-primary/80"
           >
             {t('buildBudgetCta')}

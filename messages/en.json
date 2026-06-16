@@ -1629,6 +1629,45 @@
         "emptyCta": "Start with a goal"
       }
     },
+    "budget": {
+      "continue": "Continue",
+      "saveError": "We could not save that. Please try again.",
+      "income": {
+        "title": "Let's build your budget",
+        "subtitle": "We'll shape a plan around what you earn.",
+        "label": "Monthly take-home income"
+      },
+      "savings": {
+        "title": "How much do you want to save?",
+        "subtitle": "A good target is 20% of income.",
+        "label": "Monthly savings",
+        "preset": "{pct}%",
+        "leftToSpend": "{amount} left to spend",
+        "overWarning": "Savings can't be more than your income"
+      },
+      "spend": {
+        "title": "What's your cost of living today?",
+        "subtitle": "Estimate is fine — tap an amount to adjust.",
+        "totalLabel": "Total expenses",
+        "cta": "See my plan"
+      },
+      "plan": {
+        "title": "Your savings options",
+        "savePill": "You can save",
+        "perMonth": "/month",
+        "breakdownLine": "Income {income} · Spending {spending}",
+        "savingsLabel": "Savings",
+        "savingsRate": "{pct}% of income",
+        "spendingLabel": "Spending",
+        "leftoverLabel": "Leftover / buffer",
+        "overBudget": "Over budget — trim spending or savings",
+        "saveCta": "Save my plan",
+        "adjustLink": "Adjust numbers",
+        "emptyTitle": "Let's build your budget",
+        "emptySubtitle": "Tell us your income and savings target first, and we'll show your plan.",
+        "emptyCta": "Start with income"
+      }
+    },
     "health": {
       "incomeTitle": "Let’s check your money health",
       "incomeSubtitle": "A quick snapshot — no account needed.",

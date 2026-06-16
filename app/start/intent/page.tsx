@@ -49,7 +49,7 @@ const OPTIONS: Option[] = [
     titleKey: 'intent.budgetTitle',
     subKey: 'intent.budgetSub',
     tint: 'bg-tint-blue-bg text-tint-blue-fg',
-    destination: '/start/goal/income',
+    destination: '/start/budget/income',
   },
   {
     id: 'goal',
