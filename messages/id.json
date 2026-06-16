@@ -2,12 +2,19 @@
   "auth": {
     "login": {
       "title": "Selamat datang kembali",
-      "subtitle": "Masukkan email Anda di bawah untuk masuk ke akun Anda",
+      "subtitle": "Lanjutkan dari tempat Anda berhenti.",
       "email": "Email",
       "emailPlaceholder": "m@example.com",
       "password": "Kata Sandi",
       "forgotPassword": "Lupa kata sandi?",
       "submit": "Masuk",
+      "submitting": "Sedang masuk…",
+      "google": "Lanjutkan dengan Google",
+      "apple": "Lanjutkan dengan Apple",
+      "divider": "atau dengan email",
+      "oauthError": "Tidak dapat memulai proses masuk. Silakan coba lagi.",
+      "newHere": "Baru di sini?",
+      "createAccount": "Buat akun",
       "orContinueWith": "Atau lanjutkan dengan",
       "noAccount": "Belum punya akun?",
       "signUp": "Daftar",
@@ -74,7 +81,9 @@
     },
     "verifyEmail": {
       "title": "Periksa email Anda",
-      "description": "Kami telah mengirimkan tautan verifikasi ke",
+      "description": "Kami mengirim tautan konfirmasi ke",
+      "fallbackEmail": "alamat email Anda",
+      "clickToFinish": "Klik tautan tersebut untuk menyelesaikan pengaturan akun Anda.",
       "instruction": "Klik tautan di email untuk memverifikasi akun Anda. Jika tidak menemukannya, periksa folder spam.",
       "resendCountdown": "Kirim ulang email dalam {countdown}d",
       "resendButton": "Kirim ulang email verifikasi",
@@ -89,13 +98,18 @@
       }
     },
     "forgotPassword": {
-      "title": "Lupa Kata Sandi",
+      "title": "Lupa kata sandi?",
       "description": "Masukkan alamat email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda",
+      "subtitle": "Masukkan email Anda dan kami akan mengirim tautan reset.",
       "email": "Email",
       "emailPlaceholder": "m@example.com",
-      "submit": "Kirim Tautan Reset",
-      "rememberPassword": "Ingat kata sandi Anda?",
+      "submit": "Kirim tautan reset",
+      "submitting": "Mengirim…",
+      "rememberPassword": "Sudah ingat?",
       "signIn": "Masuk",
+      "successTitle": "Periksa email Anda",
+      "successBody": "Kami mengirim tautan reset ke",
+      "resend": "Gunakan email lain",
       "successEmailSent": "Periksa email Anda untuk tautan reset kata sandi",
       "errorFailed": "Gagal mengirim email reset kata sandi",
       "errors": {
@@ -470,8 +484,16 @@
     "screen": {
       "title": "Transaksi",
       "searchPlaceholder": "Cari transaksi",
-      "tabs": { "all": "Semua", "income": "Pemasukan", "expense": "Pengeluaran", "transfer": "Transfer" },
-      "summary": { "income": "Masuk", "expense": "Keluar" },
+      "tabs": {
+        "all": "Semua",
+        "income": "Pemasukan",
+        "expense": "Pengeluaran",
+        "transfer": "Transfer"
+      },
+      "summary": {
+        "income": "Masuk",
+        "expense": "Keluar"
+      },
       "prevMonth": "Bulan sebelumnya",
       "nextMonth": "Bulan berikutnya",
       "today": "Hari ini",
@@ -481,7 +503,16 @@
       "empty": "Belum ada transaksi",
       "emptyFiltered": "Tidak ada transaksi yang cocok dengan filter",
       "reset": "Atur ulang",
-      "filter": { "title": "Filter", "titleWithCount": "Filter ({count} aktif)", "categories": "Kategori", "accounts": "Akun", "amountMin": "Jumlah min", "amountMax": "Jumlah maks", "apply": "Terapkan", "reset": "Atur ulang" }
+      "filter": {
+        "title": "Filter",
+        "titleWithCount": "Filter ({count} aktif)",
+        "categories": "Kategori",
+        "accounts": "Akun",
+        "amountMin": "Jumlah min",
+        "amountMax": "Jumlah maks",
+        "apply": "Terapkan",
+        "reset": "Atur ulang"
+      }
     }
   },
   "navigation": {
@@ -650,7 +681,10 @@
           "label": "KPR / Kredit Properti",
           "description": "Cicilan rumah atau KPR"
         },
-        "DIGITAL_WALLET": { "label": "Dompet Digital", "description": "GoPay, OVO, Dana, dll." },
+        "DIGITAL_WALLET": {
+          "label": "Dompet Digital",
+          "description": "GoPay, OVO, Dana, dll."
+        },
         "OTHER": {
           "label": "Lainnya",
           "description": "Akun lainnya"
@@ -756,7 +790,8 @@
       "other": "Lainnya",
       "property": "Properti",
       "vehicle": "Kendaraan",
-      "mortgage": "KPR / Kredit Properti", "digitalWallet": "Dompet Digital"
+      "mortgage": "KPR / Kredit Properti",
+      "digitalWallet": "Dompet Digital"
     },
     "groups": {
       "savingsInvestment": "Tabungan & Investasi",
@@ -990,14 +1025,38 @@
       "tabSettings": "Pengaturan"
     },
     "categories": {
-      "PROPERTY": { "label": "Properti", "template": "Beli rumah" },
-      "WEDDING": { "label": "Pernikahan", "template": "Rencanakan pernikahan" },
-      "KIDS": { "label": "Anak", "template": "Punya anak" },
-      "EDUCATION": { "label": "Pendidikan", "template": "Tabungan kuliah" },
-      "HAJJ": { "label": "Haji", "template": "Ibadah haji" },
-      "VEHICLE": { "label": "Kendaraan", "template": "Beli kendaraan" },
-      "RETIREMENT": { "label": "Pensiun", "template": "Rencanakan pensiun" },
-      "OTHER": { "label": "Lainnya", "template": "Peristiwa kustom" }
+      "PROPERTY": {
+        "label": "Properti",
+        "template": "Beli rumah"
+      },
+      "WEDDING": {
+        "label": "Pernikahan",
+        "template": "Rencanakan pernikahan"
+      },
+      "KIDS": {
+        "label": "Anak",
+        "template": "Punya anak"
+      },
+      "EDUCATION": {
+        "label": "Pendidikan",
+        "template": "Tabungan kuliah"
+      },
+      "HAJJ": {
+        "label": "Haji",
+        "template": "Ibadah haji"
+      },
+      "VEHICLE": {
+        "label": "Kendaraan",
+        "template": "Beli kendaraan"
+      },
+      "RETIREMENT": {
+        "label": "Pensiun",
+        "template": "Rencanakan pensiun"
+      },
+      "OTHER": {
+        "label": "Lainnya",
+        "template": "Peristiwa kustom"
+      }
     },
     "events": {
       "yourEvents": "Peristiwa Anda",
@@ -1108,7 +1167,10 @@
         "investment": "Akun Investasi"
       }
     },
-    "common": { "save": "Simpan", "back": "Kembali" },
+    "common": {
+      "save": "Simpan",
+      "back": "Kembali"
+    },
     "bank": {
       "title": "Bank / Dompet",
       "segBank": "Rekening Bank",
@@ -1222,7 +1284,12 @@
     "createTitle": "Buat Anggaran",
     "editTitle": "Ubah Anggaran",
     "stepOf": "{step} dari {total}",
-    "periodType": { "monthly": "Bulanan", "monthlyHint": "Atur batas per kategori tiap bulan", "yearly": "Tahunan", "yearlyHint": "Rencanakan pengeluaran besar tahunan" },
+    "periodType": {
+      "monthly": "Bulanan",
+      "monthlyHint": "Atur batas per kategori tiap bulan",
+      "yearly": "Tahunan",
+      "yearlyHint": "Rencanakan pengeluaran besar tahunan"
+    },
     "income": "Pemasukan periode ini: {amount}",
     "lockedTitle": "Anggaran bulanan (terkunci)",
     "lockedBanner": "Kategori tahunan tidak boleh tumpang tindih dengan anggaran bulanan",
@@ -1276,7 +1343,10 @@
       "ofIncome": "{pct}% dari pemasukan",
       "save": "Simpan Anggaran"
     },
-    "created": { "title": "Anggaran dibuat!", "cta": "Kembali ke Anggaran" },
+    "created": {
+      "title": "Anggaran dibuat!",
+      "cta": "Kembali ke Anggaran"
+    },
     "confirm": {
       "title": "Terapkan perubahan anggaran?",
       "effect": "Perubahan langsung berlaku untuk periode ini. Bulan-bulan sebelumnya tidak terpengaruh.",
@@ -1287,7 +1357,11 @@
     "noChanges": "Belum ada perubahan",
     "monthlyLabel": "{month} · Anggaran Bulanan",
     "yearlyLabel": "{year} · Anggaran Tahunan",
-    "errors": { "loadFailed": "Gagal memuat. Coba lagi.", "saveFailed": "Gagal menyimpan anggaran. Coba lagi.", "totalRequired": "Alokasikan minimal satu kategori" }
+    "errors": {
+      "loadFailed": "Gagal memuat. Coba lagi.",
+      "saveFailed": "Gagal menyimpan anggaran. Coba lagi.",
+      "totalRequired": "Alokasikan minimal satu kategori"
+    }
   },
   "budgetTab": {
     "error": "Gagal memuat anggaran periode ini. Coba lagi.",
@@ -1324,7 +1398,10 @@
       "afternoon": "Selamat siang 👋",
       "evening": "Selamat malam 👋"
     },
-    "today": { "title": "Hari ini, {date}", "logged": "{count} tercatat" },
+    "today": {
+      "title": "Hari ini, {date}",
+      "logged": "{count} tercatat"
+    },
     "hero": {
       "totalNetWorth": "Total Kekayaan Bersih",
       "thisMonth": "{pct}% bulan ini",
@@ -1372,14 +1449,58 @@
   "portfolio": {
     "title": "Portofolio",
     "newAccount": "Akun Baru",
-    "hero": { "totalValue": "Total Nilai Portofolio", "assets": "{count} aset" },
-    "accounts": { "title": "Akun Investasi", "seeAll": "Lihat semua →", "holdings": "{count} aset", "empty": "Belum ada akun investasi." },
-    "allocation": { "title": "Alokasi Aset" },
-    "top": { "title": "Aset Terbesar", "empty": "Belum ada aset — tambahkan ke akun investasi." },
-    "class": { "IDX_STOCK": "Saham IDX", "US_STOCK": "Saham AS", "MUTUAL_FUND": "Reksa Dana", "ETF": "ETF", "BOND": "Obligasi", "OTHER": "Lainnya" },
-    "classHint": { "IDX_STOCK": "Saham Indonesia di IDX", "US_STOCK": "Terdaftar NYSE & NASDAQ", "MUTUAL_FUND": "Reksa dana terkelola", "ETF": "Dana yang diperdagangkan di bursa", "BOND": "Obligasi pemerintah & korporasi", "OTHER": "Lainnya" },
-    "detail": { "investmentAccount": "Akun Investasi", "addAsset": "Tambah Aset", "back": "Kembali", "emptyTitle": "Belum ada aset", "emptyDescription": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:", "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis." },
-    "manage": { "edit": "Ubah", "remove": "Hapus dari portofolio", "currentValue": "Nilai saat ini", "cancel": "Batal", "save": "Simpan", "removeWarning": "Ini menghapus aset dan riwayatnya. Saldo akun akan diperbarui.", "confirmRemove": "Hapus", "saveFailed": "Gagal memperbarui aset.", "deleteFailed": "Gagal menghapus aset." },
+    "hero": {
+      "totalValue": "Total Nilai Portofolio",
+      "assets": "{count} aset"
+    },
+    "accounts": {
+      "title": "Akun Investasi",
+      "seeAll": "Lihat semua →",
+      "holdings": "{count} aset",
+      "empty": "Belum ada akun investasi."
+    },
+    "allocation": {
+      "title": "Alokasi Aset"
+    },
+    "top": {
+      "title": "Aset Terbesar",
+      "empty": "Belum ada aset — tambahkan ke akun investasi."
+    },
+    "class": {
+      "IDX_STOCK": "Saham IDX",
+      "US_STOCK": "Saham AS",
+      "MUTUAL_FUND": "Reksa Dana",
+      "ETF": "ETF",
+      "BOND": "Obligasi",
+      "OTHER": "Lainnya"
+    },
+    "classHint": {
+      "IDX_STOCK": "Saham Indonesia di IDX",
+      "US_STOCK": "Terdaftar NYSE & NASDAQ",
+      "MUTUAL_FUND": "Reksa dana terkelola",
+      "ETF": "Dana yang diperdagangkan di bursa",
+      "BOND": "Obligasi pemerintah & korporasi",
+      "OTHER": "Lainnya"
+    },
+    "detail": {
+      "investmentAccount": "Akun Investasi",
+      "addAsset": "Tambah Aset",
+      "back": "Kembali",
+      "emptyTitle": "Belum ada aset",
+      "emptyDescription": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:",
+      "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis."
+    },
+    "manage": {
+      "edit": "Ubah",
+      "remove": "Hapus dari portofolio",
+      "currentValue": "Nilai saat ini",
+      "cancel": "Batal",
+      "save": "Simpan",
+      "removeWarning": "Ini menghapus aset dan riwayatnya. Saldo akun akan diperbarui.",
+      "confirmRemove": "Hapus",
+      "saveFailed": "Gagal memperbarui aset.",
+      "deleteFailed": "Gagal menghapus aset."
+    },
     "emptyCta": "Buat akun investasi"
   },
   "holdingCreate": {
@@ -1399,6 +1520,271 @@
     "dateLabel": "Tanggal Beli",
     "estimatedTotal": "Estimasi Total",
     "submit": "Tambah ke Portofolio",
-    "errors": { "tickerRequired": "Masukkan ticker", "amountInvalid": "Masukkan jumlah yang valid", "createFailed": "Gagal menambah aset. Coba lagi." }
+    "errors": {
+      "tickerRequired": "Masukkan ticker",
+      "amountInvalid": "Masukkan jumlah yang valid",
+      "createFailed": "Gagal menambah aset. Coba lagi."
+    }
+  },
+  "start": {
+    "brand": "TemanTumbuh",
+    "login": "Masuk",
+    "guestPill": "Kamu menjelajah sebagai tamu",
+    "hero": {
+      "headline": "Keuangan yang akhirnya masuk akal",
+      "subtext": "Lacak pengeluaran, anggaran, saldo, dan capai tujuanmu — semua di satu tempat."
+    },
+    "heroStatLabel": "Rata-rata pengguna lebih hemat dalam 3 bulan",
+    "heroStatDelta": "+23%",
+    "features": {
+      "title": "Semua kebutuhan keuanganmu",
+      "tracking": "Pencatatan tanpa repot",
+      "trackingSub": "Foto struk atau impor rekening — AI yang mengetik.",
+      "budgets": "Anggaran yang pas untukmu",
+      "budgetsSub": "Dibuat dari pengeluaran nyatamu, bukan template.",
+      "goals": "Tujuan yang bisa kamu capai",
+      "goalsSub": "Lihat persis kapan kamu mencapai yang sedang kamu tabung.",
+      "netWorth": "Kekayaan bersih & investasi",
+      "netWorthSub": "Rekening, aset, dan portofolio dalam satu gambaran."
+    },
+    "healthCheck": {
+      "title": "Seberapa sehat keuanganmu?",
+      "subtitle": "Ikuti cek gratis 2 menit — tujuan, pemasukan, dan pengeluaranmu. Tanpa akun.",
+      "cta": "Mulai cek 2 menit"
+    },
+    "intent": {
+      "title": "Apa yang membawamu ke sini hari ini?",
+      "subtitle": "Kami akan menyesuaikan langkah pertamamu.",
+      "back": "Kembali",
+      "skip": "Lewati",
+      "continue": "Lanjut",
+      "healthTitle": "Cek kesehatan keuanganku",
+      "healthSub": "Lihat posisimu dalam 2 menit",
+      "budgetTitle": "Susun anggaran yang berfungsi",
+      "budgetSub": "Rencanakan pengeluaran sesuai hidupmu",
+      "goalTitle": "Lacak tujuan keuangan",
+      "goalSub": "Menabung untuk hal yang berarti bagimu",
+      "otherTitle": "Ada hal lain yang mengganjal",
+      "otherSub": "Ceritakan keluhan keuanganmu",
+      "guestNote": "Tanpa akun — jelajahi sebagai tamu"
+    },
+    "goal": {
+      "continue": "Lanjut",
+      "saveError": "Tidak dapat menyimpan. Silakan coba lagi.",
+      "type": {
+        "title": "Apa tujuan jangka pendekmu?",
+        "subtitle": "Pilih sesuatu yang ingin kamu capai dalam waktu dekat. Kami akan menyusun rencananya.",
+        "emergencyTitle": "Dana darurat",
+        "emergencySub": "Pengeluaran 3–6 bulan",
+        "vacationTitle": "Liburan / Perjalanan",
+        "vacationSub": "Bali, Jepang, atau ke mana saja",
+        "gadgetTitle": "Gadget baru",
+        "gadgetSub": "Ponsel, laptop, kamera",
+        "debtTitle": "Lunasi utang",
+        "debtSub": "Bereskan pinjaman atau paylater",
+        "customTitle": "Tujuan khusus",
+        "customSub": "Tentukan targetmu sendiri",
+        "targetLabel": "Jumlah target",
+        "horizonLabel": "Kapan kamu membutuhkannya?",
+        "horizon3": "3 bulan",
+        "horizon6": "6 bulan",
+        "horizon12": "1 tahun",
+        "horizonCustom": "Lainnya"
+      },
+      "income": {
+        "title": "Berapa penghasilan bulananmu?",
+        "subtitle": "Angka perkiraan tidak masalah — bisa disesuaikan nanti.",
+        "mainLabel": "Penghasilan utama (gaji)",
+        "freqLabel": "Seberapa sering?",
+        "freqMonthly": "Bulanan",
+        "freqWeekly": "Mingguan",
+        "freqIrregular": "Tidak tetap",
+        "otherTitle": "Sumber penghasilan lain",
+        "addSource": "Tambah sumber lain",
+        "removeSource": "Hapus sumber penghasilan",
+        "sourceNameLabel": "Nama sumber",
+        "sourceNamePlaceholder": "mis. Freelance, Sewa",
+        "sourceAmountLabel": "Jumlah",
+        "perMonth": "{amount} / bulan",
+        "addCancel": "Batal",
+        "addConfirm": "Tambah",
+        "privacyNote": "Tersimpan di perangkatmu sampai kamu membuat akun.",
+        "editSource": "Ubah sumber penghasilan"
+      },
+      "spend": {
+        "title": "Berapa pengeluaran bulananmu?",
+        "subtitle": "Perkiraan tidak masalah. Ketuk jumlah untuk menyesuaikan.",
+        "cta": "Hitung rencanaku"
+      },
+      "plan": {
+        "savePill": "Kamu bisa menabung",
+        "perMonth": "/bulan",
+        "incomeLabel": "Pemasukan",
+        "expensesLabel": "Pengeluaran",
+        "goalLabel": "Tujuan: {name}",
+        "achievable": "Tercapai",
+        "tight": "Ketat",
+        "reachIn": "Tercapai dalam ~{months} bulan · {date}",
+        "noSurplus": "Tambah pemasukan atau kurangi pengeluaran untuk mulai menabung",
+        "whatIfTitle": "Bagaimana jika?",
+        "whatIfCut": "Kurangi gaya hidup {amount}",
+        "whatIfSide": "Tambah penghasilan sampingan {amount}",
+        "whatIfMonths": "{months} bulan",
+        "saveCta": "Simpan rencanaku",
+        "adjustLink": "Ubah angka",
+        "emptyTitle": "Ayo susun rencanamu",
+        "emptySubtitle": "Beri tahu tujuan dan pemasukanmu dulu, lalu kami tunjukkan kapan kamu bisa mencapainya.",
+        "emptyCta": "Mulai dengan tujuan"
+      }
+    },
+    "budget": {
+      "continue": "Lanjut",
+      "saveError": "Kami tidak bisa menyimpannya. Silakan coba lagi.",
+      "income": {
+        "title": "Ayo susun anggaranmu",
+        "subtitle": "Beri tahu pemasukanmu — kami akan membaginya jadi rencana yang seimbang.",
+        "label": "Pemasukan bulanan (bersih)",
+        "noteTitle": "Dibangun sesuai target tabunganmu",
+        "noteBody": "Beri tahu berapa yang ingin kamu tabung dan berapa pengeluaranmu — kami tunjukkan pilihan yang cocok, tanpa aturan kaku."
+      },
+      "savings": {
+        "title": "Berapa yang ingin kamu tabung?",
+        "subtitle": "Tetapkan target bulanan yang pas — bisa diubah kapan saja.",
+        "label": "Target tabungan bulanan",
+        "ofIncome": "{pct}% dari pemasukan {income}",
+        "quickPicks": "Pilihan cepat",
+        "preset": "{pct}%",
+        "custom": "Sesuaikan",
+        "note": "Menabung sedikit tapi rutin lebih baik daripada tidak sama sekali. Mulai dari yang kamu bisa."
+      },
+      "spend": {
+        "title": "Berapa biaya hidupmu saat ini?",
+        "subtitle": "Kira-kira pengeluaranmu tiap bulan sekarang. Ketuk angka untuk mengubahnya.",
+        "addCategory": "Tambah kategori",
+        "newCategory": "Kategori baru",
+        "totalLabel": "Biaya hidup saat ini",
+        "cta": "Lihat pilihanku"
+      },
+      "plan": {
+        "title": "Pilihan tabunganmu",
+        "subtitle": "Dari pemasukan {income} dan pengeluaran {spending}. Pilih rencana atau atur sendiri.",
+        "summaryIncome": "Pemasukan",
+        "summarySpending": "Pengeluaran",
+        "summaryAvailable": "Tersedia",
+        "chooseLabel": "Pilih seberapa giat menabung",
+        "recommended": "Disarankan",
+        "relaxedTitle": "Santai",
+        "relaxedSubtitle": "Tanpa perubahan — tabung sisa yang ada hari ini.",
+        "relaxedOnTrackSubtitle": "Kamu sudah on track — tabung kelebihannya.",
+        "onTargetTitle": "Sesuai target",
+        "onTargetSubtitle": "Pangkas {amount} dari gaya hidup & makanan.",
+        "onTargetOnTrackSubtitle": "Tepat di targetmu — tak perlu memangkas.",
+        "ambitiousTitle": "Ambisius",
+        "ambitiousSubtitle": "Pangkas {amount} dari beberapa kategori.",
+        "ambitiousOnTrackSubtitle": "Dorong sedikit lagi dan tabung lebih banyak.",
+        "percentOfIncome": "{pct}%",
+        "specificTitle": "Atur anggaran khusus",
+        "specificSubtitle": "Sudah punya angka? Susun kategori per kategori.",
+        "saveCta": "Simpan rencanaku",
+        "emptyTitle": "Ayo susun anggaranmu",
+        "emptySubtitle": "Beri tahu pemasukan dan target tabunganmu dulu, lalu kami tunjukkan rencanamu.",
+        "emptyCta": "Mulai dengan pemasukan"
+      }
+    },
+    "health": {
+      "incomeTitle": "Yuk cek kesehatan keuanganmu",
+      "incomeSubtitle": "Gambaran singkat — tanpa perlu akun.",
+      "savingsTitle": "Apa yang sudah kamu sisihkan?",
+      "savingsSubtitle": "Tabungan dan investasi yang kamu punya saat ini.",
+      "debtsTitle": "Ada utang atau pinjaman?",
+      "debtsSubtitle": "Lewati jika tidak ada.",
+      "incomeLabel": "Pemasukan bersih bulanan",
+      "spendingLabel": "Pengeluaran bulanan",
+      "savingsLabel": "Tabungan / dana darurat",
+      "investmentsLabel": "Investasi",
+      "debtLabel": "Total utang / pinjaman",
+      "debtPaymentLabel": "Cicilan bulanan",
+      "continue": "Lanjut",
+      "seeHealth": "Lihat kesehatanku",
+      "scoreOutOf": "dari 100",
+      "statusGood": "Baik",
+      "statusWatch": "Pantau",
+      "statusLow": "Rendah",
+      "back": "Kembali",
+      "skip": "Lewati",
+      "bandOnTrack": "Sesuai jalur",
+      "bandCanImprove": "Bisa ditingkatkan",
+      "bandNeedsWork": "Perlu dibenahi",
+      "summary_savingsRatio": "Fondasi yang baik — menabung lebih banyak tiap bulan yang paling menahan skornya.",
+      "summary_debtToIncome": "Fondasi yang baik — beban utang yang paling menahan skornya.",
+      "summary_emergencyFund": "Fondasi yang baik — dana daruratmu yang paling menahan skornya.",
+      "summary_netWorth": "Fondasi yang baik — membangun kekayaan bersih yang paling menahan skornya.",
+      "row_savingsRatio": "Rasio tabungan",
+      "row_debtToIncome": "Utang terhadap pemasukan",
+      "row_emergencyFund": "Dana darurat",
+      "row_netWorth": "Kekayaan bersih",
+      "detailSavings": "{rate}% pemasukan ditabung",
+      "detailDebt": "{pct}% untuk utang",
+      "detailEmergency": "{months} bulan pengeluaran",
+      "detailNetWorth": "{amount} · {sign}",
+      "signPositive": "positif",
+      "signNegative": "negatif",
+      "tipTitle": "Prioritas utama",
+      "tip_savingsRatio": "Usahakan menyisihkan minimal 20% pemasukan tiap bulan — penghematan kecil pun berarti.",
+      "tip_debtToIncome": "Jaga cicilan utang di bawah 20% pemasukan agar lebih lega.",
+      "tip_emergencyFund": "Tingkatkan dana daruratmu menuju ~6 bulan pengeluaran.",
+      "tip_netWorth": "Lunasi utang dan terus berinvestasi agar kekayaan bersihmu positif.",
+      "buildBudgetCta": "Buat anggaran untuk memperbaikinya",
+      "saveCta": "Simpan hasilku"
+    },
+    "convert": {
+      "intro": {
+        "badge": "Rencana siap",
+        "headline": "Rencanamu sudah siap!",
+        "subtext": "Buat akun gratis untuk menyimpan rencanamu dan memantau perkembanganmu.",
+        "benefitsTitle": "Yang kamu dapatkan",
+        "benefitGoalTitle": "Simpan tujuanmu & pantau perkembangan",
+        "benefitGoalSub": "Rencanamu diperbarui otomatis seiring waktu.",
+        "benefitStreakTitle": "Catatan pengeluaran harian dengan streak",
+        "benefitStreakSub": "Bangun kebiasaan dan pantau setiap rupiah.",
+        "benefitSyncTitle": "Tersinkron di semua perangkat, cadangan aman",
+        "benefitSyncSub": "Datamu aman dan tersedia di mana saja.",
+        "createCta": "Buat akun gratis",
+        "guestCta": "Lanjutkan sebagai tamu",
+        "loginPrompt": "Sudah punya akun?",
+        "loginLink": "Masuk"
+      },
+      "form": {
+        "back": "Kembali",
+        "title": "Buat akunmu",
+        "subtitle": "Simpan rencanamu dan lanjutkan dari tempat terakhirmu.",
+        "google": "Lanjutkan dengan Google",
+        "apple": "Lanjutkan dengan Apple",
+        "divider": "atau dengan email",
+        "emailLabel": "Email",
+        "emailPlaceholder": "kamu@contoh.com",
+        "passwordLabel": "Kata sandi",
+        "passwordPlaceholder": "Minimal 6 karakter",
+        "terms": "Saya menyetujui Ketentuan & Kebijakan Privasi",
+        "submit": "Buat akun",
+        "submitting": "Membuat akun…",
+        "loginPrompt": "Sudah punya akun?",
+        "loginLink": "Masuk",
+        "invalidEmail": "Masukkan alamat email yang valid.",
+        "passwordTooShort": "Kata sandi minimal 6 karakter.",
+        "errorGeneric": "Terjadi kesalahan. Silakan coba lagi.",
+        "oauthError": "Tidak dapat memulai proses masuk. Silakan coba lagi."
+      },
+      "verify": {
+        "title": "Periksa email Anda",
+        "body": "Kami mengirim tautan konfirmasi ke {email}. Klik tautan tersebut untuk menyelesaikan penyiapan akun Anda.",
+        "resendCta": "Kirim ulang email",
+        "resending": "Mengirim ulang…",
+        "resendSuccess": "Email konfirmasi terkirim.",
+        "resendError": "Tidak dapat mengirim ulang email. Silakan coba lagi.",
+        "continueCta": "Lanjut ke aplikasi"
+      }
+    },
+    "browseLink": "Sekadar lihat-lihat? Jelajahi aplikasinya dulu"
   }
 }

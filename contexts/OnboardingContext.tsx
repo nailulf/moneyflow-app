@@ -74,6 +74,31 @@ interface OnboardingContextType {
   // Note: Amplitude events are normalised to onboarding_step_started / onboarding_step_completed
 }
 
+/**
+ * Pure reconciliation decision for the client-side onboarding context.
+ *
+ * The guest funnel now starts with a trigger-seeded default account + categories
+ * (and, mid-funnel, a seeded plan), so the *existence* of those rows must NOT be
+ * treated as "the user finished onboarding". Completion is driven solely by the
+ * funnel reaching its end (`completed` / `conversion`) WITH a real, user-created
+ * budget plan.
+ */
+export interface ReconcileInput {
+  state: UserOnboardingDB
+  hasSeededAccount: boolean
+  hasCategories: boolean
+  hasUserCreatedPlan: boolean
+}
+export interface ReconcileResult { markComplete: boolean; advanceTo?: OnboardingPhase }
+export function reconcileOnboarding(input: ReconcileInput): ReconcileResult {
+  const { state, hasUserCreatedPlan } = input
+  if (!state || state.is_completed || state.is_skipped) return { markComplete: false }
+  // Completion is driven by reaching the end of the guest funnel WITH a real plan —
+  // never by the mere existence of trigger-seeded account/categories.
+  const reachedEnd = state.current_phase === 'completed' || state.current_phase === 'conversion'
+  return { markComplete: reachedEnd && hasUserCreatedPlan }
+}
+
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined)
 const DEV_ONBOARDING_MODE_KEY = 'dev_onboarding_preview'
 const DEV_ONBOARDING_STATE_KEY = 'dev_onboarding_state'
@@ -178,15 +203,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         const data = await getOnboardingStatus(user.id)
 
         // Client-side reconciliation: if the server says the user isn't done,
-        // check their actual accounts/categories/budgets directly via the
-        // authenticated Supabase session and correct the phase on the spot.
-        // This is more reliable than server-side reconciliation because it uses
-        // the user's own JWT, bypassing any service-role/env-var issues.
-        // Client-side reconciliation runs for any user not yet marked completed,
-        // including those who previously skipped — if they've since set up their
-        // accounts/categories/budgets we mark them done and clear the skip flag.
+        // decide completion via the pure `reconcileOnboarding` rule. Completion is
+        // driven by the user reaching the END of the guest funnel (`completed` /
+        // `conversion`) WITH a real budget plan — NOT by the mere existence of the
+        // trigger-seeded default account + categories (which every brand-new guest
+        // already has). The plan row is never seeded by the DB trigger, so any
+        // `budget_plans` row is user-created.
         let finalData = data
-        if (data && !data.is_completed) {
+        if (data && !data.is_completed && !data.is_skipped) {
           try {
             const supabase = createClient()
             const [
@@ -199,14 +223,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
               supabase.from('budget_plans').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
             ])
 
-            const hasAccounts = (accountCount ?? 0) > 0
-            const hasCategories = (categoryCount ?? 0) > 0
-            const hasBudgets = (budgetCount ?? 0) > 0
-            const currentPhaseIdx = ONBOARDING_PHASES.indexOf(data.current_phase as OnboardingPhase)
+            const decision = reconcileOnboarding({
+              state: data,
+              hasSeededAccount: (accountCount ?? 0) > 0,
+              hasCategories: (categoryCount ?? 0) > 0,
+              hasUserCreatedPlan: (budgetCount ?? 0) > 0,
+            })
 
-            if (hasBudgets) {
-              // User has completed all setup steps — mark onboarding as done.
-              // Also clear is_skipped in case they previously dismissed the wizard.
+            if (decision.markComplete) {
               const { data: reconciled } = await supabase
                 .from('user_onboarding')
                 .update({
@@ -223,26 +247,6 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
               if (reconciled) {
                 finalData = reconciled as UserOnboardingDB
                 clearOnboardingCache(user.id)
-              }
-            } else if (hasAccounts && hasCategories && !data.is_skipped) {
-              // User has accounts and categories but no budget — advance to budget_setup.
-              // Only advance if they haven't explicitly skipped (respect the skip for partial state).
-              const budgetPhaseIdx = ONBOARDING_PHASES.indexOf('budget_setup')
-              if (currentPhaseIdx < budgetPhaseIdx) {
-                const { data: reconciled } = await supabase
-                  .from('user_onboarding')
-                  .update({
-                    current_phase: 'budget_setup',
-                    current_step: 0,
-                    updated_at: new Date().toISOString(),
-                  })
-                  .eq('user_id', user.id)
-                  .select()
-                  .single()
-                if (reconciled) {
-                  finalData = reconciled as UserOnboardingDB
-                  clearOnboardingCache(user.id)
-                }
               }
             }
           } catch (reconcileErr) {

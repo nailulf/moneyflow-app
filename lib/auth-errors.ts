@@ -34,7 +34,7 @@ export function getFriendlyErrorMessage(error: any): AuthError {
     result.severity = 'error';
     result.action = {
       label: 'Create an account',
-      href: '/register',
+      href: '/start',
     };
   } else if (message.includes('Email not confirmed') || message.includes('Email not verified')) {
     result.friendlyMessage = 'Please verify your email address before logging in.';

@@ -6,10 +6,12 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { isFullScreenFlow } from '@/lib/nav-visibility'
+import { useGuestGuard } from '@/hooks/useGuestGuard'
 
 export function MobileBottomNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const { guard } = useGuestGuard()
   const t = useTranslations('navigation.items')
 
   // Full-screen flows draw without the tab bar (design 08*, budget 2a–2d).
@@ -56,7 +58,8 @@ export function MobileBottomNav() {
         <button
           type="button"
           aria-label={t('addTransaction')}
-          onClick={() => router.push('/transactions/new')}
+          data-testid="bottom-nav-add-fab"
+          onClick={() => guard(() => router.push('/transactions/new'))}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95"
         >
           <Plus className="h-6 w-6" />

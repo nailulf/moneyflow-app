@@ -1,5 +1,5 @@
 /** Routes that render as full-screen flows: no bottom tab bar, no nav clearance padding. */
-const FULL_SCREEN_FLOW_PREFIXES = ['/accounts/new', '/budget/create', '/budget/edit', '/transactions/new']
+const FULL_SCREEN_FLOW_PREFIXES = ['/accounts/new', '/budget/create', '/budget/edit', '/transactions/new', '/start']
 
 // Portfolio drill-ins (/portfolio/<accountId>[/add]) are full-screen, but the bare
 // /portfolio root and the desktop sub-pages (/portfolio/holdings, /portfolio/analytics) are not.

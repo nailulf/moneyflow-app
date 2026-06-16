@@ -491,7 +491,7 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          current_phase: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+          current_phase: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed' | 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion'
           current_step: number
           is_completed: boolean
           is_skipped: boolean
@@ -503,7 +503,7 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed' | 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion'
           current_step?: number
           is_completed?: boolean
           is_skipped?: boolean
@@ -515,7 +515,7 @@ export interface Database {
         Update: {
           id?: string
           user_id?: string
-          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+          current_phase?: 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed' | 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion'
           current_step?: number
           is_completed?: boolean
           is_skipped?: boolean
@@ -702,7 +702,7 @@ export interface Database {
           id: string
           account_id: string
           name: string
-          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other' | 'debt_payoff' | 'gadget'
           target_amount: number
           target_date: string
           status: 'active' | 'completed' | 'cancelled'
@@ -713,7 +713,7 @@ export interface Database {
           id?: string
           account_id: string
           name: string
-          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+          goal_type: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other' | 'debt_payoff' | 'gadget'
           target_amount: number
           target_date: string
           status?: 'active' | 'completed' | 'cancelled'
@@ -724,7 +724,7 @@ export interface Database {
           id?: string
           account_id?: string
           name?: string
-          goal_type?: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+          goal_type?: 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other' | 'debt_payoff' | 'gadget'
           target_amount?: number
           target_date?: string
           status?: 'active' | 'completed' | 'cancelled'
@@ -943,7 +943,7 @@ export type WealthForecastEventInsert = Database['public']['Tables']['wealth_for
 export type WealthForecastEventUpdate = Database['public']['Tables']['wealth_forecast_events']['Update']
 
 // Goal type for convenience
-export type GoalType = 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other'
+export type GoalType = 'emergency_fund' | 'vacation' | 'house_down_payment' | 'car_purchase' | 'education' | 'wedding' | 'investment' | 'other' | 'debt_payoff' | 'gadget'
 export type GoalStatus = 'active' | 'completed' | 'cancelled'
 
 export type BudgetPlanDB = Database['public']['Tables']['budget_plans']['Row']
@@ -963,5 +963,7 @@ export type BudgetSnapshotCategoryInsert = Database['public']['Tables']['budget_
 export type BudgetSnapshotCategoryUpdate = Database['public']['Tables']['budget_snapshot_categories']['Update']
 
 // Onboarding phase type for convenience
-export type OnboardingPhase = 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+export type OnboardingPhase =
+  | 'welcome' | 'account_setup' | 'categories' | 'budget_setup' | 'completed'
+  | 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion'
 export type OnboardingEventType = 'phase_started' | 'phase_completed' | 'step_completed' | 'skipped' | 'resumed' | 'completed'

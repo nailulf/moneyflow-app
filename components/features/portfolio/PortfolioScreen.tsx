@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Plus } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAccounts } from '@/contexts/AccountContext'
+import { useGuestGuard } from '@/hooks/useGuestGuard'
 import { useAllHoldings } from '@/hooks/useHoldings'
 import { useHoldingsInBase } from '@/hooks/useHoldingsInBase'
 import { portfolioTotals, allocation, gainLoss } from '@/lib/portfolio-utils'
@@ -25,6 +26,7 @@ export function PortfolioScreen() {
   const router = useRouter()
   const { user } = useAuth()
   const { accounts } = useAccounts()
+  const { guard } = useGuestGuard()
   const { holdings } = useAllHoldings()
 
   const investmentAccounts = useMemo(() => accounts.filter((a) => a.type === 'INVESTMENT'), [accounts])
@@ -54,7 +56,7 @@ export function PortfolioScreen() {
       <StickyScreenHeader>
         <h1 className="text-2xl font-bold leading-title-3 text-foreground">{t('title')}</h1>
         <div className="flex shrink-0 items-center gap-2">
-          <button type="button" onClick={() => router.push('/accounts/new/investment')}
+          <button type="button" onClick={() => guard(() => router.push('/accounts/new/investment'))}
             className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm leading-none font-semibold text-primary-foreground transition-transform active:scale-95">
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
             {t('newAccount')}

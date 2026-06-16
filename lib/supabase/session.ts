@@ -8,7 +8,10 @@ const publicRoutes = [
   '/register',
   '/verify-email',
   '/forgot-password',
-  '/auth'
+  '/auth',
+  // Guest onboarding funnel: a logged-out visitor must reach /start/* without
+  // a login redirect (an anonymous session is created lazily mid-funnel).
+  '/start'
 ]
 
 // Onboarding is now handled via modal on the dashboard
@@ -62,7 +65,9 @@ export async function updateSession(request: NextRequest) {
   const isNextRoute = pathname.startsWith('/_next')
   const isStaticFile = pathname.includes('.')
 
-  // If no user and accessing protected route, redirect to login
+  // If no user and accessing protected route, redirect to the guest onboarding
+  // funnel (the product "front door"). /login stays reachable via explicit
+  // "Log in" links on /start and /start/save.
   if (
     !user &&
     !isPublicRoute &&
@@ -71,7 +76,7 @@ export async function updateSession(request: NextRequest) {
     !isStaticFile
   ) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = '/start'
     return NextResponse.redirect(url)
   }
 

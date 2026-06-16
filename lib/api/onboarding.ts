@@ -276,15 +276,14 @@ export function needsOnboarding(onboarding: UserOnboardingDB | null): boolean {
 }
 
 /**
- * Helper to get the onboarding phase order
+ * Helper to get the onboarding phase order (guest funnel, linear)
+ *
+ * NOTE: `health_check` is a SIDE-BRANCH entered directly by route and is
+ * intentionally NOT part of this linear order. As a result
+ * `getNextPhase('health_check')` returning `null` is acceptable — navigation
+ * out of the health check is handled explicitly by its route, not the machine.
  */
-export const ONBOARDING_PHASES: OnboardingPhase[] = [
-  'welcome',
-  'account_setup',
-  'categories',
-  'budget_setup',
-  'completed'
-]
+export const ONBOARDING_PHASES: OnboardingPhase[] = ['intent', 'goal_setup', 'plan', 'conversion', 'completed']
 
 /**
  * Gets the next phase in the onboarding flow

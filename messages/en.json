@@ -2,12 +2,19 @@
   "auth": {
     "login": {
       "title": "Welcome back",
-      "subtitle": "Enter your email below to login to your account",
+      "subtitle": "Pick up where you left off.",
       "email": "Email",
       "emailPlaceholder": "m@example.com",
       "password": "Password",
-      "forgotPassword": "Forgot your password?",
-      "submit": "Login",
+      "forgotPassword": "Forgot password?",
+      "submit": "Log in",
+      "submitting": "Logging in…",
+      "google": "Continue with Google",
+      "apple": "Continue with Apple",
+      "divider": "or with email",
+      "oauthError": "Could not start sign-in. Please try again.",
+      "newHere": "New here?",
+      "createAccount": "Create an account",
       "orContinueWith": "Or continue with",
       "noAccount": "Don't have an account?",
       "signUp": "Sign up",
@@ -74,7 +81,9 @@
     },
     "verifyEmail": {
       "title": "Check your email",
-      "description": "We've sent a verification link to",
+      "description": "We sent a confirmation link to",
+      "fallbackEmail": "your email address",
+      "clickToFinish": "Click it to finish setting up your account.",
       "instruction": "Click the link in the email to verify your account. If you don't see it, check your spam folder.",
       "resendCountdown": "Resend email in {countdown}s",
       "resendButton": "Resend verification email",
@@ -89,13 +98,18 @@
       }
     },
     "forgotPassword": {
-      "title": "Forgot Password",
+      "title": "Forgot password?",
       "description": "Enter your email address and we'll send you a link to reset your password",
+      "subtitle": "Enter your email and we'll send a reset link.",
       "email": "Email",
       "emailPlaceholder": "m@example.com",
-      "submit": "Send Reset Link",
-      "rememberPassword": "Remember your password?",
-      "signIn": "Sign in",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "rememberPassword": "Remember it?",
+      "signIn": "Log in",
+      "successTitle": "Check your email",
+      "successBody": "We sent a reset link to",
+      "resend": "Use a different email",
       "successEmailSent": "Check your email for the password reset link",
       "errorFailed": "Failed to send password reset email",
       "errors": {
@@ -470,8 +484,16 @@
     "screen": {
       "title": "Transactions",
       "searchPlaceholder": "Search transactions",
-      "tabs": { "all": "All", "income": "Income", "expense": "Expense", "transfer": "Transfer" },
-      "summary": { "income": "Income", "expense": "Exp" },
+      "tabs": {
+        "all": "All",
+        "income": "Income",
+        "expense": "Expense",
+        "transfer": "Transfer"
+      },
+      "summary": {
+        "income": "Income",
+        "expense": "Exp"
+      },
       "prevMonth": "Previous month",
       "nextMonth": "Next month",
       "today": "Today",
@@ -481,7 +503,16 @@
       "empty": "No transactions",
       "emptyFiltered": "No transactions match your filters",
       "reset": "Reset",
-      "filter": { "title": "Filters", "titleWithCount": "Filters ({count} active)", "categories": "Categories", "accounts": "Accounts", "amountMin": "Min amount", "amountMax": "Max amount", "apply": "Apply", "reset": "Reset" }
+      "filter": {
+        "title": "Filters",
+        "titleWithCount": "Filters ({count} active)",
+        "categories": "Categories",
+        "accounts": "Accounts",
+        "amountMin": "Min amount",
+        "amountMax": "Max amount",
+        "apply": "Apply",
+        "reset": "Reset"
+      }
     }
   },
   "navigation": {
@@ -650,7 +681,10 @@
           "label": "Mortgage / KPR",
           "description": "Home loan or mortgage"
         },
-        "DIGITAL_WALLET": { "label": "Digital Wallet", "description": "GoPay, OVO, Dana, etc." },
+        "DIGITAL_WALLET": {
+          "label": "Digital Wallet",
+          "description": "GoPay, OVO, Dana, etc."
+        },
         "OTHER": {
           "label": "Other",
           "description": "Anything else"
@@ -756,7 +790,8 @@
       "other": "Other",
       "property": "Property",
       "vehicle": "Vehicle",
-      "mortgage": "Mortgage / KPR", "digitalWallet": "Digital Wallet"
+      "mortgage": "Mortgage / KPR",
+      "digitalWallet": "Digital Wallet"
     },
     "groups": {
       "savingsInvestment": "Savings & Investment",
@@ -990,14 +1025,38 @@
       "tabSettings": "Settings"
     },
     "categories": {
-      "PROPERTY": { "label": "Property", "template": "Buy a home" },
-      "WEDDING": { "label": "Wedding", "template": "Plan a wedding" },
-      "KIDS": { "label": "Kids", "template": "Have a kid" },
-      "EDUCATION": { "label": "Education", "template": "College savings" },
-      "HAJJ": { "label": "Hajj", "template": "Hajj pilgrimage" },
-      "VEHICLE": { "label": "Vehicle", "template": "Buy a vehicle" },
-      "RETIREMENT": { "label": "Retirement", "template": "Plan retirement" },
-      "OTHER": { "label": "Other", "template": "Custom event" }
+      "PROPERTY": {
+        "label": "Property",
+        "template": "Buy a home"
+      },
+      "WEDDING": {
+        "label": "Wedding",
+        "template": "Plan a wedding"
+      },
+      "KIDS": {
+        "label": "Kids",
+        "template": "Have a kid"
+      },
+      "EDUCATION": {
+        "label": "Education",
+        "template": "College savings"
+      },
+      "HAJJ": {
+        "label": "Hajj",
+        "template": "Hajj pilgrimage"
+      },
+      "VEHICLE": {
+        "label": "Vehicle",
+        "template": "Buy a vehicle"
+      },
+      "RETIREMENT": {
+        "label": "Retirement",
+        "template": "Plan retirement"
+      },
+      "OTHER": {
+        "label": "Other",
+        "template": "Custom event"
+      }
     },
     "events": {
       "yourEvents": "Your events",
@@ -1108,7 +1167,10 @@
         "investment": "Investment Account"
       }
     },
-    "common": { "save": "Save", "back": "Back" },
+    "common": {
+      "save": "Save",
+      "back": "Back"
+    },
     "bank": {
       "title": "Bank / Wallet",
       "segBank": "Bank Account",
@@ -1222,7 +1284,12 @@
     "createTitle": "Create Budget",
     "editTitle": "Edit Budget",
     "stepOf": "{step} of {total}",
-    "periodType": { "monthly": "Monthly", "monthlyHint": "Set limits per category each month", "yearly": "Yearly", "yearlyHint": "Plan annual big-ticket expenses" },
+    "periodType": {
+      "monthly": "Monthly",
+      "monthlyHint": "Set limits per category each month",
+      "yearly": "Yearly",
+      "yearlyHint": "Plan annual big-ticket expenses"
+    },
     "income": "Income this period: {amount}",
     "lockedTitle": "Monthly budget (locked)",
     "lockedBanner": "Yearly categories can't overlap your monthly budget",
@@ -1276,7 +1343,10 @@
       "ofIncome": "{pct}% of income",
       "save": "Save Budget"
     },
-    "created": { "title": "Budget created!", "cta": "Back to Budget" },
+    "created": {
+      "title": "Budget created!",
+      "cta": "Back to Budget"
+    },
     "confirm": {
       "title": "Apply changes to budget?",
       "effect": "Changes apply to this period's tracking immediately. Past months are not affected.",
@@ -1287,7 +1357,11 @@
     "noChanges": "No changes yet",
     "monthlyLabel": "{month} · Monthly Budget",
     "yearlyLabel": "{year} · Yearly Budget",
-    "errors": { "loadFailed": "Couldn't load. Try again.", "saveFailed": "Couldn't save the budget. Try again.", "totalRequired": "Allocate at least one category" }
+    "errors": {
+      "loadFailed": "Couldn't load. Try again.",
+      "saveFailed": "Couldn't save the budget. Try again.",
+      "totalRequired": "Allocate at least one category"
+    }
   },
   "budgetTab": {
     "error": "Couldn't load this period's budget. Try again.",
@@ -1324,7 +1398,10 @@
       "afternoon": "Good afternoon 👋",
       "evening": "Good evening 👋"
     },
-    "today": { "title": "Today, {date}", "logged": "{count} logged" },
+    "today": {
+      "title": "Today, {date}",
+      "logged": "{count} logged"
+    },
     "hero": {
       "totalNetWorth": "Total Net Worth",
       "thisMonth": "{pct}% this month",
@@ -1372,14 +1449,58 @@
   "portfolio": {
     "title": "Portfolio",
     "newAccount": "New Account",
-    "hero": { "totalValue": "Total Portfolio Value", "assets": "{count} assets" },
-    "accounts": { "title": "Investment Accounts", "seeAll": "See all →", "holdings": "{count} holdings", "empty": "No investment accounts yet." },
-    "allocation": { "title": "Asset Allocation" },
-    "top": { "title": "Top Holdings", "empty": "No holdings yet — add assets to an investment account." },
-    "class": { "IDX_STOCK": "IDX Stocks", "US_STOCK": "US Stocks", "MUTUAL_FUND": "Mutual Funds", "ETF": "ETF", "BOND": "Bonds", "OTHER": "Other" },
-    "classHint": { "IDX_STOCK": "Indonesia stocks on IDX", "US_STOCK": "NYSE & NASDAQ listed", "MUTUAL_FUND": "Managed mutual funds", "ETF": "Exchange-traded funds", "BOND": "Government & corporate bonds", "OTHER": "Anything else" },
-    "detail": { "investmentAccount": "Investment Account", "addAsset": "Add Asset", "back": "Back", "emptyTitle": "No assets yet", "emptyDescription": "What do you hold in this account? Pick a type to add your first one:", "emptyTip": "Tip: add your holdings with their buy price — we'll calculate returns automatically." },
-    "manage": { "edit": "Edit", "remove": "Remove from portfolio", "currentValue": "Current value", "cancel": "Cancel", "save": "Save", "removeWarning": "This removes the asset and its history. The account balance will update.", "confirmRemove": "Remove", "saveFailed": "Couldn't update the asset.", "deleteFailed": "Couldn't remove the asset." },
+    "hero": {
+      "totalValue": "Total Portfolio Value",
+      "assets": "{count} assets"
+    },
+    "accounts": {
+      "title": "Investment Accounts",
+      "seeAll": "See all →",
+      "holdings": "{count} holdings",
+      "empty": "No investment accounts yet."
+    },
+    "allocation": {
+      "title": "Asset Allocation"
+    },
+    "top": {
+      "title": "Top Holdings",
+      "empty": "No holdings yet — add assets to an investment account."
+    },
+    "class": {
+      "IDX_STOCK": "IDX Stocks",
+      "US_STOCK": "US Stocks",
+      "MUTUAL_FUND": "Mutual Funds",
+      "ETF": "ETF",
+      "BOND": "Bonds",
+      "OTHER": "Other"
+    },
+    "classHint": {
+      "IDX_STOCK": "Indonesia stocks on IDX",
+      "US_STOCK": "NYSE & NASDAQ listed",
+      "MUTUAL_FUND": "Managed mutual funds",
+      "ETF": "Exchange-traded funds",
+      "BOND": "Government & corporate bonds",
+      "OTHER": "Anything else"
+    },
+    "detail": {
+      "investmentAccount": "Investment Account",
+      "addAsset": "Add Asset",
+      "back": "Back",
+      "emptyTitle": "No assets yet",
+      "emptyDescription": "What do you hold in this account? Pick a type to add your first one:",
+      "emptyTip": "Tip: add your holdings with their buy price — we'll calculate returns automatically."
+    },
+    "manage": {
+      "edit": "Edit",
+      "remove": "Remove from portfolio",
+      "currentValue": "Current value",
+      "cancel": "Cancel",
+      "save": "Save",
+      "removeWarning": "This removes the asset and its history. The account balance will update.",
+      "confirmRemove": "Remove",
+      "saveFailed": "Couldn't update the asset.",
+      "deleteFailed": "Couldn't remove the asset."
+    },
     "emptyCta": "Create investment account"
   },
   "holdingCreate": {
@@ -1399,6 +1520,271 @@
     "dateLabel": "Purchase Date",
     "estimatedTotal": "Estimated Total",
     "submit": "Add to Portfolio",
-    "errors": { "tickerRequired": "Enter a ticker", "amountInvalid": "Enter a valid amount", "createFailed": "Couldn't add the asset. Try again." }
+    "errors": {
+      "tickerRequired": "Enter a ticker",
+      "amountInvalid": "Enter a valid amount",
+      "createFailed": "Couldn't add the asset. Try again."
+    }
+  },
+  "start": {
+    "brand": "TemanTumbuh",
+    "login": "Log in",
+    "guestPill": "You're browsing as a guest",
+    "hero": {
+      "headline": "Money that finally makes sense",
+      "subtext": "Track spending, budgets, balance, and hit your goals — all in one place."
+    },
+    "heroStatLabel": "Avg. user saves more in 3 months",
+    "heroStatDelta": "+23%",
+    "features": {
+      "title": "Everything your money needs",
+      "tracking": "Effortless tracking",
+      "trackingSub": "Snap receipts or import statements — AI does the typing.",
+      "budgets": "Budgets that fit you",
+      "budgetsSub": "Built from your real spending, not a template.",
+      "goals": "Goals you can hit",
+      "goalsSub": "See exactly when you'll reach what you're saving for.",
+      "netWorth": "Net worth & investing",
+      "netWorthSub": "Accounts, assets and portfolio in one picture."
+    },
+    "healthCheck": {
+      "title": "How healthy is your money?",
+      "subtitle": "Take a free 2-minute check — your goals, income and spending. No account needed.",
+      "cta": "Start my 2-minute check"
+    },
+    "intent": {
+      "title": "What brings you here today?",
+      "subtitle": "We will tailor your first steps around it.",
+      "back": "Back",
+      "skip": "Skip",
+      "continue": "Continue",
+      "healthTitle": "Check my financial health",
+      "healthSub": "See where you stand in 2 minutes",
+      "budgetTitle": "Build a budget that works",
+      "budgetSub": "Plan spending around your real life",
+      "goalTitle": "Track a financial goal",
+      "goalSub": "Save for something that matters to you",
+      "otherTitle": "Something else bugs me",
+      "otherSub": "Tell us your money pain point",
+      "guestNote": "No account needed — explore as a guest"
+    },
+    "goal": {
+      "continue": "Continue",
+      "saveError": "We could not save that. Please try again.",
+      "type": {
+        "title": "What's your short-term goal?",
+        "subtitle": "Pick something you want to reach in the next year. We'll build a plan around it.",
+        "emergencyTitle": "Emergency fund",
+        "emergencySub": "3–6 months of expenses",
+        "vacationTitle": "Vacation / Trip",
+        "vacationSub": "Bali, Japan, or anywhere",
+        "gadgetTitle": "New gadget",
+        "gadgetSub": "Phone, laptop, camera",
+        "debtTitle": "Pay off debt",
+        "debtSub": "Clear a loan or paylater",
+        "customTitle": "Custom goal",
+        "customSub": "Set your own target",
+        "targetLabel": "Target amount",
+        "horizonLabel": "When do you need it?",
+        "horizon3": "3 months",
+        "horizon6": "6 months",
+        "horizon12": "1 year",
+        "horizonCustom": "Custom"
+      },
+      "income": {
+        "title": "What's your monthly income?",
+        "subtitle": "A rough number is fine — you can fine-tune it later.",
+        "mainLabel": "Main income (salary)",
+        "freqLabel": "How often?",
+        "freqMonthly": "Monthly",
+        "freqWeekly": "Weekly",
+        "freqIrregular": "Irregular",
+        "otherTitle": "Other income sources",
+        "addSource": "Add another source",
+        "removeSource": "Remove income source",
+        "sourceNameLabel": "Source name",
+        "sourceNamePlaceholder": "e.g. Freelance, Rent",
+        "sourceAmountLabel": "Amount",
+        "perMonth": "{amount} / month",
+        "addCancel": "Cancel",
+        "addConfirm": "Add",
+        "privacyNote": "Stays on your device until you create an account.",
+        "editSource": "Edit income source"
+      },
+      "spend": {
+        "title": "What do you spend monthly?",
+        "subtitle": "Estimate is okay. Tap an amount to adjust it.",
+        "cta": "Calculate my plan"
+      },
+      "plan": {
+        "savePill": "You can save",
+        "perMonth": "/month",
+        "incomeLabel": "Income",
+        "expensesLabel": "Expenses",
+        "goalLabel": "Goal: {name}",
+        "achievable": "Achievable",
+        "tight": "Tight",
+        "reachIn": "Reach it in ~{months} months · {date}",
+        "noSurplus": "Add some income or cut spending to start saving",
+        "whatIfTitle": "What if?",
+        "whatIfCut": "Cut lifestyle by {amount}",
+        "whatIfSide": "Add side income {amount}",
+        "whatIfMonths": "{months} months",
+        "saveCta": "Save my plan",
+        "adjustLink": "Adjust numbers",
+        "emptyTitle": "Let's build your plan",
+        "emptySubtitle": "Tell us your goal and income first, and we'll show you when you can reach it.",
+        "emptyCta": "Start with a goal"
+      }
+    },
+    "budget": {
+      "continue": "Continue",
+      "saveError": "We could not save that. Please try again.",
+      "income": {
+        "title": "Let's build your budget",
+        "subtitle": "Tell us what you earn — we'll split it into a balanced plan.",
+        "label": "Monthly income (take-home)",
+        "noteTitle": "Built around your savings goal",
+        "noteBody": "Tell us how much you want to save and what you spend — we'll show options that fit, no rigid rules."
+      },
+      "savings": {
+        "title": "How much do you want to save?",
+        "subtitle": "Set a monthly target that feels right — you can adjust it anytime.",
+        "label": "Monthly savings goal",
+        "ofIncome": "{pct}% of your {income} income",
+        "quickPicks": "Quick picks",
+        "preset": "{pct}%",
+        "custom": "Custom",
+        "note": "Even a small, steady amount beats saving nothing. Start where you can."
+      },
+      "spend": {
+        "title": "What's your cost of living today?",
+        "subtitle": "Roughly what you spend each month now. Tap an amount to adjust.",
+        "addCategory": "Add a category",
+        "newCategory": "New category",
+        "totalLabel": "Cost of living today",
+        "cta": "See my options"
+      },
+      "plan": {
+        "title": "Your savings options",
+        "subtitle": "From {income} income and {spending} spending. Pick a plan or set your own.",
+        "summaryIncome": "Income",
+        "summarySpending": "Spending",
+        "summaryAvailable": "Available",
+        "chooseLabel": "Choose how hard to save",
+        "recommended": "Recommended",
+        "relaxedTitle": "Relaxed",
+        "relaxedSubtitle": "No changes — save what's left today.",
+        "relaxedOnTrackSubtitle": "You're already on track — save the surplus.",
+        "onTargetTitle": "On target",
+        "onTargetSubtitle": "Trim {amount} from lifestyle & food.",
+        "onTargetOnTrackSubtitle": "Right on your goal — no trimming needed.",
+        "ambitiousTitle": "Ambitious",
+        "ambitiousSubtitle": "Trim {amount} across a few categories.",
+        "ambitiousOnTrackSubtitle": "Push a little further and save extra.",
+        "percentOfIncome": "{pct}%",
+        "specificTitle": "Set a specific budget",
+        "specificSubtitle": "Have a number in mind? Build it category by category.",
+        "saveCta": "Save my plan",
+        "emptyTitle": "Let's build your budget",
+        "emptySubtitle": "Tell us your income and savings target first, and we'll show your plan.",
+        "emptyCta": "Start with income"
+      }
+    },
+    "health": {
+      "incomeTitle": "Let’s check your money health",
+      "incomeSubtitle": "A quick snapshot — no account needed.",
+      "savingsTitle": "What have you set aside?",
+      "savingsSubtitle": "Savings and investments you have today.",
+      "debtsTitle": "Any debts or loans?",
+      "debtsSubtitle": "Skip if none.",
+      "incomeLabel": "Monthly take-home income",
+      "spendingLabel": "Monthly spending",
+      "savingsLabel": "Savings / emergency fund",
+      "investmentsLabel": "Investments",
+      "debtLabel": "Total debt / outstanding loans",
+      "debtPaymentLabel": "Monthly repayment",
+      "continue": "Continue",
+      "seeHealth": "See my health",
+      "scoreOutOf": "out of 100",
+      "statusGood": "Good",
+      "statusWatch": "Watch",
+      "statusLow": "Low",
+      "back": "Back",
+      "skip": "Skip",
+      "bandOnTrack": "On track",
+      "bandCanImprove": "Can improve",
+      "bandNeedsWork": "Needs work",
+      "summary_savingsRatio": "A solid base — saving more each month is the main thing holding the score back.",
+      "summary_debtToIncome": "A solid base — your debt load is the main thing holding the score back.",
+      "summary_emergencyFund": "A solid base — your safety net is the main thing holding the score back.",
+      "summary_netWorth": "A solid base — building net worth is the main thing holding the score back.",
+      "row_savingsRatio": "Savings ratio",
+      "row_debtToIncome": "Debt-to-income",
+      "row_emergencyFund": "Emergency fund",
+      "row_netWorth": "Net worth",
+      "detailSavings": "{rate}% of income saved",
+      "detailDebt": "{pct}% goes to debt",
+      "detailEmergency": "{months} months of spending",
+      "detailNetWorth": "{amount} · {sign}",
+      "signPositive": "positive",
+      "signNegative": "negative",
+      "tipTitle": "Top priority",
+      "tip_savingsRatio": "Aim to keep at least 20% of your income each month — even small cuts add up.",
+      "tip_debtToIncome": "Bring debt repayments under 20% of income to free up breathing room.",
+      "tip_emergencyFund": "Grow your emergency fund toward ~6 months of spending.",
+      "tip_netWorth": "Pay down debt and keep investing to push your net worth positive.",
+      "buildBudgetCta": "Build a budget to improve it",
+      "saveCta": "Save my results"
+    },
+    "convert": {
+      "intro": {
+        "badge": "Plan ready",
+        "headline": "Your plan is ready!",
+        "subtext": "Create a free account to save your plan and track your progress.",
+        "benefitsTitle": "What you get",
+        "benefitGoalTitle": "Save your goal & track progress",
+        "benefitGoalSub": "Your plan is updated automatically as you go.",
+        "benefitStreakTitle": "Daily spending log with streaks",
+        "benefitStreakSub": "Build a habit and stay on top of every rupiah.",
+        "benefitSyncTitle": "Synced across devices, secure backup",
+        "benefitSyncSub": "Your data is safe and available everywhere.",
+        "createCta": "Create free account",
+        "guestCta": "Continue as guest",
+        "loginPrompt": "Already have an account?",
+        "loginLink": "Log in"
+      },
+      "form": {
+        "back": "Back",
+        "title": "Create your account",
+        "subtitle": "Keep your plan and pick up right where you left off.",
+        "google": "Continue with Google",
+        "apple": "Continue with Apple",
+        "divider": "or with email",
+        "emailLabel": "Email",
+        "emailPlaceholder": "you@example.com",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "At least 6 characters",
+        "terms": "I agree to the Terms & Privacy Policy",
+        "submit": "Create account",
+        "submitting": "Creating account…",
+        "loginPrompt": "Already have an account?",
+        "loginLink": "Log in",
+        "invalidEmail": "Enter a valid email address.",
+        "passwordTooShort": "Password must be at least 6 characters.",
+        "errorGeneric": "Something went wrong. Please try again.",
+        "oauthError": "Could not start sign-in. Please try again."
+      },
+      "verify": {
+        "title": "Check your email",
+        "body": "We sent a confirmation link to {email}. Click it to finish setting up your account.",
+        "resendCta": "Resend email",
+        "resending": "Resending…",
+        "resendSuccess": "Confirmation email sent.",
+        "resendError": "Could not resend the email. Please try again.",
+        "continueCta": "Continue to the app"
+      }
+    },
+    "browseLink": "Just looking? Browse the app first"
   }
 }

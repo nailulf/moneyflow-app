@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAccounts } from '@/contexts/AccountContext'
+import { useGuestGuard } from '@/hooks/useGuestGuard'
 import { fetchNetWorthData } from '@/lib/net-worth-utils'
 import { splitAccounts } from '@/lib/home-utils'
 import { groupAccounts } from '@/lib/wallets-utils'
@@ -25,6 +26,7 @@ export function WalletsScreen({ onOpenAccount }: WalletsScreenProps) {
   const t = useTranslations('wallets')
   const { user } = useAuth()
   const { accounts } = useAccounts()
+  const { guard } = useGuestGuard()
 
   const { data: netWorth } = useQuery({
     queryKey: ['home-net-worth', user?.id],
@@ -54,7 +56,7 @@ export function WalletsScreen({ onOpenAccount }: WalletsScreenProps) {
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
-            onClick={() => router.push('/accounts/new')}
+            onClick={() => guard(() => router.push('/accounts/new'))}
             className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm leading-none font-semibold text-primary-foreground transition-transform active:scale-95"
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />

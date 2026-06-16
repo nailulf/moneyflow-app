@@ -18,7 +18,6 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { TransactionProvider } from '@/contexts/TransactionContext'
 import { QueryProvider } from '@/lib/providers/query-provider'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
-import { OnboardingModal } from '@/components/features/onboarding/OnboardingModal'
 import { Loader2 } from 'lucide-react'
 import { MobileScreenHeader } from '@/components/features/navigation/MobileScreenHeader'
 import { MobileBottomNav } from '@/components/features/navigation/MobileBottomNav'
@@ -63,10 +62,11 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
     window.history.replaceState({}, '', url.toString())
   }, [searchParams])
 
-  // Standalone pages (auth + offline) render without the sidebar layout.
-  // Checked before `loading` so /offline still renders when the auth fetch
-  // can't resolve (no network).
-  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth') || pathname.startsWith('/verify-email') || pathname.startsWith('/offline')) {
+  // Standalone pages (auth + offline + guest funnel) render without the
+  // sidebar layout. Checked before `loading` so /offline still renders when
+  // the auth fetch can't resolve (no network), and so the logged-out /start
+  // funnel renders full-screen without the authed shell or a login redirect.
+  if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth') || pathname.startsWith('/verify-email') || pathname.startsWith('/offline') || pathname.startsWith('/start')) {
     return <>{children}</>
   }
 
@@ -117,7 +117,6 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
         <AccountProvider>
           <CategoryProvider>
             <OnboardingProvider>
-              <OnboardingModal />
               <AppSidebar className="hidden md:flex" />
               <SidebarInset>
           <header className="hidden h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:flex">
