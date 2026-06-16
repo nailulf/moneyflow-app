@@ -140,10 +140,10 @@ export default function LoginPage() {
   const busy = isLoading || oauthProvider !== null
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-10">
+    <div className="flex flex-1 flex-col px-5 pb-5 pt-8">
       {/* Brand */}
-      <header className="flex flex-col items-center pt-12 pb-8">
-        <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-card shadow-card">
+      <header className="flex flex-col items-center">
+        <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-[16px] bg-card shadow-card">
           <Image
             src="/icons/icon.png"
             alt="Teman Tumbuh"
@@ -153,18 +153,18 @@ export default function LoginPage() {
             priority
           />
         </span>
-        <h1 className="mt-6 text-2xl leading-title-3 font-bold text-foreground">
+        <h1 className="mt-4 text-2xl leading-title-3 font-bold text-foreground">
           {t('title')}
         </h1>
-        <p className="mt-1.5 text-sm leading-body-sm text-muted-foreground">
+        <p className="mt-1 text-sm leading-body-sm text-muted-foreground">
           {t('subtitle')}
         </p>
       </header>
 
-      <AuthErrorMessage error={authError} className="mb-4" />
+      <AuthErrorMessage error={authError} className="mt-4" />
 
       {/* OAuth buttons */}
-      <div className="flex flex-col gap-3">
+      <div className="mt-6 flex flex-col gap-3">
         <Button
           type="button"
           variant="outline"
@@ -196,7 +196,7 @@ export default function LoginPage() {
       </div>
 
       {/* Divider */}
-      <div className="my-6 flex items-center gap-3">
+      <div className="my-4 flex items-center gap-3">
         <span className="h-px flex-1 bg-border" aria-hidden="true" />
         <span className="text-xs leading-caption text-muted-foreground">
           {t('divider')}
@@ -215,7 +215,7 @@ export default function LoginPage() {
             autoComplete="email"
             inputMode="email"
             placeholder={t('emailPlaceholder')}
-            className="h-12 rounded-[14px]"
+            className="h-[52px] rounded-[14px]"
             {...register('email')}
           />
           {errors.email && (
@@ -239,7 +239,7 @@ export default function LoginPage() {
             id="login-password"
             data-testid="login-password"
             autoComplete="current-password"
-            className="h-12 rounded-[14px]"
+            className="h-[52px] rounded-[14px]"
             {...register('password')}
           />
           {errors.password && (
@@ -263,7 +263,7 @@ export default function LoginPage() {
       </form>
 
       {/* New-user footer → funnel front door */}
-      <p className="mt-6 text-center text-sm leading-body-sm text-muted-foreground">
+      <p className="mt-5 text-center text-sm leading-body-sm text-muted-foreground">
         {t('newHere')}{' '}
         <button
           type="button"
@@ -404,7 +404,7 @@ function DevTools({
   }
 
   return (
-    <div className="mt-10 border-t border-border pt-4">
+    <div className="mt-auto border-t border-border pt-3">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
