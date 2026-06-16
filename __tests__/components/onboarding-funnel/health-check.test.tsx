@@ -4,17 +4,21 @@ import '@testing-library/jest-dom'
 const push = jest.fn()
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
 
-// Interpolating translation mock so {rate} placeholders resolve.
+// Interpolating translation mock so {rate}/{months} placeholders resolve.
 jest.mock('next-intl', () => ({
   useTranslations:
     () =>
     (key: string, values?: Record<string, string | number>) => {
       const labels: Record<string, string> = {
-        seeScore: 'See my score',
-        savingsRate: `You are saving ${values?.rate}% of your income`,
+        continue: 'Continue',
+        seeHealth: 'See my health',
         bandHealthy: 'Healthy',
-        bandGettingThere: 'Getting there',
+        bandCouldBeBetter: 'Could be better',
         bandNeedsAttention: 'Needs attention',
+        valueSavingsRate: `Saving ${values?.rate}% of income`,
+        valueMonths: `${values?.months} months covered`,
+        saveCta: 'Create an account to save this',
+        guestCta: 'Explore as a guest',
       }
       return labels[key] ?? key
     },
@@ -33,34 +37,77 @@ jest.mock('@/lib/api/onboarding-funnel', () => ({
 
 import HealthCheckPage from '@/app/start/health-check/page'
 
-describe('HealthCheckPage', () => {
+/** Drive the flow from step 1 through to the result. */
+async function completeFlow() {
+  // Step 1 — income + spending
+  fireEvent.change(screen.getByTestId('hc-income'), { target: { value: '10000000' } })
+  fireEvent.change(screen.getByTestId('hc-spending'), { target: { value: '6000000' } })
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
+  })
+
+  // Step 2 — savings + investments
+  fireEvent.change(screen.getByTestId('hc-savings'), { target: { value: '30000000' } })
+  fireEvent.change(screen.getByTestId('hc-investments'), { target: { value: '20000000' } })
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: /continue/i }))
+  })
+
+  // Step 3 — debts → compute
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: /see my health/i }))
+  })
+}
+
+describe('HealthCheckPage (multi-step)', () => {
   beforeEach(() => {
     push.mockClear()
     ensureAnonymousSession.mockClear()
     advanceOnboarding.mockClear()
   })
 
-  it('disables "See my score" until income and spend are entered', () => {
+  it('fires the anonymous session lazily on mount', () => {
     render(<HealthCheckPage />)
-    expect(screen.getByRole('button', { name: /see my score/i })).toBeDisabled()
+    expect(ensureAnonymousSession).toHaveBeenCalledTimes(1)
   })
 
-  it('computes the score and shows the result after See my score', async () => {
+  it('disables Continue on step 1 until income is entered', () => {
     render(<HealthCheckPage />)
+    expect(screen.getByRole('button', { name: /continue/i })).toBeDisabled()
 
-    fireEvent.change(screen.getByTestId('hc-income'), { target: { value: '10000000' } })
-    fireEvent.change(screen.getByTestId('hc-spend'), { target: { value: '6000000' } })
+    fireEvent.change(screen.getByTestId('hc-income'), { target: { value: '5000000' } })
+    expect(screen.getByRole('button', { name: /continue/i })).not.toBeDisabled()
+  })
 
-    expect(screen.getByRole('button', { name: /see my score/i })).not.toBeDisabled()
+  it('walks through all steps and renders the score gauge', async () => {
+    render(<HealthCheckPage />)
+    await completeFlow()
 
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /see my score/i }))
-    })
-
-    // healthScore(10M, 6M) = round(0.4 * 200) = 80 → "Healthy"
     const scoreEl = screen.getByTestId('hc-score')
     expect(scoreEl).toBeInTheDocument()
-    expect(scoreEl).toHaveTextContent('80')
+    // Healthy profile (40% savings, 5mo fund, investing, no debt) scores 100.
+    expect(scoreEl).toHaveTextContent('100')
     expect(screen.getByText('Healthy')).toBeInTheDocument()
+  })
+
+  it('logs the score via advanceOnboarding (best-effort)', async () => {
+    render(<HealthCheckPage />)
+    await completeFlow()
+
+    expect(advanceOnboarding).toHaveBeenCalledWith(
+      'health_check',
+      expect.objectContaining({
+        event_type: 'step_completed',
+        metadata: expect.objectContaining({ score: 100 }),
+      })
+    )
+  })
+
+  it('routes to the save funnel from the result CTA', async () => {
+    render(<HealthCheckPage />)
+    await completeFlow()
+
+    fireEvent.click(screen.getByRole('button', { name: /create an account to save this/i }))
+    expect(push).toHaveBeenCalledWith('/start/save')
   })
 })
