@@ -81,7 +81,9 @@
     },
     "verifyEmail": {
       "title": "Check your email",
-      "description": "We've sent a verification link to",
+      "description": "We sent a confirmation link to",
+      "fallbackEmail": "your email address",
+      "clickToFinish": "Click it to finish setting up your account.",
       "instruction": "Click the link in the email to verify your account. If you don't see it, check your spam folder.",
       "resendCountdown": "Resend email in {countdown}s",
       "resendButton": "Resend verification email",
@@ -96,13 +98,18 @@
       }
     },
     "forgotPassword": {
-      "title": "Forgot Password",
+      "title": "Forgot password?",
       "description": "Enter your email address and we'll send you a link to reset your password",
+      "subtitle": "Enter your email and we'll send a reset link.",
       "email": "Email",
       "emailPlaceholder": "m@example.com",
-      "submit": "Send Reset Link",
-      "rememberPassword": "Remember your password?",
-      "signIn": "Sign in",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "rememberPassword": "Remember it?",
+      "signIn": "Log in",
+      "successTitle": "Check your email",
+      "successBody": "We sent a reset link to",
+      "resend": "Use a different email",
       "successEmailSent": "Check your email for the password reset link",
       "errorFailed": "Failed to send password reset email",
       "errors": {

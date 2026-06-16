@@ -81,7 +81,9 @@
     },
     "verifyEmail": {
       "title": "Periksa email Anda",
-      "description": "Kami telah mengirimkan tautan verifikasi ke",
+      "description": "Kami mengirim tautan konfirmasi ke",
+      "fallbackEmail": "alamat email Anda",
+      "clickToFinish": "Klik tautan tersebut untuk menyelesaikan pengaturan akun Anda.",
       "instruction": "Klik tautan di email untuk memverifikasi akun Anda. Jika tidak menemukannya, periksa folder spam.",
       "resendCountdown": "Kirim ulang email dalam {countdown}d",
       "resendButton": "Kirim ulang email verifikasi",
@@ -96,13 +98,18 @@
       }
     },
     "forgotPassword": {
-      "title": "Lupa Kata Sandi",
+      "title": "Lupa kata sandi?",
       "description": "Masukkan alamat email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi Anda",
+      "subtitle": "Masukkan email Anda dan kami akan mengirim tautan reset.",
       "email": "Email",
       "emailPlaceholder": "m@example.com",
-      "submit": "Kirim Tautan Reset",
-      "rememberPassword": "Ingat kata sandi Anda?",
+      "submit": "Kirim tautan reset",
+      "submitting": "Mengirim…",
+      "rememberPassword": "Sudah ingat?",
       "signIn": "Masuk",
+      "successTitle": "Periksa email Anda",
+      "successBody": "Kami mengirim tautan reset ke",
+      "resend": "Gunakan email lain",
       "successEmailSent": "Periksa email Anda untuk tautan reset kata sandi",
       "errorFailed": "Gagal mengirim email reset kata sandi",
       "errors": {
