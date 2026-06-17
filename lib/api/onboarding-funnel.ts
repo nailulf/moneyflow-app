@@ -6,6 +6,8 @@
 //   - goal_type union  → app/api/onboarding/goal/route.ts (GOAL_TYPES)
 //   - period union     → app/api/onboarding/plan/route.ts (PlanSchema.period)
 
+import type { OnboardingDraft } from '@/lib/onboarding/build-draft'
+
 /** Mirrors the `goal_type` enum in app/api/onboarding/goal/route.ts (GOAL_TYPES). */
 export type OnboardingGoalType =
   | 'emergency_fund'
@@ -64,3 +66,9 @@ export type AdvancePhase = 'intent' | 'goal_setup' | 'health_check' | 'plan' | '
 
 export const advanceOnboarding = (phase: AdvancePhase, event?: { event_type: string; metadata?: Record<string, unknown> }) =>
   postJson<{ onboarding: { current_phase: string } }>('/api/onboarding/advance', { phase, event })
+
+export const finalizeOnboarding = (draft: OnboardingDraft) =>
+  postJson<{ goal_id: string | null; plan_id: string | null; account_id: string }>(
+    '/api/onboarding/finalize',
+    draft,
+  )
