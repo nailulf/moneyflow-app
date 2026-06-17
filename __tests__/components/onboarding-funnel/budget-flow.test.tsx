@@ -8,39 +8,16 @@ jest.mock('next-intl', () => ({
   useLocale: () => 'en',
 }))
 
-const ensureAnonymousSession = jest.fn(() => Promise.resolve('user-1'))
-jest.mock('@/lib/supabase/anonymous', () => ({ ensureAnonymousSession }))
-
-const saveOnboardingPlan = jest.fn(() => Promise.resolve({ plan: { id: 'p1' } }))
-const advanceOnboarding = jest.fn(() => Promise.resolve({ onboarding: { current_phase: 'plan' } }))
-jest.mock('@/lib/api/onboarding-funnel', () => ({
-  saveOnboardingPlan,
-  advanceOnboarding,
-}))
-
 jest.mock('sonner', () => ({ toast: { error: jest.fn() } }))
 
-// Seeded, design-aligned categories the spend/plan screens render directly.
-// budgetSpend is keyed by these real ids — no find-or-create at save time.
-const addCategory = jest.fn((name: string) =>
-  Promise.resolve(`new-${name.toLowerCase().replace(/\W+/g, '-')}`)
-)
-const CATEGORIES = [
-  { id: 'cat-housing', name: 'Housing & rent', group_type: 'EXPENSE' },
-  { id: 'cat-food', name: 'Food & groceries', group_type: 'EXPENSE' },
-  { id: 'cat-transport', name: 'Transport', group_type: 'EXPENSE' },
-  { id: 'cat-savings', name: 'Savings transfer', group_type: 'TRANSFER' },
-]
-jest.mock('@/hooks/useTransactionCategories', () => ({
-  useTransactionCategories: () => ({
-    categories: CATEGORIES,
-    isLoading: false,
-    addCategory,
-    isAdding: false,
-  }),
+// BudgetIncomePage still calls ensureAnonymousSession to lazily bootstrap the
+// guest session; mock it here so it doesn't try to reach Supabase.
+jest.mock('@/lib/supabase/anonymous', () => ({
+  ensureAnonymousSession: jest.fn(() => Promise.resolve('user-1')),
 }))
 
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
+import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 import BudgetIncomePage from '@/app/start/budget/income/page'
 import BudgetSavingsPage from '@/app/start/budget/savings/page'
 import BudgetSpendPage from '@/app/start/budget/spend/page'
@@ -50,9 +27,6 @@ describe('Budget-from-income flow', () => {
   beforeEach(() => {
     push.mockClear()
     ensureAnonymousSession.mockClear()
-    saveOnboardingPlan.mockClear()
-    advanceOnboarding.mockClear()
-    addCategory.mockClear()
     useFunnelStore.getState().reset()
   })
 
@@ -89,67 +63,74 @@ describe('Budget-from-income flow', () => {
     expect(push).toHaveBeenCalledWith('/start/budget/spend')
   })
 
-  it('spend screen stores amounts by real category id and routes to plan (no persistence yet)', async () => {
+  it('spend screen renders static categories immediately (no DB / loading state)', () => {
     useFunnelStore.setState({ budgetIncome: 10_000_000, savingsAmount: 2_000_000 })
     render(<BudgetSpendPage />)
 
-    // Rows render once the anonymous session resolves and categories load.
-    const input = await screen.findByTestId('budget-spend-cat-housing')
-    fireEvent.change(input, { target: { value: '4000000' } })
-    expect(useFunnelStore.getState().budgetSpend['cat-housing']).toBe(4_000_000)
+    // Static categories render synchronously — no DB fetch, no loading spinner.
+    expect(screen.getByTestId('budget-spend-housing')).toBeInTheDocument()
+    expect(screen.getByTestId('budget-spend-food')).toBeInTheDocument()
+    expect(screen.getByTestId('budget-spend-transport')).toBeInTheDocument()
+    expect(screen.getByTestId('budget-spend-bills')).toBeInTheDocument()
+    expect(screen.getByTestId('budget-spend-lifestyle')).toBeInTheDocument()
+  })
 
-    // Spend does NOT persist — that happens on the plan screen's "Save my plan".
-    expect(saveOnboardingPlan).not.toHaveBeenCalled()
+  it('spend screen stores amounts by slug and routes to plan (no persistence)', () => {
+    useFunnelStore.setState({ budgetIncome: 10_000_000, savingsAmount: 2_000_000 })
+    render(<BudgetSpendPage />)
+
+    const input = screen.getByTestId('budget-spend-housing')
+    fireEvent.change(input, { target: { value: '4000000' } })
+    expect(useFunnelStore.getState().budgetSpend['housing']).toBe(4_000_000)
 
     fireEvent.click(screen.getByRole('button', { name: /budget\.spend\.cta/i }))
     expect(push).toHaveBeenCalledWith('/start/budget/plan')
   })
 
-  it('plan screen defaults to On target = the savings goal', async () => {
+  it('spend screen shows add-another inline input and appends custom category', async () => {
+    useFunnelStore.setState({ budgetIncome: 10_000_000, savingsAmount: 2_000_000 })
+    render(<BudgetSpendPage />)
+
+    fireEvent.click(screen.getByRole('button', { name: /budget\.spend\.addCategory/i }))
+
+    const input = screen.getByPlaceholderText(/budget\.spend\.newCategory/i)
+    fireEvent.change(input, { target: { value: 'Pets' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    await waitFor(() =>
+      expect(useFunnelStore.getState().customCategories).toEqual([
+        { slug: 'extra-1', name: 'Pets' },
+      ])
+    )
+    expect(screen.getByTestId('budget-spend-extra-1')).toBeInTheDocument()
+  })
+
+  it('plan screen defaults to On target = the savings goal', () => {
     useFunnelStore.setState({
       budgetIncome: 10_000_000,
       savingsAmount: 2_000_000,
-      budgetSpend: { 'cat-housing': 4_000_000, 'cat-food': 2_000_000 },
+      budgetSpend: { housing: 4_000_000, food: 2_000_000 },
     })
     render(<BudgetPlanPage />)
 
     // The "On target" option is the recommended, pre-selected one.
     const onTarget = screen.getByRole('button', { name: /budget\.plan\.onTargetTitle/i })
     expect(onTarget).toHaveAttribute('aria-pressed', 'true')
-
-    // Let the async ensureAnonymousSession effect settle before unmount.
-    await waitFor(() => expect(ensureAnonymousSession).toHaveBeenCalled())
   })
 
-  it('Save my plan persists allocations by real category id then routes to /start/save', async () => {
+  it('Save my plan records choice in store and routes to /start/save (no DB write)', () => {
     useFunnelStore.setState({
       budgetIncome: 10_000_000,
       savingsAmount: 2_000_000,
-      budgetSpend: { 'cat-housing': 4_000_000, 'cat-food': 2_000_000 },
+      budgetSpend: { housing: 4_000_000, food: 2_000_000 },
     })
     render(<BudgetPlanPage />)
 
     fireEvent.click(screen.getByRole('button', { name: /budget\.plan\.saveCta/i }))
 
-    await waitFor(() => expect(saveOnboardingPlan).toHaveBeenCalledTimes(1))
-    expect(saveOnboardingPlan).toHaveBeenCalledWith(
-      expect.objectContaining({
-        monthly_income: 10_000_000,
-        period: 'monthly',
-        allocations: expect.arrayContaining([
-          { category_id: 'cat-housing', amount: 4_000_000 },
-          { category_id: 'cat-food', amount: 2_000_000 },
-          // Default selection is "On target" = the 2,000,000 savings goal,
-          // booked against the real "Savings transfer" category by name lookup.
-          { category_id: 'cat-savings', amount: 2_000_000 },
-        ]),
-      })
-    )
-    // No find-or-create — categories already exist and are referenced by id.
-    expect(addCategory).not.toHaveBeenCalled()
-    // The selected option's amount is mirrored into the store.
+    // The selected option's amount (On target = savings goal = 2,000,000) is
+    // persisted into the store synchronously — no DB write.
     expect(useFunnelStore.getState().budgetSavingsChoice).toBe(2_000_000)
-    expect(advanceOnboarding).toHaveBeenCalledWith('plan')
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/start/save'))
+    expect(push).toHaveBeenCalledWith('/start/save')
   })
 })

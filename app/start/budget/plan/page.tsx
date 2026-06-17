@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
@@ -13,20 +13,13 @@ import {
   SlidersHorizontal,
   type LucideIcon,
 } from 'lucide-react'
-import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/atoms/button'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
 import { StickyCtaBar } from '@/components/features/budget/StickyCtaBar'
-import { useTransactionCategories } from '@/hooks/useTransactionCategories'
-import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
-import { saveOnboardingPlan, advanceOnboarding } from '@/lib/api/onboarding-funnel'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
 import { formatCurrencyCompact, formatCurrencyWhole } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
-
-/** Seeded TRANSFER category the savings allocation is booked against. */
-const SAVINGS_TRANSFER_NAME = 'Savings transfer'
 
 type OptionKey = 'relaxed' | 'on_target' | 'ambitious'
 
@@ -51,19 +44,7 @@ export default function BudgetPlanPage() {
   const setBudgetSavingsChoice = useFunnelStore((s) => s.setBudgetSavingsChoice)
   const setPlanSummary = useFunnelStore((s) => s.setPlanSummary)
 
-  const [userId, setUserId] = useState<string | undefined>()
   const [selected, setSelected] = useState<OptionKey>('on_target')
-  const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    ensureAnonymousSession()
-      .then(setUserId)
-      .catch(() => {
-        /* save will surface the error via toast */
-      })
-  }, [])
-
-  const { categories } = useTransactionCategories(userId)
 
   const computed = useMemo(() => {
     const income = budgetIncome ?? 0
@@ -148,46 +129,16 @@ export default function BudgetPlanPage() {
 
   const selectedAmount = options.find((o) => o.key === selected)?.amount ?? onTarget
 
-  const handleSave = async () => {
-    setSaving(true)
-    try {
-      setBudgetSavingsChoice(selectedAmount)
-      setPlanSummary({
-        kind: 'budget',
-        primary: t('budget.plan.summaryPrimary', {
-          amount: formatCurrencyWhole(selectedAmount),
-        }),
-        caption: t('budget.plan.summaryCaption', { pct: pct(selectedAmount) }),
-      })
-
-      // budgetSpend is keyed by real category id (set on the spend screen), so
-      // allocations reference those ids directly — no find-or-create.
-      const allocations: { category_id: string; amount: number }[] = Object.entries(budgetSpend)
-        .filter(([, amount]) => amount > 0)
-        .map(([categoryId, amount]) => ({ category_id: categoryId, amount }))
-
-      if (selectedAmount > 0) {
-        const savings = categories.find(
-          (c) =>
-            c.group_type === 'TRANSFER' &&
-            c.name.toLowerCase() === SAVINGS_TRANSFER_NAME.toLowerCase()
-        )
-        if (savings) allocations.push({ category_id: savings.id, amount: selectedAmount })
-      }
-
-      await saveOnboardingPlan({
-        monthly_income: income,
-        period: 'monthly',
-        allocations,
-      })
-      await advanceOnboarding('plan').catch(() => {
-        /* best-effort — plan already persisted */
-      })
-      router.push('/start/save')
-    } catch {
-      toast.error(t('budget.saveError'))
-      setSaving(false)
-    }
+  const handleSave = () => {
+    setBudgetSavingsChoice(selectedAmount)
+    setPlanSummary({
+      kind: 'budget',
+      primary: t('budget.plan.summaryPrimary', {
+        amount: formatCurrencyWhole(selectedAmount),
+      }),
+      caption: t('budget.plan.summaryCaption', { pct: pct(selectedAmount) }),
+    })
+    router.push('/start/save')
   }
 
   const summary = [
@@ -321,7 +272,6 @@ export default function BudgetPlanPage() {
       <StickyCtaBar>
         <Button
           className="h-[52px] w-full gap-2 rounded-[14px] text-md"
-          disabled={saving}
           onClick={handleSave}
         >
           {t('budget.plan.saveCta')}

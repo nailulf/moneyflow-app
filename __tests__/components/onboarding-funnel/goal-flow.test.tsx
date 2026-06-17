@@ -8,29 +8,7 @@ jest.mock('next-intl', () => ({
   useLocale: () => 'en',
 }))
 
-const ensureAnonymousSession = jest.fn(() => Promise.resolve('user-1'))
-jest.mock('@/lib/supabase/anonymous', () => ({ ensureAnonymousSession }))
-
-const saveOnboardingGoal = jest.fn(() => Promise.resolve({ goal: { id: 'g1', account_id: 'a1' } }))
-const saveOnboardingPlan = jest.fn(() => Promise.resolve({ plan: { id: 'p1' } }))
-const advanceOnboarding = jest.fn(() => Promise.resolve({ onboarding: { current_phase: 'goal_setup' } }))
-jest.mock('@/lib/api/onboarding-funnel', () => ({
-  saveOnboardingGoal,
-  saveOnboardingPlan,
-  advanceOnboarding,
-}))
-
 jest.mock('sonner', () => ({ toast: { error: jest.fn() } }))
-
-jest.mock('@/hooks/useTransactionCategories', () => ({
-  useTransactionCategories: () => ({
-    categories: [
-      { id: 'food', name: 'Food', group_type: 'EXPENSE' },
-      { id: 'transport', name: 'Transport', group_type: 'EXPENSE' },
-    ],
-    isLoading: false,
-  }),
-}))
 
 // Reset the in-memory funnel store between tests.
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
@@ -38,18 +16,15 @@ import GoalTypePage from '@/app/start/goal/type/page'
 import GoalIncomePage from '@/app/start/goal/income/page'
 import GoalSpendPage from '@/app/start/goal/spend/page'
 
+// GoalIncomePage still calls ensureAnonymousSession to lazily bootstrap the
+// guest session; mock it here so it doesn't try to reach Supabase.
+const ensureAnonymousSession = jest.fn(() => Promise.resolve('user-1'))
+jest.mock('@/lib/supabase/anonymous', () => ({ ensureAnonymousSession }))
+
 describe('GoalTypePage', () => {
   beforeEach(() => {
     push.mockClear()
-    ensureAnonymousSession.mockClear()
-    saveOnboardingGoal.mockClear()
-    advanceOnboarding.mockClear()
     useFunnelStore.getState().reset()
-  })
-
-  it('creates the anonymous session on mount', () => {
-    render(<GoalTypePage />)
-    expect(ensureAnonymousSession).toHaveBeenCalledTimes(1)
   })
 
   it('disables Continue until a goal type and target are set', () => {
@@ -64,30 +39,26 @@ describe('GoalTypePage', () => {
     expect(screen.getByRole('button', { name: /continue/i })).not.toBeDisabled()
   })
 
-  it('saves the goal then routes to the income screen', async () => {
+  it('routes to income screen immediately (no DB write)', () => {
     render(<GoalTypePage />)
     fireEvent.click(screen.getByTestId('goal-vacation'))
     fireEvent.change(screen.getByTestId('target-amount'), { target: { value: '5000000' } })
     fireEvent.click(screen.getByRole('button', { name: /continue/i }))
 
-    await waitFor(() => expect(saveOnboardingGoal).toHaveBeenCalledTimes(1))
-    expect(saveOnboardingGoal).toHaveBeenCalledWith(
-      expect.objectContaining({ goal_type: 'vacation', target_amount: 5000000 })
-    )
-    expect(advanceOnboarding).toHaveBeenCalledWith('goal_setup')
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/start/goal/income'))
+    expect(push).toHaveBeenCalledWith('/start/goal/income')
+    // Goal type + amount are in the store — no saveOnboardingGoal called.
+    expect(useFunnelStore.getState().goalType).toBe('vacation')
+    expect(useFunnelStore.getState().targetAmount).toBe(5_000_000)
   })
 
-  it('maps the custom goal type to the "other" enum on save', async () => {
+  it('stores custom goal type in the store without mapping to "other" enum', () => {
     render(<GoalTypePage />)
     fireEvent.click(screen.getByTestId('goal-custom'))
     fireEvent.change(screen.getByTestId('target-amount'), { target: { value: '1000000' } })
     fireEvent.click(screen.getByRole('button', { name: /continue/i }))
 
-    await waitFor(() => expect(saveOnboardingGoal).toHaveBeenCalledTimes(1))
-    expect(saveOnboardingGoal).toHaveBeenCalledWith(
-      expect.objectContaining({ goal_type: 'other' })
-    )
+    expect(useFunnelStore.getState().goalType).toBe('custom')
+    expect(push).toHaveBeenCalledWith('/start/goal/income')
   })
 
   it('defaults to the vacation goal selected on mount', () => {
@@ -99,6 +70,7 @@ describe('GoalTypePage', () => {
 describe('GoalIncomePage', () => {
   beforeEach(() => {
     push.mockClear()
+    ensureAnonymousSession.mockClear()
     useFunnelStore.getState().reset()
   })
 
@@ -125,8 +97,6 @@ describe('GoalIncomePage', () => {
 describe('GoalSpendPage', () => {
   beforeEach(() => {
     push.mockClear()
-    saveOnboardingPlan.mockClear()
-    advanceOnboarding.mockClear()
     useFunnelStore.getState().reset()
   })
 
@@ -146,8 +116,6 @@ describe('GoalSpendPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /goal.spend.cta/i }))
 
     expect(push).toHaveBeenCalledWith('/start/goal/plan')
-    expect(saveOnboardingPlan).not.toHaveBeenCalled()
-    expect(advanceOnboarding).not.toHaveBeenCalled()
   })
 
   it('shows add-another category input and appends custom category', async () => {

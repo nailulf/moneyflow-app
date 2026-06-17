@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 import {
   ShieldCheck,
   Plane,
@@ -19,12 +18,6 @@ import {
 import { Button } from '@/components/ui/atoms/button'
 import { CurrencyInput } from '@/components/ui/atoms/currency-input'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
-import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
-import {
-  saveOnboardingGoal,
-  advanceOnboarding,
-  type OnboardingGoalType,
-} from '@/lib/api/onboarding-funnel'
 import { useFunnelStore, type FunnelGoalType } from '@/lib/onboarding/funnel-store'
 import { cn } from '@/lib/utils'
 
@@ -88,18 +81,6 @@ const HORIZONS: Array<{ labelKey: string; months: number | null }> = [
   { labelKey: 'goal.type.horizonCustom', months: null },
 ]
 
-/** Funnel-type → real goal_type enum understood by the goal endpoint. */
-function toGoalType(type: FunnelGoalType): OnboardingGoalType {
-  return type === 'custom' ? 'other' : type
-}
-
-/** today + N months as ISO yyyy-mm-dd. */
-function targetDateFromHorizon(months: number): string {
-  const d = new Date()
-  d.setMonth(d.getMonth() + months)
-  return d.toISOString().slice(0, 10)
-}
-
 /** Goal flow screen 1 (design Row B-1) — pick a short-term goal + target. */
 export default function GoalTypePage() {
   const t = useTranslations('start')
@@ -113,15 +94,6 @@ export default function GoalTypePage() {
   const setHorizonMonths = useFunnelStore((s) => s.setHorizonMonths)
 
   const [horizonIsCustom, setHorizonIsCustom] = useState(false)
-  const [saving, setSaving] = useState(false)
-
-  // Lazily create the anonymous Supabase user — the first persisting step.
-  // Idempotent / single-flight; fire-and-forget so it doesn't block render.
-  useEffect(() => {
-    ensureAnonymousSession().catch(() => {
-      /* surfaced again if the goal save below fails */
-    })
-  }, [])
 
   // Design default: "Vacation / Trip" pre-selected (blue border + filled radio).
   // Run once on mount; we intentionally don't re-apply if the user clears it.
@@ -129,24 +101,11 @@ export default function GoalTypePage() {
     if (!useFunnelStore.getState().goalType) setGoalType('vacation')
   }, [setGoalType])
 
-  const canContinue = !!goalType && !!targetAmount && targetAmount > 0 && !saving
+  const canContinue = !!goalType && !!targetAmount && targetAmount > 0
 
-  const handleContinue = async () => {
+  const handleContinue = () => {
     if (!goalType || !targetAmount) return
-    setSaving(true)
-    try {
-      const months = horizonMonths ?? 12
-      await saveOnboardingGoal({
-        goal_type: toGoalType(goalType),
-        target_amount: targetAmount,
-        target_date: targetDateFromHorizon(months),
-      })
-      await advanceOnboarding('goal_setup')
-      router.push('/start/goal/income')
-    } catch {
-      toast.error(t('goal.saveError'))
-      setSaving(false)
-    }
+    router.push('/start/goal/income')
   }
 
   return (
