@@ -130,24 +130,39 @@ describe('GoalSpendPage', () => {
     useFunnelStore.getState().reset()
   })
 
-  it('renders categories without a Total expenses row', async () => {
+  it('renders the static spend categories without a loading state', () => {
     render(<GoalSpendPage />)
-    expect(await screen.findByLabelText('Food')).toBeInTheDocument()
+    // Static categories are rendered immediately (no DB wait)
+    expect(screen.getByTestId('spend-housing')).toBeInTheDocument()
+    expect(screen.getByTestId('spend-food')).toBeInTheDocument()
+    expect(screen.getByTestId('spend-transport')).toBeInTheDocument()
+    expect(screen.getByTestId('spend-bills')).toBeInTheDocument()
+    expect(screen.getByTestId('spend-lifestyle')).toBeInTheDocument()
     expect(screen.queryByText('goal.spend.totalLabel')).not.toBeInTheDocument()
   })
 
-  it('saves total income including named sources', async () => {
-    useFunnelStore.setState({
-      monthlyIncome: 8_000_000,
-      incomeSources: [{ name: 'Rent', amount: 2_000_000 }],
-    })
+  it('routes to /start/goal/plan on CTA click without DB calls', () => {
     render(<GoalSpendPage />)
-    fireEvent.change(await screen.findByLabelText('Food'), { target: { value: '1000000' } })
     fireEvent.click(screen.getByRole('button', { name: /goal.spend.cta/i }))
 
-    await waitFor(() => expect(saveOnboardingPlan).toHaveBeenCalledTimes(1))
-    expect(saveOnboardingPlan).toHaveBeenCalledWith(
-      expect.objectContaining({ monthly_income: 10_000_000 })
+    expect(push).toHaveBeenCalledWith('/start/goal/plan')
+    expect(saveOnboardingPlan).not.toHaveBeenCalled()
+    expect(advanceOnboarding).not.toHaveBeenCalled()
+  })
+
+  it('shows add-another category input and appends custom category', async () => {
+    render(<GoalSpendPage />)
+    fireEvent.click(screen.getByRole('button', { name: /goal.spend.addCategory/i }))
+
+    const input = screen.getByPlaceholderText(/goal.spend.newCategory/i)
+    fireEvent.change(input, { target: { value: 'Side hustle' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+
+    await waitFor(() =>
+      expect(useFunnelStore.getState().customCategories).toEqual([
+        { slug: 'extra-1', name: 'Side hustle' },
+      ])
     )
+    expect(screen.getByTestId('spend-extra-1')).toBeInTheDocument()
   })
 })

@@ -1617,6 +1617,8 @@
       "spend": {
         "title": "Berapa pengeluaran bulananmu?",
         "subtitle": "Perkiraan tidak masalah. Ketuk jumlah untuk menyesuaikan.",
+        "addCategory": "Tambah kategori lain",
+        "newCategory": "Kategori baru",
         "cta": "Hitung rencanaku"
       },
       "plan": {

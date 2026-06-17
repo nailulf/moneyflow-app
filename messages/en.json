@@ -1617,6 +1617,8 @@
       "spend": {
         "title": "What do you spend monthly?",
         "subtitle": "Estimate is okay. Tap an amount to adjust it.",
+        "addCategory": "Add another category",
+        "newCategory": "New category",
         "cta": "Calculate my plan"
       },
       "plan": {
