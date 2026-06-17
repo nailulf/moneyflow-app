@@ -1,14 +1,15 @@
-// Typed client wrappers for the onboarding funnel write endpoints
-// (`/api/onboarding/goal` and `/api/onboarding/plan`). Thin typed `fetch`
-// helpers used by the Phase 2 funnel UI to persist the guest's goal and plan.
+// Typed client wrappers for the onboarding funnel write endpoints.
+// Exports:
+//   - `advanceOnboarding`   → POST /api/onboarding/advance  (phase progression + event logging)
+//   - `finalizeOnboarding`  → POST /api/onboarding/finalize (persist guest draft on conversion)
 //
-// Input types mirror the Zod schemas in the route files exactly:
-//   - goal_type union  → app/api/onboarding/goal/route.ts (GOAL_TYPES)
-//   - period union     → app/api/onboarding/plan/route.ts (PlanSchema.period)
+// Guest financial data (goal + plan) is never written during the anonymous
+// funnel; it is collected client-side in the onboarding draft store and
+// persisted in a single atomic call to `finalizeOnboarding` at conversion time.
 
 import type { OnboardingDraft } from '@/lib/onboarding/build-draft'
 
-/** Mirrors the `goal_type` enum in app/api/onboarding/goal/route.ts (GOAL_TYPES). */
+/** Goal-type values shared by the draft store and the finalize RPC. */
 export type OnboardingGoalType =
   | 'emergency_fund'
   | 'vacation'
@@ -20,27 +21,6 @@ export type OnboardingGoalType =
   | 'other'
   | 'debt_payoff'
   | 'gadget'
-
-export type OnboardingGoalInput = {
-  goal_type: OnboardingGoalType
-  target_amount: number
-  /** ISO date (YYYY-MM-DD). Defaults server-side to one year out when omitted. */
-  target_date?: string
-  /** Defaults server-side from the goal type when omitted. */
-  name?: string
-}
-
-/** Mirrors the `period` enum in app/api/onboarding/plan/route.ts (no 'weekly'). */
-export type OnboardingPlanPeriod = 'monthly' | 'yearly'
-
-export type OnboardingPlanInput = {
-  // Accepted by the endpoint for the funnel's use, but not persisted (the
-  // route stores the allocation sum as the budget ceiling).
-  monthly_income: number
-  /** Defaults server-side to 'monthly' when omitted. */
-  period?: OnboardingPlanPeriod
-  allocations: { category_id: string; amount: number }[]
-}
 
 async function postJson<T>(url: string, body: unknown): Promise<T> {
   const res = await fetch(url, {
@@ -54,12 +34,6 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   }
   return res.json() as Promise<T>
 }
-
-export const saveOnboardingGoal = (input: OnboardingGoalInput) =>
-  postJson<{ goal: { id: string; account_id: string } }>('/api/onboarding/goal', input)
-
-export const saveOnboardingPlan = (input: OnboardingPlanInput) =>
-  postJson<{ plan: { id: string } }>('/api/onboarding/plan', input)
 
 /** Funnel-facing phases accepted by POST /api/onboarding/advance (subset of current_phase). */
 export type AdvancePhase = 'intent' | 'goal_setup' | 'health_check' | 'plan' | 'conversion' | 'completed'

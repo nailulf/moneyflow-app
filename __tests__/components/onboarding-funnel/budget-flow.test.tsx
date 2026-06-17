@@ -17,7 +17,8 @@ jest.mock('@/lib/supabase/anonymous', () => ({
 }))
 
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
-import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
+import { ensureAnonymousSession as _ensureAnonymousSession } from '@/lib/supabase/anonymous'
+const ensureAnonymousSession = _ensureAnonymousSession as unknown as jest.Mock
 import BudgetIncomePage from '@/app/start/budget/income/page'
 import BudgetSavingsPage from '@/app/start/budget/savings/page'
 import BudgetSpendPage from '@/app/start/budget/spend/page'
