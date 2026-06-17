@@ -30,7 +30,7 @@ export interface PlanSummary {
   caption: string
 }
 
-interface FunnelState {
+export interface FunnelState {
   goalType?: FunnelGoalType
   targetAmount?: number
   /** 3 | 6 | 12 | custom value (months). Defaults to 12 in the UI. */
@@ -38,7 +38,11 @@ interface FunnelState {
   monthlyIncome?: number
   /** Named extra income streams; total income = main + sum(sources). */
   incomeSources: IncomeSource[]
-  /** categoryId → monthly spend amount. */
+  /**
+   * Goal-flow monthly spend estimates, keyed by slug
+   * ('housing' | 'food' | 'transport' | 'bills' | 'lifestyle' | 'extra-N').
+   * Mapped to real categories only at registration (finalize).
+   */
   spend: Record<string, number>
 
   // ── Budget-from-income flow (Flow 2) ───────────────────────────────────────
@@ -49,13 +53,15 @@ interface FunnelState {
   /** Monthly savings target captured on /start/budget/savings. */
   savingsAmount?: number
   /**
-   * Estimated monthly spend from /start/budget/spend, keyed by the design's
-   * FIXED spend-category key ('housing' | 'food' | 'transport' | 'bills' |
-   * 'lifestyle' | dynamically-added 'extra-N'). The design's category labels
-   * differ from the app's seeded categories, so these keys are mapped to real
-   * categories (find-or-create) only at save time on the plan screen.
+   * Estimated monthly spend from /start/budget/spend, keyed by slug
+   * ('housing' | 'food' | 'transport' | 'bills' | 'lifestyle' | 'extra-N').
+   * Slugs are mapped to real categories (find-or-create) only at registration
+   * (finalize). Core slugs resolve via SPEND_SLUG_TO_NAME; custom 'extra-N'
+   * slugs resolve via customCategories.
    */
   budgetSpend: Record<string, number>
+  /** User-added spend rows beyond the static core list; slug = `extra-{n}`. */
+  customCategories: { slug: string; name: string }[]
   /**
    * The savings amount of the option selected on /start/budget/plan
    * (Relaxed / On target / Ambitious). Persisted as the plan's savings
@@ -81,6 +87,7 @@ interface FunnelState {
   setBudgetSpend: (categoryId: string, amount: number) => void
   setBudgetSavingsChoice: (budgetSavingsChoice: number) => void
   setPlanSummary: (planSummary: PlanSummary) => void
+  addCustomCategory: (name: string) => void
   reset: () => void
 }
 
@@ -94,6 +101,7 @@ export const useFunnelStore = create<FunnelState>((set) => ({
   incomeSources: [],
   spend: {},
   budgetSpend: {},
+  customCategories: [],
 
   setGoalType: (goalType) => set({ goalType }),
   setTargetAmount: (targetAmount) => set({ targetAmount }),
@@ -111,12 +119,20 @@ export const useFunnelStore = create<FunnelState>((set) => ({
     set((state) => ({ budgetSpend: { ...state.budgetSpend, [categoryId]: amount } })),
   setBudgetSavingsChoice: (budgetSavingsChoice) => set({ budgetSavingsChoice }),
   setPlanSummary: (planSummary) => set({ planSummary }),
+  addCustomCategory: (name) =>
+    set((state) => ({
+      customCategories: [
+        ...state.customCategories,
+        { slug: `extra-${state.customCategories.length + 1}`, name },
+      ],
+    })),
   reset: () =>
     set({
       horizonMonths: 12,
       incomeSources: [],
       spend: {},
       budgetSpend: {},
+      customCategories: [],
       goalType: undefined,
       targetAmount: undefined,
       monthlyIncome: undefined,
