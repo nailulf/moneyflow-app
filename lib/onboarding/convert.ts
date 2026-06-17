@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/client'
-import { advanceOnboarding } from '@/lib/api/onboarding-funnel'
+import { advanceOnboarding, finalizeOnboarding } from '@/lib/api/onboarding-funnel'
 import { isDevToolsEnabled } from '@/lib/utils/environment'
+import type { OnboardingDraft } from '@/lib/onboarding/build-draft'
 
 /**
  * Detects the Supabase "email already registered" error returned by
@@ -14,36 +15,35 @@ const EMAIL_EXISTS = (e: { code?: string; message?: string } | null) =>
 /**
  * Convert an anonymous guest into a permanent email/password account.
  *
- * Captures the anon access token BEFORE any call that could replace the
- * session, then attempts to promote the same anonymous user via `updateUser`
- * (keeps the same user_id, so the guest's goal/plan stay theirs).
+ * Attempts to promote the same anonymous user via `updateUser` (keeps the same
+ * user_id, so the guest's session data stays intact). On success, materializes
+ * the in-memory onboarding draft into real DB rows via `finalizeOnboarding`.
  *
  * On an "email already registered" conflict we sign into the EXISTING account
- * and hand the captured anon token to the service-role merge endpoint, which
- * reassigns the bounded guest data into the existing account.
+ * and materialize the draft into that account instead.
  *
  * @returns `{ merged: false, pendingVerification: true }` when the anon user
  *          became permanent in place — Supabase requires the user to confirm
  *          the new email before `email_confirmed_at` is set.
- *          `{ merged: true }` when data was merged into a pre-existing account.
+ *          `{ merged: true }` when the draft was materialized into a
+ *          pre-existing account.
  */
 export async function convertWithEmail(
   email: string,
   password: string,
+  draft: OnboardingDraft,
 ): Promise<{ merged: boolean; pendingVerification?: boolean }> {
   const supabase = createClient()
 
-  // Capture the anon token first — updateUser/signIn can replace the session.
-  const { data: { session } } = await supabase.auth.getSession()
-  const anonAccessToken = session?.access_token
-
   const { error } = await supabase.auth.updateUser({ email, password })
   if (!error) {
-    // The anon user is now permanent on the same user_id (data intact). The new
-    // email is unconfirmed until they click the link. In dev/preview there is no
-    // real email, so auto-confirm via the dev-only admin route — otherwise the
-    // account is stuck unconfirmed and the user can neither proceed nor log in.
-    // In production we keep email verification (the verify-email screen).
+    // Same user_id, now permanent. Materialize the draft into real rows.
+    try { await finalizeOnboarding(draft) } catch { /* surfaced by caller retry */ }
+
+    // The new email is unconfirmed until they click the link. In dev/preview
+    // there is no real email, so auto-confirm via the dev-only admin route —
+    // otherwise the account is stuck unconfirmed. In production we keep email
+    // verification (the verify-email screen).
     let pendingVerification = true
     if (isDevToolsEnabled()) {
       try {
@@ -58,37 +58,17 @@ export async function convertWithEmail(
       }
     }
     // Mark onboarding complete so the funnel doesn't re-trigger — best-effort.
-    try {
-      await advanceOnboarding('completed')
-    } catch {
-      // Non-fatal: the account is already converted.
-    }
+    try { await advanceOnboarding('completed') } catch {}
     return { merged: false, pendingVerification }
   }
   if (!EMAIL_EXISTS(error)) throw new Error(error.message)
 
-  // Conflict: the email belongs to an existing account. Sign into it, then
-  // merge the guest's data via the service-role endpoint using the anon token.
+  // Email exists → sign into account B, then materialize the draft into it.
   const { error: signErr } = await supabase.auth.signInWithPassword({ email, password })
   if (signErr) throw new Error(signErr.message)
 
-  const res = await fetch('/api/onboarding/merge', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ anonAccessToken }),
-  })
-  if (!res.ok) throw new Error((await res.json().catch(() => ({})))?.error ?? 'Merge failed')
-
-  // Mark onboarding complete on the merge path too. The session is now user B's
-  // (signed in above via signInWithPassword), so this correctly targets the
-  // existing account — otherwise B can be left on a stale onboarding phase
-  // (e.g. the legacy activation banner) after merging. Best-effort: never block
-  // the conversion if it fails.
-  try {
-    await advanceOnboarding('completed')
-  } catch {
-    // Non-fatal: the data was already merged.
-  }
+  try { await finalizeOnboarding(draft) } catch {}
+  try { await advanceOnboarding('completed') } catch {}
   return { merged: true }
 }
 

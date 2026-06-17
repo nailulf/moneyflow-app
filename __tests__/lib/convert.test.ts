@@ -5,48 +5,47 @@ const linkIdentity = jest.fn()
 jest.mock('@/lib/supabase/client', () => ({
   createClient: () => ({ auth: { updateUser, getSession, signInWithPassword, linkIdentity } }),
 }))
-const mergeFetch = jest.fn()
-global.fetch = ((...a: unknown[]) => mergeFetch(...a)) as never
+const devFetch = jest.fn()
+global.fetch = ((...a: unknown[]) => devFetch(...a)) as never
 
 const advanceOnboarding = jest.fn().mockResolvedValue(undefined)
+const finalizeOnboarding = jest.fn().mockResolvedValue(undefined)
 jest.mock('@/lib/api/onboarding-funnel', () => ({
   advanceOnboarding: (...a: unknown[]) => advanceOnboarding(...a),
+  finalizeOnboarding: (...a: unknown[]) => finalizeOnboarding(...a),
 }))
 
 import { convertWithEmail } from '@/lib/onboarding/convert'
+
+const DRAFT = { allocations: [], period: 'monthly' as const }
 
 describe('convertWithEmail', () => {
   beforeEach(() => jest.clearAllMocks())
 
   it('links email to the same user on success (no merge)', async () => {
-    getSession.mockResolvedValue({ data: { session: { access_token: 'ANON' } } })
     updateUser.mockResolvedValue({ data: { user: { id: 'same' } }, error: null })
-    const r = await convertWithEmail('new@x.com', 'pw12345')
+    const r = await convertWithEmail('new@x.com', 'pw12345', DRAFT)
     expect(r.merged).toBe(false)
     expect(r.pendingVerification).toBe(true)
     expect(signInWithPassword).not.toHaveBeenCalled()
+    expect(finalizeOnboarding).toHaveBeenCalledTimes(1)
+    expect(finalizeOnboarding).toHaveBeenCalledWith(DRAFT)
   })
 
-  it('on email-exists conflict, signs into existing account and calls merge with the anon token', async () => {
-    getSession.mockResolvedValue({ data: { session: { access_token: 'ANON_TOKEN' } } })
+  it('on email-exists conflict, signs into existing account and calls finalizeOnboarding', async () => {
     updateUser.mockResolvedValue({ data: null, error: { message: 'email address already registered', code: 'email_exists' } })
     signInWithPassword.mockResolvedValue({ data: { user: { id: 'existing' } }, error: null })
-    mergeFetch.mockResolvedValue({ ok: true, json: async () => ({ merged: true }) })
 
-    const r = await convertWithEmail('taken@x.com', 'pw12345')
+    const r = await convertWithEmail('taken@x.com', 'pw12345', DRAFT)
     expect(signInWithPassword).toHaveBeenCalledWith({ email: 'taken@x.com', password: 'pw12345' })
-    expect(mergeFetch).toHaveBeenCalledWith('/api/onboarding/merge', expect.objectContaining({
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ anonAccessToken: 'ANON_TOKEN' }),
-    }))
+    expect(finalizeOnboarding).toHaveBeenCalledTimes(1)
+    expect(finalizeOnboarding).toHaveBeenCalledWith(DRAFT)
     expect(advanceOnboarding).toHaveBeenCalledWith('completed')
     expect(r.merged).toBe(true)
   })
 
   it('re-throws a non-conflict updateUser error', async () => {
-    getSession.mockResolvedValue({ data: { session: { access_token: 'ANON' } } })
     updateUser.mockResolvedValue({ data: null, error: { message: 'password too short', code: 'weak_password' } })
-    await expect(convertWithEmail('a@b.com', 'x')).rejects.toThrow()
+    await expect(convertWithEmail('a@b.com', 'x', DRAFT)).rejects.toThrow()
   })
 })
