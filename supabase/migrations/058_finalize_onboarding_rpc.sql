@@ -66,7 +66,7 @@ BEGIN
 
   -- ── 3. Ensure default Cash account ────────────────────────────────────────
   SELECT id INTO account_id FROM public.accounts
-    WHERE user_id = p_user_id AND name = 'Cash';
+    WHERE user_id = p_user_id AND name = 'Cash' AND type = 'CASH';
   IF account_id IS NULL THEN
     INSERT INTO public.accounts (user_id, name, type, currency, balance, is_default)
     VALUES (p_user_id, 'Cash', 'CASH', 'IDR', 0, true) RETURNING id INTO account_id;
@@ -90,7 +90,7 @@ BEGIN
   END IF;
 
   -- ── 5. Budget plan + allocations (optional) ───────────────────────────────
-  IF p_draft ? 'allocations' AND jsonb_array_length(p_draft->'allocations') > 0 THEN
+  IF p_draft ? 'allocations' AND jsonb_typeof(p_draft->'allocations') = 'array' AND jsonb_array_length(p_draft->'allocations') > 0 THEN
     SELECT COALESCE(SUM((a->>'amount')::numeric), 0) INTO total
     FROM jsonb_array_elements(p_draft->'allocations') AS a;
 

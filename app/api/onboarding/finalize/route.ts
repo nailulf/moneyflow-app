@@ -6,7 +6,18 @@ import { createServerComponentClient } from '@/lib/supabase'
 const DraftSchema = z.object({
   goal: z
     .object({
-      goal_type: z.string(),
+      goal_type: z.enum([
+        'emergency_fund',
+        'vacation',
+        'house_down_payment',
+        'car_purchase',
+        'education',
+        'wedding',
+        'investment',
+        'other',
+        'debt_payoff',
+        'gadget',
+      ]),
       name: z.string().max(120),
       target_amount: z.number().positive().max(1e15),
       target_date: z.string().date(),

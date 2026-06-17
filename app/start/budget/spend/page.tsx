@@ -172,7 +172,7 @@ export default function BudgetSpendPage() {
             <button
               type="button"
               onClick={handleConfirmAdd}
-              aria-label="Confirm"
+              aria-label={t('budget.spend.confirmCategory')}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Check className="h-4 w-4" aria-hidden="true" />

@@ -1619,6 +1619,7 @@
         "subtitle": "Perkiraan tidak masalah. Ketuk jumlah untuk menyesuaikan.",
         "addCategory": "Tambah kategori lain",
         "newCategory": "Kategori baru",
+        "confirmCategory": "Konfirmasi",
         "cta": "Hitung rencanaku"
       },
       "plan": {
@@ -1670,6 +1671,7 @@
         "subtitle": "Kira-kira pengeluaranmu tiap bulan sekarang. Ketuk angka untuk mengubahnya.",
         "addCategory": "Tambah kategori",
         "newCategory": "Kategori baru",
+        "confirmCategory": "Konfirmasi",
         "totalLabel": "Biaya hidup saat ini",
         "cta": "Lihat pilihanku"
       },

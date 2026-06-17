@@ -1619,6 +1619,7 @@
         "subtitle": "Estimate is okay. Tap an amount to adjust it.",
         "addCategory": "Add another category",
         "newCategory": "New category",
+        "confirmCategory": "Confirm",
         "cta": "Calculate my plan"
       },
       "plan": {
@@ -1670,6 +1671,7 @@
         "subtitle": "Roughly what you spend each month now. Tap an amount to adjust.",
         "addCategory": "Add a category",
         "newCategory": "New category",
+        "confirmCategory": "Confirm",
         "totalLabel": "Cost of living today",
         "cta": "See my options"
       },

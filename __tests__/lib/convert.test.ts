@@ -1,9 +1,8 @@
 const updateUser = jest.fn()
-const getSession = jest.fn()
 const signInWithPassword = jest.fn()
 const linkIdentity = jest.fn()
 jest.mock('@/lib/supabase/client', () => ({
-  createClient: () => ({ auth: { updateUser, getSession, signInWithPassword, linkIdentity } }),
+  createClient: () => ({ auth: { updateUser, signInWithPassword, linkIdentity } }),
 }))
 const devFetch = jest.fn()
 global.fetch = ((...a: unknown[]) => devFetch(...a)) as never
@@ -32,7 +31,7 @@ describe('convertWithEmail', () => {
     expect(finalizeOnboarding).toHaveBeenCalledWith(DRAFT)
   })
 
-  it('on email-exists conflict, signs into existing account and calls finalizeOnboarding', async () => {
+  it('on email-exists conflict, signs into existing account, calls finalizeOnboarding, and advances to completed', async () => {
     updateUser.mockResolvedValue({ data: null, error: { message: 'email address already registered', code: 'email_exists' } })
     signInWithPassword.mockResolvedValue({ data: { user: { id: 'existing' } }, error: null })
 

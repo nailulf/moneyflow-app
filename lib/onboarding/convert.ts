@@ -101,6 +101,7 @@ export async function resendConfirmation(email: string): Promise<boolean> {
  * initiating the link.
  */
 export async function convertWithOAuth(provider: 'google' | 'apple'): Promise<void> {
+  // TODO(oauth-finalize): post-redirect, the OAuth callback must call finalizeOnboarding(draft) — anonymous users are no longer seeded by the signup trigger (migration 057), so without this an OAuth-converted guest lands with no categories/account/goal/plan. Tracked as a later task in the pre-account-onboarding spec.
   const supabase = createClient()
   const { error } = await supabase.auth.linkIdentity({ provider })
   if (error) throw new Error(error.message)
