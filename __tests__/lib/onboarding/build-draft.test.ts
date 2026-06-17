@@ -56,4 +56,12 @@ describe('buildOnboardingDraft', () => {
     expect(draft.allocations).toEqual([])
     expect(draft.period).toBe('monthly')
   })
+
+  it('clamps target_date to last day of month when source day overflows (Jan 31 + 1 month = Feb 28)', () => {
+    const jan31 = new Date('2026-01-31T00:00:00Z')
+    const draft = buildOnboardingDraft({
+      ...base, goalType: 'vacation', targetAmount: 5_000_000, horizonMonths: 1,
+    } as FunnelState, jan31)
+    expect(draft.goal!.target_date).toBe('2026-02-28')
+  })
 })

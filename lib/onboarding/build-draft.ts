@@ -34,7 +34,12 @@ const GOAL_TYPE_LABELS: Record<OnboardingGoalType, string> = {
 
 function isoDatePlusMonths(now: Date, months: number): string {
   const d = new Date(now)
+  const originalDay = d.getDate()
   d.setMonth(d.getMonth() + months)
+  // If the day-of-month changed, the target month has fewer days — clamp to its last day
+  if (d.getDate() < originalDay) {
+    d.setDate(0) // rolls back to last day of the previous (intended) month
+  }
   return d.toISOString().slice(0, 10)
 }
 
@@ -55,7 +60,7 @@ export function buildOnboardingDraft(s: FunnelState, now: Date): OnboardingDraft
     .filter(([, amount]) => amount > 0)
     .map(([slug, amount]) => ({ name: slugToName[slug] ?? slug, amount }))
 
-  if (isBudgetFlow && s.budgetSavingsChoice && s.budgetSavingsChoice > 0) {
+  if (isBudgetFlow && (s.budgetSavingsChoice ?? 0) > 0) {
     allocations.push({ name: 'Savings transfer', amount: s.budgetSavingsChoice })
   }
 
