@@ -60,8 +60,9 @@ export function buildOnboardingDraft(s: FunnelState, now: Date): OnboardingDraft
     .filter(([, amount]) => amount > 0)
     .map(([slug, amount]) => ({ name: slugToName[slug] ?? slug, amount }))
 
-  if (isBudgetFlow && (s.budgetSavingsChoice ?? 0) > 0) {
-    allocations.push({ name: 'Savings transfer', amount: s.budgetSavingsChoice })
+  const savings = s.budgetSavingsChoice ?? 0
+  if (isBudgetFlow && savings > 0) {
+    allocations.push({ name: 'Savings transfer', amount: savings })
   }
 
   const draft: OnboardingDraft = { allocations, period: 'monthly' }
