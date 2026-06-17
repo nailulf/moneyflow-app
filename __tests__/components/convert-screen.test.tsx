@@ -100,7 +100,13 @@ describe('ConvertPage', () => {
     expect(submit).not.toBeDisabled()
     fireEvent.click(submit)
 
-    expect(convertWithEmail).toHaveBeenCalledWith('jane@example.com', 'secret123')
+    await waitFor(() =>
+      expect(convertWithEmail).toHaveBeenCalledWith(
+        'jane@example.com',
+        'secret123',
+        expect.objectContaining({ allocations: expect.any(Array), period: 'monthly' }),
+      ),
+    )
   })
 
   it('shows the verify-email state (and does not navigate) when conversion is pending verification', async () => {

@@ -296,8 +296,6 @@ function FormStep({
   const [agreed, setAgreed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  const funnelState = useFunnelStore((s) => s)
-
   const emailValid = EMAIL_RE.test(email)
   const passwordValid = password.length >= 6
   const canSubmit = emailValid && passwordValid && agreed && !submitting
@@ -331,7 +329,7 @@ function FormStep({
     }
     setSubmitting(true)
     try {
-      const draft = buildOnboardingDraft(funnelState, new Date())
+      const draft = buildOnboardingDraft(useFunnelStore.getState(), new Date())
       const result = await convertWithEmail(email, password, draft)
       // Email conversions need confirmation; surface the verify state. The
       // merge (conflict) path lands in an existing, confirmed account → home.
