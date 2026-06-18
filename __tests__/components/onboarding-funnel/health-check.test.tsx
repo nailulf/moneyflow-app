@@ -105,11 +105,13 @@ describe('HealthCheckPage (multi-step)', () => {
     )
   })
 
-  it('routes to the save funnel from the result CTA', async () => {
+  it('routes to the save funnel from the result conversion CTA', async () => {
     render(<HealthCheckPage />)
     await completeFlow()
 
-    fireEvent.click(screen.getByRole('button', { name: /save my results/i }))
+    // The result screen is the conversion point — "Create free account" routes
+    // straight to the signup form.
+    fireEvent.click(screen.getByRole('button', { name: /createAccount/i }))
     expect(push).toHaveBeenCalledWith('/start/save')
   })
 })

@@ -11,16 +11,21 @@ import {
   PiggyBank,
   ShieldCheck,
   TrendingUp,
+  TrendingDown,
+  PieChart,
+  CreditCard,
+  CalendarClock,
+  Check,
   Landmark,
   type LucideIcon,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/atoms/button'
-import { CurrencyInput } from '@/components/ui/atoms/currency-input'
+import { BigCurrencyField } from '@/components/features/onboarding/funnel/BigCurrencyField'
+import { ConversionCtaBlock } from '@/components/features/onboarding/funnel/ConversionCtaBlock'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
 import { advanceOnboarding } from '@/lib/api/onboarding-funnel'
-import { useFunnelStore } from '@/lib/onboarding/funnel-store'
 import { formatCurrencyCompact } from '@/lib/data-utils'
 import {
   financialHealthScore,
@@ -94,8 +99,22 @@ export default function HealthCheckPage() {
   const [investments, setInvestments] = useState(0)
   const [debt, setDebt] = useState(0)
   const [debtPayment, setDebtPayment] = useState(0)
+  const [noDebt, setNoDebt] = useState(false)
 
   const [result, setResult] = useState<FinancialHealthResult | null>(null)
+
+  // "I have no debt" zeroes both debt fields and disables the cards; typing in
+  // a card clears the toggle so the two stay consistent.
+  const toggleNoDebt = () => {
+    setNoDebt((prev) => {
+      const next = !prev
+      if (next) {
+        setDebt(0)
+        setDebtPayment(0)
+      }
+      return next
+    })
+  }
 
   // Lazily create the anonymous Supabase user on entering step 1.
   // Idempotent / single-flight; fire-and-forget so it never blocks the flow.
@@ -130,7 +149,7 @@ export default function HealthCheckPage() {
 
   // ─── Result step ─────────────────────────────────────────────────────────
   if (step === 'result' && result) {
-    return <ResultStep result={result} onBack={() => setStep('debts')} router={router} t={t} />
+    return <ResultStep result={result} onBack={() => setStep('debts')} t={t} />
   }
 
   // ─── Input steps share the same chrome ─────────────────────────────────────
@@ -173,48 +192,91 @@ export default function HealthCheckPage() {
       </header>
 
       {step === 'income' && (
-        <div className="flex flex-col gap-6">
-          <Field
+        <div className="flex flex-col gap-3">
+          <BigCurrencyField
             id="hc-income"
             label={t('incomeLabel')}
             value={income}
             onChange={setIncome}
+            icon={TrendingUp}
+            iconClassName="bg-success/10 text-success"
           />
-          <Field
+          <BigCurrencyField
             id="hc-spending"
             label={t('spendingLabel')}
             value={spending}
             onChange={setSpending}
+            icon={TrendingDown}
+            iconClassName="bg-destructive/10 text-destructive"
           />
+          <p className="mt-1 flex items-center gap-1.5 text-xs leading-caption text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            {t('privacyNote')}
+          </p>
         </div>
       )}
 
       {step === 'savings' && (
-        <div className="flex flex-col gap-6">
-          <Field
+        <div className="flex flex-col gap-3">
+          <BigCurrencyField
             id="hc-savings"
             label={t('savingsLabel')}
             value={savings}
             onChange={setSavings}
+            icon={PiggyBank}
+            iconClassName="bg-tint-blue-bg text-tint-blue-fg"
           />
-          <Field
+          <BigCurrencyField
             id="hc-investments"
             label={t('investmentsLabel')}
             value={investments}
             onChange={setInvestments}
+            icon={PieChart}
+            iconClassName="bg-tint-purple-bg text-tint-purple-fg"
           />
         </div>
       )}
 
       {step === 'debts' && (
-        <div className="flex flex-col gap-6">
-          <Field id="hc-debt" label={t('debtLabel')} value={debt} onChange={setDebt} />
-          <Field
+        <div className="flex flex-col gap-3">
+          <BigCurrencyField
+            id="hc-debt"
+            label={t('debtLabel')}
+            value={debt}
+            onChange={(v) => {
+              setDebt(v)
+              if (v > 0) setNoDebt(false)
+            }}
+            icon={CreditCard}
+            iconClassName="bg-tint-pink-bg text-tint-pink-fg"
+            disabled={noDebt}
+          />
+          <BigCurrencyField
             id="hc-debt-payment"
             label={t('debtPaymentLabel')}
             value={debtPayment}
-            onChange={setDebtPayment}
+            onChange={(v) => {
+              setDebtPayment(v)
+              if (v > 0) setNoDebt(false)
+            }}
+            icon={CalendarClock}
+            iconClassName="bg-tint-amber-bg text-tint-amber-fg"
+            disabled={noDebt}
           />
+          <button
+            type="button"
+            onClick={toggleNoDebt}
+            aria-pressed={noDebt}
+            className={cn(
+              'mt-1 flex h-[52px] w-full items-center justify-center gap-2 rounded-2xl border text-sm leading-body-sm font-semibold transition-colors',
+              noDebt
+                ? 'border-primary bg-selected text-primary'
+                : 'border-border bg-card text-foreground hover:bg-muted/50'
+            )}
+          >
+            <Check className="h-4 w-4" aria-hidden="true" />
+            {t('noDebt')}
+          </button>
         </div>
       )}
 
@@ -255,37 +317,6 @@ export default function HealthCheckPage() {
   )
 }
 
-/** Labelled CurrencyInput row — the repeated control across all three input steps. */
-function Field({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string
-  label: string
-  value: number
-  onChange: (v: number) => void
-}) {
-  return (
-    <div>
-      <label
-        htmlFor={id}
-        className="block text-sm leading-body-sm font-medium text-foreground"
-      >
-        {label}
-      </label>
-      <CurrencyInput
-        id={id}
-        data-testid={id}
-        value={value}
-        onChange={onChange}
-        className="mt-2 h-[52px] rounded-[14px] text-lg"
-      />
-    </div>
-  )
-}
-
 interface BreakdownRow {
   factor: HealthFactor
   icon: LucideIcon
@@ -302,17 +333,14 @@ interface BreakdownRow {
 function ResultStep({
   result,
   onBack,
-  router,
   t,
 }: {
   result: FinancialHealthResult
   onBack: () => void
-  router: ReturnType<typeof useRouter>
   t: ReturnType<typeof useTranslations>
 }) {
   const band = bandFor(result.score)
   const weakest = weakestFactor(result.breakdown)
-  const setPlanSummary = useFunnelStore((s) => s.setPlanSummary)
 
   // Gauge geometry — a track circle + a progress arc via stroke-dashoffset, on navy.
   const SIZE = 140
@@ -473,23 +501,10 @@ function ResultStep({
         </div>
       </div>
 
-      {/* Sticky bottom CTA */}
+      {/* Sticky bottom CTA — the result screen IS the conversion point */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-background via-background to-transparent px-5 pb-6 pt-8">
-        <div className="pointer-events-auto mx-auto flex max-w-md flex-col items-center gap-2">
-          <Button
-            className="h-[52px] w-full gap-2 rounded-[14px] text-md"
-            onClick={() => {
-              setPlanSummary({
-                kind: 'health',
-                primary: `${result.score}`,
-                caption: t('summaryCaption', { band: t(band.labelKey) }),
-              })
-              router.push('/start/save')
-            }}
-          >
-            {t('saveCta')}
-            <ArrowRight className="h-5 w-5" aria-hidden="true" />
-          </Button>
+        <div className="pointer-events-auto mx-auto max-w-md">
+          <ConversionCtaBlock />
         </div>
       </div>
     </div>

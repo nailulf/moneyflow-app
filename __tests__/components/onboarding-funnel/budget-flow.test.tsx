@@ -119,7 +119,7 @@ describe('Budget-from-income flow', () => {
     expect(onTarget).toHaveAttribute('aria-pressed', 'true')
   })
 
-  it('Save my plan records choice in store and routes to /start/save (no DB write)', () => {
+  it('syncs the savings choice to the store and routes to /start/save from the conversion CTA (no DB write)', () => {
     useFunnelStore.setState({
       budgetIncome: 10_000_000,
       savingsAmount: 2_000_000,
@@ -127,11 +127,13 @@ describe('Budget-from-income flow', () => {
     })
     render(<BudgetPlanPage />)
 
-    fireEvent.click(screen.getByRole('button', { name: /budget\.plan\.saveCta/i }))
-
-    // The selected option's amount (On target = savings goal = 2,000,000) is
-    // persisted into the store synchronously — no DB write.
+    // The default-selected option's amount (On target = savings goal = 2,000,000)
+    // is synced into the store by an effect on render — no DB write.
     expect(useFunnelStore.getState().budgetSavingsChoice).toBe(2_000_000)
+
+    // The result screen is the conversion point: "Create free account" routes
+    // straight to the signup form.
+    fireEvent.click(screen.getByRole('button', { name: /createAccount/i }))
     expect(push).toHaveBeenCalledWith('/start/save')
   })
 })

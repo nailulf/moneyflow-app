@@ -47,45 +47,16 @@ describe('ConvertPage', () => {
     useFunnelStore.getState().reset()
   })
 
-  it('calls continueAsGuest when the "Continue as guest" link is clicked on the intro step', () => {
+  it('opens directly on the create-account form (no separate intro step)', () => {
     render(<ConvertPage />)
-    // Guest exit is a quiet text link now, not a full button — but still a
-    // <button> element, so query it by its accessible name.
-    fireEvent.click(screen.getByText('intro.guestCta'))
-    expect(continueAsGuest).toHaveBeenCalledTimes(1)
-  })
-
-  it('shows the generic celebration hero when no plan summary is set', () => {
-    render(<ConvertPage />)
-    expect(screen.getByText('intro.headline')).toBeInTheDocument()
-    expect(screen.getByText('intro.subtext')).toBeInTheDocument()
-  })
-
-  it('renders the personalized payoff hero from the store planSummary', () => {
-    useFunnelStore.getState().setPlanSummary({
-      kind: 'goal',
-      primary: 'Rp 2.400.000/mo',
-      caption: 'Reach Emergency fund by Jun 2027',
-    })
-    render(<ConvertPage />)
-
-    // The personalized primary + caption (pre-formatted strings) render…
-    expect(screen.getByText('Rp 2.400.000/mo')).toBeInTheDocument()
-    expect(screen.getByText('Reach Emergency fund by Jun 2027')).toBeInTheDocument()
-    // …and the goal kind pill + personalized subtext show.
-    expect(screen.getByText('intro.pillGoal')).toBeInTheDocument()
-    expect(screen.getByText('intro.personalizedSubtext')).toBeInTheDocument()
-    // The generic celebration headline is replaced.
-    expect(screen.queryByText('intro.headline')).not.toBeInTheDocument()
-  })
-
-  it('reveals the form and submits valid credentials via convertWithEmail', async () => {
-    render(<ConvertPage />)
-
-    // Intro → form
-    expect(screen.queryByTestId('convert-email')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: /intro\.createCta/i }))
+    // The flow result pages are the conversion point now, so /start/save opens
+    // straight on the form — there is no "your plan is ready" intro to reveal.
     expect(screen.getByTestId('convert-email')).toBeInTheDocument()
+    expect(screen.getByTestId('convert-password')).toBeInTheDocument()
+  })
+
+  it('submits valid credentials via convertWithEmail', async () => {
+    render(<ConvertPage />)
 
     // Fill valid email + password and agree to terms
     fireEvent.change(screen.getByTestId('convert-email'), {
@@ -113,7 +84,6 @@ describe('ConvertPage', () => {
     convertWithEmail.mockResolvedValue({ merged: false, pendingVerification: true })
     render(<ConvertPage />)
 
-    fireEvent.click(screen.getByRole('button', { name: /intro\.createCta/i }))
     fireEvent.change(screen.getByTestId('convert-email'), {
       target: { value: 'jane@example.com' },
     })

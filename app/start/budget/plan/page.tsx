@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import {
@@ -16,9 +16,10 @@ import {
 
 import { Button } from '@/components/ui/atoms/button'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
+import { ConversionCtaBlock } from '@/components/features/onboarding/funnel/ConversionCtaBlock'
 import { StickyCtaBar } from '@/components/features/budget/StickyCtaBar'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
-import { formatCurrencyCompact, formatCurrencyWhole } from '@/lib/data-utils'
+import { formatCurrencyCompact } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
 
 type OptionKey = 'relaxed' | 'on_target' | 'ambitious'
@@ -42,7 +43,6 @@ export default function BudgetPlanPage() {
   const savingsAmount = useFunnelStore((s) => s.savingsAmount)
   const budgetSpend = useFunnelStore((s) => s.budgetSpend)
   const setBudgetSavingsChoice = useFunnelStore((s) => s.setBudgetSavingsChoice)
-  const setPlanSummary = useFunnelStore((s) => s.setPlanSummary)
 
   const [selected, setSelected] = useState<OptionKey>('on_target')
 
@@ -65,6 +65,14 @@ export default function BudgetPlanPage() {
   }, [budgetIncome, savingsAmount, budgetSpend])
 
   const { income, totalSpend, available, onTrack, relaxed, onTarget, ambitious, pct } = computed
+
+  // Keep the funnel draft's savings choice in sync with the selected option so
+  // the conversion CTA can route straight to signup (finalize reads the store).
+  // Declared before the deep-link early return to keep hook order stable.
+  useEffect(() => {
+    const amt = selected === 'relaxed' ? relaxed : selected === 'ambitious' ? ambitious : onTarget
+    setBudgetSavingsChoice(amt)
+  }, [selected, relaxed, onTarget, ambitious, setBudgetSavingsChoice])
 
   // Deep-link guard: no draft → gentle empty state, no NaN/zeros.
   const hasDraft = (budgetIncome ?? 0) > 0 && (savingsAmount ?? 0) > 0
@@ -128,18 +136,6 @@ export default function BudgetPlanPage() {
   ]
 
   const selectedAmount = options.find((o) => o.key === selected)?.amount ?? onTarget
-
-  const handleSave = () => {
-    setBudgetSavingsChoice(selectedAmount)
-    setPlanSummary({
-      kind: 'budget',
-      primary: t('budget.plan.summaryPrimary', {
-        amount: formatCurrencyWhole(selectedAmount),
-      }),
-      caption: t('budget.plan.summaryCaption', { pct: pct(selectedAmount) }),
-    })
-    router.push('/start/save')
-  }
 
   const summary = [
     { label: t('budget.plan.summaryIncome'), value: formatCurrencyCompact(income), tone: 'text-foreground' },
@@ -270,12 +266,7 @@ export default function BudgetPlanPage() {
       </div>
 
       <StickyCtaBar>
-        <Button
-          className="h-[52px] w-full gap-2 rounded-[14px] text-md"
-          onClick={handleSave}
-        >
-          {t('budget.plan.saveCta')}
-        </Button>
+        <ConversionCtaBlock />
       </StickyCtaBar>
     </div>
   )

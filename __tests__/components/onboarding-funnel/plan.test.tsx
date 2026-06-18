@@ -81,9 +81,9 @@ describe('GoalPlanPage', () => {
     expect(screen.getAllByText(/months$/).length).toBeGreaterThanOrEqual(2)
   })
 
-  it('pushes to /start/save when Save my plan is clicked', () => {
+  it('pushes to /start/save when Create free account is clicked (result is the conversion point)', () => {
     render(<GoalPlanPage />)
-    fireEvent.click(screen.getByRole('button', { name: /save my plan/i }))
+    fireEvent.click(screen.getByRole('button', { name: /createAccount/i }))
     expect(push).toHaveBeenCalledWith('/start/save')
   })
 

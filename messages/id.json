@@ -1703,6 +1703,11 @@
         "summaryCaption": "Tabung {pct}% dari penghasilanmu"
       }
     },
+    "conversionCta": {
+      "createAccount": "Buat akun gratis",
+      "continueAsGuest": "Lanjut sebagai tamu",
+      "login": "Masuk"
+    },
     "health": {
       "incomeTitle": "Yuk cek kesehatan keuanganmu",
       "incomeSubtitle": "Gambaran singkat — tanpa perlu akun.",
@@ -1716,6 +1721,8 @@
       "investmentsLabel": "Investasi",
       "debtLabel": "Total utang / pinjaman",
       "debtPaymentLabel": "Cicilan bulanan",
+      "noDebt": "Saya tidak punya utang",
+      "privacyNote": "Tersimpan di perangkatmu sampai kamu membuat akun.",
       "continue": "Lanjut",
       "seeHealth": "Lihat kesehatanku",
       "scoreOutOf": "dari 100",

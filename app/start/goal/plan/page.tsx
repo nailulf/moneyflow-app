@@ -21,6 +21,7 @@ import {
 
 import { Button } from '@/components/ui/atoms/button'
 import { FunnelProgress } from '@/components/features/onboarding/funnel/FunnelProgress'
+import { ConversionCtaBlock } from '@/components/features/onboarding/funnel/ConversionCtaBlock'
 import { useFunnelStore, type FunnelGoalType } from '@/lib/onboarding/funnel-store'
 import { monthsToGoal } from '@/lib/onboarding/plan-math'
 import { formatCurrencyCompact, formatCurrencyWhole } from '@/lib/data-utils'
@@ -65,7 +66,6 @@ export default function GoalPlanPage() {
   const monthlyIncome = useFunnelStore((s) => s.monthlyIncome)
   const incomeSources = useFunnelStore((s) => s.incomeSources)
   const spend = useFunnelStore((s) => s.spend)
-  const setPlanSummary = useFunnelStore((s) => s.setPlanSummary)
 
   const computed = useMemo(() => {
     const income =
@@ -261,33 +261,10 @@ export default function GoalPlanPage() {
         )}
       </div>
 
-      {/* Sticky bottom CTA */}
+      {/* Sticky bottom CTA — this result screen is the conversion point */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-background via-background to-transparent px-5 pb-6 pt-8">
         <div className="pointer-events-auto mx-auto flex max-w-md flex-col items-center gap-3">
-          <Button
-            className="h-[52px] w-full gap-2 rounded-[14px] text-md"
-            onClick={() => {
-              const goalName = goalType
-                ? t(GOAL_LABEL_KEY[goalType])
-                : t('goal.type.customTitle')
-              setPlanSummary({
-                kind: 'goal',
-                primary: t('goal.plan.summaryPrimary', {
-                  amount: formatCurrencyWhole(surplus),
-                }),
-                caption: Number.isFinite(months)
-                  ? t('goal.plan.summaryCaption', {
-                      name: goalName,
-                      date: targetMonthLabel(months, locale),
-                    })
-                  : t('goal.plan.summaryCaptionNoDate', { name: goalName }),
-              })
-              router.push('/start/save')
-            }}
-          >
-            {t('goal.plan.saveCta')}
-            <ArrowRight className="h-5 w-5" aria-hidden="true" />
-          </Button>
+          <ConversionCtaBlock />
           <button
             type="button"
             onClick={() => router.push('/start/goal/spend')}

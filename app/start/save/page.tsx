@@ -5,16 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import {
-  PartyPopper,
-  Target,
-  Flame,
-  ShieldCheck,
-  PiggyBank,
-  HeartPulse,
   ChevronLeft,
   Loader2,
   MailCheck,
-  type LucideIcon,
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/atoms/button'
@@ -24,46 +17,11 @@ import { Checkbox } from '@/components/ui/atoms/checkbox'
 import {
   convertWithEmail,
   convertWithOAuth,
-  continueAsGuest,
   resendConfirmation,
 } from '@/lib/onboarding/convert'
-import { useFunnelStore, type PlanSummary } from '@/lib/onboarding/funnel-store'
+import { useFunnelStore } from '@/lib/onboarding/funnel-store'
 import { buildOnboardingDraft } from '@/lib/onboarding/build-draft'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
-
-/** Benefit rows for the "Your plan is ready" celebration — each gets its own tint. */
-const BENEFITS: Array<{
-  icon: LucideIcon
-  titleKey: string
-  subKey: string
-  tint: string
-}> = [
-  {
-    icon: Target,
-    titleKey: 'intro.benefitGoalTitle',
-    subKey: 'intro.benefitGoalSub',
-    tint: 'bg-tint-blue-bg text-tint-blue-fg',
-  },
-  {
-    icon: Flame,
-    titleKey: 'intro.benefitStreakTitle',
-    subKey: 'intro.benefitStreakSub',
-    tint: 'bg-tint-amber-bg text-tint-amber-fg',
-  },
-  {
-    icon: ShieldCheck,
-    titleKey: 'intro.benefitSyncTitle',
-    subKey: 'intro.benefitSyncSub',
-    tint: 'bg-tint-green-bg text-tint-green-fg',
-  },
-]
-
-/** Per-kind icon + pill-label key for the personalized payoff hero. */
-const KIND_HERO: Record<PlanSummary['kind'], { icon: LucideIcon; pillKey: string }> = {
-  goal: { icon: Target, pillKey: 'intro.pillGoal' },
-  budget: { icon: PiggyBank, pillKey: 'intro.pillBudget' },
-  health: { icon: HeartPulse, pillKey: 'intro.pillHealth' },
-}
 
 /** Brand glyph for the Google OAuth button (lucide has no brand icons). */
 function GoogleIcon() {
@@ -115,20 +73,13 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export default function ConvertPage() {
   const t = useTranslations('start.convert')
   const router = useRouter()
-  const [step, setStep] = useState<'intro' | 'form' | 'verify'>('intro')
+  // The flow result pages (goal/budget/health) are the conversion point now —
+  // they route straight here, so this screen opens directly on the form (no
+  // separate "your plan is ready" intro that repeated the result).
+  const [step, setStep] = useState<'form' | 'verify'>('form')
   // The email awaiting confirmation — captured when an email conversion lands
   // in the pending-verification state, so the verify view can show & resend it.
   const [pendingEmail, setPendingEmail] = useState('')
-
-  if (step === 'intro') {
-    return (
-      <IntroStep
-        t={t}
-        onCreate={() => setStep('form')}
-        onLogin={() => router.push('/login')}
-      />
-    )
-  }
 
   if (step === 'verify') {
     return (
@@ -143,7 +94,7 @@ export default function ConvertPage() {
   return (
     <FormStep
       t={t}
-      onBack={() => setStep('intro')}
+      onBack={() => router.back()}
       onLogin={() => router.push('/login')}
       onConverted={() => window.location.assign('/')}
       onPendingVerification={(email) => {
@@ -155,127 +106,6 @@ export default function ConvertPage() {
 }
 
 type T = ReturnType<typeof useTranslations<'start.convert'>>
-
-/** step 'intro' — "Your plan is ready" celebration. */
-function IntroStep({
-  t,
-  onCreate,
-  onLogin,
-}: {
-  t: T
-  onCreate: () => void
-  onLogin: () => void
-}) {
-  const planSummary = useFunnelStore((s) => s.planSummary)
-
-  const handleGuest = async () => {
-    await continueAsGuest()
-  }
-
-  return (
-    <div className="flex flex-1 flex-col px-5 pb-10">
-      {planSummary ? (
-        /* Personalized payoff hero — echoes what the guest just built */
-        (() => {
-          const { icon: KindIcon, pillKey } = KIND_HERO[planSummary.kind]
-          return (
-            <section className="mt-5 rounded-[20px] bg-hero-gradient p-6 text-center text-hero-foreground shadow-floating">
-              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-hero-foreground/10">
-                <KindIcon className="h-7 w-7 text-hero-foreground" aria-hidden="true" />
-              </span>
-              <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-hero-foreground/10 px-2.5 py-1 text-tiny font-medium uppercase tracking-wide text-hero-foreground">
-                {t(pillKey)}
-              </span>
-              <p className="mt-3 whitespace-nowrap text-3xl leading-title-2 font-bold sm:text-4xl">
-                {planSummary.primary}
-              </p>
-              <p className="mt-1.5 text-md leading-body-lg text-hero-muted">
-                {planSummary.caption}
-              </p>
-              <p className="mt-4 text-sm leading-body-sm text-hero-muted">
-                {t('intro.personalizedSubtext')}
-              </p>
-            </section>
-          )
-        })()
-      ) : (
-        /* Generic celebration hero — signup-wall entry with an empty draft */
-        <section className="mt-5 rounded-[20px] bg-hero-gradient p-6 text-center text-hero-foreground shadow-floating">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-hero-foreground/10">
-            <PartyPopper className="h-8 w-8 text-hero-success" aria-hidden="true" />
-          </span>
-          <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-hero-foreground/10 px-2.5 py-1 text-tiny font-medium uppercase tracking-wide text-hero-foreground">
-            {t('intro.badge')}
-          </span>
-          <h1 className="mt-3 text-3xl leading-title-3 font-bold">
-            {t('intro.headline')}
-          </h1>
-          <p className="mt-3 text-md leading-body-lg text-hero-muted">
-            {t('intro.subtext')}
-          </p>
-        </section>
-      )}
-
-      {/* Benefit list */}
-      <section className="mt-8">
-        <h2 className="text-sm leading-body-sm font-semibold text-muted-foreground">
-          {t('intro.benefitsTitle')}
-        </h2>
-        <ul className="mt-4 flex flex-col gap-4">
-          {BENEFITS.map(({ icon: Icon, titleKey, subKey, tint }) => (
-            <li key={titleKey} className="flex items-start gap-3">
-              <span
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] ${tint}`}
-              >
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-md leading-body-lg font-semibold text-foreground">
-                  {t(titleKey)}
-                </span>
-                <span className="block text-sm leading-body-sm text-muted-foreground">
-                  {t(subKey)}
-                </span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Actions */}
-      <div className="mt-8">
-        <Button
-          type="button"
-          className="h-[52px] w-full rounded-[14px] text-md"
-          onClick={onCreate}
-        >
-          {t('intro.createCta')}
-        </Button>
-      </div>
-
-      {/* Quiet secondary actions — guest exit demoted to a text link */}
-      <div className="mt-6 flex flex-col items-center gap-3">
-        <button
-          type="button"
-          onClick={handleGuest}
-          className="text-sm leading-body-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-        >
-          {t('intro.guestCta')}
-        </button>
-        <p className="text-center text-sm leading-body-sm text-muted-foreground">
-          {t('intro.loginPrompt')}{' '}
-          <button
-            type="button"
-            onClick={onLogin}
-            className="font-medium text-primary hover:text-primary/80"
-          >
-            {t('intro.loginLink')}
-          </button>
-        </p>
-      </div>
-    </div>
-  )
-}
 
 /** step 'form' — "Create your account". */
 function FormStep({

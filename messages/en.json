@@ -1703,6 +1703,11 @@
         "summaryCaption": "Save {pct}% of your income"
       }
     },
+    "conversionCta": {
+      "createAccount": "Create free account",
+      "continueAsGuest": "Continue as guest",
+      "login": "Log in"
+    },
     "health": {
       "incomeTitle": "Let’s check your money health",
       "incomeSubtitle": "A quick snapshot — no account needed.",
@@ -1716,6 +1721,8 @@
       "investmentsLabel": "Investments",
       "debtLabel": "Total debt / outstanding loans",
       "debtPaymentLabel": "Monthly repayment",
+      "noDebt": "I have no debt",
+      "privacyNote": "Stays on your device until you create an account.",
       "continue": "Continue",
       "seeHealth": "See my health",
       "scoreOutOf": "out of 100",
