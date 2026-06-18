@@ -218,7 +218,7 @@ export default function BudgetPlanPage() {
                     <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-md leading-body-lg font-semibold text-foreground">
+                    <span className="block truncate text-sm leading-body-sm font-normal text-foreground">
                       {s.name}
                     </span>
                     <span className="block text-xs leading-caption text-muted-foreground">

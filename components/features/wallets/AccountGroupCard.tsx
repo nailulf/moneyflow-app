@@ -67,7 +67,7 @@ export function AccountGroupCard({ groupKey, accounts, onOpen }: AccountGroupCar
               <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', tint.bg)}>
                 <Icon className={cn('h-4 w-4', tint.fg)} aria-hidden="true" />
               </span>
-              <span className="min-w-0 flex-1 truncate text-sm leading-body-sm font-semibold text-foreground">
+              <span className="min-w-0 flex-1 truncate text-sm leading-body-sm font-normal text-foreground">
                 {account.name}
               </span>
               <span className="shrink-0 text-sm leading-body-sm font-bold text-foreground">

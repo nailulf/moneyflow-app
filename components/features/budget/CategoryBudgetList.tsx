@@ -33,7 +33,7 @@ export function CategoryBudgetList({ rows, currency }: CategoryBudgetListProps) 
                 {createElement(getCategoryIcon(row.name), { className: cn('h-4 w-4', tint.fg) })}
               </span>
               <span className="flex min-w-0 flex-1 items-center gap-2">
-                <span className="truncate text-sm leading-body-sm font-semibold text-foreground">{row.name}</span>
+                <span className="truncate text-sm leading-body-sm font-normal text-foreground">{row.name}</span>
                 {row.status === 'over' && (
                   <span className="shrink-0 rounded-full bg-destructive/10 px-1.5 py-0.5 text-tiny font-semibold text-destructive">
                     {t('categories.over')}

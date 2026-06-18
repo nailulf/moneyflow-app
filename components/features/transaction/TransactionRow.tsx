@@ -31,7 +31,7 @@ export function TransactionRow({ transaction, categoryName, accountName, onSelec
         {createElement(getCategoryIcon(categoryName), { className: cn('size-[18px]', tint.fg) })}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="truncate text-sm leading-none font-medium text-foreground">{title}</span>
+        <span className="truncate text-sm leading-none font-normal text-foreground">{title}</span>
         <span className="self-start rounded-full bg-muted px-2 py-0.5 text-tiny font-medium text-muted-foreground">
           {accountName}
         </span>
