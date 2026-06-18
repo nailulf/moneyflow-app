@@ -8,6 +8,91 @@ export function monthsToGoal(target: number, monthlySurplus: number): number {
   return Math.ceil(target / monthlySurplus)
 }
 
+// ── Budget trim plan (design QlVbR) ──────────────────────────────────────────
+// The budget flow keeps the savings TARGET fixed (set on /start/budget/savings)
+// and, when the guest's current spending leaves too little free, suggests which
+// categories to TRIM to free up the gap — instead of offering a lower target.
+
+/** How much of a category we'd ever suggest trimming, keyed by spend slug. */
+const TRIMMABILITY: Record<string, number> = {
+  housing: 0, // rent is fixed — never suggested
+  food: 0.15,
+  transport: 0.2,
+  bills: 0.15,
+  lifestyle: 0.35, // most discretionary — trimmed hardest
+}
+/** Custom ("extra-N") categories: treat as moderately discretionary. */
+const DEFAULT_TRIMMABILITY = 0.2
+/** Round suggested trims to tidy, glanceable steps. */
+const TRIM_ROUND = 50_000
+
+export interface TrimSuggestion {
+  slug: string
+  name: string
+  /** Current monthly amount for the category. */
+  current: number
+  /** Suggested cut (current − suggested), rounded to {@link TRIM_ROUND}. */
+  trim: number
+  /** Current − trim. */
+  suggested: number
+}
+
+export interface BudgetTrimPlan {
+  /** Income − total current spend, floored at 0. */
+  freeNow: number
+  /** Amount still needed to hit the savings goal: max(0, goal − freeNow). */
+  gap: number
+  /** Trimmable categories, largest suggested trim first (excludes 0-trim rows). */
+  suggestions: TrimSuggestion[]
+  /** Slugs pre-checked: the fewest largest trims that cover the gap. */
+  preselected: string[]
+  /** Whether the gap can be closed by trimming alone (Σ trims ≥ gap). */
+  coverable: boolean
+}
+
+/**
+ * Build the trim plan for the budget result screen. Pure & deterministic.
+ *
+ * Each category gets a suggested trim = round(amount × trimmability). Rows are
+ * ordered largest-trim-first; the pre-selected set is the fewest of those whose
+ * trims cumulatively cover the gap (greedy). Housing/rent is never suggested.
+ */
+export function buildBudgetTrimPlan({
+  income,
+  savingsGoal,
+  categories,
+}: {
+  income: number
+  savingsGoal: number
+  categories: { slug: string; name: string; amount: number }[]
+}): BudgetTrimPlan {
+  const totalSpend = categories.reduce((sum, c) => sum + c.amount, 0)
+  const freeNow = Math.max(0, income - totalSpend)
+  const gap = Math.max(0, savingsGoal - freeNow)
+
+  const suggestions: TrimSuggestion[] = categories
+    .map((c) => {
+      const pct = TRIMMABILITY[c.slug] ?? DEFAULT_TRIMMABILITY
+      const trim = Math.round((c.amount * pct) / TRIM_ROUND) * TRIM_ROUND
+      return { slug: c.slug, name: c.name, current: c.amount, trim, suggested: c.amount - trim }
+    })
+    .filter((s) => s.trim > 0)
+    .sort((a, b) => b.trim - a.trim)
+
+  const preselected: string[] = []
+  if (gap > 0) {
+    let acc = 0
+    for (const s of suggestions) {
+      if (acc >= gap) break
+      preselected.push(s.slug)
+      acc += s.trim
+    }
+  }
+
+  const totalTrim = suggestions.reduce((sum, s) => sum + s.trim, 0)
+  return { freeNow, gap, suggestions, preselected, coverable: totalTrim >= gap }
+}
+
 /** Savings-rate-based score: (income - spend) / income, clamped to 0-100. 50% savings rate => 100. */
 export function healthScore({ income, spend }: { income: number; spend: number }): number {
   if (income <= 0) return 0

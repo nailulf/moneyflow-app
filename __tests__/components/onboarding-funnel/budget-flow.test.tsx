@@ -106,20 +106,23 @@ describe('Budget-from-income flow', () => {
     expect(screen.getByTestId('budget-spend-extra-1')).toBeInTheDocument()
   })
 
-  it('plan screen defaults to On target = the savings goal', () => {
+  it('pre-selects the trims that close the gap and shows the fixed goal will be hit', () => {
     useFunnelStore.setState({
       budgetIncome: 10_000_000,
-      savingsAmount: 2_000_000,
-      budgetSpend: { housing: 4_000_000, food: 2_000_000 },
+      savingsAmount: 2_500_000,
+      budgetSpend: { housing: 2_000_000, food: 2_000_000, transport: 1_500_000, lifestyle: 3_000_000 },
     })
     render(<BudgetPlanPage />)
 
-    // The "On target" option is the recommended, pre-selected one.
-    const onTarget = screen.getByRole('button', { name: /budget\.plan\.onTargetTitle/i })
-    expect(onTarget).toHaveAttribute('aria-pressed', 'true')
+    // freeNow 1.5M, gap 1M → Lifestyle (−1.05M) alone covers it and is pre-checked.
+    expect(
+      screen.getByRole('button', { name: /Lifestyle & fun/i })
+    ).toHaveAttribute('aria-pressed', 'true')
+    // Primary takeaway: the fixed savings goal will be hit.
+    expect(screen.getByText('budget.plan.willHitTitle')).toBeInTheDocument()
   })
 
-  it('syncs the savings choice to the store and routes to /start/save from the conversion CTA (no DB write)', () => {
+  it('sticks to the savings goal and routes to /start/save from the conversion CTA (no DB write)', () => {
     useFunnelStore.setState({
       budgetIncome: 10_000_000,
       savingsAmount: 2_000_000,
@@ -127,8 +130,8 @@ describe('Budget-from-income flow', () => {
     })
     render(<BudgetPlanPage />)
 
-    // The default-selected option's amount (On target = savings goal = 2,000,000)
-    // is synced into the store by an effect on render — no DB write.
+    // Already free to save the full target (freeNow 4M ≥ goal 2M) → on track;
+    // the savings choice sticks to the goal, synced by an effect on render.
     expect(useFunnelStore.getState().budgetSavingsChoice).toBe(2_000_000)
 
     // The result screen is the conversion point: "Create free account" routes
