@@ -202,7 +202,7 @@ export default function GoalTypePage() {
           data-testid="target-amount"
           value={targetAmount ?? 0}
           onChange={setTargetAmount}
-          className="mt-1.5 h-[52px] rounded-[14px] text-lg"
+          className="mt-1.5 h-[52px] rounded-[14px] bg-card text-lg"
         />
       </div>
 
