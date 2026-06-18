@@ -264,14 +264,14 @@ export default function GoalPlanPage() {
       {/* Sticky bottom CTA — this result screen is the conversion point */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-background via-background to-transparent px-5 pb-6 pt-8">
         <div className="pointer-events-auto mx-auto flex max-w-md flex-col items-center gap-3">
-          <ConversionCtaBlock />
           <button
             type="button"
             onClick={() => router.push('/start/goal/spend')}
-            className="text-sm leading-body-sm font-medium text-muted-foreground hover:text-foreground"
+            className="text-sm leading-body-sm font-semibold text-primary hover:text-primary/80"
           >
             {t('goal.plan.adjustLink')}
           </button>
+          <ConversionCtaBlock />
         </div>
       </div>
     </div>
