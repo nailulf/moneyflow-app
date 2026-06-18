@@ -29,34 +29,13 @@ export function ConversionCtaBlock({
   }
 
   return (
-    <div className="flex w-full flex-col items-center gap-3">
-      <Button
-        className="h-[52px] w-full gap-2 rounded-[14px] text-md"
-        disabled={disabled}
-        onClick={() => go('/start/save')}
-      >
-        {t('createAccount')}
-        <ArrowRight className="h-5 w-5" aria-hidden="true" />
-      </Button>
-      <div className="flex items-center gap-2 text-sm leading-body-sm">
-        <button
-          type="button"
-          onClick={() => go('/')}
-          className="font-medium text-muted-foreground hover:text-foreground"
-        >
-          {t('continueAsGuest')}
-        </button>
-        <span className="text-muted-foreground/40" aria-hidden="true">
-          ·
-        </span>
-        <button
-          type="button"
-          onClick={() => go('/login')}
-          className="font-medium text-primary hover:text-primary/80"
-        >
-          {t('login')}
-        </button>
-      </div>
-    </div>
+    <Button
+      className="h-[52px] w-full gap-2 rounded-[14px] text-md"
+      disabled={disabled}
+      onClick={() => go('/start/save')}
+    >
+      {t('createAccount')}
+      <ArrowRight className="h-5 w-5" aria-hidden="true" />
+    </Button>
   )
 }
