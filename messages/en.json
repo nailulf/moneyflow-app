@@ -1825,6 +1825,8 @@
         "continueCta": "Continue to the app"
       }
     },
-    "browseLink": "Just looking? Browse the app first"
+    "browseLink": "Just looking? Browse the app first",
+    "registerPrompt": "Rather sign up now?",
+    "registerLink": "Create an account"
   }
 }

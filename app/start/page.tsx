@@ -170,15 +170,26 @@ export default function StartPage() {
         </Button>
       </section>
 
-      {/* Subtle "browse as a guest" link (secondary affordance, not a CTA).
-          Creates an anonymous session, then drops the visitor on the homepage. */}
+      {/* Secondary affordances (not the primary CTA): sign up directly, or
+          browse as a guest. The 2-minute check above remains the focused path. */}
+      <p className="mt-6 text-center text-sm leading-body-sm text-muted-foreground">
+        {t('registerPrompt')}{' '}
+        <button
+          type="button"
+          onClick={() => router.push('/start/save')}
+          className="font-medium text-primary hover:text-primary/80"
+        >
+          {t('registerLink')}
+        </button>
+      </p>
+
       <button
         type="button"
         onClick={async () => {
           await ensureAnonymousSession()
           router.push('/')
         }}
-        className="mt-6 text-center text-sm leading-body-sm text-muted-foreground hover:text-foreground"
+        className="mt-3 text-center text-sm leading-body-sm text-muted-foreground hover:text-foreground"
       >
         {t('browseLink')}
       </button>

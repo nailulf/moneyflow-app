@@ -1825,6 +1825,8 @@
         "continueCta": "Lanjut ke aplikasi"
       }
     },
-    "browseLink": "Sekadar lihat-lihat? Jelajahi aplikasinya dulu"
+    "browseLink": "Sekadar lihat-lihat? Jelajahi aplikasinya dulu",
+    "registerPrompt": "Mau langsung daftar?",
+    "registerLink": "Buat akun"
   }
 }
