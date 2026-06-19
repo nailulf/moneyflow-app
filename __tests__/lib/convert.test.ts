@@ -1,11 +1,11 @@
-const updateUser = jest.fn()
 const signInWithPassword = jest.fn()
+const signOut = jest.fn().mockResolvedValue(undefined)
 const linkIdentity = jest.fn()
 jest.mock('@/lib/supabase/client', () => ({
-  createClient: () => ({ auth: { updateUser, signInWithPassword, linkIdentity } }),
+  createClient: () => ({ auth: { signInWithPassword, signOut, linkIdentity } }),
 }))
-const devFetch = jest.fn()
-global.fetch = ((...a: unknown[]) => devFetch(...a)) as never
+const fetchMock = jest.fn()
+global.fetch = ((...a: unknown[]) => fetchMock(...a)) as never
 
 const advanceOnboarding = jest.fn().mockResolvedValue(undefined)
 const finalizeOnboarding = jest.fn().mockResolvedValue(undefined)
@@ -18,24 +18,41 @@ import { convertWithEmail } from '@/lib/onboarding/convert'
 
 const DRAFT = { allocations: [], period: 'monthly' as const }
 
+/** Minimal Response-like stub for the /api/onboarding/convert fetch. */
+const apiResponse = (status: number, body: unknown = {}) => ({
+  ok: status >= 200 && status < 300,
+  status,
+  json: async () => body,
+})
+
 describe('convertWithEmail', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('links email to the same user on success (no merge)', async () => {
-    updateUser.mockResolvedValue({ data: { user: { id: 'same' } }, error: null })
+  it('creates a real confirmed account server-side, signs in fresh, and finalizes (no merge, no verify)', async () => {
+    fetchMock.mockResolvedValue(apiResponse(200, { success: true }))
+    signInWithPassword.mockResolvedValue({ data: { user: { id: 'same' } }, error: null })
+
     const r = await convertWithEmail('new@x.com', 'pw12345', DRAFT)
-    expect(r.merged).toBe(false)
-    expect(r.pendingVerification).toBe(true)
-    expect(signInWithPassword).not.toHaveBeenCalled()
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/onboarding/convert',
+      expect.objectContaining({ method: 'POST' }),
+    )
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' })
+    expect(signInWithPassword).toHaveBeenCalledWith({ email: 'new@x.com', password: 'pw12345' })
     expect(finalizeOnboarding).toHaveBeenCalledTimes(1)
     expect(finalizeOnboarding).toHaveBeenCalledWith(DRAFT)
+    expect(advanceOnboarding).toHaveBeenCalledWith('completed')
+    expect(r.merged).toBe(false)
+    expect(r.pendingVerification).toBe(false)
   })
 
-  it('on email-exists conflict, signs into existing account, calls finalizeOnboarding, and advances to completed', async () => {
-    updateUser.mockResolvedValue({ data: null, error: { message: 'email address already registered', code: 'email_exists' } })
+  it('on conflict (email taken), signs into the existing account and merges the draft', async () => {
+    fetchMock.mockResolvedValue(apiResponse(409, { error: 'An account with this email already exists.' }))
     signInWithPassword.mockResolvedValue({ data: { user: { id: 'existing' } }, error: null })
 
     const r = await convertWithEmail('taken@x.com', 'pw12345', DRAFT)
+
     expect(signInWithPassword).toHaveBeenCalledWith({ email: 'taken@x.com', password: 'pw12345' })
     expect(finalizeOnboarding).toHaveBeenCalledTimes(1)
     expect(finalizeOnboarding).toHaveBeenCalledWith(DRAFT)
@@ -43,8 +60,14 @@ describe('convertWithEmail', () => {
     expect(r.merged).toBe(true)
   })
 
-  it('re-throws a non-conflict updateUser error', async () => {
-    updateUser.mockResolvedValue({ data: null, error: { message: 'password too short', code: 'weak_password' } })
-    await expect(convertWithEmail('a@b.com', 'x', DRAFT)).rejects.toThrow()
+  it('throws the server message when conversion fails and the merge sign-in also fails', async () => {
+    fetchMock.mockResolvedValue(apiResponse(409, { error: 'An account with this email already exists.' }))
+    // Email is taken but the supplied password doesn't match → sign-in fails.
+    signInWithPassword.mockResolvedValue({ data: null, error: { message: 'Invalid login credentials' } })
+
+    await expect(convertWithEmail('taken@x.com', 'wrongpw', DRAFT)).rejects.toThrow(
+      'An account with this email already exists.',
+    )
+    expect(finalizeOnboarding).not.toHaveBeenCalled()
   })
 })

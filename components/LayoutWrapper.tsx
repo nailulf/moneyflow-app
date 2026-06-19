@@ -67,7 +67,15 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   // the auth fetch can't resolve (no network), and so the logged-out /start
   // funnel renders full-screen without the authed shell or a login redirect.
   if (pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password') || pathname.startsWith('/auth') || pathname.startsWith('/verify-email') || pathname.startsWith('/offline') || pathname.startsWith('/start')) {
-    return <>{children}</>
+    // Standalone routes still need the Toaster mounted, or their toast.*()
+    // feedback (e.g. the guest-conversion errors on /start/save) renders
+    // nowhere and failures look like "nothing happened".
+    return (
+      <>
+        {children}
+        <Toaster />
+      </>
+    )
   }
 
   if (loading) {

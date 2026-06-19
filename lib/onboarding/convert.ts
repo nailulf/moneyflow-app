@@ -3,15 +3,6 @@ import { advanceOnboarding, finalizeOnboarding } from '@/lib/api/onboarding-funn
 import type { OnboardingDraft } from '@/lib/onboarding/build-draft'
 
 /**
- * Detects the Supabase "email already registered" error returned by
- * `auth.updateUser({ email })` when the target email belongs to an existing
- * account. Supabase surfaces this with `code: 'email_exists'`; we also match on
- * the message text as a defensive fallback across Supabase versions.
- */
-const EMAIL_EXISTS = (e: { code?: string; message?: string } | null) =>
-  !!e && (e.code === 'email_exists' || /already registered|already.*exists/i.test(e.message ?? ''))
-
-/**
  * Convert an anonymous guest into a permanent email/password account.
  *
  * Attempts to promote the same anonymous user via `updateUser` (keeps the same
@@ -34,28 +25,51 @@ export async function convertWithEmail(
 ): Promise<{ merged: boolean; pendingVerification?: boolean }> {
   const supabase = createClient()
 
-  // Promote the anon user in place — same user_id (the guest's data stays
-  // theirs) and the current session stays valid, so no re-login is needed.
-  const { data, error } = await supabase.auth.updateUser({ email, password })
-  if (!error) {
+  // Create the real account server-side via the service-role admin API
+  // (`/api/onboarding/convert`). This sets email + password and confirms the
+  // address in one call with NO email sent — so it never trips Supabase's
+  // email-send rate limit, the way a client-side `updateUser({ email })` email
+  // *change* did. The guest's session becomes a permanent, confirmed account in
+  // place (same user_id), so their funnel data stays theirs.
+  const res = await fetch('/api/onboarding/convert', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+
+  if (res.ok) {
+    // The admin email change rotates the session, so the in-memory anon JWT is
+    // now stale. Clear it locally (a stale refresh token would make the SSR
+    // middleware wipe the cookie on the next navigation), then sign in fresh
+    // with the new credentials — same user_id, so the guest's data stays theirs.
+    await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+    const { error: signErr } = await supabase.auth.signInWithPassword({ email, password })
+    if (signErr) throw new Error(signErr.message)
     try { await finalizeOnboarding(draft) } catch { /* surfaced by caller retry */ }
     // Mark onboarding complete so the funnel doesn't re-trigger — best-effort.
     try { await advanceOnboarding('completed') } catch {}
-    // If the project requires email confirmation, the new address is pending
-    // until the user clicks the link → show the verify step. With confirmation
-    // disabled it's confirmed immediately → straight into the app.
-    const pendingVerification = !data.user?.email_confirmed_at
-    return { merged: false, pendingVerification }
+    // Confirmed server-side → no verify step; straight into the app.
+    return { merged: false, pendingVerification: false }
   }
-  if (!EMAIL_EXISTS(error)) throw new Error(error.message)
 
-  // Email exists → sign into account B, then materialize the draft into it.
+  // Conversion failed. The dominant cause is that the email already belongs to
+  // an existing account (the admin email change reports this only as an opaque
+  // error, so we don't rely on a specific code). Try signing into that account
+  // with the supplied credentials — if it works, the email is genuinely theirs,
+  // so merge the draft into it. This only succeeds for a real account with
+  // matching credentials, so it can't be abused.
   const { error: signErr } = await supabase.auth.signInWithPassword({ email, password })
-  if (signErr) throw new Error(signErr.message)
+  if (!signErr) {
+    try { await finalizeOnboarding(draft) } catch {}
+    try { await advanceOnboarding('completed') } catch {}
+    return { merged: true }
+  }
 
-  try { await finalizeOnboarding(draft) } catch {}
-  try { await advanceOnboarding('completed') } catch {}
-  return { merged: true }
+  // Sign-in didn't help: either the email is taken with a different password, or
+  // a genuine server error. Surface the server's message (already friendly for
+  // the conflict case) so the user knows to log in instead.
+  const payload = (await res.json().catch(() => ({}))) as { error?: string }
+  throw new Error(payload.error ?? 'Could not create your account. Please try again.')
 }
 
 /**
