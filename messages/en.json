@@ -1421,7 +1421,10 @@
       "liabilities": "Liabilities",
       "accountsCount": "{count} accounts",
       "loansCount": "{count} loans",
-      "more": "+{count} more"
+      "more": "+{count} more",
+      "emptyTitle": "No accounts yet",
+      "emptyHint": "Add a bank, cash or e-wallet to see your balances here.",
+      "add": "Add account"
     },
     "budget": {
       "title": "{month} Budget",
@@ -1431,22 +1434,29 @@
       "of": "of {amount}",
       "used": "{pct}% used",
       "left": "{amount} left",
-      "noBudget": "No budget set for this month yet."
+      "emptyTitle": "No budget yet",
+      "emptyHint": "Set monthly limits to stay on track.",
+      "create": "Create"
     },
     "goals": {
       "title": "Financial Goals",
       "viewAll": "View all →",
-      "of": "{current} of {target}"
+      "of": "{current} of {target}",
+      "emptyTitle": "No goals yet",
+      "emptyHint": "Save for an emergency fund, a trip, or anything.",
+      "setGoal": "Set goal"
     },
     "upcoming": {
       "title": "Upcoming",
       "subtitle": "Dates with scheduled payments",
-      "empty": "No scheduled payments in the next 30 days."
+      "emptyTitle": "No upcoming payments",
+      "emptyHint": "Scheduled payments in the next 30 days will show up here."
     },
     "biggest": {
       "title": "Biggest This Month",
       "seeAll": "See all →",
-      "empty": "No expenses recorded this month yet."
+      "emptyTitle": "No expenses yet",
+      "emptyHint": "Your biggest spends this month will show up here."
     }
   },
   "portfolio": {

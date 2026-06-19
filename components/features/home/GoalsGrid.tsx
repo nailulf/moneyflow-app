@@ -6,6 +6,7 @@ import {
   Shield, Plane, House, Car, GraduationCap, Heart, TrendingUp, Target, type LucideIcon,
 } from 'lucide-react'
 import { formatCurrencyCompact } from '@/lib/data-utils'
+import { HomeEmptyState } from './HomeEmptyState'
 
 const GOAL_ICONS: Record<string, LucideIcon> = {
   emergency_fund: Shield,
@@ -35,7 +36,24 @@ interface GoalsGridProps {
 /** Financial goals 2-up mini cards (design `lGVxL`). Renders nothing when empty. */
 export function GoalsGrid({ goals }: GoalsGridProps) {
   const t = useTranslations('home')
-  if (goals.length === 0) return null
+
+  if (goals.length === 0) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h2 className="text-md leading-body-lg font-bold text-foreground">{t('goals.title')}</h2>
+        <HomeEmptyState
+          variant="inline"
+          icon={Target}
+          bubbleClassName="bg-tint-green-bg"
+          iconClassName="text-tint-green-fg"
+          title={t('goals.emptyTitle')}
+          description={t('goals.emptyHint')}
+          cta={{ label: t('goals.setGoal'), href: '/accounts' }}
+        />
+      </section>
+    )
+  }
+
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">

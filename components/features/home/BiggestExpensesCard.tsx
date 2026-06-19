@@ -2,9 +2,11 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { Receipt } from 'lucide-react'
 import { getCategoryIcon, getCategoryTint } from '@/lib/category-style'
 import { formatCurrency } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
+import { HomeEmptyState } from './HomeEmptyState'
 
 export interface ExpenseRow {
   id: string
@@ -21,6 +23,22 @@ interface BiggestExpensesCardProps {
 /** Biggest expenses this month (design `IlvC4`), top-3 ranked rows. */
 export function BiggestExpensesCard({ rows }: BiggestExpensesCardProps) {
   const t = useTranslations('home')
+
+  if (rows.length === 0) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h2 className="text-md leading-body-lg font-bold text-foreground">{t('biggest.title')}</h2>
+        <HomeEmptyState
+          icon={Receipt}
+          bubbleClassName="bg-muted"
+          iconClassName="text-muted-foreground"
+          title={t('biggest.emptyTitle')}
+          description={t('biggest.emptyHint')}
+        />
+      </section>
+    )
+  }
+
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -28,9 +46,7 @@ export function BiggestExpensesCard({ rows }: BiggestExpensesCardProps) {
         <Link href="/transactions" className="text-sm leading-body-sm text-primary">{t('biggest.seeAll')}</Link>
       </div>
       <div className="rounded-2xl bg-card shadow-card">
-        {rows.length === 0 ? (
-          <p className="p-4 text-sm leading-body-sm text-muted-foreground">{t('biggest.empty')}</p>
-        ) : (
+        {
           rows.map((row, i) => {
             const Icon = getCategoryIcon(row.categoryName)
             const tint = getCategoryTint(row.categoryName)
@@ -60,7 +76,7 @@ export function BiggestExpensesCard({ rows }: BiggestExpensesCardProps) {
               </div>
             )
           })
-        )}
+        }
       </div>
     </section>
   )

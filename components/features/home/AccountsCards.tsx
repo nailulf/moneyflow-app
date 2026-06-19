@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ChevronsDown } from 'lucide-react'
+import { ChevronsDown, Wallet } from 'lucide-react'
 import { formatCurrencyCompact } from '@/lib/data-utils'
+import { HomeEmptyState } from './HomeEmptyState'
 
 interface AccountItem {
   id: string
@@ -68,6 +69,24 @@ function CardColumn({
 /** Assets + Liabilities pair (design `dqmsL` / `w2mgo5`). */
 export function AccountsCards({ currency, assets, liabilities, assetsTotal, liabilitiesTotal }: AccountsCardsProps) {
   const t = useTranslations('home')
+  const isEmpty = assets.length === 0 && liabilities.length === 0
+
+  if (isEmpty) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h2 className="text-md leading-body-lg font-bold text-foreground">{t('accounts.title')}</h2>
+        <HomeEmptyState
+          icon={Wallet}
+          bubbleClassName="bg-selected"
+          iconClassName="text-primary"
+          title={t('accounts.emptyTitle')}
+          description={t('accounts.emptyHint')}
+          cta={{ label: t('accounts.add'), href: '/accounts/new' }}
+        />
+      </section>
+    )
+  }
+
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">

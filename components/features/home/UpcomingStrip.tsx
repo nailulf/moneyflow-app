@@ -1,9 +1,11 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { CalendarClock } from 'lucide-react'
 import { getCategoryIcon, getCategoryTint } from '@/lib/category-style'
 import { formatCurrencyCompact } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
+import { HomeEmptyState } from './HomeEmptyState'
 
 export interface UpcomingTile {
   id: string
@@ -22,6 +24,22 @@ interface UpcomingStripProps {
 /** Upcoming scheduled payments date strip (design `RlUR0`); nearest tile is navy. */
 export function UpcomingStrip({ items }: UpcomingStripProps) {
   const t = useTranslations('home')
+
+  if (items.length === 0) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h2 className="text-md leading-body-lg font-bold text-foreground">{t('upcoming.title')}</h2>
+        <HomeEmptyState
+          icon={CalendarClock}
+          bubbleClassName="bg-muted"
+          iconClassName="text-muted-foreground"
+          title={t('upcoming.emptyTitle')}
+          description={t('upcoming.emptyHint')}
+        />
+      </section>
+    )
+  }
+
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
@@ -29,10 +47,7 @@ export function UpcomingStrip({ items }: UpcomingStripProps) {
       </div>
       <div className="rounded-2xl bg-card p-3.5 shadow-card">
         <p className="text-xs leading-caption text-muted-foreground">{t('upcoming.subtitle')}</p>
-        {items.length === 0 ? (
-          <p className="mt-2 text-sm leading-body-sm text-muted-foreground">{t('upcoming.empty')}</p>
-        ) : (
-          <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex gap-2">
             {items.map((item, i) => {
               const first = i === 0
               const Icon = getCategoryIcon(item.categoryName)
@@ -66,8 +81,7 @@ export function UpcomingStrip({ items }: UpcomingStripProps) {
                 </div>
               )
             })}
-          </div>
-        )}
+        </div>
       </div>
     </section>
   )

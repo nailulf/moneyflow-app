@@ -1421,7 +1421,10 @@
       "liabilities": "Liabilitas",
       "accountsCount": "{count} akun",
       "loansCount": "{count} pinjaman",
-      "more": "+{count} lagi"
+      "more": "+{count} lagi",
+      "emptyTitle": "Belum ada akun",
+      "emptyHint": "Tambahkan bank, tunai, atau e-wallet untuk melihat saldo Anda di sini.",
+      "add": "Tambah akun"
     },
     "budget": {
       "title": "Anggaran {month}",
@@ -1431,22 +1434,29 @@
       "of": "dari {amount}",
       "used": "{pct}% terpakai",
       "left": "Sisa {amount}",
-      "noBudget": "Belum ada anggaran untuk bulan ini."
+      "emptyTitle": "Belum ada anggaran",
+      "emptyHint": "Tetapkan batas bulanan agar tetap terkendali.",
+      "create": "Buat"
     },
     "goals": {
       "title": "Target Keuangan",
       "viewAll": "Lihat semua →",
-      "of": "{current} dari {target}"
+      "of": "{current} dari {target}",
+      "emptyTitle": "Belum ada target",
+      "emptyHint": "Menabung untuk dana darurat, liburan, atau apa pun.",
+      "setGoal": "Buat target"
     },
     "upcoming": {
       "title": "Mendatang",
       "subtitle": "Tanggal dengan pembayaran terjadwal",
-      "empty": "Tidak ada pembayaran terjadwal dalam 30 hari ke depan."
+      "emptyTitle": "Belum ada pembayaran mendatang",
+      "emptyHint": "Pembayaran terjadwal dalam 30 hari ke depan akan muncul di sini."
     },
     "biggest": {
       "title": "Terbesar Bulan Ini",
       "seeAll": "Lihat semua →",
-      "empty": "Belum ada pengeluaran tercatat bulan ini."
+      "emptyTitle": "Belum ada pengeluaran",
+      "emptyHint": "Pengeluaran terbesar Anda bulan ini akan muncul di sini."
     }
   },
   "portfolio": {
