@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
 import { advanceOnboarding, finalizeOnboarding } from '@/lib/api/onboarding-funnel'
-import { isDevToolsEnabled } from '@/lib/utils/environment'
 import type { OnboardingDraft } from '@/lib/onboarding/build-draft'
 
 /**
@@ -35,49 +34,18 @@ export async function convertWithEmail(
 ): Promise<{ merged: boolean; pendingVerification?: boolean }> {
   const supabase = createClient()
 
-  // Dev/preview: convert via the service-role admin route so NO confirmation
-  // email is sent. `updateUser({ email })` sends one, and Supabase's built-in
-  // SMTP rate-limits sends (`over_email_send_rate_limit`) — which breaks
-  // repeated dev testing (there's no real inbox to confirm from anyway).
-  if (isDevToolsEnabled()) {
-    const devRes = await fetch('/api/dev/convert', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    }).catch(() => null)
-
-    if (devRes?.ok) {
-      // The admin email change revokes the anon session. Clear the stale local
-      // session first (its rotated refresh token would otherwise make the SSR
-      // middleware's refresh fail and wipe the cookie on the next navigation),
-      // then sign in fresh with the new credentials — same user_id, so the
-      // guest's data stays theirs.
-      await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
-      const { error: signErr } = await supabase.auth.signInWithPassword({ email, password })
-      if (signErr) throw new Error(signErr.message)
-      try { await finalizeOnboarding(draft) } catch { /* surfaced by caller retry */ }
-      try { await advanceOnboarding('completed') } catch {}
-      return { merged: false, pendingVerification: false }
-    }
-    if (devRes?.status === 409) {
-      // Email belongs to an existing account → merge into it (same as prod).
-      const { error: signErr } = await supabase.auth.signInWithPassword({ email, password })
-      if (signErr) throw new Error(signErr.message)
-      try { await finalizeOnboarding(draft) } catch {}
-      try { await advanceOnboarding('completed') } catch {}
-      return { merged: true }
-    }
-    // Any other dev failure → fall through to the normal client path below.
-  }
-
-  const { error } = await supabase.auth.updateUser({ email, password })
+  // Promote the anon user in place — same user_id (the guest's data stays
+  // theirs) and the current session stays valid, so no re-login is needed.
+  const { data, error } = await supabase.auth.updateUser({ email, password })
   if (!error) {
-    // Same user_id, now permanent. Materialize the draft into real rows.
     try { await finalizeOnboarding(draft) } catch { /* surfaced by caller retry */ }
     // Mark onboarding complete so the funnel doesn't re-trigger — best-effort.
     try { await advanceOnboarding('completed') } catch {}
-    // The new email is unconfirmed until the user clicks the link → verify step.
-    return { merged: false, pendingVerification: true }
+    // If the project requires email confirmation, the new address is pending
+    // until the user clicks the link → show the verify step. With confirmation
+    // disabled it's confirmed immediately → straight into the app.
+    const pendingVerification = !data.user?.email_confirmed_at
+    return { merged: false, pendingVerification }
   }
   if (!EMAIL_EXISTS(error)) throw new Error(error.message)
 
