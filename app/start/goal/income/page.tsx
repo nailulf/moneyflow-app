@@ -71,7 +71,7 @@ export default function GoalIncomePage() {
           <FunnelProgress total={4} current={2} />
           <button
             type="button"
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/start/save')}
             className="shrink-0 text-sm leading-body-sm font-medium text-muted-foreground hover:text-foreground"
           >
             {t('intent.skip')}

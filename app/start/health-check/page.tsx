@@ -174,7 +174,7 @@ export default function HealthCheckPage() {
           <FunnelProgress total={4} current={STEP_INDEX[step]} />
           <button
             type="button"
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/start/save')}
             className="shrink-0 text-sm leading-body-sm font-medium text-muted-foreground hover:text-foreground"
           >
             {t('skip')}
