@@ -1464,7 +1464,14 @@
     "newAccount": "New Account",
     "hero": {
       "totalValue": "Total Portfolio Value",
-      "assets": "{count} assets"
+      "assets": "{count} assets",
+      "gainPlaceholder": "Needs price data"
+    },
+    "insights": {
+      "performance": "Performance",
+      "income": "Income",
+      "health": "Health",
+      "placeholder": "Needs price data"
     },
     "accounts": {
       "title": "Investment Accounts",

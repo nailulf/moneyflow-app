@@ -1464,7 +1464,14 @@
     "newAccount": "Akun Baru",
     "hero": {
       "totalValue": "Total Nilai Portofolio",
-      "assets": "{count} aset"
+      "assets": "{count} aset",
+      "gainPlaceholder": "Butuh data harga"
+    },
+    "insights": {
+      "performance": "Performa",
+      "income": "Pendapatan",
+      "health": "Kesehatan",
+      "placeholder": "Butuh data harga"
     },
     "accounts": {
       "title": "Akun Investasi",

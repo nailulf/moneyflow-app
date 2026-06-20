@@ -12,17 +12,16 @@ import { AllocationBars } from '@/components/features/portfolio/AllocationBars'
 import { TopHoldingsCard } from '@/components/features/portfolio/TopHoldingsCard'
 
 describe('PortfolioValueHero', () => {
-  it('renders total value, positive gain in hero-success, and asset count', () => {
+  it('renders total value, gain placeholder, and asset count', () => {
     render(<PortfolioValueHero totalValue={48750000} totalGainLoss={3250000} totalGainLossPct={7.1} assetCount={5} currency="IDR" />)
     expect(screen.getByText(/48\.750\.000/)).toBeInTheDocument()
-    const gain = screen.getByText(/3\.250\.000/)
-    expect(gain.className).toMatch(/text-hero-success/)
+    // gain is now a placeholder, not a computed number
+    expect(screen.getByText('hero.gainPlaceholder')).toBeInTheDocument()
     expect(screen.getByText(/hero\.assets:\{"count":5\}/)).toBeInTheDocument()
   })
-  it('renders a loss in hero-danger with a minus', () => {
+  it('renders placeholder regardless of gain/loss direction', () => {
     render(<PortfolioValueHero totalValue={100} totalGainLoss={-50} totalGainLossPct={-5} assetCount={1} currency="IDR" />)
-    const loss = screen.getByText(/− /)
-    expect(loss.className).toMatch(/text-hero-danger/)
+    expect(screen.getByText('hero.gainPlaceholder')).toBeInTheDocument()
   })
 })
 
