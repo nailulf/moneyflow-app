@@ -110,7 +110,7 @@ export function groupHoldingsByClass<H extends HoldingLike>(holdings: H[]): Hold
 
 import { SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
 
-const ASSET_CLASSES: AssetClass[] = ['IDX_STOCK', 'US_STOCK', 'MUTUAL_FUND', 'ETF', 'BOND', 'OTHER']
+export const ASSET_CLASSES: AssetClass[] = ['IDX_STOCK', 'US_STOCK', 'MUTUAL_FUND', 'ETF', 'BOND', 'OTHER']
 
 export interface SanitizedHolding {
   asset_class: AssetClass

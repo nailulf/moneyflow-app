@@ -25,6 +25,9 @@ export async function PUT(request: NextRequest, context: RouteParams) {
     const ctx = await authedHolding(accountId, holdingId)
     if ('error' in ctx) return ctx.error
     const body = await request.json()
+    for (const k of ['quantity', 'purchase_price', 'current_value']) {
+      if (k in body) return NextResponse.json({ error: `${k} is derived from transactions and cannot be edited directly` }, { status: 400 })
+    }
     const result = sanitizeHoldingPayload(body, { partial: true })
     if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 })
     const { data: holding, error } = await ctx.supabase
