@@ -13,19 +13,16 @@ const steps = [
     icon: Landmark,
     titleKey: 'step1Title' as const,
     subKey: 'step1Sub' as const,
-    tint: 'tint-blue',
   },
   {
     icon: Layers,
     titleKey: 'step2Title' as const,
     subKey: 'step2Sub' as const,
-    tint: 'tint-violet',
   },
   {
     icon: BarChart2,
     titleKey: 'step3Title' as const,
     subKey: 'step3Sub' as const,
-    tint: 'tint-green',
   },
 ]
 
@@ -54,27 +51,17 @@ export function PortfolioEmptyState({ onAddAccount }: PortfolioEmptyStateProps) 
 
       {/* 3-step list card */}
       <div className="rounded-2xl bg-card shadow-card divide-y divide-border">
-        {steps.map(({ icon: Icon, titleKey, subKey, tint }, idx) => (
+        {steps.map(({ icon: Icon, titleKey, subKey }, idx) => (
           <div key={titleKey} className="flex items-center gap-3 px-4 py-4">
             {/* Number badge */}
             <span
               className={cn(
-                'flex h-5 w-5 shrink-0 items-center justify-center rounded-full',
-                'bg-primary text-primary-foreground text-nano font-bold leading-none'
+                'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
+                'bg-selected text-primary text-tiny font-bold leading-none'
               )}
             >
               {idx + 1}
             </span>
-
-            {/* Tinted icon circle */}
-            <div
-              className={cn(
-                'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
-                `bg-${tint}-bg`
-              )}
-            >
-              <Icon className={cn('h-5 w-5', `text-${tint}-fg`)} aria-hidden="true" />
-            </div>
 
             {/* Text */}
             <div className="flex min-w-0 flex-1 flex-col">
@@ -85,6 +72,12 @@ export function PortfolioEmptyState({ onAddAccount }: PortfolioEmptyStateProps) 
                 {t(subKey)}
               </span>
             </div>
+
+            {/* Faint right icon */}
+            <Icon
+              className="h-5 w-5 shrink-0 text-muted-foreground/40"
+              aria-hidden="true"
+            />
           </div>
         ))}
       </div>
