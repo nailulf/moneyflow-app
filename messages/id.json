@@ -1509,7 +1509,8 @@
       "back": "Kembali",
       "emptyTitle": "Belum ada aset",
       "emptyDescription": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:",
-      "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis."
+      "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis.",
+      "holdings": "Portofolio"
     },
     "manage": {
       "edit": "Ubah",

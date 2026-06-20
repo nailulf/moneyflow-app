@@ -1509,7 +1509,8 @@
       "back": "Back",
       "emptyTitle": "No assets yet",
       "emptyDescription": "What do you hold in this account? Pick a type to add your first one:",
-      "emptyTip": "Tip: add your holdings with their buy price — we'll calculate returns automatically."
+      "emptyTip": "Tip: add your holdings with their buy price — we'll calculate returns automatically.",
+      "holdings": "Holdings"
     },
     "manage": {
       "edit": "Edit",

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useQueryClient } from '@tanstack/react-query'
@@ -9,14 +9,14 @@ import { toast } from 'sonner'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useHoldings } from '@/hooks/useHoldings'
 import { useHoldingsInBase } from '@/hooks/useHoldingsInBase'
-import { updateHolding, deleteHolding, type Holding } from '@/lib/api/holdings'
-import { portfolioTotals, type SanitizedHolding } from '@/lib/portfolio-utils'
+import { deleteHolding } from '@/lib/api/holdings'
+import { portfolioTotals } from '@/lib/portfolio-utils'
 import { isEmptyAccount } from '@/lib/portfolio-screen-utils'
 
 const BASE_CURRENCY = 'IDR'
 import { PortfolioValueHero } from '@/components/features/portfolio/PortfolioValueHero'
+import { AccountInsightCards } from '@/components/features/portfolio/AccountInsightCards'
 import { HoldingsByClassList } from '@/components/features/portfolio/HoldingsByClassList'
-import { HoldingManageSheet } from '@/components/features/portfolio/HoldingManageSheet'
 import { InvestmentAccountEmptyState } from '@/components/features/portfolio/InvestmentAccountEmptyState'
 
 export default function AccountDetailPage() {
@@ -26,8 +26,6 @@ export default function AccountDetailPage() {
   const queryClient = useQueryClient()
   const { accounts } = useAccounts()
   const { data: holdings = [], isLoading } = useHoldings(accountId)
-  const [managed, setManaged] = useState<Holding | null>(null)
-  const [pending, setPending] = useState(false)
 
   const account = accounts.find((a) => a.id === accountId)
 
@@ -43,23 +41,16 @@ export default function AccountDetailPage() {
     queryClient.invalidateQueries({ queryKey: ['net-worth'] })
   }
 
-  const handleSave = async (patch: Partial<SanitizedHolding>) => {
-    if (!managed || pending) return
-    setPending(true)
+  // Delete is still wired at the page level so future task (asset-detail manage sheet) can
+  // receive it as a prop; remove once Task 7 fully owns removal.
+  const handleDelete = async (holdingId: string) => {
     try {
-      await updateHolding(accountId, managed.id, patch)
-      refresh(); setManaged(null)
-    } catch { toast.error(t('manage.saveFailed')) } finally { setPending(false) }
+      await deleteHolding(accountId, holdingId)
+      refresh()
+    } catch { toast.error(t('manage.deleteFailed')) }
   }
 
-  const handleDelete = async () => {
-    if (!managed || pending) return
-    setPending(true)
-    try {
-      await deleteHolding(accountId, managed.id)
-      refresh(); setManaged(null)
-    } catch { toast.error(t('manage.deleteFailed')) } finally { setPending(false) }
-  }
+  void handleDelete // suppress unused-var lint until Task 7 wires it
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 pt-3 pb-10 md:pt-8">
@@ -84,7 +75,7 @@ export default function AccountDetailPage() {
       {!isLoading && isEmptyAccount(holdings) ? (
         <InvestmentAccountEmptyState
           accountName={account?.name ?? ''}
-          onAddAsset={(assetClass) => {
+          onAddAsset={() => {
             // TODO(SP3): pass ?class=${assetClass} once the add page reads a class query param
             router.push(`/portfolio/${accountId}/add`)
           }}
@@ -93,16 +84,17 @@ export default function AccountDetailPage() {
         <>
           <PortfolioValueHero totalValue={totals.totalValue} totalGainLoss={totals.totalGainLoss}
             totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={BASE_CURRENCY} />
-          <HoldingsByClassList
-            holdings={displayHoldings}
-            onSelect={(h) => setManaged(holdings.find((o) => o.id === h.id) ?? null)}
-          />
-        </>
-      )}
 
-      {managed && (
-        <HoldingManageSheet open={!!managed} holding={managed} pending={pending}
-          onClose={() => setManaged(null)} onSave={handleSave} onDelete={handleDelete} />
+          <AccountInsightCards />
+
+          <section className="flex flex-col gap-3">
+            <h2 className="px-1 text-sm leading-body-sm font-semibold text-muted-foreground">{t('detail.holdings')}</h2>
+            <HoldingsByClassList
+              holdings={displayHoldings}
+              onSelect={(h) => router.push(`/portfolio/${accountId}/${h.id}`)}
+            />
+          </section>
+        </>
       )}
     </div>
   )

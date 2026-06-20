@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 global.ResizeObserver = global.ResizeObserver || class { observe() {} unobserve() {} disconnect() {} }
@@ -15,10 +15,8 @@ jest.mock('@/contexts/AccountContext', () => ({
   useAccounts: () => ({ accounts: [{ id: 'acc1', name: 'Stockbit — Growth', type: 'INVESTMENT', broker: 'Stockbit', currency: 'IDR', balance: 1900000 }], loading: false }),
 }))
 const deleteHolding = jest.fn().mockResolvedValue(undefined)
-const updateHolding = jest.fn().mockResolvedValue({})
 jest.mock('@/lib/api/holdings', () => ({
   deleteHolding: (...a: unknown[]) => deleteHolding(...a),
-  updateHolding: (...a: unknown[]) => updateHolding(...a),
 }))
 const invalidate = jest.fn()
 jest.mock('@tanstack/react-query', () => ({
@@ -42,12 +40,9 @@ describe('AccountDetailPage', () => {
     expect(push).toHaveBeenCalledWith('/portfolio/acc1/add')
   })
 
-  it('opens the manage sheet on a holding tap and deletes', async () => {
+  it('navigates to asset detail when a holding row is tapped', () => {
     render(<AccountDetailPage />)
     fireEvent.click(screen.getByRole('button', { name: /Bank Central Asia/ }))
-    fireEvent.click(await screen.findByRole('button', { name: 'manage.remove' }))
-    fireEvent.click(screen.getByRole('button', { name: 'manage.confirmRemove' }))
-    await waitFor(() => expect(deleteHolding).toHaveBeenCalledWith('acc1', 'h1'))
-    expect(invalidate).toHaveBeenCalled()
+    expect(push).toHaveBeenCalledWith('/portfolio/acc1/h1')
   })
 })
