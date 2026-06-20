@@ -30,7 +30,7 @@ function InsightCard({ icon, iconBg, label, placeholder }: InsightCardProps) {
 }
 
 /** Row of 3 placeholder insight cards (Performance / Income / Health).
- *  No live data — placeholders until price-feed integration (Task 2). */
+ *  No live data — placeholders until live price-feed integration. */
 export function AccountInsightCards() {
   const t = useTranslations('portfolio.insights')
 

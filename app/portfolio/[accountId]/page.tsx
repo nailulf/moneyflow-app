@@ -5,11 +5,9 @@ import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Plus } from 'lucide-react'
-import { toast } from 'sonner'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useHoldings } from '@/hooks/useHoldings'
 import { useHoldingsInBase } from '@/hooks/useHoldingsInBase'
-import { deleteHolding } from '@/lib/api/holdings'
 import { portfolioTotals } from '@/lib/portfolio-utils'
 import { isEmptyAccount } from '@/lib/portfolio-screen-utils'
 
@@ -40,17 +38,6 @@ export default function AccountDetailPage() {
     queryClient.invalidateQueries({ queryKey: ['accounts'] })
     queryClient.invalidateQueries({ queryKey: ['net-worth'] })
   }
-
-  // Delete is still wired at the page level so future task (asset-detail manage sheet) can
-  // receive it as a prop; remove once Task 7 fully owns removal.
-  const handleDelete = async (holdingId: string) => {
-    try {
-      await deleteHolding(accountId, holdingId)
-      refresh()
-    } catch { toast.error(t('manage.deleteFailed')) }
-  }
-
-  void handleDelete // suppress unused-var lint until Task 7 wires it
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 pt-3 pb-10 md:pt-8">
