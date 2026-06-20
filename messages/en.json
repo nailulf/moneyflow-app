@@ -1502,6 +1502,7 @@
       "BOND": "Government & corporate bonds",
       "OTHER": "Anything else"
     },
+    "accountSubtitle": "Investment Account",
     "detail": {
       "investmentAccount": "Investment Account",
       "addAsset": "Add Asset",

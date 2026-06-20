@@ -1502,6 +1502,7 @@
       "BOND": "Obligasi pemerintah & korporasi",
       "OTHER": "Lainnya"
     },
+    "accountSubtitle": "Akun Investasi",
     "detail": {
       "investmentAccount": "Akun Investasi",
       "addAsset": "Tambah Aset",

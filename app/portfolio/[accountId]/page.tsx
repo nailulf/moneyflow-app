@@ -70,13 +70,15 @@ export default function AccountDetailPage() {
         </button>
         <span className="min-w-0 flex-1">
           <h1 className="truncate text-lg leading-body-lg font-bold text-foreground">{account?.name ?? ''}</h1>
-          <span className="block truncate text-tiny text-muted-foreground">{account?.broker ?? t('detail.investmentAccount')}</span>
+          <span className="block truncate text-tiny text-muted-foreground">{t('accountSubtitle')}</span>
         </span>
-        <button type="button" onClick={() => router.push(`/portfolio/${accountId}/add`)}
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm leading-none font-semibold text-primary-foreground">
-          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-          {t('detail.addAsset')}
-        </button>
+        {!isLoading && !isEmptyAccount(holdings) && (
+          <button type="button" onClick={() => router.push(`/portfolio/${accountId}/add`)}
+            className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm leading-none font-semibold text-primary-foreground">
+            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+            {t('detail.addAsset')}
+          </button>
+        )}
       </header>
 
       {!isLoading && isEmptyAccount(holdings) ? (

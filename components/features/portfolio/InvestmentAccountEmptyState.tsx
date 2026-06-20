@@ -1,24 +1,22 @@
 'use client'
 
-import { createElement } from 'react'
 import { useTranslations } from 'next-intl'
-import { Layers, LineChart, PieChart, Landmark, Coins, TrendingUp, Plus, Lightbulb, type LucideIcon } from 'lucide-react'
+import { Layers, Plus, Lightbulb } from 'lucide-react'
 import type { AssetClass } from '@/lib/portfolio-utils'
 import { cn } from '@/lib/utils'
 
 interface Chip {
   assetClass: AssetClass
   labelKey: 'chipIdx' | 'chipFund' | 'chipEtf' | 'chipBond' | 'chipUs'
-  icon: LucideIcon
   tint: string
 }
 
 const CHIPS: Chip[] = [
-  { assetClass: 'IDX_STOCK',   labelKey: 'chipIdx',  icon: LineChart,  tint: 'bg-tint-blue-bg   text-tint-blue-fg'   },
-  { assetClass: 'MUTUAL_FUND', labelKey: 'chipFund', icon: PieChart,   tint: 'bg-tint-purple-bg text-tint-purple-fg' },
-  { assetClass: 'ETF',         labelKey: 'chipEtf',  icon: Landmark,   tint: 'bg-tint-teal-bg   text-tint-teal-fg'   },
-  { assetClass: 'BOND',        labelKey: 'chipBond', icon: Coins,      tint: 'bg-tint-amber-bg  text-tint-amber-fg'  },
-  { assetClass: 'US_STOCK',    labelKey: 'chipUs',   icon: TrendingUp, tint: 'bg-tint-green-bg  text-tint-green-fg'  },
+  { assetClass: 'IDX_STOCK',   labelKey: 'chipIdx',  tint: 'bg-tint-blue-bg   text-tint-blue-fg'   },
+  { assetClass: 'MUTUAL_FUND', labelKey: 'chipFund', tint: 'bg-tint-purple-bg text-tint-purple-fg' },
+  { assetClass: 'ETF',         labelKey: 'chipEtf',  tint: 'bg-tint-teal-bg   text-tint-teal-fg'   },
+  { assetClass: 'BOND',        labelKey: 'chipBond', tint: 'bg-tint-amber-bg  text-tint-amber-fg'  },
+  { assetClass: 'US_STOCK',    labelKey: 'chipUs',   tint: 'bg-tint-green-bg  text-tint-green-fg'  },
 ]
 
 interface InvestmentAccountEmptyStateProps {
@@ -69,10 +67,7 @@ export function InvestmentAccountEmptyState({ onAddAsset }: InvestmentAccountEmp
               )}
             >
               <Plus className="h-3 w-3" aria-hidden="true" />
-              <span className="flex items-center gap-1">
-                {createElement(chip.icon, { className: 'h-3.5 w-3.5', 'aria-hidden': true })}
-                {t(chip.labelKey)}
-              </span>
+              {t(chip.labelKey)}
             </button>
           ))}
         </div>
