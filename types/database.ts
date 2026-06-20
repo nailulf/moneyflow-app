@@ -26,6 +26,7 @@ export interface Database {
           is_duplicate: boolean
           duplicate_of: string | null
           is_balance_adjustment: boolean
+          source_investment_txn_id: string | null
           created_at: string
           updated_at: string
         }
@@ -53,6 +54,7 @@ export interface Database {
           is_duplicate?: boolean
           duplicate_of?: string | null
           is_balance_adjustment?: boolean
+          source_investment_txn_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -80,6 +82,7 @@ export interface Database {
           is_duplicate?: boolean
           duplicate_of?: string | null
           is_balance_adjustment?: boolean
+          source_investment_txn_id?: string | null
           updated_at?: string
         }
       }
@@ -774,6 +777,54 @@ export interface Database {
           current_value?: number
           purchase_date?: string | null
           currency?: string
+          updated_at?: string
+        }
+      }
+      investment_transactions: {
+        Row: {
+          id: string
+          holding_id: string
+          account_id: string
+          user_id: string
+          type: 'BUY' | 'SELL' | 'DIVIDEND'
+          quantity: number
+          price_per_unit: number
+          total_amount: number
+          realized_pl: number | null
+          cash_account_id: string | null
+          transaction_date: string
+          currency: string
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          holding_id: string
+          account_id: string
+          user_id: string
+          type: 'BUY' | 'SELL' | 'DIVIDEND'
+          quantity: number
+          price_per_unit: number
+          total_amount: number
+          realized_pl?: number | null
+          cash_account_id?: string | null
+          transaction_date: string
+          currency?: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          type?: 'BUY' | 'SELL' | 'DIVIDEND'
+          quantity?: number
+          price_per_unit?: number
+          total_amount?: number
+          realized_pl?: number | null
+          cash_account_id?: string | null
+          transaction_date?: string
+          currency?: string
+          notes?: string | null
           updated_at?: string
         }
       }
