@@ -1507,6 +1507,27 @@
       "lots": "lots",
       "units": "units"
     },
+    "history": {
+      "title": "Transaction History",
+      "seeAll": "See all",
+      "buy": "Buy",
+      "sell": "Sell",
+      "dividend": "Dividend",
+      "empty": "No transactions yet"
+    },
+    "position": {
+      "title": "Your Holdings",
+      "avgBuyPrice": "Average Buy Price",
+      "currentPrice": "Current Price",
+      "currentValue": "Current Value",
+      "unrealizedPl": "Unrealized P/L",
+      "placeholder": "Needs price data"
+    },
+    "assetDetail": {
+      "sell": "Sell",
+      "buyMore": "Buy More",
+      "chartPlaceholder": "Price history coming soon"
+    },
     "detail": {
       "investmentAccount": "Investment Account",
       "addAsset": "Add Asset",

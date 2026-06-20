@@ -1507,6 +1507,27 @@
       "lots": "lot",
       "units": "unit"
     },
+    "history": {
+      "title": "Riwayat Transaksi",
+      "seeAll": "Lihat semua",
+      "buy": "Beli",
+      "sell": "Jual",
+      "dividend": "Dividen",
+      "empty": "Belum ada transaksi"
+    },
+    "position": {
+      "title": "Kepemilikanmu",
+      "avgBuyPrice": "Rata-rata Harga Beli",
+      "currentPrice": "Harga Saat Ini",
+      "currentValue": "Nilai Saat Ini",
+      "unrealizedPl": "Unrealized P/L",
+      "placeholder": "Butuh data harga"
+    },
+    "assetDetail": {
+      "sell": "Jual",
+      "buyMore": "Beli Lagi",
+      "chartPlaceholder": "Riwayat harga segera hadir"
+    },
     "detail": {
       "investmentAccount": "Akun Investasi",
       "addAsset": "Tambah Aset",
