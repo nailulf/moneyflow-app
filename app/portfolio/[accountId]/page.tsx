@@ -79,19 +79,23 @@ export default function AccountDetailPage() {
         </button>
       </header>
 
-      <PortfolioValueHero totalValue={totals.totalValue} totalGainLoss={totals.totalGainLoss}
-        totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={BASE_CURRENCY} />
-
       {!isLoading && isEmptyAccount(holdings) ? (
         <InvestmentAccountEmptyState
           accountName={account?.name ?? ''}
-          onAddAsset={(assetClass) => router.push(`/portfolio/${accountId}/add`)}
+          onAddAsset={(assetClass) => {
+            // TODO(SP3): pass ?class=${assetClass} once the add page reads a class query param
+            router.push(`/portfolio/${accountId}/add`)
+          }}
         />
       ) : (
-        <HoldingsByClassList
-          holdings={displayHoldings}
-          onSelect={(h) => setManaged(holdings.find((o) => o.id === h.id) ?? null)}
-        />
+        <>
+          <PortfolioValueHero totalValue={totals.totalValue} totalGainLoss={totals.totalGainLoss}
+            totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={BASE_CURRENCY} />
+          <HoldingsByClassList
+            holdings={displayHoldings}
+            onSelect={(h) => setManaged(holdings.find((o) => o.id === h.id) ?? null)}
+          />
+        </>
       )}
 
       {managed && (
