@@ -1521,7 +1521,19 @@
       "saveFailed": "Gagal memperbarui aset.",
       "deleteFailed": "Gagal menghapus aset."
     },
-    "emptyCta": "Buat akun investasi"
+    "emptyCta": "Buat akun investasi",
+    "empty": {
+      "title": "Semua investasimu, satu tempat",
+      "subtitle": "Tambahkan akun broker atau reksa dana, lalu pantau saham, obligasi, dan dana yang kamu miliki.",
+      "step1Title": "Buat akun investasi",
+      "step1Sub": "mis. Stockbit, Bibit, IPOT",
+      "step2Title": "Tambahkan aset yang kamu miliki",
+      "step2Sub": "Saham, reksa dana, ETF, obligasi",
+      "step3Title": "Lihat performa & pendapatan",
+      "step3Sub": "Return, dividen, tips rebalancing",
+      "addCta": "Tambah akun investasi",
+      "basicsLink": "Baru mulai investasi? Pelajari dasarnya"
+    }
   },
   "holdingCreate": {
     "selectTitle": "Tambah Investasi",

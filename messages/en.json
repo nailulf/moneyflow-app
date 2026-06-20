@@ -1521,7 +1521,19 @@
       "saveFailed": "Couldn't update the asset.",
       "deleteFailed": "Couldn't remove the asset."
     },
-    "emptyCta": "Create investment account"
+    "emptyCta": "Create investment account",
+    "empty": {
+      "title": "All your investments, one place",
+      "subtitle": "Add your broker or fund accounts, then track the stocks, funds, and bonds you own.",
+      "step1Title": "Create an investment account",
+      "step1Sub": "e.g. Stockbit, Bibit, IPOT",
+      "step2Title": "Add the assets you own",
+      "step2Sub": "Stocks, reksa dana, ETF, bonds",
+      "step3Title": "See performance & income",
+      "step3Sub": "Returns, dividends, rebalancing tips",
+      "addCta": "Add investment account",
+      "basicsLink": "New to investing? Start with the basics"
+    }
   },
   "holdingCreate": {
     "selectTitle": "Add Investment",
