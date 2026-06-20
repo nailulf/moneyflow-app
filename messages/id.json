@@ -1833,6 +1833,9 @@
         "resendSuccess": "Email konfirmasi terkirim.",
         "resendError": "Tidak dapat mengirim ulang email. Silakan coba lagi.",
         "continueCta": "Lanjut ke aplikasi"
+      },
+      "finalizing": {
+        "message": "Menyiapkan akun Anda…"
       }
     },
     "browseLink": "Sekadar lihat-lihat? Jelajahi aplikasinya dulu",

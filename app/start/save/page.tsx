@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import {
@@ -17,11 +17,13 @@ import { Checkbox } from '@/components/ui/atoms/checkbox'
 import {
   convertWithEmail,
   convertWithOAuth,
+  finalizePendingOAuthDraft,
   resendConfirmation,
 } from '@/lib/onboarding/convert'
 import { useFunnelStore } from '@/lib/onboarding/funnel-store'
 import { buildOnboardingDraft } from '@/lib/onboarding/build-draft'
 import { ensureAnonymousSession } from '@/lib/supabase/anonymous'
+import { OAUTH_FINALIZE_PARAM, hasPendingDraft } from '@/lib/onboarding/pending-draft'
 
 /** Brand glyph for the Google OAuth button (lucide has no brand icons). */
 function GoogleIcon() {
@@ -73,13 +75,59 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export default function ConvertPage() {
   const t = useTranslations('start.convert')
   const router = useRouter()
+  const searchParams = useSearchParams()
   // The flow result pages (goal/budget/health) are the conversion point now —
   // they route straight here, so this screen opens directly on the form (no
   // separate "your plan is ready" intro that repeated the result).
-  const [step, setStep] = useState<'form' | 'verify'>('form')
+  // `finalizing` is the post-OAuth landing state: we returned from the provider
+  // and are materializing the persisted draft before entering the app.
+  const [step, setStep] = useState<'form' | 'verify' | 'finalizing'>('form')
   // The email awaiting confirmation — captured when an email conversion lands
   // in the pending-verification state, so the verify view can show & resend it.
   const [pendingEmail, setPendingEmail] = useState('')
+  // Guards against double-finalize: React 18 Strict Mode mounts effects twice in
+  // dev, and a re-render shouldn't re-trigger the RPC. finalize is idempotent
+  // server-side, but we still run it at most once per landing.
+  const finalizeStarted = useRef(false)
+
+  // ── Post-OAuth landing ─────────────────────────────────────────────────────
+  // convertWithOAuth persisted the draft and pointed Supabase's redirectTo back
+  // here with `?oauth_finalize=1`. The browser arrived back authenticated (the
+  // /auth/callback route exchanged the code), so rehydrate the draft and
+  // materialize it once, then continue into the app — the same end state as the
+  // email path. If there's no pending draft (already finalized / direct visit),
+  // do nothing and show the form.
+  useEffect(() => {
+    if (searchParams.get(OAUTH_FINALIZE_PARAM) !== '1') return
+    if (!hasPendingDraft()) return
+    if (finalizeStarted.current) return
+    finalizeStarted.current = true
+
+    setStep('finalizing')
+    finalizePendingOAuthDraft()
+      .then(() => {
+        // Full reload so the authed shell picks up the new session + seeded data.
+        window.location.assign('/?registered=1')
+      })
+      .catch(() => {
+        // Leave the draft in place so a retry can re-run; drop back to the form
+        // (the user is signed in, so they can also just continue as guest).
+        finalizeStarted.current = false
+        toast.error(t('form.errorGeneric'))
+        setStep('form')
+      })
+  }, [searchParams, t])
+
+  if (step === 'finalizing') {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-5 pb-10 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+        <p className="mt-4 text-sm leading-body-sm text-muted-foreground">
+          {t('finalizing.message')}
+        </p>
+      </div>
+    )
+  }
 
   if (step === 'verify') {
     return (
@@ -138,10 +186,14 @@ function FormStep({
   }, [])
 
   // NOTE: Google/Apple providers must be enabled in Supabase Auth for these to
-  // work — they're wired regardless. linkIdentity redirects the browser away.
+  // work — they're wired regardless. linkIdentity redirects the browser away,
+  // wiping the in-memory funnel store, so we build the draft NOW and hand it to
+  // convertWithOAuth, which persists it across the redirect. On return the
+  // landing effect above rehydrates and finalizes it (same end state as email).
   const handleOAuth = async (provider: 'google' | 'apple') => {
     try {
-      await convertWithOAuth(provider)
+      const draft = buildOnboardingDraft(useFunnelStore.getState(), new Date())
+      await convertWithOAuth(provider, draft)
     } catch {
       toast.error(t('form.oauthError'))
     }

@@ -14,7 +14,13 @@ global.ResizeObserver =
   }
 
 const push = jest.fn()
-jest.mock('next/navigation', () => ({ useRouter: () => ({ push }) }))
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push }),
+  // The OAuth-finalize landing effect reads `?oauth_finalize=1`; default to a
+  // param-less URL so these (email-path) tests render the form, not the
+  // finalizing state.
+  useSearchParams: () => new URLSearchParams(),
+}))
 jest.mock('next-intl', () => ({
   useTranslations: () => (k: string) => k,
   useLocale: () => 'en',
@@ -24,11 +30,13 @@ const convertWithEmail = jest.fn().mockResolvedValue({ merged: false })
 const convertWithOAuth = jest.fn().mockResolvedValue(undefined)
 const continueAsGuest = jest.fn().mockResolvedValue(undefined)
 const resendConfirmation = jest.fn().mockResolvedValue(true)
+const finalizePendingOAuthDraft = jest.fn().mockResolvedValue(false)
 jest.mock('@/lib/onboarding/convert', () => ({
   convertWithEmail: (...args: unknown[]) => convertWithEmail(...args),
   convertWithOAuth: (...args: unknown[]) => convertWithOAuth(...args),
   continueAsGuest: (...args: unknown[]) => continueAsGuest(...args),
   resendConfirmation: (...args: unknown[]) => resendConfirmation(...args),
+  finalizePendingOAuthDraft: (...args: unknown[]) => finalizePendingOAuthDraft(...args),
 }))
 
 import ConvertPage from '@/app/start/save/page'

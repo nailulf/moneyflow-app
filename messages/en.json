@@ -1833,6 +1833,9 @@
         "resendSuccess": "Confirmation email sent.",
         "resendError": "Could not resend the email. Please try again.",
         "continueCta": "Continue to the app"
+      },
+      "finalizing": {
+        "message": "Setting up your account…"
       }
     },
     "browseLink": "Just looking? Browse the app first",
