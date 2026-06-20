@@ -68,6 +68,7 @@ export async function POST(request: NextRequest, context: RouteParams) {
     if (data.type === 'SELL' && data.cash_account_id) {
       const { data: cash } = await ctx.supabase.from('accounts').select('id, user_id, type').eq('id', data.cash_account_id).single()
       if (!cash || cash.user_id !== ctx.user.id) return NextResponse.json({ error: 'Invalid cash account' }, { status: 400 })
+      if (cash.type === 'INVESTMENT') return NextResponse.json({ error: 'Cash account cannot be an investment account' }, { status: 400 })
       cashAccountId = cash.id
     }
 
@@ -86,6 +87,7 @@ export async function POST(request: NextRequest, context: RouteParams) {
     }
 
     // Opt-in: deposit proceeds as a single INCOME transaction on the chosen cash account.
+    let cashInflowError: string | null = null
     if (cashAccountId) {
       const { error: cashErr } = await ctx.supabase.from('transactions').insert({
         user_id: ctx.user.id, account_id: cashAccountId, type: 'INCOME',
@@ -94,10 +96,16 @@ export async function POST(request: NextRequest, context: RouteParams) {
         description: `Sale of ${ctx.holding.symbol || ctx.holding.name}`,
         source_investment_txn_id: txn.id,
       })
-      if (cashErr) console.error('[InvTxn API] cash inflow error (non-fatal):', cashErr)
+      if (cashErr) {
+        console.error('[InvTxn API] cash inflow error (non-fatal):', cashErr)
+        cashInflowError = 'Failed to record cash proceeds; the investment transaction was saved.'
+      }
     }
 
-    return NextResponse.json({ transaction: txn }, { status: 201 })
+    return NextResponse.json(
+      cashInflowError ? { transaction: txn, cash_inflow_error: cashInflowError } : { transaction: txn },
+      { status: 201 }
+    )
   } catch (e) {
     console.error('[InvTxn API] POST error:', e)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
