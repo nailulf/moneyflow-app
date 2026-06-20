@@ -120,6 +120,13 @@ AS $$
 DECLARE
   v_holding_id UUID;
 BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM accounts
+    WHERE id = p_account_id AND user_id = p_user_id AND user_id = auth.uid()
+  ) THEN
+    RAISE EXCEPTION 'not authorized to add assets to this account';
+  END IF;
+
   INSERT INTO portfolio_holdings (account_id, user_id, asset_class, symbol, name, quantity, purchase_price, current_value, purchase_date, currency)
   VALUES (p_account_id, p_user_id, p_asset_class, p_symbol, p_name, 0, 0, 0, p_transaction_date, p_currency)
   RETURNING id INTO v_holding_id;
