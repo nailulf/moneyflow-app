@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ArrowLeft, MoreHorizontal } from 'lucide-react'
+import { ArrowLeft, Loader2, MoreHorizontal } from 'lucide-react'
 import { useHoldings } from '@/hooks/useHoldings'
 import { useInvestmentTransactions } from '@/hooks/useInvestmentTransactions'
 import type { AssetClass } from '@/lib/portfolio-utils'
@@ -27,6 +27,15 @@ export default function AssetDetailPage() {
   const { data: transactions = [], isLoading: txnLoading } = useInvestmentTransactions(accountId, holdingId)
 
   const [activePeriod, setActivePeriod] = useState<Period>('1M')
+
+  // Loading state — show centered spinner while holdings fetch
+  if (isLoading && !holding) {
+    return (
+      <div className="mx-auto flex w-full max-w-md items-center justify-center pt-24">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-label="Loading" />
+      </div>
+    )
+  }
 
   // Not-found state after data loads
   if (!isLoading && !holding) {
@@ -57,8 +66,8 @@ export default function AssetDetailPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 pt-3 pb-10 md:pt-8">
-      {/* Sticky header: back + symbol/class + manage trigger */}
-      <header className="sticky top-0 z-20 -mt-3 flex items-center gap-2 bg-background/90 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/75 md:-mt-8">
+      {/* Header: back + symbol/class + manage trigger */}
+      <header className="flex items-center gap-2">
         <button
           type="button"
           onClick={() => router.push(`/portfolio/${accountId}`)}
@@ -122,7 +131,7 @@ export default function AssetDetailPage() {
 
       {/* Transaction history */}
       {!txnLoading && (
-        <TransactionHistoryList transactions={transactions} currency={currency} />
+        <TransactionHistoryList transactions={transactions} currency={currency} assetClass={assetClass} />
       )}
 
       {/* Sell / Buy More — inert SP3; disabled buttons */}
