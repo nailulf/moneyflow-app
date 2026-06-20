@@ -14,6 +14,7 @@ import { topHoldings, hasInvestmentAccounts } from '@/lib/portfolio-screen-utils
 import { NavUser } from '@/components/features/navigation/nav-user'
 import { formatCurrency } from '@/lib/data-utils'
 import { PortfolioValueHero } from './PortfolioValueHero'
+import { AccountInsightCards } from './AccountInsightCards'
 import { AllocationBars } from './AllocationBars'
 import { StickyScreenHeader } from '@/components/features/navigation/StickyScreenHeader'
 import { TopHoldingsCard, type TopHoldingRow } from './TopHoldingsCard'
@@ -75,11 +76,13 @@ export function PortfolioScreen() {
           <PortfolioEmptyState onAddAccount={handleAddAccount} />
         </div>
       ) : (
-        <>
+        <div className="flex flex-col gap-5 px-5 pb-5">
           <PortfolioValueHero
             totalValue={totals.totalValue} totalGainLoss={totals.totalGainLoss}
             totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={BASE_CURRENCY}
           />
+
+          <AccountInsightCards />
 
           <section className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
@@ -92,7 +95,7 @@ export function PortfolioScreen() {
               <div className="divide-y divide-muted rounded-2xl bg-card shadow-card">
                 {investmentAccounts.map((a) => (
                   <button key={a.id} type="button" onClick={() => router.push(`/portfolio/${a.id}`)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50">
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 first:rounded-t-2xl last:rounded-b-2xl">
                     <span className="flex min-w-0 flex-1 flex-col">
                       <span className="truncate text-sm leading-body-sm font-semibold text-foreground">{a.name}</span>
                       {a.broker && <span className="text-tiny text-muted-foreground">{a.broker}</span>}
@@ -109,7 +112,7 @@ export function PortfolioScreen() {
 
           <AllocationBars slices={slices} />
           <TopHoldingsCard rows={top} />
-        </>
+        </div>
       )}
     </div>
   )
