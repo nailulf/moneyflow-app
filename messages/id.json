@@ -1521,6 +1521,18 @@
       "saveFailed": "Gagal memperbarui aset.",
       "deleteFailed": "Gagal menghapus aset."
     },
+    "accountEmpty": {
+      "heroLabel": "Total Nilai Portofolio",
+      "heroHint": "Akunmu siap — tambahkan aset untuk mulai memantau pertumbuhannya",
+      "title": "Belum ada aset",
+      "subtitle": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:",
+      "chipIdx": "Saham (IDX)",
+      "chipFund": "Reksa Dana",
+      "chipEtf": "ETF",
+      "chipBond": "Obligasi",
+      "chipUs": "Saham AS",
+      "tip": "Tips: tambahkan asetmu dengan harga beli — return akan dihitung otomatis."
+    },
     "emptyCta": "Buat akun investasi",
     "empty": {
       "title": "Semua investasimu, satu tempat",

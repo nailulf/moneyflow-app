@@ -4,18 +4,20 @@ import { useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Plus, Layers } from 'lucide-react'
+import { ArrowLeft, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useHoldings } from '@/hooks/useHoldings'
 import { useHoldingsInBase } from '@/hooks/useHoldingsInBase'
 import { updateHolding, deleteHolding, type Holding } from '@/lib/api/holdings'
 import { portfolioTotals, type SanitizedHolding } from '@/lib/portfolio-utils'
+import { isEmptyAccount } from '@/lib/portfolio-screen-utils'
 
 const BASE_CURRENCY = 'IDR'
 import { PortfolioValueHero } from '@/components/features/portfolio/PortfolioValueHero'
 import { HoldingsByClassList } from '@/components/features/portfolio/HoldingsByClassList'
 import { HoldingManageSheet } from '@/components/features/portfolio/HoldingManageSheet'
+import { InvestmentAccountEmptyState } from '@/components/features/portfolio/InvestmentAccountEmptyState'
 
 export default function AccountDetailPage() {
   const t = useTranslations('portfolio')
@@ -80,19 +82,11 @@ export default function AccountDetailPage() {
       <PortfolioValueHero totalValue={totals.totalValue} totalGainLoss={totals.totalGainLoss}
         totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={BASE_CURRENCY} />
 
-      {!isLoading && holdings.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl bg-card p-6 text-center shadow-card">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-muted">
-            <Layers className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
-          </span>
-          <p className="text-sm leading-body-sm font-bold text-foreground">{t('detail.emptyTitle')}</p>
-          <p className="text-sm leading-body-sm text-muted-foreground">{t('detail.emptyDescription')}</p>
-          <button type="button" onClick={() => router.push(`/portfolio/${accountId}/add`)}
-            className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm leading-none font-semibold text-primary-foreground">
-            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-            {t('detail.addAsset')}
-          </button>
-        </div>
+      {!isLoading && isEmptyAccount(holdings) ? (
+        <InvestmentAccountEmptyState
+          accountName={account?.name ?? ''}
+          onAddAsset={(assetClass) => router.push(`/portfolio/${accountId}/add`)}
+        />
       ) : (
         <HoldingsByClassList
           holdings={displayHoldings}

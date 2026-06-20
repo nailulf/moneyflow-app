@@ -1521,6 +1521,18 @@
       "saveFailed": "Couldn't update the asset.",
       "deleteFailed": "Couldn't remove the asset."
     },
+    "accountEmpty": {
+      "heroLabel": "Total Portfolio Value",
+      "heroHint": "Your account is ready — add assets to see it grow",
+      "title": "No assets yet",
+      "subtitle": "What do you hold in this account? Pick a type to add your first one:",
+      "chipIdx": "Saham (IDX)",
+      "chipFund": "Reksa Dana",
+      "chipEtf": "ETF",
+      "chipBond": "Obligasi",
+      "chipUs": "US Stocks",
+      "tip": "Tip: add your current holdings with their buy price — we'll calculate returns automatically."
+    },
     "emptyCta": "Create investment account",
     "empty": {
       "title": "All your investments, one place",
