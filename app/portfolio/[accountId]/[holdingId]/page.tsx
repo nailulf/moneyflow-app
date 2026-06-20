@@ -1,15 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Loader2, MoreHorizontal } from 'lucide-react'
 import { useHoldings } from '@/hooks/useHoldings'
 import { useInvestmentTransactions } from '@/hooks/useInvestmentTransactions'
+import { deleteHolding } from '@/lib/api/holdings'
 import type { AssetClass } from '@/lib/portfolio-utils'
 import { AssetDetailHero } from '@/components/features/portfolio/AssetDetailHero'
 import { AssetPositionStats } from '@/components/features/portfolio/AssetPositionStats'
 import { TransactionHistoryList } from '@/components/features/portfolio/TransactionHistoryList'
+import { AssetManageSheet } from '@/components/features/portfolio/AssetManageSheet'
 import { cn } from '@/lib/utils'
 
 const PERIODS = ['1W', '1M', '3M', '6M', '1Y'] as const
@@ -19,6 +22,7 @@ type Period = (typeof PERIODS)[number]
 export default function AssetDetailPage() {
   const t = useTranslations('portfolio')
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { accountId, holdingId } = useParams<{ accountId: string; holdingId: string }>()
 
   const { data: holdings = [], isLoading } = useHoldings(accountId)
@@ -27,6 +31,33 @@ export default function AssetDetailPage() {
   const { data: transactions = [], isLoading: txnLoading } = useInvestmentTransactions(accountId, holdingId)
 
   const [activePeriod, setActivePeriod] = useState<Period>('1M')
+  const [manageOpen, setManageOpen] = useState(false)
+  const [deletePending, setDeletePending] = useState(false)
+
+  // Ref for the transaction history section — used by onViewTransactions to scroll into view
+  const historyRef = useRef<HTMLDivElement>(null)
+
+  const handleViewTransactions = () => {
+    setManageOpen(false)
+    // Give the sheet time to dismiss before scrolling
+    requestAnimationFrame(() => {
+      historyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
+
+  const handleRemove = async () => {
+    setDeletePending(true)
+    try {
+      await deleteHolding(accountId, holdingId)
+      await queryClient.invalidateQueries({ queryKey: ['holdings', accountId] })
+      await queryClient.invalidateQueries({ queryKey: ['all-holdings'] })
+      await queryClient.invalidateQueries({ queryKey: ['accounts'] })
+      await queryClient.invalidateQueries({ queryKey: ['net-worth'] })
+      router.push(`/portfolio/${accountId}`)
+    } finally {
+      setDeletePending(false)
+    }
+  }
 
   // Loading state — show centered spinner while holdings fetch
   if (isLoading && !holding) {
@@ -84,10 +115,11 @@ export default function AssetDetailPage() {
           <span className="truncate text-tiny text-muted-foreground">{t(`class.${assetClass}` as Parameters<typeof t>[0])}</span>
         </span>
 
-        {/* "…" manage trigger — Task 7 wires the sheet; for now it is a no-op placeholder */}
+        {/* "…" manage trigger — opens the AssetManageSheet */}
         <button
           type="button"
           aria-label="Manage asset"
+          onClick={() => setManageOpen(true)}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-card shadow-card"
         >
           <MoreHorizontal className="h-4 w-4 text-foreground" aria-hidden="true" />
@@ -129,10 +161,12 @@ export default function AssetDetailPage() {
       {/* Position stats */}
       {holding && <AssetPositionStats holding={holding} />}
 
-      {/* Transaction history */}
-      {!txnLoading && (
-        <TransactionHistoryList transactions={transactions} currency={currency} assetClass={assetClass} />
-      )}
+      {/* Transaction history — ref for scroll-from-sheet */}
+      <div ref={historyRef}>
+        {!txnLoading && (
+          <TransactionHistoryList transactions={transactions} currency={currency} assetClass={assetClass} />
+        )}
+      </div>
 
       {/* Sell / Buy More — inert SP3; disabled buttons */}
       <div className="flex gap-3 pb-2">
@@ -151,6 +185,18 @@ export default function AssetDetailPage() {
           {t('assetDetail.buyMore')}
         </button>
       </div>
+
+      {/* Asset manage sheet */}
+      {holding && (
+        <AssetManageSheet
+          open={manageOpen}
+          holding={holding}
+          pending={deletePending}
+          onClose={() => setManageOpen(false)}
+          onViewTransactions={handleViewTransactions}
+          onRemove={handleRemove}
+        />
+      )}
     </div>
   )
 }

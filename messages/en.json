@@ -1540,13 +1540,23 @@
     "manage": {
       "edit": "Edit",
       "remove": "Remove from portfolio",
+      "removeSub": "Deletes this asset and its history",
       "currentValue": "Current value",
       "cancel": "Cancel",
       "save": "Save",
       "removeWarning": "This removes the asset and its history. The account balance will update.",
       "confirmRemove": "Remove",
       "saveFailed": "Couldn't update the asset.",
-      "deleteFailed": "Couldn't remove the asset."
+      "deleteFailed": "Couldn't remove the asset.",
+      "buyMore": "Buy more",
+      "buyMoreSub": "Record an additional purchase",
+      "sell": "Sell / reduce",
+      "sellSub": "Record a sale of this asset",
+      "editPurchase": "Edit purchase info",
+      "editPurchaseSub": "Fix lots, price, or date",
+      "viewTransactions": "View transactions",
+      "viewTransactionsSub": "All buys and sells of this asset",
+      "comingSoon": "Coming soon"
     },
     "accountEmpty": {
       "heroLabel": "Total Portfolio Value",

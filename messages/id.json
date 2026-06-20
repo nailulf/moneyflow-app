@@ -1540,13 +1540,23 @@
     "manage": {
       "edit": "Ubah",
       "remove": "Hapus dari portofolio",
+      "removeSub": "Menghapus aset dan seluruh riwayatnya",
       "currentValue": "Nilai saat ini",
       "cancel": "Batal",
       "save": "Simpan",
       "removeWarning": "Ini menghapus aset dan riwayatnya. Saldo akun akan diperbarui.",
       "confirmRemove": "Hapus",
       "saveFailed": "Gagal memperbarui aset.",
-      "deleteFailed": "Gagal menghapus aset."
+      "deleteFailed": "Gagal menghapus aset.",
+      "buyMore": "Beli lagi",
+      "buyMoreSub": "Catat pembelian tambahan",
+      "sell": "Jual / kurangi",
+      "sellSub": "Catat penjualan aset ini",
+      "editPurchase": "Ubah info pembelian",
+      "editPurchaseSub": "Perbaiki lot, harga, atau tanggal",
+      "viewTransactions": "Lihat transaksi",
+      "viewTransactionsSub": "Semua pembelian dan penjualan aset ini",
+      "comingSoon": "Segera hadir"
     },
     "accountEmpty": {
       "heroLabel": "Total Nilai Portofolio",
