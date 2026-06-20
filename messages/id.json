@@ -1503,6 +1503,10 @@
       "OTHER": "Lainnya"
     },
     "accountSubtitle": "Akun Investasi",
+    "unit": {
+      "lots": "lot",
+      "units": "unit"
+    },
     "detail": {
       "investmentAccount": "Akun Investasi",
       "addAsset": "Tambah Aset",

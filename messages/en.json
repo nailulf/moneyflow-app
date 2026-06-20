@@ -1503,6 +1503,10 @@
       "OTHER": "Anything else"
     },
     "accountSubtitle": "Investment Account",
+    "unit": {
+      "lots": "lots",
+      "units": "units"
+    },
     "detail": {
       "investmentAccount": "Investment Account",
       "addAsset": "Add Asset",
