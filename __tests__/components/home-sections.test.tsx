@@ -28,9 +28,10 @@ describe('GoalsGrid', () => {
     expect(screen.getByText('75%')).toBeInTheDocument()
     expect(screen.getByText(/goals\.of:/)).toBeInTheDocument()
   })
-  it('renders nothing when there are no goals', () => {
-    const { container } = render(<GoalsGrid goals={[]} />)
-    expect(container).toBeEmptyDOMElement()
+  it('renders the empty state with a set-goal CTA when there are no goals', () => {
+    render(<GoalsGrid goals={[]} />)
+    expect(screen.getByText('goals.emptyTitle')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /goals\.setGoal/ })).toHaveAttribute('href', '/accounts')
   })
 })
 
@@ -47,7 +48,7 @@ describe('UpcomingStrip', () => {
   })
   it('renders the empty message when no items', () => {
     render(<UpcomingStrip items={[]} />)
-    expect(screen.getByText('upcoming.empty')).toBeInTheDocument()
+    expect(screen.getByText('upcoming.emptyTitle')).toBeInTheDocument()
   })
 })
 
@@ -67,6 +68,6 @@ describe('BiggestExpensesCard', () => {
   })
   it('renders the empty message when no rows', () => {
     render(<BiggestExpensesCard rows={[]} />)
-    expect(screen.getByText('biggest.empty')).toBeInTheDocument()
+    expect(screen.getByText('biggest.emptyTitle')).toBeInTheDocument()
   })
 })
