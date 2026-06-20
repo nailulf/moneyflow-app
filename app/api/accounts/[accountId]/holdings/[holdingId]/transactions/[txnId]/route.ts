@@ -49,14 +49,22 @@ export async function PUT(request: NextRequest, context: RouteParams) {
     }
 
     // Keep the linked cash inflow consistent (amount/date) if one exists.
+    let cashSyncMessage: string | null = null
     if (patch.total_amount !== undefined || patch.transaction_date !== undefined) {
       const cashPatch: Record<string, unknown> = {}
       if (patch.total_amount !== undefined) cashPatch.amount = patch.total_amount
       if (patch.transaction_date !== undefined) cashPatch.date = patch.transaction_date
-      await ctx.supabase.from('transactions').update(cashPatch).eq('source_investment_txn_id', txnId)
+      const { error: cashSyncError } = await ctx.supabase
+        .from('transactions').update(cashPatch).eq('source_investment_txn_id', txnId)
+      if (cashSyncError) {
+        console.error('[InvTxn API] cash-leg sync error (non-fatal):', cashSyncError)
+        cashSyncMessage = 'Failed to sync the linked cash transaction; the investment edit was saved.'
+      }
     }
 
-    return NextResponse.json({ transaction: txn })
+    return NextResponse.json(
+      cashSyncMessage ? { transaction: txn, cash_sync_error: cashSyncMessage } : { transaction: txn }
+    )
   } catch (e) {
     console.error('[InvTxn API] PUT error:', e)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -69,7 +77,12 @@ export async function DELETE(_request: NextRequest, context: RouteParams) {
     const ctx = await authedTxn(accountId, holdingId, txnId)
     if ('error' in ctx) return ctx.error
     // Remove the linked cash inflow first, then the ledger row (recompute fires on delete).
-    await ctx.supabase.from('transactions').delete().eq('source_investment_txn_id', txnId)
+    const { error: cashDeleteError } = await ctx.supabase
+      .from('transactions').delete().eq('source_investment_txn_id', txnId)
+    if (cashDeleteError) {
+      console.error('[InvTxn API] cash-leg delete error:', cashDeleteError)
+      return NextResponse.json({ error: 'Failed to delete cash transaction' }, { status: 500 })
+    }
     const { error } = await ctx.supabase.from('investment_transactions').delete().eq('id', txnId)
     if (error) {
       console.error('[InvTxn API] delete error:', error)
