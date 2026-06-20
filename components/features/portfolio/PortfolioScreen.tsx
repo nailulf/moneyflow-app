@@ -72,11 +72,9 @@ export function PortfolioScreen() {
       </StickyScreenHeader>
 
       {!hasInvestmentAccounts(accounts) ? (
-        <div className="px-5">
-          <PortfolioEmptyState onAddAccount={handleAddAccount} />
-        </div>
+        <PortfolioEmptyState onAddAccount={handleAddAccount} />
       ) : (
-        <div className="flex flex-col gap-5 px-5 pb-5">
+        <div className="flex flex-col gap-5 pb-5">
           <PortfolioValueHero
             totalValue={totals.totalValue} totalGainLoss={totals.totalGainLoss}
             totalGainLossPct={totals.totalGainLossPct} assetCount={holdings.length} currency={BASE_CURRENCY}
