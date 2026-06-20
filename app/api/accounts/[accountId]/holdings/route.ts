@@ -60,8 +60,6 @@ export async function POST(request: NextRequest, context: RouteParams) {
     if (!name) return NextResponse.json({ error: 'name is required' }, { status: 400 })
     if (!Number.isFinite(quantity) || quantity <= 0) return NextResponse.json({ error: 'quantity must be positive' }, { status: 400 })
     if (!Number.isFinite(price) || price < 0) return NextResponse.json({ error: 'price_per_unit must be non-negative' }, { status: 400 })
-    if (!date) return NextResponse.json({ error: 'transaction_date is required' }, { status: 400 })
-
     const symbol = typeof body.symbol === 'string' && body.symbol.trim() ? body.symbol.trim() : null
     const currency = typeof body.currency === 'string' && body.currency.trim() ? body.currency.trim().toUpperCase() : ctx.account.currency
 
@@ -74,7 +72,12 @@ export async function POST(request: NextRequest, context: RouteParams) {
       console.error('[Holdings API] add-asset rpc error:', rpcErr)
       return NextResponse.json({ error: 'Failed to create asset' }, { status: 500 })
     }
-    const { data: holding } = await ctx.supabase.from('portfolio_holdings').select('*').eq('id', holdingId).single()
+    const { data: holding, error: fetchErr } = await ctx.supabase
+      .from('portfolio_holdings').select('*').eq('id', holdingId).single()
+    if (fetchErr || !holding) {
+      console.error('[Holdings API] post-rpc fetch error:', fetchErr)
+      return NextResponse.json({ error: 'Asset created but could not be retrieved' }, { status: 500 })
+    }
     return NextResponse.json({ holding }, { status: 201 })
   } catch (e) {
     console.error('[Holdings API] POST error:', e)
