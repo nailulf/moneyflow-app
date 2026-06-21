@@ -4,8 +4,12 @@ import { CalendarDays } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { CurrencyInput } from "@/components/ui/atoms/currency-input"
 
+// Mobile-design-system control spec (designs/spending-page.pen §4): text input is
+// h52 · r14 · white fill · border #E2E8F0 → focus #20507F · pad-x 16. White fill
+// (bg-card) is required so inputs read as filled fields on gray (#EEF2F7) screen/
+// sheet backgrounds instead of disappearing — bg-transparent was the recurring gap.
 const baseInputClassName =
-  "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-10 lg:h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-md leading-body-sm shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+  "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground bg-card dark:bg-input/30 border-input flex h-[52px] w-full min-w-0 rounded-[14px] border px-4 py-1 text-md leading-body-sm shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
 
 const baseInputFocusClassName =
   "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
