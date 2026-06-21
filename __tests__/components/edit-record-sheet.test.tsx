@@ -20,5 +20,6 @@ it('saves an edit (base-unit quantity) and deletes', async () => {
   await waitFor(() => expect(api.updateTransaction).toHaveBeenCalledWith('a1', 'h1', 't1',
     expect.objectContaining({ quantity: 300 })))
   fireEvent.click(screen.getByRole('button', { name: en.portfolio.trade.delete }))
+  fireEvent.click(screen.getByRole('button', { name: en.portfolio.trade.confirmDeleteRecord }))
   await waitFor(() => expect(api.deleteTransaction).toHaveBeenCalledWith('a1', 'h1', 't1'))
 })

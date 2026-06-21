@@ -37,12 +37,14 @@ export function EditRecordSheet({ open, txn, holding, accountId, onClose, onDone
   const [price, setPrice] = useState<number>(() => txn.price_per_unit ?? 0)
   const [date, setDate] = useState<string>(() => txn.transaction_date)
   const [pending, setPending] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   // Re-sync when txn changes (e.g. opening a different row)
   useEffect(() => {
     setQty(baseToLotsOrUnits(txn.quantity, assetClass))
     setPrice(txn.price_per_unit ?? 0)
     setDate(txn.transaction_date)
+    setConfirmDelete(false)
   }, [txn.id, txn.quantity, txn.price_per_unit, txn.transaction_date, assetClass])
 
   const baseQty = lotsOrUnitsToBase(qty, assetClass)
@@ -52,7 +54,19 @@ export function EditRecordSheet({ open, txn, holding, accountId, onClose, onDone
   const typeLabel = txn.type === 'BUY' ? t('history.buy') : txn.type === 'SELL' ? t('history.sell') : t('history.dividend')
 
   const handleClose = () => {
-    if (!pending) onClose()
+    if (!pending) {
+      setConfirmDelete(false)
+      onClose()
+    }
+  }
+
+  const handleDeleteClick = () => {
+    if (pending) return
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    void handleDelete()
   }
 
   const handleSave = async () => {
@@ -175,7 +189,6 @@ export function EditRecordSheet({ open, txn, holding, accountId, onClose, onDone
           {/* Save button */}
           <button
             type="button"
-            aria-label={t('trade.save')}
             onClick={handleSave}
             disabled={!canSubmit || pending}
             className={cn(
@@ -186,19 +199,20 @@ export function EditRecordSheet({ open, txn, holding, accountId, onClose, onDone
             {pending ? t('trade.saving') : t('trade.save')}
           </button>
 
-          {/* Delete button */}
+          {/* Delete button — requires a confirm step */}
           <button
             type="button"
-            aria-label={t('trade.delete')}
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             disabled={pending}
             className={cn(
               'h-[52px] w-full rounded-[14px] text-md leading-body-lg font-semibold',
-              'border border-destructive/30 bg-destructive/10 text-destructive',
               'transition-opacity disabled:cursor-not-allowed disabled:opacity-50',
+              confirmDelete
+                ? 'bg-destructive text-destructive-foreground'
+                : 'border border-destructive/30 bg-destructive/10 text-destructive',
             )}
           >
-            {t('trade.delete')}
+            {confirmDelete ? t('trade.confirmDeleteRecord') : t('trade.delete')}
           </button>
 
           {/* Cancel */}

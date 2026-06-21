@@ -1601,6 +1601,7 @@
       "confirmSell": "Catat penjualan",
       "save": "Simpan perubahan",
       "delete": "Hapus catatan",
+      "confirmDeleteRecord": "Ketuk lagi untuk hapus",
       "saving": "Menyimpan…",
       "buyError": "Gagal mencatat pembelian",
       "sellError": "Gagal mencatat penjualan",

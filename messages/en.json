@@ -1601,6 +1601,7 @@
       "confirmSell": "Record sell",
       "save": "Save changes",
       "delete": "Delete record",
+      "confirmDeleteRecord": "Tap again to delete",
       "saving": "Saving…",
       "buyError": "Couldn't record the buy",
       "sellError": "Couldn't record the sell",
