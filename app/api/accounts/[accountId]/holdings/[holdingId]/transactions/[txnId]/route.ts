@@ -41,14 +41,18 @@ export async function PUT(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ error: 'price_per_unit must be greater than 0 for buy/sell' }, { status: 400 })
     }
 
-    // Oversell re-check: increasing a SELL's quantity must not drive the holding negative.
-    if (effectiveType === 'SELL' && patch.quantity !== undefined) {
+    // Negative-holding re-check: increasing a SELL's quantity OR decreasing a BUY's quantity
+    // must not drive the holding negative.
+    if ((effectiveType === 'BUY' || effectiveType === 'SELL') && patch.quantity !== undefined) {
       const { data: holding } = await ctx.supabase
         .from('portfolio_holdings').select('quantity').eq('id', ctx.txn.holding_id).single()
       if (!holding) return NextResponse.json({ error: 'Holding not found' }, { status: 404 })
-      const resulting = Number(holding.quantity) + Number(ctx.txn.quantity) - patch.quantity
+      // This txn contributes +qty (BUY) or −qty (SELL) to the holding. Re-derive the holding quantity
+      // after applying the patched quantity; reject if it would go negative.
+      const sign = effectiveType === 'SELL' ? -1 : 1
+      const resulting = Number(holding.quantity) + sign * (patch.quantity - Number(ctx.txn.quantity))
       if (resulting < 0) {
-        return NextResponse.json({ error: 'Cannot sell more units than you hold' }, { status: 400 })
+        return NextResponse.json({ error: 'This change would make the holding go negative' }, { status: 400 })
       }
     }
 
