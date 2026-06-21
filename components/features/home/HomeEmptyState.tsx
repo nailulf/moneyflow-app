@@ -7,7 +7,31 @@ import { cn } from '@/lib/utils'
 
 interface EmptyCta {
   label: string
-  href: string
+  /** Navigates when set. Use `onClick` instead for an in-place flow (e.g. opening a sheet). */
+  href?: string
+  onClick?: () => void
+}
+
+/** CTA rendered as a Link (href) or a button (onClick). */
+function CtaButton({ cta, size, className }: { cta: EmptyCta; size?: 'sm'; className?: string }) {
+  const inner = (
+    <>
+      <Plus className="size-4" aria-hidden="true" />
+      {cta.label}
+    </>
+  )
+  if (cta.onClick) {
+    return (
+      <Button type="button" size={size} className={className} onClick={cta.onClick}>
+        {inner}
+      </Button>
+    )
+  }
+  return (
+    <Button asChild size={size} className={className}>
+      <Link href={cta.href ?? '#'}>{inner}</Link>
+    </Button>
+  )
 }
 
 interface HomeEmptyStateProps {
@@ -50,14 +74,7 @@ export function HomeEmptyState({
           <p className="text-sm leading-body-sm font-bold text-foreground">{title}</p>
           <p className="text-xs leading-caption text-muted-foreground">{description}</p>
         </div>
-        {cta && (
-          <Button asChild size="sm" className="shrink-0 rounded-xl">
-            <Link href={cta.href}>
-              <Plus className="size-4" aria-hidden="true" />
-              {cta.label}
-            </Link>
-          </Button>
-        )}
+        {cta && <CtaButton cta={cta} size="sm" className="shrink-0 rounded-xl" />}
       </div>
     )
   }
@@ -71,14 +88,7 @@ export function HomeEmptyState({
         <p className="text-sm leading-body-sm font-bold text-foreground">{title}</p>
         <p className="mx-auto max-w-[16rem] text-xs leading-caption text-muted-foreground">{description}</p>
       </div>
-      {cta && (
-        <Button asChild className="mt-1 rounded-xl">
-          <Link href={cta.href}>
-            <Plus className="size-4" aria-hidden="true" />
-            {cta.label}
-          </Link>
-        </Button>
-      )}
+      {cta && <CtaButton cta={cta} className="mt-1 rounded-xl" />}
     </div>
   )
 }

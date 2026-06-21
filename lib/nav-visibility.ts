@@ -14,7 +14,14 @@ function isTransactionEdit(pathname: string): boolean {
   return /^\/transactions\/[^/]+\/edit$/.test(pathname)
 }
 
+// /accounts/<id> is a full-screen detail; /accounts (list) and /accounts/new are not.
+function isAccountDetail(pathname: string): boolean {
+  const m = pathname.match(/^\/accounts\/([^/]+)/)
+  return m !== null && m[1] !== 'new'
+}
+
 export const isFullScreenFlow = (pathname: string): boolean =>
   FULL_SCREEN_FLOW_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
   isPortfolioDetail(pathname) ||
-  isTransactionEdit(pathname)
+  isTransactionEdit(pathname) ||
+  isAccountDetail(pathname)

@@ -832,6 +832,23 @@
       "overview": "Overview",
       "transactions": "Transactions"
     },
+    "header": {
+      "back": "Back"
+    },
+    "hero": {
+      "currentBalance": "Current Balance"
+    },
+    "trend": {
+      "title": "Balance Trend",
+      "subtitle": "Last 6 months",
+      "changeBadge": "{value}"
+    },
+    "menu": {
+      "label": "Account actions",
+      "edit": "Edit",
+      "export": "Export",
+      "delete": "Delete"
+    },
     "details": {
       "title": "Account Details",
       "accountType": "Account Type",
@@ -885,7 +902,11 @@
       "adjustment": "Adjustment",
       "cancel": "Cancel",
       "confirm": "Adjust Balance",
-      "adjusting": "Adjusting..."
+      "adjusting": "Adjusting...",
+      "willAdd": "{amount} will be added",
+      "willRemove": "{amount} will be removed",
+      "infoBanner": "A new uncategorized transaction of {amount} will be added to this account's history.",
+      "save": "Save Adjustment"
     },
     "adjustments": {
       "title": "Balance History"
@@ -1444,7 +1465,8 @@
       "of": "{current} of {target}",
       "emptyTitle": "No goals yet",
       "emptyHint": "Save for an emergency fund, a trip, or anything.",
-      "setGoal": "Set goal"
+      "setGoal": "Set goal",
+      "pickAccountTitle": "Choose an account"
     },
     "upcoming": {
       "title": "Upcoming",
@@ -1457,6 +1479,37 @@
       "seeAll": "See all →",
       "emptyTitle": "No expenses yet",
       "emptyHint": "Your biggest spends this month will show up here."
+    }
+  },
+  "goalForm": {
+    "title": "Add Financial Goal",
+    "description": "Set a savings goal for {account}",
+    "nameLabel": "Goal Name",
+    "namePlaceholder": "e.g., Emergency Fund",
+    "typeLabel": "Goal Type",
+    "amountLabel": "Target Amount",
+    "amountPlaceholder": "30,000,000",
+    "currentBalance": "Current balance: {balance}",
+    "dateLabel": "Target Date",
+    "monthPlaceholder": "Month",
+    "yearPlaceholder": "Year",
+    "previewLabel": "Preview:",
+    "previewText": "Need to save {amount} more ({pct}% complete)",
+    "errorName": "Please enter a goal name",
+    "errorAmount": "Please enter a valid target amount",
+    "errorBalance": "Target must be greater than current balance",
+    "errorDate": "Please select a target date",
+    "cancel": "Cancel",
+    "submit": "Create Goal",
+    "types": {
+      "emergency_fund": "Emergency Fund",
+      "vacation": "Vacation",
+      "house_down_payment": "House Down Payment",
+      "car_purchase": "Car Purchase",
+      "education": "Education",
+      "wedding": "Wedding",
+      "investment": "Investment",
+      "other": "Other"
     }
   },
   "portfolio": {

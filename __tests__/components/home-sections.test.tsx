@@ -12,6 +12,14 @@ jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ href, children }: { href: string; children: React.ReactNode }) => <a href={href}>{children}</a>,
 }))
+// GoalsEmptyState (rendered by GoalsGrid's empty branch) pulls in the account +
+// goal-summary hooks and the router for its create flow.
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }))
+jest.mock('@/contexts/AccountContext', () => ({ useAccounts: () => ({ accounts: [] }) }))
+jest.mock('@/hooks/useGoalsQuery', () => ({
+  useGoalsSummary: () => ({ data: undefined }),
+  useCreateGoal: () => ({ mutateAsync: jest.fn(), isPending: false }),
+}))
 
 import { GoalsGrid } from '@/components/features/home/GoalsGrid'
 import { UpcomingStrip } from '@/components/features/home/UpcomingStrip'
@@ -28,10 +36,10 @@ describe('GoalsGrid', () => {
     expect(screen.getByText('75%')).toBeInTheDocument()
     expect(screen.getByText(/goals\.of:/)).toBeInTheDocument()
   })
-  it('renders the empty state with a set-goal CTA when there are no goals', () => {
+  it('renders the empty state with a set-goal CTA button when there are no goals', () => {
     render(<GoalsGrid goals={[]} />)
     expect(screen.getByText('goals.emptyTitle')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /goals\.setGoal/ })).toHaveAttribute('href', '/accounts')
+    expect(screen.getByRole('button', { name: /goals\.setGoal/ })).toBeInTheDocument()
   })
 })
 

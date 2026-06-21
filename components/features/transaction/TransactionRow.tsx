@@ -11,9 +11,10 @@ interface TransactionRowProps {
   categoryName: string
   accountName: string
   onSelect: (transaction: Transaction) => void
+  hideAccount?: boolean
 }
 
-export function TransactionRow({ transaction, categoryName, accountName, onSelect }: TransactionRowProps) {
+export function TransactionRow({ transaction, categoryName, accountName, onSelect, hideAccount = false }: TransactionRowProps) {
   const isIncome = transaction.type === 'INCOME'
   const isExpense = transaction.type === 'EXPENSE'
   const sign = isIncome ? '+' : isExpense ? '-' : ''
@@ -32,17 +33,23 @@ export function TransactionRow({ transaction, categoryName, accountName, onSelec
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="truncate text-sm leading-none font-normal text-foreground">{title}</span>
-        <span className="self-start rounded-full bg-muted px-2 py-0.5 text-tiny font-medium text-muted-foreground">
-          {accountName}
-        </span>
+        {hideAccount ? (
+          <span className="truncate text-xs leading-caption text-muted-foreground">{categoryName}</span>
+        ) : (
+          <span className="self-start rounded-full bg-muted px-2 py-0.5 text-tiny font-medium text-muted-foreground">
+            {accountName}
+          </span>
+        )}
       </span>
       <span className="flex shrink-0 flex-col items-end gap-1">
         <span className={cn('text-sm leading-none font-semibold', amountClass)}>
           {sign ? `${sign} ` : ''}{formatCurrency(Math.abs(transaction.amount), transaction.currency ?? 'IDR')}
         </span>
-        <span className={cn('rounded-lg px-1.5 py-0.5 text-tiny font-semibold', tint.bg, tint.fg)}>
-          {categoryName}
-        </span>
+        {!hideAccount && (
+          <span className={cn('rounded-lg px-1.5 py-0.5 text-tiny font-semibold', tint.bg, tint.fg)}>
+            {categoryName}
+          </span>
+        )}
       </span>
     </button>
   )
