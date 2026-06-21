@@ -1,6 +1,13 @@
 import { createClient } from '@/lib/supabase/client'
 import { advanceOnboarding, finalizeOnboarding } from '@/lib/api/onboarding-funnel'
 import type { OnboardingDraft } from '@/lib/onboarding/build-draft'
+import { getSiteUrl } from '@/lib/utils/site-url'
+import {
+  persistPendingDraft,
+  readPendingDraft,
+  clearPendingDraft,
+  OAUTH_FINALIZE_PARAM,
+} from '@/lib/onboarding/pending-draft'
 
 /**
  * Convert an anonymous guest into a permanent email/password account.
@@ -95,16 +102,64 @@ export async function resendConfirmation(email: string): Promise<boolean> {
 
 /**
  * Begin converting an anonymous guest into a permanent account via an OAuth
- * provider by linking the identity to the current (anon) user. This redirects
- * to the provider; the conflict→merge path resolves after the OAuth round-trip
- * and is wired up post-redirect in a later task. Keep this focused on
- * initiating the link.
+ * provider by linking the identity to the current (anon) user.
+ *
+ * `linkIdentity` redirects the browser to the provider and back — a full-page
+ * navigation that wipes the in-memory funnel store. So unlike the email path
+ * (which finalizes in-process), the draft must SURVIVE the round-trip: we
+ * serialize it to `sessionStorage` here, and point Supabase's post-OAuth
+ * `redirectTo` back at the conversion screen with the `OAUTH_FINALIZE_PARAM`
+ * marker. On return, `/start/save` rehydrates the draft and calls
+ * `finalizeOnboarding` exactly once (see `finalizePendingOAuthDraft` /
+ * `app/start/save/page.tsx`). Without this, an OAuth-converted guest lands with
+ * no categories/account/goal/plan — anonymous users are no longer seeded by the
+ * signup trigger (migration 057).
+ *
+ * @returns nothing; on success the browser navigates away to the provider.
  */
-export async function convertWithOAuth(provider: 'google' | 'apple'): Promise<void> {
-  // TODO(oauth-finalize): post-redirect, the OAuth callback must call finalizeOnboarding(draft) — anonymous users are no longer seeded by the signup trigger (migration 057), so without this an OAuth-converted guest lands with no categories/account/goal/plan. Tracked as a later task in the pre-account-onboarding spec.
+export async function convertWithOAuth(
+  provider: 'google' | 'apple',
+  draft: OnboardingDraft,
+): Promise<void> {
+  // Persist BEFORE initiating the redirect — once linkIdentity navigates away,
+  // the in-memory Zustand draft is gone. Best-effort: if storage is blocked the
+  // link still proceeds (finalize just won't auto-run, same as the old gap).
+  persistPendingDraft(draft)
+
+  const redirectTo = `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(
+    `/start/save?${OAUTH_FINALIZE_PARAM}=1`,
+  )}`
+
   const supabase = createClient()
-  const { error } = await supabase.auth.linkIdentity({ provider })
+  const { error } = await supabase.auth.linkIdentity({
+    provider,
+    options: { redirectTo },
+  })
   if (error) throw new Error(error.message)
+}
+
+/**
+ * Finalize a draft persisted across an OAuth redirect. Called by the conversion
+ * screen when it lands back authenticated with the `OAUTH_FINALIZE_PARAM`
+ * marker. Reads the persisted draft, materializes it via the finalize RPC
+ * (idempotent server-side), marks onboarding complete, then clears the draft so
+ * a refresh can't re-run it.
+ *
+ * @returns `true` when a pending draft was found and finalize was attempted,
+ *          `false` when there was nothing to do (already finalized / no draft).
+ *          Throws only if finalize itself fails, so the caller can surface an
+ *          error and leave the draft in place for a retry.
+ */
+export async function finalizePendingOAuthDraft(): Promise<boolean> {
+  const draft = readPendingDraft()
+  if (!draft) return false
+
+  // The finalize RPC is idempotent (find-or-create + upserts), so a duplicate
+  // call is harmless; we still clear the draft on success to stop re-runs.
+  await finalizeOnboarding(draft)
+  try { await advanceOnboarding('completed') } catch {}
+  clearPendingDraft()
+  return true
 }
 
 /** Dismiss the conversion prompt and continue using the app as a guest. */

@@ -166,6 +166,7 @@ export interface Database {
           name: string
           type: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance: number
+          unallocated_cash: number
           currency: string
           is_default: boolean
           is_active: boolean
@@ -194,6 +195,7 @@ export interface Database {
           name: string
           type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance?: number
+          unallocated_cash?: number
           currency?: string
           is_default?: boolean
           is_active?: boolean
@@ -222,6 +224,7 @@ export interface Database {
           name?: string
           type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance?: number
+          unallocated_cash?: number
           currency?: string
           is_default?: boolean
           is_active?: boolean
@@ -774,6 +777,54 @@ export interface Database {
           current_value?: number
           purchase_date?: string | null
           currency?: string
+          updated_at?: string
+        }
+      }
+      investment_transactions: {
+        Row: {
+          id: string
+          holding_id: string
+          account_id: string
+          user_id: string
+          type: 'BUY' | 'SELL' | 'DIVIDEND'
+          quantity: number
+          price_per_unit: number
+          total_amount: number
+          realized_pl: number | null
+          proceeds_to_cash: boolean
+          transaction_date: string
+          currency: string
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          holding_id: string
+          account_id: string
+          user_id: string
+          type: 'BUY' | 'SELL' | 'DIVIDEND'
+          quantity: number
+          price_per_unit: number
+          total_amount: number
+          realized_pl?: number | null
+          proceeds_to_cash?: boolean
+          transaction_date: string
+          currency?: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          type?: 'BUY' | 'SELL' | 'DIVIDEND'
+          quantity?: number
+          price_per_unit?: number
+          total_amount?: number
+          realized_pl?: number | null
+          proceeds_to_cash?: boolean
+          transaction_date?: string
+          currency?: string
+          notes?: string | null
           updated_at?: string
         }
       }

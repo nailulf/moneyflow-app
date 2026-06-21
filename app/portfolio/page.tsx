@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { PortfolioNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
@@ -14,6 +15,7 @@ import { formatCurrency } from '@/lib/data-utils'
 const BASE_CURRENCY = 'IDR'
 
 export default function PortfolioPage() {
+  const t = useTranslations('portfolio')
   const { accounts } = useAccounts()
   const { holdings } = useAllHoldings()
 
@@ -23,10 +25,6 @@ export default function PortfolioPage() {
   const totals = useMemo(() => portfolioTotals(displayHoldings), [displayHoldings])
   const slices = useMemo(() => allocation(displayHoldings), [displayHoldings])
   const baseCurrency = BASE_CURRENCY
-
-  const gainLossLabel = totals.totalGainLoss >= 0
-    ? `+${totals.totalGainLossPct}% all-time gain`
-    : `${totals.totalGainLossPct}% all-time loss`
 
   return (
     <div className="flex flex-col h-full">
@@ -58,7 +56,9 @@ export default function PortfolioPage() {
                         ? 'No investment accounts yet'
                         : formatCurrency(totals.totalValue, baseCurrency)}
                     </div>
-                    <p className="text-xs text-muted-foreground">{gainLossLabel}</p>
+                    {totals.totalValue > 0 && (
+                      <p className="text-xs text-muted-foreground">{t('hero.gainPlaceholder')}</p>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -68,10 +68,8 @@ export default function PortfolioPage() {
                     <CardDescription>Unrealised gain/loss vs cost basis</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className={`text-2xl font-bold ${totals.totalGainLoss >= 0 ? 'text-success' : 'text-destructive'}`}>
-                      {totals.totalCostBasis === 0
-                        ? '—'
-                        : `${totals.totalGainLoss >= 0 ? '+' : ''}${formatCurrency(totals.totalGainLoss, baseCurrency)}`}
+                    <div className="text-2xl font-bold text-muted-foreground italic">
+                      {totals.totalCostBasis === 0 ? '—' : t('hero.gainPlaceholder')}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {totals.totalCostBasis === 0

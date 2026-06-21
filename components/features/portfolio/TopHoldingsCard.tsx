@@ -3,7 +3,7 @@
 import { createElement } from 'react'
 import { useTranslations } from 'next-intl'
 import { TrendingUp, Landmark, LineChart, PieChart, Coins, CircleDollarSign, type LucideIcon } from 'lucide-react'
-import { formatCurrency, formatCurrencyCompact } from '@/lib/data-utils'
+import { formatCurrency } from '@/lib/data-utils'
 import type { AssetClass } from '@/lib/portfolio-utils'
 import { cn } from '@/lib/utils'
 
@@ -41,7 +41,6 @@ export function TopHoldingsCard({ rows }: TopHoldingsCardProps) {
       ) : (
         <div className="divide-y divide-muted rounded-2xl bg-card shadow-card">
           {rows.map((row) => {
-            const up = row.gainLoss >= 0
             return (
               <div key={row.id} className="flex items-center gap-3 px-4 py-3">
                 <span className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-xl', CLASS_TINT[row.assetClass])} aria-hidden="true">
@@ -53,9 +52,7 @@ export function TopHoldingsCard({ rows }: TopHoldingsCardProps) {
                 </span>
                 <span className="flex shrink-0 flex-col items-end">
                   <span className="text-sm leading-body-sm font-bold text-foreground">{formatCurrency(row.value, row.currency)}</span>
-                  <span className={cn('text-tiny font-medium', up ? 'text-success' : 'text-destructive')}>
-                    {up ? '+' : '−'}{formatCurrencyCompact(Math.abs(row.gainLoss), row.currency)}
-                  </span>
+                  <span className="text-tiny text-muted-foreground">{t('hero.gainPlaceholder')}</span>
                 </span>
               </div>
             )

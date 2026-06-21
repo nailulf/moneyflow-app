@@ -1,16 +1,18 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { PortfolioNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
 import { Badge } from "@/components/ui/atoms/badge"
 import { useAccounts } from '@/contexts/AccountContext'
 import { useAllHoldings } from '@/hooks/useHoldings'
-import { portfolioTotals, allocation, gainLoss, gainLossPct } from '@/lib/portfolio-utils'
+import { portfolioTotals, allocation } from '@/lib/portfolio-utils'
 import { formatCurrency } from '@/lib/data-utils'
 
 export default function PortfolioHoldingsPage() {
+  const t = useTranslations('portfolio')
   const { accounts } = useAccounts()
   const { holdings, isLoading } = useAllHoldings()
 
@@ -53,8 +55,6 @@ export default function PortfolioHoldingsPage() {
 
             <div className="space-y-4">
               {holdings.map((holding) => {
-                const gl = gainLoss(holding)
-                const glPct = gainLossPct(holding)
                 const allocPct = allocationPct(holding.current_value)
                 return (
                   <Card key={holding.id} className="rounded-xl">
@@ -76,9 +76,8 @@ export default function PortfolioHoldingsPage() {
                           <div className="text-sm text-muted-foreground">
                             Cost: {formatCurrency(holding.purchase_price * holding.quantity, holding.currency)}
                           </div>
-                          <div className={`text-sm font-medium ${glPct >= 0 ? 'text-success' : 'text-destructive'}`}>
-                            {glPct >= 0 ? '+' : ''}{glPct.toFixed(1)}%
-                            ({gl >= 0 ? '+' : ''}{formatCurrency(gl, holding.currency)})
+                          <div className="text-sm font-medium text-muted-foreground italic">
+                            {t('position.placeholder')}
                           </div>
                         </div>
                       </div>
@@ -105,8 +104,8 @@ export default function PortfolioHoldingsPage() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Total Gain / Loss</span>
-                    <span className={`font-medium ${totals.totalGainLoss >= 0 ? 'text-success' : 'text-destructive'}`}>
-                      {totals.totalGainLoss >= 0 ? '+' : ''}{totals.totalGainLossPct.toFixed(1)}%
+                    <span className="font-medium text-muted-foreground italic">
+                      {t('hero.gainPlaceholder')}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">

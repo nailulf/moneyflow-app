@@ -53,6 +53,6 @@ describe('BudgetCard', () => {
   })
   it('renders the empty state without totals when total is 0', () => {
     render(<BudgetCard monthLabel="June 2026" spent={0} total={0} currency="IDR" />)
-    expect(screen.getByText('budget.noBudget')).toBeInTheDocument()
+    expect(screen.getByText('budget.emptyTitle')).toBeInTheDocument()
   })
 })

@@ -39,3 +39,22 @@ export async function deleteHolding(accountId: string, holdingId: string): Promi
   const res = await fetch(`/api/accounts/${accountId}/holdings/${holdingId}`, { method: 'DELETE' })
   await jsonOrThrow<{ success: true }>(res)
 }
+
+export type AddAssetPayload = {
+  asset_class: SanitizedHolding['asset_class']
+  name: string
+  symbol?: string | null
+  currency?: string
+  quantity: number
+  price_per_unit: number
+  transaction_date: string
+}
+
+/** Create a holding + its opening BUY in one call (RPC-backed POST /holdings). */
+export async function addInvestmentAsset(accountId: string, payload: AddAssetPayload): Promise<Holding> {
+  const res = await fetch(`/api/accounts/${accountId}/holdings`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+  })
+  const { holding } = await jsonOrThrow<{ holding: Holding }>(res)
+  return holding
+}

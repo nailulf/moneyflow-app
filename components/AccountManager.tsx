@@ -152,6 +152,7 @@ function AccountManagerInternal({
         name: newAccountName.trim(),
         type: accountType,
         balance: parseCurrencyAmount(newAccountBalance),
+        unallocated_cash: 0,
         currency: newAccountCurrency,
         is_active: true,
         is_default: false,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { sanitizeHoldingPayload } from '@/lib/portfolio-utils'
+import { sanitizeHoldingPayload, ASSET_CLASSES, type AssetClass } from '@/lib/portfolio-utils'
 
 interface RouteParams {
   params: Promise<{ accountId: string }>
@@ -37,22 +37,46 @@ export async function GET(request: NextRequest, context: RouteParams) {
   }
 }
 
-// POST — create a holding (balance is recomputed by the DB trigger)
+// POST — create a holding + opening BUY atomically via RPC (balance recomputed by triggers)
 export async function POST(request: NextRequest, context: RouteParams) {
   try {
     const { accountId } = await context.params
     const ctx = await authedInvestmentAccount(accountId)
     if ('error' in ctx) return ctx.error
-    const body = await request.json()
-    const result = sanitizeHoldingPayload(body)
-    if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 })
-    const { data: holding, error } = await ctx.supabase
-      .from('portfolio_holdings')
-      .insert({ ...result.data, account_id: accountId, user_id: ctx.user.id })  // user_id server-derived
-      .select().single()
-    if (error) {
-      console.error('[Holdings API] create error:', error)
-      return NextResponse.json({ error: 'Failed to create holding' }, { status: 500 })
+    const body = await request.json() as Record<string, unknown>
+
+    const assetClass = String(body.asset_class ?? '').toUpperCase()
+    const name = typeof body.name === 'string' ? body.name.trim() : ''
+    const quantity = Number(body.quantity)
+    // Accept both new shape (price_per_unit / transaction_date) and old shape (purchase_price / purchase_date)
+    const price = Number(body.price_per_unit ?? body.purchase_price)
+    const date = (typeof body.transaction_date === 'string' && body.transaction_date)
+      ? body.transaction_date
+      : (typeof body.purchase_date === 'string' && body.purchase_date
+        ? body.purchase_date
+        : new Date().toISOString().slice(0, 10))
+
+    if (!ASSET_CLASSES.includes(assetClass as AssetClass)) return NextResponse.json({ error: 'invalid asset_class' }, { status: 400 })
+    if (!name) return NextResponse.json({ error: 'name is required' }, { status: 400 })
+    if (!Number.isFinite(quantity) || quantity <= 0) return NextResponse.json({ error: 'quantity must be positive' }, { status: 400 })
+    if (!Number.isFinite(price) || price < 0) return NextResponse.json({ error: 'price_per_unit must be non-negative' }, { status: 400 })
+    const symbol = typeof body.symbol === 'string' && body.symbol.trim() ? body.symbol.trim() : null
+    const currency = typeof body.currency === 'string' && body.currency.trim() ? body.currency.trim().toUpperCase() : ctx.account.currency
+
+    const { data: holdingId, error: rpcErr } = await ctx.supabase.rpc('add_investment_asset', {
+      p_account_id: accountId, p_user_id: ctx.user.id, p_asset_class: assetClass,
+      p_symbol: symbol, p_name: name, p_currency: currency,
+      p_quantity: quantity, p_price_per_unit: price, p_transaction_date: date,
+    })
+    if (rpcErr || !holdingId) {
+      console.error('[Holdings API] add-asset rpc error:', rpcErr)
+      return NextResponse.json({ error: 'Failed to create asset' }, { status: 500 })
+    }
+    const { data: holding, error: fetchErr } = await ctx.supabase
+      .from('portfolio_holdings').select('*').eq('id', holdingId).single()
+    if (fetchErr || !holding) {
+      console.error('[Holdings API] post-rpc fetch error:', fetchErr)
+      return NextResponse.json({ error: 'Asset created but could not be retrieved' }, { status: 500 })
     }
     return NextResponse.json({ holding }, { status: 201 })
   } catch (e) {

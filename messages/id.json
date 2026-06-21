@@ -1421,7 +1421,10 @@
       "liabilities": "Liabilitas",
       "accountsCount": "{count} akun",
       "loansCount": "{count} pinjaman",
-      "more": "+{count} lagi"
+      "more": "+{count} lagi",
+      "emptyTitle": "Belum ada akun",
+      "emptyHint": "Tambahkan bank, tunai, atau e-wallet untuk melihat saldo Anda di sini.",
+      "add": "Tambah akun"
     },
     "budget": {
       "title": "Anggaran {month}",
@@ -1431,22 +1434,29 @@
       "of": "dari {amount}",
       "used": "{pct}% terpakai",
       "left": "Sisa {amount}",
-      "noBudget": "Belum ada anggaran untuk bulan ini."
+      "emptyTitle": "Belum ada anggaran",
+      "emptyHint": "Tetapkan batas bulanan agar tetap terkendali.",
+      "create": "Buat"
     },
     "goals": {
       "title": "Target Keuangan",
       "viewAll": "Lihat semua →",
-      "of": "{current} dari {target}"
+      "of": "{current} dari {target}",
+      "emptyTitle": "Belum ada target",
+      "emptyHint": "Menabung untuk dana darurat, liburan, atau apa pun.",
+      "setGoal": "Buat target"
     },
     "upcoming": {
       "title": "Mendatang",
       "subtitle": "Tanggal dengan pembayaran terjadwal",
-      "empty": "Tidak ada pembayaran terjadwal dalam 30 hari ke depan."
+      "emptyTitle": "Belum ada pembayaran mendatang",
+      "emptyHint": "Pembayaran terjadwal dalam 30 hari ke depan akan muncul di sini."
     },
     "biggest": {
       "title": "Terbesar Bulan Ini",
       "seeAll": "Lihat semua →",
-      "empty": "Belum ada pengeluaran tercatat bulan ini."
+      "emptyTitle": "Belum ada pengeluaran",
+      "emptyHint": "Pengeluaran terbesar Anda bulan ini akan muncul di sini."
     }
   },
   "portfolio": {
@@ -1454,7 +1464,14 @@
     "newAccount": "Akun Baru",
     "hero": {
       "totalValue": "Total Nilai Portofolio",
-      "assets": "{count} aset"
+      "assets": "{count} aset",
+      "gainPlaceholder": "Butuh data harga"
+    },
+    "insights": {
+      "performance": "Performa",
+      "income": "Pendapatan",
+      "health": "Kesehatan",
+      "placeholder": "Butuh data harga"
     },
     "accounts": {
       "title": "Akun Investasi",
@@ -1485,26 +1502,117 @@
       "BOND": "Obligasi pemerintah & korporasi",
       "OTHER": "Lainnya"
     },
+    "accountSubtitle": "Akun Investasi",
+    "unit": {
+      "lots": "lot",
+      "units": "unit"
+    },
+    "history": {
+      "title": "Riwayat Transaksi",
+      "seeAll": "Lihat semua",
+      "buy": "Beli",
+      "sell": "Jual",
+      "dividend": "Dividen",
+      "empty": "Belum ada transaksi"
+    },
+    "position": {
+      "title": "Kepemilikanmu",
+      "avgBuyPrice": "Rata-rata Harga Beli",
+      "currentPrice": "Harga Saat Ini",
+      "currentValue": "Nilai Saat Ini",
+      "unrealizedPl": "Unrealized P/L",
+      "placeholder": "Butuh data harga"
+    },
+    "assetDetail": {
+      "sell": "Jual",
+      "buyMore": "Beli Lagi",
+      "chartPlaceholder": "Riwayat harga segera hadir"
+    },
     "detail": {
       "investmentAccount": "Akun Investasi",
-      "addAsset": "Tambah Aset",
+      "addAsset": "Tambah",
       "back": "Kembali",
       "emptyTitle": "Belum ada aset",
       "emptyDescription": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:",
-      "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis."
+      "emptyTip": "Tip: tambahkan aset dengan harga belinya — return dihitung otomatis.",
+      "holdings": "Portofolio"
     },
     "manage": {
       "edit": "Ubah",
       "remove": "Hapus dari portofolio",
+      "removeSub": "Menghapus aset dan seluruh riwayatnya",
       "currentValue": "Nilai saat ini",
       "cancel": "Batal",
       "save": "Simpan",
       "removeWarning": "Ini menghapus aset dan riwayatnya. Saldo akun akan diperbarui.",
       "confirmRemove": "Hapus",
       "saveFailed": "Gagal memperbarui aset.",
-      "deleteFailed": "Gagal menghapus aset."
+      "deleteFailed": "Gagal menghapus aset.",
+      "buyMore": "Beli lagi",
+      "buyMoreSub": "Catat pembelian tambahan",
+      "sell": "Jual / kurangi",
+      "sellSub": "Catat penjualan aset ini",
+      "editPurchase": "Ubah info pembelian",
+      "editPurchaseSub": "Perbaiki lot, harga, atau tanggal",
+      "viewTransactions": "Lihat transaksi",
+      "viewTransactionsSub": "Semua pembelian dan penjualan aset ini",
+      "comingSoon": "Segera hadir"
     },
-    "emptyCta": "Buat akun investasi"
+    "accountEmpty": {
+      "heroLabel": "Total Nilai Portofolio",
+      "heroHint": "Akunmu siap — tambahkan aset untuk mulai memantau pertumbuhannya",
+      "title": "Belum ada aset",
+      "subtitle": "Apa yang kamu miliki di akun ini? Pilih jenis untuk menambah yang pertama:",
+      "chipIdx": "Saham (IDX)",
+      "chipFund": "Reksa Dana",
+      "chipEtf": "ETF",
+      "chipBond": "Obligasi",
+      "chipUs": "Saham AS",
+      "tip": "Tips: tambahkan asetmu dengan harga beli — return akan dihitung otomatis."
+    },
+    "emptyCta": "Buat akun investasi",
+    "empty": {
+      "title": "Semua investasimu, satu tempat",
+      "subtitle": "Tambahkan akun broker atau reksa dana, lalu pantau saham, obligasi, dan dana yang kamu miliki.",
+      "step1Title": "Buat akun investasi",
+      "step1Sub": "mis. Stockbit, Bibit, IPOT",
+      "step2Title": "Tambahkan aset yang kamu miliki",
+      "step2Sub": "Saham, reksa dana, ETF, obligasi",
+      "step3Title": "Lihat performa & pendapatan",
+      "step3Sub": "Return, dividen, tips rebalancing",
+      "addCta": "Tambah akun investasi",
+      "basicsLink": "Baru mulai investasi? Pelajari dasarnya"
+    },
+    "trade": {
+      "buyTitle": "Beli lagi",
+      "sellTitle": "Jual / kurangi",
+      "editTitle": "Edit catatan",
+      "quantityLabel": "Jumlah",
+      "lots": "lot",
+      "units": "unit",
+      "priceLabel": "Harga per {unit}",
+      "dateLabel": "Tanggal",
+      "estimatedTotal": "Estimasi total",
+      "proceeds": "Hasil penjualan",
+      "youHold": "Kamu punya {qty}",
+      "keepAsCash": "Simpan hasil jual sebagai kas di akun ini",
+      "netWorthNote": "Penjualan mengurangi portofoliomu (dan kekayaan bersih) sebesar {amount}; hasilnya tidak dicatat.",
+      "confirmBuy": "Catat pembelian",
+      "confirmSell": "Catat penjualan",
+      "save": "Simpan perubahan",
+      "delete": "Hapus catatan",
+      "confirmDeleteRecord": "Ketuk lagi untuk hapus",
+      "saving": "Menyimpan…",
+      "buyError": "Gagal mencatat pembelian",
+      "sellError": "Gagal mencatat penjualan",
+      "editError": "Gagal memperbarui catatan",
+      "deleteError": "Gagal menghapus catatan",
+      "priceShareLabel": "Harga Beli / Saham",
+      "priceUnitLabel": "Harga per unit",
+      "sharesHint": "({shares} saham)",
+      "estimateBreakdownLots": "{lots} lot × {price} × 100 saham",
+      "estimateBreakdownUnits": "{units} × {price}"
+    }
   },
   "holdingCreate": {
     "selectTitle": "Tambah Investasi",
@@ -1823,6 +1931,9 @@
         "resendSuccess": "Email konfirmasi terkirim.",
         "resendError": "Tidak dapat mengirim ulang email. Silakan coba lagi.",
         "continueCta": "Lanjut ke aplikasi"
+      },
+      "finalizing": {
+        "message": "Menyiapkan akun Anda…"
       }
     },
     "browseLink": "Sekadar lihat-lihat? Jelajahi aplikasinya dulu",
