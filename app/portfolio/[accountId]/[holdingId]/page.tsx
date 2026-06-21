@@ -15,6 +15,8 @@ import { TransactionHistoryList } from '@/components/features/portfolio/Transact
 import { AssetManageSheet } from '@/components/features/portfolio/AssetManageSheet'
 import { BuySheet } from '@/components/features/portfolio/BuySheet'
 import { SellSheet } from '@/components/features/portfolio/SellSheet'
+import { EditRecordSheet } from '@/components/features/portfolio/EditRecordSheet'
+import type { InvestmentTxn } from '@/lib/api/investment-transactions'
 import { cn } from '@/lib/utils'
 
 const PERIODS = ['1W', '1M', '3M', '6M', '1Y'] as const
@@ -36,6 +38,7 @@ export default function AssetDetailPage() {
   const [manageOpen, setManageOpen] = useState(false)
   const [buyOpen, setBuyOpen] = useState(false)
   const [sellOpen, setSellOpen] = useState(false)
+  const [editTxn, setEditTxn] = useState<InvestmentTxn | null>(null)
   const [deletePending, setDeletePending] = useState(false)
 
   // Ref for the transaction history section — used by onViewTransactions to scroll into view
@@ -103,6 +106,15 @@ export default function AssetDetailPage() {
 
   const currency = holding?.currency ?? 'IDR'
   const assetClass = (holding?.asset_class ?? 'OTHER') as AssetClass
+
+  // Earliest BUY transaction — used by "Edit purchase info" shortcut in AssetManageSheet
+  const openingBuy = transactions
+    .filter((tx) => tx.type === 'BUY')
+    .sort((a, b) => {
+      const dateDiff = a.transaction_date.localeCompare(b.transaction_date)
+      if (dateDiff !== 0) return dateDiff
+      return (a.created_at ?? '').localeCompare(b.created_at ?? '')
+    })[0] ?? null
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-5 pt-3 pb-10 md:pt-8">
@@ -173,7 +185,12 @@ export default function AssetDetailPage() {
       {/* Transaction history — ref for scroll-from-sheet */}
       <div ref={historyRef}>
         {!txnLoading && (
-          <TransactionHistoryList transactions={transactions} currency={currency} assetClass={assetClass} />
+          <TransactionHistoryList
+            transactions={transactions}
+            currency={currency}
+            assetClass={assetClass}
+            onSelect={setEditTxn}
+          />
         )}
       </div>
 
@@ -206,6 +223,7 @@ export default function AssetDetailPage() {
           onRemove={handleRemove}
           onBuy={() => { setManageOpen(false); setBuyOpen(true) }}
           onSell={() => { setManageOpen(false); setSellOpen(true) }}
+          onEdit={openingBuy ? () => { setManageOpen(false); setEditTxn(openingBuy) } : undefined}
         />
       )}
 
@@ -228,6 +246,18 @@ export default function AssetDetailPage() {
           accountId={accountId}
           onClose={() => setSellOpen(false)}
           onDone={() => { setSellOpen(false); refresh() }}
+        />
+      )}
+
+      {/* Edit record sheet */}
+      {editTxn && holding && (
+        <EditRecordSheet
+          open={!!editTxn}
+          txn={editTxn}
+          holding={holding}
+          accountId={accountId}
+          onClose={() => setEditTxn(null)}
+          onDone={() => { setEditTxn(null); refresh() }}
         />
       )}
     </div>

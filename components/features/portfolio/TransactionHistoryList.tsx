@@ -13,6 +13,7 @@ interface TransactionHistoryListProps {
   transactions: InvestmentTxn[]
   currency: string
   assetClass?: AssetClass
+  onSelect?: (txn: InvestmentTxn) => void
 }
 
 /** Localized label for a transaction type key from txnRowView. */
@@ -43,7 +44,7 @@ function formatDate(dateStr: string, locale: string): string {
  * Rows are rendered in the order they are received (the API returns newest-first).
  * Each row shows: type icon + label, signed quantity, formatted total, date.
  */
-export function TransactionHistoryList({ transactions, currency, assetClass }: TransactionHistoryListProps) {
+export function TransactionHistoryList({ transactions, currency, assetClass, onSelect }: TransactionHistoryListProps) {
   const t = useTranslations('portfolio')
   const locale = useLocale()
   const isIDX = assetClass === 'IDX_STOCK'
@@ -74,14 +75,8 @@ export function TransactionHistoryList({ transactions, currency, assetClass }: T
             const unitLabel = isIDX ? t('unit.lots') : t('unit.units')
             const signedQtyDisplay = `${sign}${displayQty} ${unitLabel}`
 
-            return (
-              <li
-                key={txn.id}
-                className={cn(
-                  'flex items-center gap-3 px-4 py-3',
-                  idx < transactions.length - 1 && 'border-b border-border',
-                )}
-              >
+            const rowContent = (
+              <>
                 {/* Type icon */}
                 <span className={cn('shrink-0', colorClass)} aria-hidden="true">
                   <Icon className="h-5 w-5" />
@@ -102,6 +97,27 @@ export function TransactionHistoryList({ transactions, currency, assetClass }: T
                   </span>
                   <span className="text-tiny text-muted-foreground">{formatDate(row.date, locale)}</span>
                 </span>
+              </>
+            )
+
+            const rowClasses = cn(
+              'flex items-center gap-3 px-4 py-3',
+              idx < transactions.length - 1 && 'border-b border-border',
+            )
+
+            return (
+              <li key={txn.id}>
+                {onSelect ? (
+                  <button
+                    type="button"
+                    onClick={() => onSelect(txn)}
+                    className={cn(rowClasses, 'w-full text-left hover:bg-muted/50 transition-colors')}
+                  >
+                    {rowContent}
+                  </button>
+                ) : (
+                  <div className={rowClasses}>{rowContent}</div>
+                )}
               </li>
             )
           })}

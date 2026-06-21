@@ -24,6 +24,7 @@ interface AssetManageSheetProps {
   onRemove: () => void
   onBuy?: () => void
   onSell?: () => void
+  onEdit?: () => void
 }
 
 interface MenuRowProps {
@@ -70,7 +71,7 @@ function MenuRow({ icon: Icon, iconBg, iconFg, title, sub, onClick, disabled, de
  *
  * Design: manage-sheet frame (BBCA action sheet) in designs/spending-page.pen.
  */
-export function AssetManageSheet({ open, holding, pending, onClose, onViewTransactions, onRemove, onBuy, onSell }: AssetManageSheetProps) {
+export function AssetManageSheet({ open, holding, pending, onClose, onViewTransactions, onRemove, onBuy, onSell, onEdit }: AssetManageSheetProps) {
   const t = useTranslations('portfolio')
 
   const close = () => onClose()
@@ -119,14 +120,15 @@ export function AssetManageSheet({ open, holding, pending, onClose, onViewTransa
               onClick={onSell}
             />
 
-            {/* Edit purchase info — inert SP3 */}
+            {/* Edit purchase info */}
             <MenuRow
               icon={Pencil}
               iconBg="bg-tint-blue-bg"
               iconFg="text-tint-blue-fg"
               title={t('manage.editPurchase')}
               sub={t('manage.editPurchaseSub')}
-              disabled
+              onClick={onEdit}
+              disabled={!onEdit}
             />
 
             {/* View transactions — wired */}
