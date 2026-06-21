@@ -15,9 +15,10 @@ interface Props {
   isLoading: boolean
   isFiltered?: boolean
   onReset?: () => void
+  hideAccount?: boolean
 }
 
-export function TransactionGroupedList({ groups, todayKey, getCategoryName, getAccountName, onSelect, isLoading, isFiltered = false, onReset }: Props) {
+export function TransactionGroupedList({ groups, todayKey, getCategoryName, getAccountName, onSelect, isLoading, isFiltered = false, onReset, hideAccount = false }: Props) {
   const t = useTranslations('transactions.screen')
   const locale = useLocale()
 
@@ -58,6 +59,7 @@ export function TransactionGroupedList({ groups, todayKey, getCategoryName, getA
                 categoryName={tx.category_id ? getCategoryName(tx.category_id) : t('uncategorized')}
                 accountName={tx.account_id ? getAccountName(tx.account_id) : t('noAccount')}
                 onSelect={onSelect}
+                hideAccount={hideAccount}
               />
             ))}
           </div>
