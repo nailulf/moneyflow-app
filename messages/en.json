@@ -844,6 +844,7 @@
       "changeBadge": "{value}"
     },
     "menu": {
+      "label": "Account actions",
       "edit": "Edit",
       "export": "Export",
       "delete": "Delete"

@@ -844,6 +844,7 @@
       "changeBadge": "{value}"
     },
     "menu": {
+      "label": "Tindakan akun",
       "edit": "Edit",
       "export": "Ekspor",
       "delete": "Hapus"
