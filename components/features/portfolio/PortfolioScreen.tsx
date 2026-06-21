@@ -3,7 +3,6 @@
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Plus } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useGuestGuard } from '@/hooks/useGuestGuard'
@@ -60,13 +59,6 @@ export function PortfolioScreen() {
       <StickyScreenHeader>
         <h1 className="text-2xl font-bold leading-title-3 text-foreground">{t('title')}</h1>
         <div className="flex shrink-0 items-center gap-2">
-          {hasInvestmentAccounts(accounts) && (
-            <button type="button" onClick={handleAddAccount}
-              className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm leading-none font-semibold text-primary-foreground transition-transform active:scale-95">
-              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-              {t('newAccount')}
-            </button>
-          )}
           <NavUser user={userData} />
         </div>
       </StickyScreenHeader>

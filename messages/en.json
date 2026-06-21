@@ -1530,7 +1530,7 @@
     },
     "detail": {
       "investmentAccount": "Investment Account",
-      "addAsset": "Add Asset",
+      "addAsset": "Add",
       "back": "Back",
       "emptyTitle": "No assets yet",
       "emptyDescription": "What do you hold in this account? Pick a type to add your first one:",
