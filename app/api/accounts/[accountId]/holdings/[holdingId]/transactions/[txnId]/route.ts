@@ -45,7 +45,8 @@ export async function PUT(request: NextRequest, context: RouteParams) {
     if (effectiveType === 'SELL' && patch.quantity !== undefined) {
       const { data: holding } = await ctx.supabase
         .from('portfolio_holdings').select('quantity').eq('id', ctx.txn.holding_id).single()
-      const resulting = Number(holding?.quantity ?? 0) + Number(ctx.txn.quantity) - patch.quantity
+      if (!holding) return NextResponse.json({ error: 'Holding not found' }, { status: 404 })
+      const resulting = Number(holding.quantity) + Number(ctx.txn.quantity) - patch.quantity
       if (resulting < 0) {
         return NextResponse.json({ error: 'Cannot sell more units than you hold' }, { status: 400 })
       }
