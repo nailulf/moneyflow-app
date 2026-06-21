@@ -23,6 +23,7 @@ import { BudgetCard } from './BudgetCard'
 import { GoalsGrid } from './GoalsGrid'
 import { UpcomingStrip } from './UpcomingStrip'
 import { BiggestExpensesCard } from './BiggestExpensesCard'
+import { MobileHomeSkeleton } from './MobileHomeSkeleton'
 
 const HERO_MONTHS = 6
 const UPCOMING_HORIZON_DAYS = 30
@@ -34,7 +35,7 @@ export function MobileHome() {
   const t = useTranslations('home')
   const { user } = useAuth()
   const { transactions, loading: transactionsLoading } = useTransactions()
-  const { accounts } = useAccounts()
+  const { accounts, loading: accountsLoading } = useAccounts()
   const { getCategoryName } = useCategories()
 
   // Stable "now" for the whole mount (react-hooks/purity: no Date.now in render path).
@@ -49,7 +50,7 @@ export function MobileHome() {
   const month = now.getMonth() + 1
 
   const { snapshot, isLoading: budgetLoading } = useBudgetSnapshot('monthly', year, month)
-  const { data: goalsSummary } = useGoalsSummary()
+  const { data: goalsSummary, isLoading: goalsLoading } = useGoalsSummary()
   const { data: netWorth } = useQuery({
     queryKey: ['home-net-worth', user?.id],
     queryFn: () => fetchNetWorthData(user!.id, '1Y'),
@@ -137,40 +138,43 @@ export function MobileHome() {
     date: now.toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
   })
 
+  // First-load signal (React Query `isLoading` is true only with no cached
+  // data, so this stays false on background refetches). While true we render a
+  // full skeleton instead of letting each section pop in / flash empty copy as
+  // its query resolves.
+  const initialLoading = accountsLoading || transactionsLoading || budgetLoading || goalsLoading
+
   return (
     <div className="flex flex-col gap-5 pt-3 md:hidden">
       <HomeGreetingHeader greetingKey={getGreetingKey(now.getHours())} user={userData} />
       <OnboardingBanner />
-      {/* Transaction-fed sections wait for the initial load so they don't flash "loaded-empty" copy. */}
-      {!transactionsLoading && (
-        <TodayCard dateLabel={todayLabel} spent={today.spent} count={today.count} currency={baseCurrency} />
-      )}
-      <NetWorthHeroCard
-        netWorth={netWorth?.currentNetWorth ?? split.assetsTotal - split.liabilitiesTotal}
-        changePercentage={monthChangePct}
-        currency={baseCurrency}
-        months={heroMonths}
-        income={monthIncome}
-        expenses={monthExpenses}
-      />
-      <AccountsCards
-        currency={baseCurrency}
-        assets={split.assets}
-        liabilities={split.liabilities}
-        assetsTotal={split.assetsTotal}
-        liabilitiesTotal={split.liabilitiesTotal}
-      />
-      {!budgetLoading && (
-        <BudgetCard
-          monthLabel={`${new Date(year, month - 1, 1).toLocaleDateString(locale, { month: 'long' })} ${year}`}
-          spent={snapshot?.total_spent ?? 0}
-          total={snapshot?.total_amount ?? 0}
-          currency={snapshot?.currency ?? baseCurrency}
-        />
-      )}
-      <GoalsGrid goals={goalsSummary?.goals ?? []} />
-      {!transactionsLoading && (
+      {initialLoading ? (
+        <MobileHomeSkeleton />
+      ) : (
         <>
+          <TodayCard dateLabel={todayLabel} spent={today.spent} count={today.count} currency={baseCurrency} />
+          <NetWorthHeroCard
+            netWorth={netWorth?.currentNetWorth ?? split.assetsTotal - split.liabilitiesTotal}
+            changePercentage={monthChangePct}
+            currency={baseCurrency}
+            months={heroMonths}
+            income={monthIncome}
+            expenses={monthExpenses}
+          />
+          <AccountsCards
+            currency={baseCurrency}
+            assets={split.assets}
+            liabilities={split.liabilities}
+            assetsTotal={split.assetsTotal}
+            liabilitiesTotal={split.liabilitiesTotal}
+          />
+          <BudgetCard
+            monthLabel={`${new Date(year, month - 1, 1).toLocaleDateString(locale, { month: 'long' })} ${year}`}
+            spent={snapshot?.total_spent ?? 0}
+            total={snapshot?.total_amount ?? 0}
+            currency={snapshot?.currency ?? baseCurrency}
+          />
+          <GoalsGrid goals={goalsSummary?.goals ?? []} />
           <UpcomingStrip items={upcoming} />
           <BiggestExpensesCard rows={biggest} />
         </>
