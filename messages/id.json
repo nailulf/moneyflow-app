@@ -1606,7 +1606,12 @@
       "buyError": "Gagal mencatat pembelian",
       "sellError": "Gagal mencatat penjualan",
       "editError": "Gagal memperbarui catatan",
-      "deleteError": "Gagal menghapus catatan"
+      "deleteError": "Gagal menghapus catatan",
+      "priceShareLabel": "Harga Beli / Saham",
+      "priceUnitLabel": "Harga per unit",
+      "sharesHint": "({shares} saham)",
+      "estimateBreakdownLots": "{lots} lot × {price} × 100 saham",
+      "estimateBreakdownUnits": "{units} × {price}"
     }
   },
   "holdingCreate": {

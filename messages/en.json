@@ -1606,7 +1606,12 @@
       "buyError": "Couldn't record the buy",
       "sellError": "Couldn't record the sell",
       "editError": "Couldn't update the record",
-      "deleteError": "Couldn't delete the record"
+      "deleteError": "Couldn't delete the record",
+      "priceShareLabel": "Purchase Price / Share",
+      "priceUnitLabel": "Price per unit",
+      "sharesHint": "({shares} shares)",
+      "estimateBreakdownLots": "{lots} lots × {price} × 100 shares",
+      "estimateBreakdownUnits": "{units} × {price}"
     }
   },
   "holdingCreate": {
