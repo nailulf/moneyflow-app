@@ -12,8 +12,13 @@ interface Props {
 
 export function AccountActionsMenu({ onEdit, onExport, onDelete }: Props) {
   const t = useTranslations('accountDetail')
+  // modal={false}: a menu item here opens a Dialog (Edit/Delete). A *modal* dropdown
+  // locks the body (pointer-events:none); when its teardown races the Dialog's own
+  // scroll-lock, the body's pointer-events:none gets restored instead of cleared,
+  // freezing the whole screen to taps (scroll still works) after the dialog closes.
+  // Non-modal menu = no body lock = the Dialog captures a clean state to restore.
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger
         aria-label={t('menu.label')}
         className="flex size-9 items-center justify-center rounded-[10px] bg-card text-foreground shadow-card transition-colors hover:bg-muted/50"

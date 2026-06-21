@@ -125,6 +125,11 @@ recurring pixel-gap sources — match them exactly):
   `--normal-bg: hsl(var(--popover))` — the tokens are raw HSL triplets, so the bare `var(--popover)`
   is an invalid color and renders transparent. Always wrap token vars in `hsl(...)` for real CSS
   color values.
+- **A DropdownMenu/Popover item that opens a Dialog/Sheet must set `modal={false}` on the menu.**
+  A modal dropdown locks the body (`pointer-events: none`); when its teardown races the dialog's own
+  scroll-lock, the body's `pointer-events: none` gets *restored* instead of cleared after the dialog
+  closes — freezing the whole screen to taps (scroll still works). Non-modal menu = no body lock = the
+  dialog restores a clean state. Reference: `components/features/accounts/detail/AccountActionsMenu.tsx`.
 
 **Example — a stat card, on-brand and themeable:**
 ```tsx

@@ -236,6 +236,13 @@ gray `#EEF2F7` screen/sheet background) — use the `Input` atom. The only excep
 design tokens are raw HSL triplets, so a bare `var(--token)` is an invalid color and renders the toast
 transparent. Always wrap token vars in `hsl(...)` when feeding them to a raw CSS color property.
 
+**A dropdown/popover menu item that opens a Dialog/Sheet must set `modal={false}` on the menu**
+(e.g. `<DropdownMenu modal={false}>`). A modal menu locks the body (`pointer-events: none`); when its
+teardown races the dialog's own scroll-lock, the body's `pointer-events: none` is *restored* instead of
+cleared after the dialog closes — freezing the entire screen to taps while scrolling still works.
+Non-modal menu = no body lock = clean teardown. Reference:
+`components/features/accounts/detail/AccountActionsMenu.tsx`.
+
 **Pixel-fidelity is a hard requirement.** For any screen with a Pencil design, reproduce it exactly
 (structure, copy, spacing, **surface colors**, control sizes) and **verify in the browser preview at
 390px side-by-side with the design screenshot** before claiming done — reading the code is not enough.
