@@ -45,6 +45,7 @@ function todayKey(): string {
 
 export function AccountDetailScreen({ accountId }: { accountId: string }) {
   const t = useTranslations('accountDetail')
+  const tTx = useTranslations('transactions.screen')
   const router = useRouter()
   const queryClient = useQueryClient()
   const { user } = useAuth()
@@ -160,7 +161,7 @@ export function AccountDetailScreen({ accountId }: { accountId: string }) {
         <TransactionGroupedList
           groups={groups}
           todayKey={todayKey()}
-          getCategoryName={(id) => (id ? getCategoryName(id) : '')}
+          getCategoryName={(id) => (id ? getCategoryName(id) : tTx('uncategorized'))}
           getAccountName={() => account.name}
           onSelect={(tx) => router.push(`/transactions/${tx.id}/edit`)}
           isLoading={isLoading}
