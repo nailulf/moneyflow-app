@@ -861,7 +861,12 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
 
   return (
     <div className="flex flex-col h-full">
-      <AccountNavigation />
+      {/* Desktop-only top nav. On mobile this full-page legacy view is reached via the
+          /accounts/[id] route (for property/vehicle/mortgage); the desktop "Overview"
+          + "Add account" chrome would look out of place there, so hide it below md. */}
+      <div className="hidden md:block">
+        <AccountNavigation />
+      </div>
       <PageLayout>
         {content}
       </PageLayout>
