@@ -48,7 +48,7 @@ export type SanitizedTxn = {
   transaction_date: string
   currency: string
   notes: string | null
-  cash_account_id: string | null
+  proceeds_to_cash: boolean
 }
 
 export type TxnPayloadResult =
@@ -102,7 +102,7 @@ export function sanitizeTxnPayload(
       out.total_amount = round2(out.quantity * out.price_per_unit)
     }
     if (has('notes') || !opts.partial) out.notes = trimOrNull(body.notes)
-    if (has('cash_account_id') || !opts.partial) out.cash_account_id = trimOrNull(body.cash_account_id)
+    if (has('proceeds_to_cash') || !opts.partial) out.proceeds_to_cash = body.proceeds_to_cash === true
 
     return { ok: true, data: out as SanitizedTxn }
   } catch (e) {

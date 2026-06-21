@@ -10,7 +10,7 @@ export type CreateTxnPayload = {
   total_amount?: number
   currency?: string
   notes?: string | null
-  cash_account_id?: string | null
+  proceeds_to_cash?: boolean
 }
 
 async function jsonOrThrow<T>(res: Response): Promise<T> {

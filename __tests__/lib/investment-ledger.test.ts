@@ -63,7 +63,7 @@ describe('sanitizeTxnPayload', () => {
       ok: true,
       data: {
         type: 'BUY', quantity: 100, price_per_unit: 9000, total_amount: 900_000,
-        transaction_date: '2026-06-01', currency: 'IDR', notes: null, cash_account_id: null,
+        transaction_date: '2026-06-01', currency: 'IDR', notes: null, proceeds_to_cash: false,
       },
     })
   })
@@ -87,10 +87,14 @@ describe('sanitizeTxnPayload', () => {
     expect(r).toEqual({ ok: true, data: { price_per_unit: 9500 } })
   })
 
-  it('keeps cash_account_id for a SELL', () => {
+  it('parses proceeds_to_cash boolean for a SELL', () => {
     const r = sanitizeTxnPayload({
-      type: 'SELL', quantity: 10, price_per_unit: 12000, transaction_date: '2026-06-02', cash_account_id: 'cash1',
+      type: 'SELL', quantity: 10, price_per_unit: 12000, transaction_date: '2026-06-02', proceeds_to_cash: true,
     })
-    expect(r.ok && r.data.cash_account_id).toBe('cash1')
+    expect(r.ok && r.data.proceeds_to_cash).toBe(true)
+  })
+  it('defaults proceeds_to_cash to false', () => {
+    const r = sanitizeTxnPayload({ type: 'SELL', quantity: 10, price_per_unit: 12000, transaction_date: '2026-06-02' })
+    expect(r.ok && r.data.proceeds_to_cash).toBe(false)
   })
 })
