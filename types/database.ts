@@ -26,7 +26,6 @@ export interface Database {
           is_duplicate: boolean
           duplicate_of: string | null
           is_balance_adjustment: boolean
-          source_investment_txn_id: string | null
           created_at: string
           updated_at: string
         }
@@ -54,7 +53,6 @@ export interface Database {
           is_duplicate?: boolean
           duplicate_of?: string | null
           is_balance_adjustment?: boolean
-          source_investment_txn_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -82,7 +80,6 @@ export interface Database {
           is_duplicate?: boolean
           duplicate_of?: string | null
           is_balance_adjustment?: boolean
-          source_investment_txn_id?: string | null
           updated_at?: string
         }
       }
@@ -169,6 +166,7 @@ export interface Database {
           name: string
           type: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance: number
+          unallocated_cash: number
           currency: string
           is_default: boolean
           is_active: boolean
@@ -197,6 +195,7 @@ export interface Database {
           name: string
           type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance?: number
+          unallocated_cash?: number
           currency?: string
           is_default?: boolean
           is_active?: boolean
@@ -225,6 +224,7 @@ export interface Database {
           name?: string
           type?: 'BANK' | 'CREDIT_CARD' | 'CASH' | 'INVESTMENT' | 'OTHER' | 'PROPERTY' | 'VEHICLE' | 'MORTGAGE' | 'DIGITAL_WALLET'
           balance?: number
+          unallocated_cash?: number
           currency?: string
           is_default?: boolean
           is_active?: boolean
@@ -791,7 +791,7 @@ export interface Database {
           price_per_unit: number
           total_amount: number
           realized_pl: number | null
-          cash_account_id: string | null
+          proceeds_to_cash: boolean
           transaction_date: string
           currency: string
           notes: string | null
@@ -808,7 +808,7 @@ export interface Database {
           price_per_unit: number
           total_amount: number
           realized_pl?: number | null
-          cash_account_id?: string | null
+          proceeds_to_cash?: boolean
           transaction_date: string
           currency?: string
           notes?: string | null
@@ -821,7 +821,7 @@ export interface Database {
           price_per_unit?: number
           total_amount?: number
           realized_pl?: number | null
-          cash_account_id?: string | null
+          proceeds_to_cash?: boolean
           transaction_date?: string
           currency?: string
           notes?: string | null
