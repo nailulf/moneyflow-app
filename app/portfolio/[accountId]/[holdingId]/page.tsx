@@ -14,6 +14,7 @@ import { AssetPositionStats } from '@/components/features/portfolio/AssetPositio
 import { TransactionHistoryList } from '@/components/features/portfolio/TransactionHistoryList'
 import { AssetManageSheet } from '@/components/features/portfolio/AssetManageSheet'
 import { BuySheet } from '@/components/features/portfolio/BuySheet'
+import { SellSheet } from '@/components/features/portfolio/SellSheet'
 import { cn } from '@/lib/utils'
 
 const PERIODS = ['1W', '1M', '3M', '6M', '1Y'] as const
@@ -34,6 +35,7 @@ export default function AssetDetailPage() {
   const [activePeriod, setActivePeriod] = useState<Period>('1M')
   const [manageOpen, setManageOpen] = useState(false)
   const [buyOpen, setBuyOpen] = useState(false)
+  const [sellOpen, setSellOpen] = useState(false)
   const [deletePending, setDeletePending] = useState(false)
 
   // Ref for the transaction history section — used by onViewTransactions to scroll into view
@@ -175,12 +177,12 @@ export default function AssetDetailPage() {
         )}
       </div>
 
-      {/* Sell / Buy More — Sell inert SP4; Buy More wired */}
+      {/* Sell / Buy More */}
       <div className="flex gap-3 pb-2">
         <button
           type="button"
-          disabled
-          className="flex-1 rounded-full border border-border py-3.5 text-sm leading-none font-semibold text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => setSellOpen(true)}
+          className="flex-1 rounded-full border border-border py-3.5 text-sm leading-none font-semibold text-foreground"
         >
           {t('assetDetail.sell')}
         </button>
@@ -203,6 +205,7 @@ export default function AssetDetailPage() {
           onViewTransactions={handleViewTransactions}
           onRemove={handleRemove}
           onBuy={() => { setManageOpen(false); setBuyOpen(true) }}
+          onSell={() => { setManageOpen(false); setSellOpen(true) }}
         />
       )}
 
@@ -214,6 +217,17 @@ export default function AssetDetailPage() {
           accountId={accountId}
           onClose={() => setBuyOpen(false)}
           onDone={() => { setBuyOpen(false); refresh() }}
+        />
+      )}
+
+      {/* Sell sheet */}
+      {holding && (
+        <SellSheet
+          open={sellOpen}
+          holding={holding}
+          accountId={accountId}
+          onClose={() => setSellOpen(false)}
+          onDone={() => { setSellOpen(false); refresh() }}
         />
       )}
     </div>
