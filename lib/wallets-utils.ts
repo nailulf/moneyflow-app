@@ -61,6 +61,7 @@ export function buildAccountPayload(
     name: fields.name,
     type: fields.type,
     balance: fields.balance ?? 0,
+    unallocated_cash: fields.unallocated_cash ?? 0,
     currency: fields.currency ?? 'IDR',
     is_default: fields.is_default ?? false,
     is_active: fields.is_active ?? true,

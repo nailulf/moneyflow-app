@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import { PortfolioNavigation } from '@/components/features/navigation/TopNavigation'
 import { PageLayout, MainContent, SideContent, ContentWrapper } from '@/components/PageLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/molecules/card"
@@ -10,6 +11,7 @@ import { portfolioTotals, allocation } from '@/lib/portfolio-utils'
 import { formatCurrency } from '@/lib/data-utils'
 
 export default function PortfolioAnalyticsPage() {
+  const t = useTranslations('portfolio')
   const { accounts } = useAccounts()
   const { holdings, isLoading } = useAllHoldings()
 
@@ -66,16 +68,12 @@ export default function PortfolioAnalyticsPage() {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Unrealised Gain / Loss</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className={`text-2xl font-bold ${totals.totalGainLoss >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    {totals.totalCostBasis === 0
-                      ? '—'
-                      : `${totals.totalGainLoss >= 0 ? '+' : ''}${totals.totalGainLossPct.toFixed(1)}%`}
+                  <div className="text-2xl font-bold text-muted-foreground italic">
+                    {totals.totalCostBasis === 0 ? '—' : t('hero.gainPlaceholder')}
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {totals.totalCostBasis === 0
-                      ? 'Add holdings to see gain/loss'
-                      : `${totals.totalGainLoss >= 0 ? '+' : ''}${formatCurrency(totals.totalGainLoss, baseCurrency)}`}
-                  </div>
+                  {totals.totalCostBasis === 0 && (
+                    <div className="text-sm text-muted-foreground">Add holdings to see gain/loss</div>
+                  )}
                 </CardContent>
               </Card>
             </div>
