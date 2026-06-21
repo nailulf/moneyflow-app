@@ -20,8 +20,9 @@ import {
   SelectValue
 } from '@/components/ui/molecules/select'
 import { Loader2 } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 import { formatCurrency } from '@/lib/data-utils'
-import { getGoalIcon, getGoalTypeLabel } from '@/lib/goals/calculations'
+import { getGoalIcon } from '@/lib/goals/calculations'
 import { useCreateGoal, CreateGoalInput } from '@/hooks/useGoalsQuery'
 import { AccountDB, GoalType } from '@/types/database'
 
@@ -49,6 +50,8 @@ export function AddGoalModal({
   onClose,
   onSuccess
 }: AddGoalModalProps) {
+  const t = useTranslations('goalForm')
+  const locale = useLocale()
   const [formData, setFormData] = useState({
     name: '',
     goalType: 'other' as GoalType,
@@ -80,23 +83,23 @@ export function AddGoalModal({
 
     // Validate
     if (!formData.name.trim()) {
-      setError('Please enter a goal name')
+      setError(t('errorName'))
       return
     }
 
     const targetAmount = parseFloat(formData.targetAmount)
     if (isNaN(targetAmount) || targetAmount <= 0) {
-      setError('Please enter a valid target amount')
+      setError(t('errorAmount'))
       return
     }
 
     if (targetAmount <= account.balance) {
-      setError('Target must be greater than current balance')
+      setError(t('errorBalance'))
       return
     }
 
     if (!formData.targetMonth || !formData.targetYear) {
-      setError('Please select a target date')
+      setError(t('errorDate'))
       return
     }
 
@@ -120,10 +123,10 @@ export function AddGoalModal({
     }
   }
 
-  // Generate month options
+  // Generate month options (localized month names)
   const months = Array.from({ length: 12 }, (_, i) => ({
     value: (i + 1).toString().padStart(2, '0'),
-    label: new Date(2000, i, 1).toLocaleString('en-US', { month: 'long' })
+    label: new Date(2000, i, 1).toLocaleString(locale, { month: 'long' })
   }))
 
   // Generate year options (current year + 10 years)
@@ -141,19 +144,19 @@ export function AddGoalModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Financial Goal</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            Set a savings goal for {account.name}
+            {t('description', { account: account.name })}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Goal Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Goal Name</Label>
+            <Label htmlFor="name">{t('nameLabel')}</Label>
             <Input
               id="name"
-              placeholder="e.g., Emergency Fund"
+              placeholder={t('namePlaceholder')}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
@@ -161,7 +164,7 @@ export function AddGoalModal({
 
           {/* Goal Type */}
           <div className="space-y-2">
-            <Label htmlFor="goalType">Goal Type</Label>
+            <Label htmlFor="goalType">{t('typeLabel')}</Label>
             <Select
               value={formData.goalType}
               onValueChange={(value) =>
@@ -174,7 +177,7 @@ export function AddGoalModal({
               <SelectContent>
                 {GOAL_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
-                    {getGoalIcon(type)} {getGoalTypeLabel(type)}
+                    {getGoalIcon(type)} {t(`types.${type}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -183,24 +186,24 @@ export function AddGoalModal({
 
           {/* Target Amount */}
           <div className="space-y-2">
-            <Label htmlFor="targetAmount">Target Amount</Label>
+            <Label htmlFor="targetAmount">{t('amountLabel')}</Label>
             <Input
               id="targetAmount"
               type="amount"
-              placeholder="30,000,000"
+              placeholder={t('amountPlaceholder')}
               value={formData.targetAmount}
               onChange={(e) =>
                 setFormData({ ...formData, targetAmount: e.target.value })
               }
             />
             <p className="text-xs text-muted-foreground">
-              Current balance: {formatCurrency(account.balance, account.currency)}
+              {t('currentBalance', { balance: formatCurrency(account.balance, account.currency) })}
             </p>
           </div>
 
           {/* Target Date */}
           <div className="space-y-2">
-            <Label>Target Date</Label>
+            <Label>{t('dateLabel')}</Label>
             <div className="grid grid-cols-2 gap-2">
               <Select
                 value={formData.targetMonth}
@@ -209,7 +212,7 @@ export function AddGoalModal({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Month" />
+                  <SelectValue placeholder={t('monthPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {months.map((month) => (
@@ -227,7 +230,7 @@ export function AddGoalModal({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Year" />
+                  <SelectValue placeholder={t('yearPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {years.map((year) => (
@@ -244,12 +247,11 @@ export function AddGoalModal({
           {targetAmount > 0 && (
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-sm">
-                <span className="font-medium">Preview: </span>
-                Need to save{' '}
-                <span className="font-semibold text-primary">
-                  {formatCurrency(amountNeeded, account.currency)}
-                </span>{' '}
-                more ({previewProgress.toFixed(1)}% complete)
+                <span className="font-medium">{t('previewLabel')} </span>
+                {t('previewText', {
+                  amount: formatCurrency(amountNeeded, account.currency),
+                  pct: previewProgress.toFixed(1),
+                })}
               </p>
             </div>
           )}
@@ -262,13 +264,13 @@ export function AddGoalModal({
           {/* Actions */}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button type="submit" disabled={createGoal.isPending}>
               {createGoal.isPending && (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               )}
-              Create Goal
+              {t('submit')}
             </Button>
           </DialogFooter>
         </form>

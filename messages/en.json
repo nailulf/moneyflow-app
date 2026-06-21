@@ -1481,6 +1481,37 @@
       "emptyHint": "Your biggest spends this month will show up here."
     }
   },
+  "goalForm": {
+    "title": "Add Financial Goal",
+    "description": "Set a savings goal for {account}",
+    "nameLabel": "Goal Name",
+    "namePlaceholder": "e.g., Emergency Fund",
+    "typeLabel": "Goal Type",
+    "amountLabel": "Target Amount",
+    "amountPlaceholder": "30,000,000",
+    "currentBalance": "Current balance: {balance}",
+    "dateLabel": "Target Date",
+    "monthPlaceholder": "Month",
+    "yearPlaceholder": "Year",
+    "previewLabel": "Preview:",
+    "previewText": "Need to save {amount} more ({pct}% complete)",
+    "errorName": "Please enter a goal name",
+    "errorAmount": "Please enter a valid target amount",
+    "errorBalance": "Target must be greater than current balance",
+    "errorDate": "Please select a target date",
+    "cancel": "Cancel",
+    "submit": "Create Goal",
+    "types": {
+      "emergency_fund": "Emergency Fund",
+      "vacation": "Vacation",
+      "house_down_payment": "House Down Payment",
+      "car_purchase": "Car Purchase",
+      "education": "Education",
+      "wedding": "Wedding",
+      "investment": "Investment",
+      "other": "Other"
+    }
+  },
   "portfolio": {
     "title": "Portfolio",
     "newAccount": "New Account",

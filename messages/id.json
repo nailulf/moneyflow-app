@@ -1481,6 +1481,37 @@
       "emptyHint": "Pengeluaran terbesar Anda bulan ini akan muncul di sini."
     }
   },
+  "goalForm": {
+    "title": "Tambah Target Keuangan",
+    "description": "Tetapkan target tabungan untuk {account}",
+    "nameLabel": "Nama Target",
+    "namePlaceholder": "mis. Dana Darurat",
+    "typeLabel": "Jenis Target",
+    "amountLabel": "Jumlah Target",
+    "amountPlaceholder": "30.000.000",
+    "currentBalance": "Saldo saat ini: {balance}",
+    "dateLabel": "Tanggal Target",
+    "monthPlaceholder": "Bulan",
+    "yearPlaceholder": "Tahun",
+    "previewLabel": "Pratinjau:",
+    "previewText": "Perlu menabung {amount} lagi ({pct}% selesai)",
+    "errorName": "Masukkan nama target",
+    "errorAmount": "Masukkan jumlah target yang valid",
+    "errorBalance": "Target harus lebih besar dari saldo saat ini",
+    "errorDate": "Pilih tanggal target",
+    "cancel": "Batal",
+    "submit": "Buat Target",
+    "types": {
+      "emergency_fund": "Dana Darurat",
+      "vacation": "Liburan",
+      "house_down_payment": "Uang Muka Rumah",
+      "car_purchase": "Pembelian Mobil",
+      "education": "Pendidikan",
+      "wedding": "Pernikahan",
+      "investment": "Investasi",
+      "other": "Lainnya"
+    }
+  },
   "portfolio": {
     "title": "Portofolio",
     "newAccount": "Akun Baru",
