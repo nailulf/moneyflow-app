@@ -832,6 +832,22 @@
       "overview": "Ringkasan",
       "transactions": "Transaksi"
     },
+    "header": {
+      "back": "Kembali"
+    },
+    "hero": {
+      "currentBalance": "Saldo Saat Ini"
+    },
+    "trend": {
+      "title": "Tren Saldo",
+      "subtitle": "6 bulan terakhir",
+      "changeBadge": "{value}"
+    },
+    "menu": {
+      "edit": "Edit",
+      "export": "Ekspor",
+      "delete": "Hapus"
+    },
     "details": {
       "title": "Detail Akun",
       "accountType": "Jenis Akun",
@@ -885,7 +901,11 @@
       "adjustment": "Penyesuaian",
       "cancel": "Batal",
       "confirm": "Sesuaikan Saldo",
-      "adjusting": "Menyesuaikan..."
+      "adjusting": "Menyesuaikan...",
+      "willAdd": "{amount} akan ditambahkan",
+      "willRemove": "{amount} akan dikurangi",
+      "infoBanner": "Transaksi tanpa kategori sebesar {amount} akan ditambahkan ke riwayat akun ini.",
+      "save": "Simpan Penyesuaian"
     },
     "adjustments": {
       "title": "Riwayat Saldo"

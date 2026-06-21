@@ -832,6 +832,22 @@
       "overview": "Overview",
       "transactions": "Transactions"
     },
+    "header": {
+      "back": "Back"
+    },
+    "hero": {
+      "currentBalance": "Current Balance"
+    },
+    "trend": {
+      "title": "Balance Trend",
+      "subtitle": "Last 6 months",
+      "changeBadge": "{value}"
+    },
+    "menu": {
+      "edit": "Edit",
+      "export": "Export",
+      "delete": "Delete"
+    },
     "details": {
       "title": "Account Details",
       "accountType": "Account Type",
@@ -885,7 +901,11 @@
       "adjustment": "Adjustment",
       "cancel": "Cancel",
       "confirm": "Adjust Balance",
-      "adjusting": "Adjusting..."
+      "adjusting": "Adjusting...",
+      "willAdd": "{amount} will be added",
+      "willRemove": "{amount} will be removed",
+      "infoBanner": "A new uncategorized transaction of {amount} will be added to this account's history.",
+      "save": "Save Adjustment"
     },
     "adjustments": {
       "title": "Balance History"
