@@ -1582,6 +1582,30 @@
       "step3Sub": "Return, dividen, tips rebalancing",
       "addCta": "Tambah akun investasi",
       "basicsLink": "Baru mulai investasi? Pelajari dasarnya"
+    },
+    "trade": {
+      "buyTitle": "Beli lagi",
+      "sellTitle": "Jual / kurangi",
+      "editTitle": "Edit catatan",
+      "quantityLabel": "Jumlah",
+      "lots": "lot",
+      "units": "unit",
+      "priceLabel": "Harga per {unit}",
+      "dateLabel": "Tanggal",
+      "estimatedTotal": "Estimasi total",
+      "proceeds": "Hasil penjualan",
+      "youHold": "Kamu punya {qty}",
+      "keepAsCash": "Simpan hasil jual sebagai kas di akun ini",
+      "netWorthNote": "Penjualan mengurangi portofoliomu (dan kekayaan bersih) sebesar {amount}; hasilnya tidak dicatat.",
+      "confirmBuy": "Catat pembelian",
+      "confirmSell": "Catat penjualan",
+      "save": "Simpan perubahan",
+      "delete": "Hapus catatan",
+      "saving": "Menyimpan…",
+      "buyError": "Gagal mencatat pembelian",
+      "sellError": "Gagal mencatat penjualan",
+      "editError": "Gagal memperbarui catatan",
+      "deleteError": "Gagal menghapus catatan"
     }
   },
   "holdingCreate": {

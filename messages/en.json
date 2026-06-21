@@ -1582,6 +1582,30 @@
       "step3Sub": "Returns, dividends, rebalancing tips",
       "addCta": "Add investment account",
       "basicsLink": "New to investing? Start with the basics"
+    },
+    "trade": {
+      "buyTitle": "Buy more",
+      "sellTitle": "Sell / reduce",
+      "editTitle": "Edit record",
+      "quantityLabel": "Quantity",
+      "lots": "lots",
+      "units": "units",
+      "priceLabel": "Price per {unit}",
+      "dateLabel": "Date",
+      "estimatedTotal": "Estimated total",
+      "proceeds": "Proceeds",
+      "youHold": "You hold {qty}",
+      "keepAsCash": "Keep proceeds as cash in this account",
+      "netWorthNote": "Selling reduces your portfolio (and net worth) by {amount}; the proceeds aren't recorded.",
+      "confirmBuy": "Record buy",
+      "confirmSell": "Record sell",
+      "save": "Save changes",
+      "delete": "Delete record",
+      "saving": "Saving…",
+      "buyError": "Couldn't record the buy",
+      "sellError": "Couldn't record the sell",
+      "editError": "Couldn't update the record",
+      "deleteError": "Couldn't delete the record"
     }
   },
   "holdingCreate": {

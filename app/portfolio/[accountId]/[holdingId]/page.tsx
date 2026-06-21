@@ -13,6 +13,7 @@ import { AssetDetailHero } from '@/components/features/portfolio/AssetDetailHero
 import { AssetPositionStats } from '@/components/features/portfolio/AssetPositionStats'
 import { TransactionHistoryList } from '@/components/features/portfolio/TransactionHistoryList'
 import { AssetManageSheet } from '@/components/features/portfolio/AssetManageSheet'
+import { BuySheet } from '@/components/features/portfolio/BuySheet'
 import { cn } from '@/lib/utils'
 
 const PERIODS = ['1W', '1M', '3M', '6M', '1Y'] as const
@@ -32,6 +33,7 @@ export default function AssetDetailPage() {
 
   const [activePeriod, setActivePeriod] = useState<Period>('1M')
   const [manageOpen, setManageOpen] = useState(false)
+  const [buyOpen, setBuyOpen] = useState(false)
   const [deletePending, setDeletePending] = useState(false)
 
   // Ref for the transaction history section — used by onViewTransactions to scroll into view
@@ -45,14 +47,19 @@ export default function AssetDetailPage() {
     })
   }
 
+  const refresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['holdings', accountId] })
+    await queryClient.invalidateQueries({ queryKey: ['all-holdings'] })
+    await queryClient.invalidateQueries({ queryKey: ['accounts'] })
+    await queryClient.invalidateQueries({ queryKey: ['net-worth'] })
+    await queryClient.invalidateQueries({ queryKey: ['investment-transactions', accountId, holdingId] })
+  }
+
   const handleRemove = async () => {
     setDeletePending(true)
     try {
       await deleteHolding(accountId, holdingId)
-      await queryClient.invalidateQueries({ queryKey: ['holdings', accountId] })
-      await queryClient.invalidateQueries({ queryKey: ['all-holdings'] })
-      await queryClient.invalidateQueries({ queryKey: ['accounts'] })
-      await queryClient.invalidateQueries({ queryKey: ['net-worth'] })
+      await refresh()
       router.push(`/portfolio/${accountId}`)
     } finally {
       setDeletePending(false)
@@ -168,7 +175,7 @@ export default function AssetDetailPage() {
         )}
       </div>
 
-      {/* Sell / Buy More — inert SP3; disabled buttons */}
+      {/* Sell / Buy More — Sell inert SP4; Buy More wired */}
       <div className="flex gap-3 pb-2">
         <button
           type="button"
@@ -179,8 +186,8 @@ export default function AssetDetailPage() {
         </button>
         <button
           type="button"
-          disabled
-          className="flex-1 rounded-full bg-primary py-3.5 text-sm leading-none font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => setBuyOpen(true)}
+          className="flex-1 rounded-full bg-primary py-3.5 text-sm leading-none font-semibold text-primary-foreground"
         >
           {t('assetDetail.buyMore')}
         </button>
@@ -195,6 +202,18 @@ export default function AssetDetailPage() {
           onClose={() => setManageOpen(false)}
           onViewTransactions={handleViewTransactions}
           onRemove={handleRemove}
+          onBuy={() => { setManageOpen(false); setBuyOpen(true) }}
+        />
+      )}
+
+      {/* Buy sheet */}
+      {holding && (
+        <BuySheet
+          open={buyOpen}
+          holding={holding}
+          accountId={accountId}
+          onClose={() => setBuyOpen(false)}
+          onDone={() => { setBuyOpen(false); refresh() }}
         />
       )}
     </div>
