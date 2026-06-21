@@ -6,7 +6,7 @@ import {
   Shield, Plane, House, Car, GraduationCap, Heart, TrendingUp, Target, type LucideIcon,
 } from 'lucide-react'
 import { formatCurrencyCompact } from '@/lib/data-utils'
-import { HomeEmptyState } from './HomeEmptyState'
+import { GoalsEmptyState } from './GoalsEmptyState'
 
 const GOAL_ICONS: Record<string, LucideIcon> = {
   emergency_fund: Shield,
@@ -41,15 +41,7 @@ export function GoalsGrid({ goals }: GoalsGridProps) {
     return (
       <section className="flex flex-col gap-3">
         <h2 className="text-md leading-body-lg font-bold text-foreground">{t('goals.title')}</h2>
-        <HomeEmptyState
-          variant="inline"
-          icon={Target}
-          bubbleClassName="bg-tint-green-bg"
-          iconClassName="text-tint-green-fg"
-          title={t('goals.emptyTitle')}
-          description={t('goals.emptyHint')}
-          cta={{ label: t('goals.setGoal'), href: '/accounts' }}
-        />
+        <GoalsEmptyState />
       </section>
     )
   }

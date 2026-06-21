@@ -1465,7 +1465,8 @@
       "of": "{current} of {target}",
       "emptyTitle": "No goals yet",
       "emptyHint": "Save for an emergency fund, a trip, or anything.",
-      "setGoal": "Set goal"
+      "setGoal": "Set goal",
+      "pickAccountTitle": "Choose an account"
     },
     "upcoming": {
       "title": "Upcoming",

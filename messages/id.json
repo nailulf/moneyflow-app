@@ -1465,7 +1465,8 @@
       "of": "{current} dari {target}",
       "emptyTitle": "Belum ada target",
       "emptyHint": "Menabung untuk dana darurat, liburan, atau apa pun.",
-      "setGoal": "Buat target"
+      "setGoal": "Buat target",
+      "pickAccountTitle": "Pilih akun"
     },
     "upcoming": {
       "title": "Mendatang",
