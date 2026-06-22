@@ -108,12 +108,15 @@ export async function GET(request: NextRequest) {
         (item.accounts as unknown as JoinedAccount).id
       ) as JoinedAccount
 
-      // Active goals get their waterfall saved; non-active goals fall back to the
-      // raw live balance (waterfall only includes active goals).
+      // Active goals get their waterfall saved. Non-active goals must NOT inject the
+      // full account balance (that double-counts a shared account across its goals):
+      // completed → its target_amount, cancelled → 0.
       const currentAmount =
         item.status === 'active'
           ? (savedByGoalId.get(item.id) ?? 0)
-          : (accountBalanceCache.get(account.id) ?? 0)
+          : item.status === 'completed'
+            ? item.target_amount
+            : 0
       const progress = calculateGoalProgress(currentAmount, item.target_amount)
 
       return {
@@ -134,9 +137,12 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Total savings = sum of waterfall saved across goals (no double counting of a
-    // shared account balance across its multiple goals).
-    const totalSavings = goals.reduce((sum, goal) => sum + goal.currentAmount, 0)
+    // Total savings ("Total Terkumpul") = money currently allocated to ACTIVE goals,
+    // i.e. the sum of active goals' waterfall `saved`. Non-active goals are excluded so
+    // a shared account balance is never double-counted across its goals.
+    const totalSavings = goals
+      .filter((goal) => goal.status === 'active')
+      .reduce((sum, goal) => sum + goal.currentAmount, 0)
 
     // Separate active and completed goals
     const activeGoals = goals.filter(g => g.status === 'active')

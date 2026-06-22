@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { AccountDB, FinancialGoalDB, GoalType } from '@/types/database'
 import { GoalProgress } from '@/lib/goals/calculations'
 import { computeGoalWaterfall, GoalWithSaved } from '@/lib/goals/waterfall'
+import { canHaveGoal } from '@/lib/goals/eligibility'
 import { useAccounts, AccountWithHistory } from '@/contexts/AccountContext'
 import { queryKeys } from '@/hooks/useDataRefresh'
 
@@ -206,7 +207,7 @@ export interface AllGoalsResult {
 // Hook: Get every account's goals (waterfall-applied), aggregated across accounts.
 export function useAllGoals(options?: { enabled?: boolean }) {
   const { accounts } = useAccounts()
-  const accountsWithGoals = accounts.filter((a) => ['BANK', 'INVESTMENT'].includes(a.type))
+  const accountsWithGoals = accounts.filter((a) => canHaveGoal(a.type))
 
   return useQuery<AllGoalsResult>({
     queryKey: [...goalKeys.allList(), accountsWithGoals.map((a) => a.id).sort().join(',')],
