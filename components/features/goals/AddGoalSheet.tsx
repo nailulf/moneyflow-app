@@ -18,6 +18,7 @@ import { useAccounts } from '@/contexts/AccountContext'
 import { goalIcon, goalTint } from '@/lib/goals/goal-style'
 import { GoalType } from '@/types/database'
 import { cn } from '@/lib/utils'
+import { GoalCreatedView } from './GoalCreatedView'
 
 interface Props {
   open: boolean
@@ -88,8 +89,12 @@ export function AddGoalSheet({ open, onOpenChange, accountId, onCreated }: Props
     return { defaultValue: dmy }
   }, [])
 
+  // In-sheet success state. When set, the sheet shows GoalCreatedView instead
+  // of the form. Cleared by reset() so reopening the sheet shows the form again.
+  const [createdGoalId, setCreatedGoalId] = useState<string | null>(null)
+
   const {
-    register, handleSubmit, control, watch, setValue,
+    register, handleSubmit, control, watch, setValue, reset: resetForm,
     formState: { isSubmitting },
   } = useForm({
     resolver: zodResolver(formSchema),
@@ -124,9 +129,17 @@ export function AddGoalSheet({ open, onOpenChange, accountId, onCreated }: Props
       (result as { goal?: { id?: string } }).goal?.id ??
       (result as { id?: string }).id ??
       ''
-    onCreated(createdId)
-    onOpenChange(false)
+    // Show the in-sheet success recap instead of navigating immediately.
+    // onCreated(...) fires later, from the "Lihat Target" CTA.
+    setCreatedGoalId(createdId)
   })
+
+  // Clears the form and dismisses the success view (createdGoalId → null),
+  // so reopening the sheet starts fresh on the form.
+  const reset = () => {
+    setCreatedGoalId(null)
+    resetForm()
+  }
 
   const submitting = isPending || isSubmitting
 
@@ -138,7 +151,22 @@ export function AddGoalSheet({ open, onOpenChange, accountId, onCreated }: Props
       >
         <div className="mx-auto mt-2 mb-1 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/30" />
 
-        {/* Scrollable body */}
+        {createdGoalId ? (
+          // Success recap — brings its own sticky-footer CTAs, so it replaces
+          // the entire scroll-body + footer region (no double-wrapped footer).
+          <GoalCreatedView
+            goalId={createdGoalId}
+            onViewGoal={() => {
+              onCreated(createdGoalId)
+              reset()
+            }}
+            onBackToAccount={() => {
+              onOpenChange(false)
+              reset()
+            }}
+          />
+        ) : (
+        /* Scrollable body */
         <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 overflow-y-auto px-4 pb-4">
             <SheetHeader className="px-0 text-left">
@@ -295,6 +323,7 @@ export function AddGoalSheet({ open, onOpenChange, accountId, onCreated }: Props
             </Button>
           </div>
         </form>
+        )}
       </SheetContent>
     </Sheet>
   )

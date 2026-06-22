@@ -3,7 +3,21 @@ import '@testing-library/jest-dom'
 
 jest.mock('next-intl', () => ({ useTranslations: () => (k: string) => k, useLocale: () => 'en' }))
 const createMut = jest.fn((_input: unknown) => Promise.resolve({ id: 'newgoal' }))
-jest.mock('@/hooks/useGoalsQuery', () => ({ useCreateGoal: () => ({ mutateAsync: createMut, isPending: false }) }))
+// GoalCreatedView (the in-sheet success step) calls useGoal(goalId) to render its recap.
+jest.mock('@/hooks/useGoalsQuery', () => ({
+  useCreateGoal: () => ({ mutateAsync: createMut, isPending: false }),
+  useGoal: () => ({
+    data: {
+      goal: {
+        id: 'newgoal', name: 'Dana Darurat', goal_type: 'emergency_fund',
+        target_amount: 30000000, target_date: '12/2026', created_at: '2026-06-01',
+      },
+      account: { currency: 'IDR' },
+      saved: 0,
+      isCompleted: false,
+    },
+  }),
+}))
 jest.mock('@/contexts/AccountContext', () => ({
   useAccounts: () => ({ accounts: [{ id: 'a1', name: 'Bank BCA', type: 'BANK', currency: 'IDR' }] }),
 }))
@@ -36,6 +50,10 @@ it('submits a create payload with target date', async () => {
   expect(typeof payload.targetDate).toBe('string')
   expect(payload.targetDate).toMatch(/^\d{2}\/\d{4}$/)
 
+  // Submit now shows the in-sheet success view; onCreated fires from "Lihat Target".
+  await waitFor(() => expect(screen.getByRole('button', { name: 'success.viewGoal' })).toBeInTheDocument())
+  expect(onCreated).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole('button', { name: 'success.viewGoal' }))
   await waitFor(() => expect(onCreated).toHaveBeenCalledWith('newgoal'))
 })
 
