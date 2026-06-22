@@ -40,9 +40,9 @@ export function GoalSection({ account }: GoalSectionProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   const { data, isLoading } = useAccountGoal(account.id)
-  const deleteGoal = useDeleteGoal(account.id)
 
   const goal = data?.goal
+  const deleteGoal = useDeleteGoal(goal?.id ?? '')
   const canHaveThisGoal = canHaveGoal(account.type)
 
   const handleDelete = async () => {

@@ -33,7 +33,9 @@ async function computeCurrentBalance(
   )
 }
 
-// GET /api/accounts/[accountId]/goal - Get goal for specific account
+// GET /api/accounts/[accountId]/goal - Get ALL goals for a specific account.
+// Returns an ARRAY ordered by target_date asc, created_at asc (waterfall fill order).
+// Progress is now derived client-side from the live balance via computeGoalWaterfall.
 export async function GET(request: NextRequest, context: RouteParams) {
   try {
     const { accountId } = await context.params
@@ -45,10 +47,10 @@ export async function GET(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Verify account belongs to user and get balance
+    // Verify account belongs to user
     const { data: account, error: accountError } = await supabase
       .from('accounts')
-      .select('id, user_id, balance, type, currency')
+      .select('id, user_id')
       .eq('id', accountId)
       .single()
 
@@ -60,32 +62,20 @@ export async function GET(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Get goal for this account
-    const { data: goal, error: goalError } = await supabase
+    // Get ALL goals for this account, in waterfall fill order
+    const { data: goals, error: goalError } = await supabase
       .from('financial_goals')
       .select('*')
       .eq('account_id', accountId)
-      .single()
+      .order('target_date', { ascending: true })
+      .order('created_at', { ascending: true })
 
-    if (goalError && goalError.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('[Goal API] Error fetching goal:', goalError)
-      return NextResponse.json({ error: 'Failed to fetch goal' }, { status: 500 })
+    if (goalError) {
+      console.error('[Goal API] Error fetching goals:', goalError)
+      return NextResponse.json({ error: 'Failed to fetch goals' }, { status: 500 })
     }
 
-    // If no goal, return null
-    if (!goal) {
-      return NextResponse.json({ goal: null, progress: null })
-    }
-
-    // Calculate progress using computed live balance (opening anchor + Σ transactions)
-    const currentBalance = await computeCurrentBalance(supabase, {
-      ...account,
-      type: account.type as AccountDB['type'],
-      currency: account.currency || 'IDR',
-    })
-    const progress = calculateGoalProgress(currentBalance, goal.target_amount)
-
-    return NextResponse.json({ goal, progress })
+    return NextResponse.json(goals || [])
   } catch (error) {
     console.error('[Goal API] Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -147,11 +137,16 @@ export async function POST(request: NextRequest, context: RouteParams) {
       )
     }
 
-    // Parse target date - convert MM/YYYY to ISO date
+    // Parse target date - convert MM/YYYY to the ISO month-END date.
+    // new Date(year, month, 0) yields the last day of `month` (month is 1-based here,
+    // and day 0 rolls back to the prior month's last day).
     let isoTargetDate: string
     if (targetDate.includes('/')) {
       const [month, year] = targetDate.split('/')
-      isoTargetDate = `${year}-${month.padStart(2, '0')}-01`
+      const lastDay = new Date(Number(year), Number(month), 0)
+      const mm = String(lastDay.getMonth() + 1).padStart(2, '0')
+      const dd = String(lastDay.getDate()).padStart(2, '0')
+      isoTargetDate = `${lastDay.getFullYear()}-${mm}-${dd}`
     } else {
       isoTargetDate = targetDate
     }
@@ -173,13 +168,7 @@ export async function POST(request: NextRequest, context: RouteParams) {
       .single()
 
     if (createError) {
-      // Check for unique constraint violation
-      if (createError.code === '23505') {
-        return NextResponse.json(
-          { error: 'A goal already exists for this account' },
-          { status: 409 }
-        )
-      }
+      // Multi-goal is now allowed: do NOT reject when a goal already exists.
       console.error('[Goal API] Error creating goal:', createError)
       return NextResponse.json({ error: 'Failed to create goal' }, { status: 500 })
     }
