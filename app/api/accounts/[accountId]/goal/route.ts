@@ -244,10 +244,15 @@ export async function PUT(request: NextRequest, context: RouteParams) {
       updateData.target_amount = targetAmount
     }
     if (targetDate !== undefined) {
-      // Parse target date - convert MM/YYYY to ISO date
+      // Parse target date - convert MM/YYYY to the ISO month-END date.
+      // new Date(year, month, 0) yields the last day of `month` (month is 1-based here,
+      // and day 0 rolls back to the prior month's last day).
       if (targetDate.includes('/')) {
         const [month, year] = targetDate.split('/')
-        updateData.target_date = `${year}-${month.padStart(2, '0')}-01`
+        const lastDay = new Date(Number(year), Number(month), 0)
+        const mm = String(lastDay.getMonth() + 1).padStart(2, '0')
+        const dd = String(lastDay.getDate()).padStart(2, '0')
+        updateData.target_date = `${lastDay.getFullYear()}-${mm}-${dd}`
       } else {
         updateData.target_date = targetDate
       }

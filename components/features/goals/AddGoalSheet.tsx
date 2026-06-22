@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,7 +16,6 @@ import { useCreateGoal } from '@/hooks/useGoalsQuery'
 import { canHaveGoal } from '@/lib/goals/eligibility'
 import { useAccounts } from '@/contexts/AccountContext'
 import { goalIcon, goalTint } from '@/lib/goals/goal-style'
-import { getGoalTypeLabel } from '@/lib/goals/calculations'
 import { GoalType } from '@/types/database'
 import { cn } from '@/lib/utils'
 
@@ -56,6 +55,16 @@ export function AddGoalSheet({ open, onOpenChange, accountId, onCreated }: Props
   const [selectedAccountId, setSelectedAccountId] = useState<string>(
     accountId ?? eligibleAccounts[0]?.id ?? ''
   )
+
+  // useAccounts() returns [] on first paint then hydrates. In the picker case
+  // (no accountId prop), seed the default to the first eligible account once it
+  // arrives — without clobbering an explicit user selection.
+  useEffect(() => {
+    if (!accountId && !selectedAccountId && eligibleAccounts.length > 0) {
+      setSelectedAccountId(eligibleAccounts[0].id)
+    }
+  }, [accountId, selectedAccountId, eligibleAccounts])
+
   const resolvedAccountId = accountId ?? selectedAccountId
   const resolvedAccount = accounts.find((a) => a.id === resolvedAccountId)
 
@@ -173,7 +182,7 @@ export function AddGoalSheet({ open, onOpenChange, accountId, onCreated }: Props
                         >
                           <Icon className={cn('size-3', selected ? 'text-primary-foreground' : tint.fg)} />
                         </span>
-                        {getGoalTypeLabel(type)}
+                        {t(`types.${type}`)}
                       </button>
                     )
                   })}

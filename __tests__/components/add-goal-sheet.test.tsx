@@ -38,3 +38,11 @@ it('submits a create payload with target date', async () => {
 
   await waitFor(() => expect(onCreated).toHaveBeenCalledWith('newgoal'))
 })
+
+it('renders goal-type chips with the i18n label (not the hardcoded English label)', () => {
+  render(<AddGoalSheet open onOpenChange={() => {}} accountId="a1" onCreated={() => {}} />)
+  // The next-intl mock returns the key, so the localized chip renders as `types.<goal_type>`.
+  expect(screen.getByRole('button', { name: /types\.emergency_fund/ })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: /types\.gadget/ })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: /types\.debt_payoff/ })).toBeInTheDocument()
+})
