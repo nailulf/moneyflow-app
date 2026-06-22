@@ -2028,7 +2028,9 @@
     "card": {
       "tercapai": "{pct}% achieved",
       "onTrack": "On track",
-      "behind": "Behind"
+      "behind": "Behind",
+      "target": "Target {date}",
+      "ofTarget": "of {target}"
     },
     "list": {
       "totalTitle": "Total Savings Progress",

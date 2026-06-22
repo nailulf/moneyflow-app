@@ -2028,7 +2028,9 @@
     "card": {
       "tercapai": "{pct}% tercapai",
       "onTrack": "On track",
-      "behind": "Tertinggal"
+      "behind": "Tertinggal",
+      "target": "Target {date}",
+      "ofTarget": "dari {target}"
     },
     "list": {
       "totalTitle": "Total Kemajuan Tabungan",
