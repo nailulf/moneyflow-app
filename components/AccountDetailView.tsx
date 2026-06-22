@@ -13,6 +13,7 @@ import { ChartContainer } from '@/components/ui/organisms/chart'
 import { ArrowLeft, CreditCard, Wallet, TrendingUp, Building2, Loader2, Edit, Trash2, Download, SlidersHorizontal , Smartphone } from 'lucide-react'
 import { useAccounts, AccountWithHistory } from '@/contexts/AccountContext'
 import { formatCurrency, parseCurrencyAmount } from '@/lib/data-utils'
+import { canHaveGoal } from '@/lib/goals/eligibility'
 import { GoalSection } from '@/components/features/goals'
 import { AccountDB, BalanceAdjustment } from '@/types/database'
 import { useAllTransactions } from '@/hooks/useTransactionsQuery'
@@ -396,7 +397,7 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
   }
 
   const Icon = ACCOUNT_ICONS[account.type] || CreditCard
-  const canHaveGoal = ['BANK', 'INVESTMENT'].includes(account.type)
+  const canHaveThisGoal = canHaveGoal(account.type)
 
   const accountHeader = (
     <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-start sm:justify-between">
@@ -452,11 +453,11 @@ export function AccountDetailView({ accountId: propAccountId, isModal = false }:
 
               <TabsContent value="overview">
                 {/* Goal Section - only for bank and investment accounts */}
-                {canHaveGoal && <GoalSection account={account} />}
+                {canHaveThisGoal && <GoalSection account={account} />}
 
                 {/* Balance History Chart */}
                 {balanceHistory.length > 1 && (
-                  <Card className={canHaveGoal ? 'mt-6' : ''}>
+                  <Card className={canHaveThisGoal ? 'mt-6' : ''}>
                     <CardHeader>
                       <CardTitle className="text-lg leading-title-5">{t('chart.title')}</CardTitle>
                     </CardHeader>
