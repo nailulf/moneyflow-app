@@ -24,6 +24,7 @@ import { groupByDate } from '@/lib/transaction-filters'
 import { buildBalanceHistory } from '@/lib/account-detail-utils'
 import { StickyScreenHeader } from '@/components/features/navigation/StickyScreenHeader'
 import { TransactionGroupedList } from '@/components/features/transaction/TransactionGroupedList'
+import { AccountGoalsSection } from '@/components/features/goals/AccountGoalsSection'
 import { AccountBalanceHero } from './AccountBalanceHero'
 import { BalanceTrendCard } from './BalanceTrendCard'
 import { AccountActionsMenu } from './AccountActionsMenu'
@@ -155,6 +156,8 @@ export function AccountDetailScreen({ accountId }: { accountId: string }) {
       <AccountBalanceHero icon={Icon} balance={currentBalance} currency={account.currency} />
 
       <BalanceTrendCard series={series} currency={account.currency} />
+
+      <AccountGoalsSection account={account} />
 
       <section className="flex flex-col gap-3">
         <h2 className="px-2 text-lg leading-title-5 font-semibold text-foreground">{t('tabs.transactions')}</h2>
