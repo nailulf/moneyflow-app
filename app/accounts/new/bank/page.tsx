@@ -14,6 +14,7 @@ import { bankAccountSchema } from '@/lib/validations-account'
 import { buildAccountPayload } from '@/lib/wallets-utils'
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { FormCard, FormRow } from '@/components/features/accounts/create/FormCard'
+import { MoneyInput } from '@/components/features/accounts/create/MoneyInput'
 import { SegmentedControl } from '@/components/features/accounts/create/SegmentedControl'
 import { SubmitButton } from '@/components/features/accounts/create/SubmitButton'
 import { AccountCreatedView } from '@/components/features/accounts/create/AccountCreatedView'
@@ -30,7 +31,7 @@ export default function BankAccountPage() {
   const [created, setCreated] = useState<{ name: string; type: string } | null>(null)
   const [pending, setPending] = useState(false)
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } =
+  const { register, handleSubmit, watch, setValue, control, formState: { errors } } =
     useForm<z.input<typeof bankAccountSchema>, unknown, z.output<typeof bankAccountSchema>>({
       resolver: zodResolver(bankAccountSchema),
       defaultValues: {
@@ -93,17 +94,7 @@ export default function BankAccountPage() {
             />
           </FormRow>
           <FormRow icon={Banknote} error={errors.balance && t(`errors.${errors.balance.message}`)}>
-            <div className="flex items-center gap-2">
-              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('bank.balanceLabel')}</span>
-              <input
-                {...register('balance')}
-                type="number"
-                inputMode="numeric"
-                min="0"
-                aria-label={t('bank.balanceLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
-              />
-            </div>
+            <MoneyInput control={control} name="balance" label={t('bank.balanceLabel')} />
           </FormRow>
         </FormCard>
         <SubmitButton label={t('bank.submit')} pending={pending} />

@@ -232,6 +232,13 @@ button placed after short content floats mid-screen — that's the bug this fixe
 gray `#EEF2F7` screen/sheet background) — use the `Input` atom. The only exception is the inline
 "settings-row" input (transparent input inside a white `FormCard` row, e.g. create-account / edit-record).
 
+**Money/amount fields must be currency-formatted, never a raw `type="number"`.** Use `Input
+type="amount"` (boxed, RHF-compatible) or `CurrencyInput` (inline) so amounts show IDR
+thousand-separators + the `Rp` prefix. Create-account FormCard rows use the shared
+`components/features/accounts/create/MoneyInput.tsx` (CurrencyInput bridged to react-hook-form via a
+`Controller`, keeping the Zod string schemas untouched). Keep `type="number"` only for non-money
+numbers: day-of-month (1–31), percentages (interest/depreciation), and counts (loan-term years).
+
 **Toasts must be opaque.** `components/ui/atoms/sonner.tsx` wraps tokens as `hsl(var(--popover))` — the
 design tokens are raw HSL triplets, so a bare `var(--token)` is an invalid color and renders the toast
 transparent. Always wrap token vars in `hsl(...)` when feeding them to a raw CSS color property.

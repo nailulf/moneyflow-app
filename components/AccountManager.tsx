@@ -511,9 +511,8 @@ function AccountManagerInternal({
             <label htmlFor="monthly-payment" className="text-sm font-medium">{t('assetDetails.monthlyPayment')}</label>
             <Input
               id="monthly-payment"
-              type="number"
-              min="0"
-              step="0.01"
+              type="amount"
+              currency={newAccountCurrency}
               value={newMonthlyPayment}
               onChange={(e) => setNewMonthlyPayment(e.target.value)}
               placeholder={t('assetDetails.monthlyPaymentPlaceholder')}
@@ -585,9 +584,8 @@ function AccountManagerInternal({
             <label htmlFor="edit-monthly-payment" className="text-sm font-medium">{t('assetDetails.monthlyPayment')}</label>
             <Input
               id="edit-monthly-payment"
-              type="number"
-              min="0"
-              step="0.01"
+              type="amount"
+              currency={editAccountCurrency}
               value={editMonthlyPayment}
               onChange={(e) => setEditMonthlyPayment(e.target.value)}
               placeholder={t('assetDetails.monthlyPaymentPlaceholder')}
@@ -678,11 +676,11 @@ function AccountManagerInternal({
           </label>
           <Input
             id="account-balance"
-            type="number"
-            step="0.01"
+            type="amount"
+            currency={newAccountCurrency}
             value={newAccountBalance}
             onChange={(e) => setNewAccountBalance(e.target.value)}
-            placeholder="0.00"
+            placeholder="0"
           />
         </div>
       </div>

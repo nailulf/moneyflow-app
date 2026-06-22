@@ -110,6 +110,12 @@ recurring pixel-gap sources — match them exactly):
   `Input` atom, don't hand-roll `<input>`**, and never set `bg-transparent` on a field (it disappears
   on the gray `#EEF2F7` screen/sheet background — the #1 repeat defect). Inline "settings-row" inputs
   (transparent input inside a white `FormCard` row) are the *only* exception.
+- **Money/amount fields must be currency-formatted** — never a raw `type="number"`. Use
+  `<Input type="amount" currency={…}>` (boxed) or `<CurrencyInput>` (inline) so values render with IDR
+  thousand-separators + the `Rp` prefix (e.g. `Rp 25.000.000`). In the create-account FormCard rows,
+  use the shared `components/features/accounts/create/MoneyInput.tsx` (bridges CurrencyInput →
+  react-hook-form via a `Controller`). Only *non-money* numbers stay `type="number"`: day-of-month
+  (1–31), percentages (interest/depreciation rate), and counts (loan-term years).
 - **CTA buttons** are `h-[52px]`, `rounded-[14px]`, `bg-primary` / `text-primary-foreground`, label
   `text-md leading-body-lg font-semibold`. Secondary = same box, `border` on `background`.
 - **Surfaces are white** (`bg-card`): cards, **and bottom sheets**. A bottom sheet's `SheetContent`

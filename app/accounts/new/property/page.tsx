@@ -14,6 +14,7 @@ import { propertySchema } from '@/lib/validations-account'
 import { buildAccountPayload, deriveMortgage } from '@/lib/wallets-utils'
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { FormCard, FormRow } from '@/components/features/accounts/create/FormCard'
+import { MoneyInput } from '@/components/features/accounts/create/MoneyInput'
 import { ToggleSection } from '@/components/features/accounts/create/ToggleSection'
 import { SubmitButton } from '@/components/features/accounts/create/SubmitButton'
 import { AccountCreatedView } from '@/components/features/accounts/create/AccountCreatedView'
@@ -29,7 +30,7 @@ export default function PropertyPage() {
   const [created, setCreated] = useState<{ name: string; type: string; note?: string } | null>(null)
   const [pending, setPending] = useState(false)
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } =
+  const { register, handleSubmit, watch, setValue, control, formState: { errors } } =
     useForm<z.input<typeof propertySchema>, unknown, z.output<typeof propertySchema>>({
       resolver: zodResolver(propertySchema),
       defaultValues: {
@@ -112,7 +113,7 @@ export default function PropertyPage() {
   }
 
   const numberRow = (
-    name: 'downPayment' | 'interestRate' | 'monthlyPayment' | 'loanTermYears',
+    name: 'interestRate' | 'loanTermYears',
     icon: typeof Banknote,
     label: string,
     step?: string
@@ -154,17 +155,7 @@ export default function PropertyPage() {
             />
           </FormRow>
           <FormRow icon={Banknote} error={errors.currentValue && t(`errors.${errors.currentValue.message}`)}>
-            <div className="flex items-center gap-2">
-              <span className="text-sm leading-body-sm text-muted-foreground">{t('property.valueLabel')}</span>
-              <input
-                {...register('currentValue')}
-                type="number"
-                inputMode="numeric"
-                min="0"
-                aria-label={t('property.valueLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
-              />
-            </div>
+            <MoneyInput control={control} name="currentValue" label={t('property.valueLabel')} />
           </FormRow>
           <FormRow icon={Calendar} error={errors.purchaseDate && t(`errors.${errors.purchaseDate.message}`)}>
             <div className="flex items-center gap-2">
@@ -186,9 +177,13 @@ export default function PropertyPage() {
           checked={hasMortgage}
           onCheckedChange={(v) => setValue('hasMortgage', v)}
         >
-          {numberRow('downPayment', Wallet, t('property.downPayment'))}
+          <FormRow icon={Wallet} error={errors.downPayment && t(`errors.${errors.downPayment.message}`)}>
+            <MoneyInput control={control} name="downPayment" label={t('property.downPayment')} />
+          </FormRow>
           {numberRow('interestRate', Percent, t('property.interestRate'), '0.1')}
-          {numberRow('monthlyPayment', Banknote, t('property.monthlyPayment'))}
+          <FormRow icon={Banknote} error={errors.monthlyPayment && t(`errors.${errors.monthlyPayment.message}`)}>
+            <MoneyInput control={control} name="monthlyPayment" label={t('property.monthlyPayment')} />
+          </FormRow>
           {numberRow('loanTermYears', Hourglass, t('property.loanTermYears'), '1')}
         </ToggleSection>
 
