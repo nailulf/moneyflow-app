@@ -2041,8 +2041,20 @@
     "detail": {
       "title": "Goal Details",
       "remaining": "Remaining {amount}",
+      "insightsTitle": "Insights & Tips",
       "feasibleOnTrack": "On track to reach your goal by {date}",
       "feasibleBehind": "You need {rate}% increase per month to reach your goal by {date}"
+    },
+    "edit": {
+      "title": "Edit Goal",
+      "subtitle": "Update your savings target",
+      "submit": "Save Changes"
+    },
+    "deleteDialog": {
+      "title": "Delete Goal",
+      "description": "This goal will be permanently removed. This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
     },
     "insights": {
       "accelerateTitle": "Accelerate Your Savings",

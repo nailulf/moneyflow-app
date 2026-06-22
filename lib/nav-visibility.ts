@@ -20,8 +20,15 @@ function isAccountDetail(pathname: string): boolean {
   return m !== null && m[1] !== 'new'
 }
 
+// /goals/<id> is a full-screen detail; /goals (list) is NOT.
+function isGoalDetail(pathname: string): boolean {
+  const m = pathname.match(/^\/goals\/([^/]+)/)
+  return m !== null
+}
+
 export const isFullScreenFlow = (pathname: string): boolean =>
   FULL_SCREEN_FLOW_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
   isPortfolioDetail(pathname) ||
   isTransactionEdit(pathname) ||
-  isAccountDetail(pathname)
+  isAccountDetail(pathname) ||
+  isGoalDetail(pathname)

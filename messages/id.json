@@ -2041,8 +2041,20 @@
     "detail": {
       "title": "Detail Target",
       "remaining": "Sisa {amount}",
+      "insightsTitle": "Wawasan & Saran",
       "feasibleOnTrack": "Sesuai rencana untuk mencapai target pada {date}",
       "feasibleBehind": "Anda perlu kenaikan {rate}% per bulan untuk mencapai target pada {date}"
+    },
+    "edit": {
+      "title": "Ubah Target",
+      "subtitle": "Perbarui target tabungan Anda",
+      "submit": "Simpan Perubahan"
+    },
+    "deleteDialog": {
+      "title": "Hapus Target",
+      "description": "Target ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
+      "cancel": "Batal",
+      "delete": "Hapus"
     },
     "insights": {
       "accelerateTitle": "Percepat Tabungan Anda",
