@@ -1,5 +1,6 @@
 'use client'
 
+import { createElement } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -30,7 +31,6 @@ export function GoalCardCompact({ item, currency, onClick }: GoalCardProps) {
   const tracking = isGoalOnTrack(saved, target, goal.target_date, goal.created_at)
   const onTrack = tracking.status !== 'behind' && tracking.status !== 'overdue'
 
-  const Icon = goalIcon(goal.goal_type)
   const tint = goalTint(goal.goal_type)
 
   const targetMonth = parseTargetDate(goal.target_date).toLocaleDateString(locale, {
@@ -52,7 +52,7 @@ export function GoalCardCompact({ item, currency, onClick }: GoalCardProps) {
             tint.bg,
           )}
         >
-          <Icon className={cn('h-5 w-5', tint.fg)} />
+          {createElement(goalIcon(goal.goal_type), { className: cn('h-5 w-5', tint.fg), 'aria-hidden': true })}
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-md font-semibold leading-body-sm text-foreground">

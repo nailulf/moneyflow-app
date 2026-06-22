@@ -1,5 +1,6 @@
 'use client'
 
+import { createElement } from 'react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { formatCurrencyCompact } from '@/lib/data-utils'
@@ -24,7 +25,6 @@ export function GoalCardMini({ item, currency, onClick }: GoalCardProps) {
   const tracking = isGoalOnTrack(saved, target, goal.target_date, goal.created_at)
   const onTrack = tracking.status !== 'behind' && tracking.status !== 'overdue'
 
-  const Icon = goalIcon(goal.goal_type)
   const tint = goalTint(goal.goal_type)
 
   return (
@@ -41,7 +41,7 @@ export function GoalCardMini({ item, currency, onClick }: GoalCardProps) {
             tint.bg,
           )}
         >
-          <Icon className={cn('h-[18px] w-[18px]', tint.fg)} />
+          {createElement(goalIcon(goal.goal_type), { className: cn('h-[18px] w-[18px]', tint.fg), 'aria-hidden': true })}
         </div>
         <span className="text-sm font-semibold leading-body-sm text-primary">
           {pct}%

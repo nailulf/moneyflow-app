@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { createElement, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { ArrowLeft, Pencil, Trash2, TrendingUp, Flame, Loader2, type LucideIcon } from 'lucide-react'
@@ -82,7 +82,6 @@ export function GoalDetailScreen({ goalId }: { goalId: string }) {
   const remaining = Math.max(0, target - saved)
   const pct = target > 0 ? Math.min(100, Math.round((saved / target) * 100)) : 0
 
-  const Icon = goalIcon(goal.goal_type)
   const tint = goalTint(goal.goal_type)
 
   // ── Feasibility ──────────────────────────────────────────────────────────
@@ -156,7 +155,7 @@ export function GoalDetailScreen({ goalId }: { goalId: string }) {
       <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-card">
         <div className="flex items-center gap-3">
           <span className={cn('flex size-12 shrink-0 items-center justify-center rounded-full', tint.bg)}>
-            <Icon className={cn('size-6', tint.fg)} />
+            {createElement(goalIcon(goal.goal_type), { className: cn('size-6', tint.fg), 'aria-hidden': true })}
           </span>
           <div className="min-w-0">
             <h2 className="truncate text-lg leading-title-5 font-bold text-foreground">{goal.name}</h2>
