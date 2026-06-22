@@ -1997,5 +1997,66 @@
     "browseLink": "Sekadar lihat-lihat? Jelajahi aplikasinya dulu",
     "registerPrompt": "Mau langsung daftar?",
     "registerLink": "Buat akun"
+  },
+  "goals": {
+    "sectionTitle": "Target Tabungan",
+    "seeAll": "Lihat Semua",
+    "add": "Tambah",
+    "empty": {
+      "title": "Mulai Perjalanan Tabungan Anda",
+      "cta": "Tetapkan Target Pertama"
+    },
+    "create": {
+      "title": "Buat Target",
+      "subtitle": "Tetapkan target tabungan untuk akun Anda",
+      "name": "Nama Target",
+      "type": "Jenis Target",
+      "account": "Akun",
+      "accountPlaceholder": "Pilih akun",
+      "amount": "Jumlah Target",
+      "date": "Tanggal Target",
+      "month": "Bulan",
+      "year": "Tahun",
+      "submit": "Buat Target"
+    },
+    "success": {
+      "title": "Target Dibuat!",
+      "subtitle": "Target Anda telah disimpan. Mulai menabung menuju target Anda.",
+      "viewGoal": "Lihat Target",
+      "backToAccount": "Kembali ke Akun"
+    },
+    "card": {
+      "tercapai": "{pct}% tercapai",
+      "onTrack": "On track",
+      "behind": "Tertinggal"
+    },
+    "list": {
+      "totalTitle": "Total Kemajuan Tabungan",
+      "activeCount": "{count} target aktif"
+    },
+    "detail": {
+      "title": "Detail Target",
+      "remaining": "Sisa {amount}",
+      "feasibleOnTrack": "Sesuai rencana untuk mencapai target pada {date}",
+      "feasibleBehind": "Anda perlu kenaikan {rate}% per bulan untuk mencapai target pada {date}"
+    },
+    "insights": {
+      "accelerateTitle": "Percepat Tabungan Anda",
+      "accelerateBody": "Hemat {amount} lebih banyak per bulan selama {months} bulan untuk mencapai target lebih awal",
+      "streakTitle": "Aliran Tabungan",
+      "streakBody": "Anda telah menabung secara konsisten selama {months} bulan"
+    },
+    "types": {
+      "emergency_fund": "Dana Darurat",
+      "vacation": "Liburan",
+      "house_down_payment": "Beli Rumah",
+      "car_purchase": "Beli Mobil",
+      "education": "Pendidikan",
+      "wedding": "Pernikahan",
+      "investment": "Investasi",
+      "other": "Lainnya",
+      "debt_payoff": "Cicil Hutang",
+      "gadget": "Gadget"
+    }
   }
 }
