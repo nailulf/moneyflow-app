@@ -1,6 +1,5 @@
-import { differenceInMonths, startOfMonth, getYear, getMonth } from 'date-fns'
+import { startOfMonth, subMonths } from 'date-fns'
 import type { Transaction } from '@/types/database'
-import { calculateRequiredSavings } from './calculations'
 
 /**
  * Calculate average net monthly inflow into an account over a trailing window.
@@ -17,14 +16,15 @@ export function monthlyInflowRate(
   asOf: Date,
   months: number = 6
 ): number {
-  // Calculate cutoff date: months back from asOf
-  const cutoffDate = new Date(asOf)
-  cutoffDate.setMonth(cutoffDate.getMonth() - months)
+  // Trailing window: the `months` calendar months ending at asOf (inclusive of
+  // asOf's month). Use date-fns subMonths to avoid setMonth() day-of-month
+  // overflow at month boundaries (e.g. subtracting from the 31st).
+  const cutoff = startOfMonth(subMonths(asOf, months - 1))
 
   // Filter transactions within the trailing window
   const relevantTxns = transactions.filter((tx) => {
     const txDate = new Date(tx.date)
-    return txDate >= cutoffDate && txDate <= asOf
+    return txDate >= cutoff && txDate <= asOf
   })
 
   if (relevantTxns.length === 0) {
@@ -173,7 +173,11 @@ export function consistencyStreak(
 }
 
 /**
- * Thin wrapper over calculateRequiredSavings for computing required monthly savings.
+ * Required monthly savings to close `remaining` by the deadline.
+ * Intentionally inlined rather than delegating to calculateRequiredSavings:
+ * that helper's signature is (currentBalance, targetAmount, targetDate-string)
+ * and derives its own month count from a date — it does not accept a
+ * pre-computed (remaining, monthsToDeadline) pair, so a thin wrapper isn't possible.
  * @param remaining - Amount remaining to save
  * @param monthsToDeadline - Number of months until deadline
  * @returns Required monthly savings amount

@@ -41,6 +41,16 @@ describe('goals/insights', () => {
       // Should include both (June and Jan are within 6-month window from June 30)
       expect(rate).toBeGreaterThan(0)
     })
+
+    it('includes a txn exactly at the cutoff month and excludes one a month before', () => {
+      // asOf=2026-06-30, months=6 => cutoff = startOfMonth(2026-01) = 2026-01-01.
+      // A txn at the cutoff month is IN; a txn in 2025-12 (one month before) is OUT.
+      const atCutoff = [tx({ amount: 600_000, date: '2026-01-31' })]
+      const beforeCutoff = [tx({ amount: 600_000, date: '2025-12-31' })]
+
+      expect(monthlyInflowRate(atCutoff as any, 'a', new Date('2026-06-30'), 6)).toBeGreaterThan(0)
+      expect(monthlyInflowRate(beforeCutoff as any, 'a', new Date('2026-06-30'), 6)).toBe(0)
+    })
   })
 
   describe('projectCompletionDate', () => {
