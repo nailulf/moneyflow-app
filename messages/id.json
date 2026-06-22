@@ -2034,7 +2034,9 @@
     },
     "list": {
       "totalTitle": "Total Kemajuan Tabungan",
-      "activeCount": "{count} target aktif"
+      "activeCount": "{count} target aktif",
+      "empty": "Belum ada target tabungan",
+      "emptyCta": "Tambah"
     },
     "detail": {
       "title": "Detail Target",

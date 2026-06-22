@@ -2034,7 +2034,9 @@
     },
     "list": {
       "totalTitle": "Total Savings Progress",
-      "activeCount": "{count} active goals"
+      "activeCount": "{count} active goals",
+      "empty": "No savings goals yet",
+      "emptyCta": "Add"
     },
     "detail": {
       "title": "Goal Details",
