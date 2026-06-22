@@ -6,9 +6,10 @@ import { toast } from 'sonner'
 import { ArrowUp, ArrowDown, Info } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/organisms/sheet'
 import { Input } from '@/components/ui/atoms/input'
+import { CurrencyInput } from '@/components/ui/atoms/currency-input'
 import { Label } from '@/components/ui/atoms/label'
 import { Button } from '@/components/ui/atoms/button'
-import { formatCurrency, parseCurrencyAmount } from '@/lib/data-utils'
+import { formatCurrency } from '@/lib/data-utils'
 import { cn } from '@/lib/utils'
 
 interface Props {
@@ -22,15 +23,16 @@ interface Props {
 
 export function AdjustBalanceSheet({ open, onOpenChange, accountId, currentBalance, currency, onSaved }: Props) {
   const t = useTranslations('accountDetail')
-  const [newBalance, setNewBalance] = useState('')
+  // 0 represents an empty / untouched field (CurrencyInput renders 0 as blank). Setting a
+  // balance to exactly 0 via adjustment isn't supported here — close the account instead.
+  const [newBalance, setNewBalance] = useState(0)
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
 
-  const parsed = parseCurrencyAmount(newBalance)
-  const diff = newBalance.trim() === '' ? null : parsed - currentBalance
+  const diff = newBalance === 0 ? null : newBalance - currentBalance
   const hasChange = diff !== null && diff !== 0
 
-  const reset = () => { setNewBalance(''); setNote('') }
+  const reset = () => { setNewBalance(0); setNote('') }
 
   const handleSave = async () => {
     if (!hasChange) return
@@ -40,7 +42,7 @@ export function AdjustBalanceSheet({ open, onOpenChange, accountId, currentBalan
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          new_balance: parsed,
+          new_balance: newBalance,
           note: note.trim() || null,
           adjustment_date: new Date().toISOString().slice(0, 10),
         }),
@@ -87,7 +89,15 @@ export function AdjustBalanceSheet({ open, onOpenChange, accountId, currentBalan
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="adj-new-balance">{t('adjustDialog.newBalance')}</Label>
-              <Input id="adj-new-balance" inputMode="decimal" value={newBalance} onChange={(e) => setNewBalance(e.target.value)} placeholder="0" />
+              {/* CurrencyInput: IDR thousand-separators + currency prefix. Override its legacy
+                  baked-in styling to the white h52/r14 field spec (incl. the lg: variant). */}
+              <CurrencyInput
+                id="adj-new-balance"
+                value={newBalance}
+                onChange={setNewBalance}
+                currency={currency}
+                className="h-[52px] rounded-[14px] bg-card px-4 pl-10 text-md lg:h-[52px]"
+              />
             </div>
 
             {diff !== null && diff !== 0 && (
