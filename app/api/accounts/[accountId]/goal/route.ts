@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateGoalProgress } from '@/lib/goals/calculations'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
+import { canHaveGoal } from '@/lib/goals/eligibility'
 import { AccountDB, FinancialGoalInsert, FinancialGoalUpdate, GoalType } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
@@ -109,8 +110,8 @@ export async function POST(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Only allow goals for BANK and INVESTMENT accounts
-    if (!['BANK', 'INVESTMENT'].includes(account.type)) {
+    // Only allow goals for eligible account types (BANK, DIGITAL_WALLET, CASH)
+    if (!canHaveGoal(account.type)) {
       return NextResponse.json(
         { error: 'Goals can only be set for bank and investment accounts' },
         { status: 400 }
