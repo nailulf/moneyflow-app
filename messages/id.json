@@ -1193,7 +1193,12 @@
     },
     "common": {
       "save": "Simpan",
-      "back": "Kembali"
+      "back": "Kembali",
+      "units": {
+        "perYear": "%/tahun",
+        "years": "tahun",
+        "ofMonth": "tiap bulan"
+      }
     },
     "bank": {
       "title": "Bank / Dompet",
@@ -1213,9 +1218,9 @@
       "purchaseDateLabel": "Tanggal Pembelian",
       "mortgage": "Detail KPR",
       "downPayment": "Uang Muka",
-      "interestRate": "Suku Bunga (%/tahun)",
+      "interestRate": "Suku Bunga",
       "monthlyPayment": "Angsuran Bulanan",
-      "loanTermYears": "Tenor (tahun)",
+      "loanTermYears": "Tenor",
       "submit": "Tambah Properti"
     },
     "vehicle": {
@@ -1226,7 +1231,7 @@
       "nameLabel": "Nama Kendaraan",
       "namePlaceholder": "mis. Honda HR-V 2021",
       "priceLabel": "Harga Beli",
-      "depreciationLabel": "Tingkat Depresiasi (%/tahun)",
+      "depreciationLabel": "Tingkat Depresiasi",
       "submit": "Tambah Kendaraan"
     },
     "creditCard": {
@@ -1234,8 +1239,8 @@
       "nameLabel": "Nama Kartu",
       "namePlaceholder": "mis. BCA Platinum",
       "limitLabel": "Limit Kredit",
-      "statementLabel": "Tanggal Cetak Tagihan (hari)",
-      "dueLabel": "Tanggal Jatuh Tempo (hari)",
+      "statementLabel": "Tanggal Cetak Tagihan",
+      "dueLabel": "Tanggal Jatuh Tempo",
       "info": "Pengeluaran dicatat sebagai expense. Saldo menunjukkan sisa limit kredit.",
       "submit": "Tambah Kartu Kredit"
     },

@@ -99,8 +99,9 @@ export default function CreditCardPage() {
                 min="1"
                 max="31"
                 aria-label={t('creditCard.statementLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
+                className="min-w-0 flex-1 bg-transparent text-left text-sm leading-body-sm font-semibold text-foreground outline-none"
               />
+              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('common.units.ofMonth')}</span>
             </div>
           </FormRow>
           <FormRow icon={CalendarCheck} error={errors.dueDay && t(`errors.${errors.dueDay.message}`)}>
@@ -113,8 +114,9 @@ export default function CreditCardPage() {
                 min="1"
                 max="31"
                 aria-label={t('creditCard.dueLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
+                className="min-w-0 flex-1 bg-transparent text-left text-sm leading-body-sm font-semibold text-foreground outline-none"
               />
+              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('common.units.ofMonth')}</span>
             </div>
           </FormRow>
         </FormCard>

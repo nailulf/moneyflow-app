@@ -105,7 +105,7 @@ export default function VehiclePage() {
           </FormRow>
           <FormRow icon={TrendingDown} error={errors.depreciationRate && t(`errors.${errors.depreciationRate.message}`)}>
             <div className="flex items-center gap-2">
-              <span className="text-sm leading-body-sm text-muted-foreground">{t('vehicle.depreciationLabel')}</span>
+              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('vehicle.depreciationLabel')}</span>
               <input
                 {...register('depreciationRate')}
                 type="number"
@@ -113,8 +113,9 @@ export default function VehiclePage() {
                 min="0"
                 step="0.1"
                 aria-label={t('vehicle.depreciationLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
+                className="min-w-0 flex-1 bg-transparent text-left text-sm leading-body-sm font-semibold text-foreground outline-none"
               />
+              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('common.units.perYear')}</span>
             </div>
           </FormRow>
         </FormCard>
