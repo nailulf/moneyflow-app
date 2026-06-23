@@ -8,35 +8,6 @@ interface RouteParams {
   params: Promise<{ accountId: string }>
 }
 
-/**
- * Resolves the "Other" (or "Other Income") category id for the given user and
- * transaction type.  Falls back to data[0] if no exact name match is found —
- * still returns a valid category so the adjustment transaction is always
- * bookable.
- *
- * NOTE: the categories table uses `group_type` (values: 'INCOME'|'EXPENSE'|'TRANSFER'),
- * NOT a `type` column.
- */
-async function resolveOtherCategoryId(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  type: 'INCOME' | 'EXPENSE'
-): Promise<string | null> {
-  // Adjustments must land in the generic "Other/Uncategorized" bucket — never a real
-  // category like Food/Transport. Prefer the seeded generic category; if the user has
-  // deleted it, return null (uncategorized) rather than an arbitrary real category.
-  const candidates = type === 'EXPENSE' ? ['Other'] : ['Other Income', 'Income']
-  const { data } = await supabase
-    .from('categories')
-    .select('id, name')
-    .eq('user_id', userId)
-    .eq('group_type', type)
-    .order('created_at', { ascending: true })
-  if (!data || data.length === 0) return null
-  const match = data.find(c => candidates.includes(c.name))
-  return match ? match.id : null
-}
-
 // GET /api/accounts/[accountId]/adjust-balance
 // Returns all balance adjustment log entries for the account, newest first
 export async function GET(request: NextRequest, context: RouteParams) {
@@ -180,8 +151,12 @@ export async function POST(request: NextRequest, context: RouteParams) {
       return NextResponse.json({ message: 'Balance already matches; no adjustment created', currentBalance })
     }
 
-    // Resolve the "Other" category for the delta direction
-    const categoryId = await resolveOtherCategoryId(supabase, account.user_id, delta.type)
+    // Balance adjustments are intentionally UNCATEGORIZED (category_id = null): they are
+    // balance corrections, not real income/expense, and the Adjust UI tells the user a
+    // "new uncategorized transaction" will be added. Assigning a real/"Other" category
+    // both contradicts that copy and risks picking an inactive category the client never
+    // loads (which then renders as "Unknown Category").
+    const categoryId = null
 
     // Build the synthetic transaction payload
     const payload = buildAdjustmentPayload({

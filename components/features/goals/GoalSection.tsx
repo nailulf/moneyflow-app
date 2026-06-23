@@ -24,6 +24,7 @@ import {
   getStatusText,
   formatTargetDate
 } from '@/lib/goals/calculations'
+import { canHaveGoal } from '@/lib/goals/eligibility'
 import { useAccountGoal, useDeleteGoal } from '@/hooks/useGoalsQuery'
 import { AddGoalModal } from './AddGoalModal'
 import { EditGoalModal } from './EditGoalModal'
@@ -39,10 +40,10 @@ export function GoalSection({ account }: GoalSectionProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
   const { data, isLoading } = useAccountGoal(account.id)
-  const deleteGoal = useDeleteGoal(account.id)
 
   const goal = data?.goal
-  const canHaveGoal = ['BANK', 'INVESTMENT'].includes(account.type)
+  const deleteGoal = useDeleteGoal(goal?.id ?? '')
+  const canHaveThisGoal = canHaveGoal(account.type)
 
   const handleDelete = async () => {
     await deleteGoal.mutateAsync()
@@ -61,7 +62,7 @@ export function GoalSection({ account }: GoalSectionProps) {
   }
 
   // Can't have goals for this account type
-  if (!canHaveGoal) {
+  if (!canHaveThisGoal) {
     return null
   }
 

@@ -14,6 +14,7 @@ import { creditCardSchema } from '@/lib/validations-account'
 import { buildAccountPayload } from '@/lib/wallets-utils'
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { FormCard, FormRow } from '@/components/features/accounts/create/FormCard'
+import { MoneyInput } from '@/components/features/accounts/create/MoneyInput'
 import { InfoBanner } from '@/components/features/accounts/create/InfoBanner'
 import { SubmitButton } from '@/components/features/accounts/create/SubmitButton'
 import { AccountCreatedView } from '@/components/features/accounts/create/AccountCreatedView'
@@ -29,7 +30,7 @@ export default function CreditCardPage() {
   const [created, setCreated] = useState<{ name: string; type: string } | null>(null)
   const [pending, setPending] = useState(false)
 
-  const { register, handleSubmit, formState: { errors } } =
+  const { register, handleSubmit, control, formState: { errors } } =
     useForm<z.input<typeof creditCardSchema>, unknown, z.output<typeof creditCardSchema>>({
       resolver: zodResolver(creditCardSchema),
       defaultValues: { name: '', creditLimit: '', statementDay: '25', dueDay: '15' },
@@ -86,17 +87,7 @@ export default function CreditCardPage() {
             />
           </FormRow>
           <FormRow icon={Banknote} error={errors.creditLimit && t(`errors.${errors.creditLimit.message}`)}>
-            <div className="flex items-center gap-2">
-              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('creditCard.limitLabel')}</span>
-              <input
-                {...register('creditLimit')}
-                type="number"
-                inputMode="numeric"
-                min="0"
-                aria-label={t('creditCard.limitLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
-              />
-            </div>
+            <MoneyInput control={control} name="creditLimit" label={t('creditCard.limitLabel')} />
           </FormRow>
           <FormRow icon={Calendar} error={errors.statementDay && t(`errors.${errors.statementDay.message}`)}>
             <div className="flex items-center gap-2">
@@ -108,8 +99,9 @@ export default function CreditCardPage() {
                 min="1"
                 max="31"
                 aria-label={t('creditCard.statementLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
+                className="min-w-0 flex-1 bg-transparent text-left text-sm leading-body-sm font-semibold text-foreground outline-none"
               />
+              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('common.units.ofMonth')}</span>
             </div>
           </FormRow>
           <FormRow icon={CalendarCheck} error={errors.dueDay && t(`errors.${errors.dueDay.message}`)}>
@@ -122,8 +114,9 @@ export default function CreditCardPage() {
                 min="1"
                 max="31"
                 aria-label={t('creditCard.dueLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
+                className="min-w-0 flex-1 bg-transparent text-left text-sm leading-body-sm font-semibold text-foreground outline-none"
               />
+              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('common.units.ofMonth')}</span>
             </div>
           </FormRow>
         </FormCard>

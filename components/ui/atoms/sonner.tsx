@@ -30,9 +30,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
         }}
         style={
           {
-            "--normal-bg": "var(--popover)",
-            "--normal-text": "var(--popover-foreground)",
-            "--normal-border": "var(--border)",
+            // Wrap in hsl(): the tokens are raw HSL triplets (e.g. "0 0% 100%"),
+            // not full colors. Passing the bare var made --normal-bg an invalid
+            // color, so the toast rendered transparent. hsl(var(--popover)) yields
+            // a solid (opaque) surface.
+            "--normal-bg": "hsl(var(--popover))",
+            "--normal-text": "hsl(var(--popover-foreground))",
+            "--normal-border": "hsl(var(--border))",
           } as React.CSSProperties
         }
         {...props}

@@ -8,7 +8,6 @@ import { useTransactions } from '@/contexts/TransactionContext'
 import { useAccounts } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useBudgetSnapshot } from '@/hooks/useBudgetSnapshot'
-import { useGoalsSummary } from '@/hooks/useGoalsQuery'
 import { fetchNetWorthData } from '@/lib/net-worth-utils'
 import {
   getGreetingKey, summarizeToday, topExpenses, monthlySpending,
@@ -20,7 +19,7 @@ import { TodayCard } from './TodayCard'
 import { NetWorthHeroCard, type HeroMonth } from './NetWorthHeroCard'
 import { AccountsCards } from './AccountsCards'
 import { BudgetCard } from './BudgetCard'
-import { GoalsGrid } from './GoalsGrid'
+import { HomeGoalsSection } from '@/components/features/goals/HomeGoalsSection'
 import { UpcomingStrip } from './UpcomingStrip'
 import { BiggestExpensesCard } from './BiggestExpensesCard'
 import { MobileHomeSkeleton } from './MobileHomeSkeleton'
@@ -50,7 +49,6 @@ export function MobileHome() {
   const month = now.getMonth() + 1
 
   const { snapshot, isLoading: budgetLoading } = useBudgetSnapshot('monthly', year, month)
-  const { data: goalsSummary, isLoading: goalsLoading } = useGoalsSummary()
   const { data: netWorth } = useQuery({
     queryKey: ['home-net-worth', user?.id],
     queryFn: () => fetchNetWorthData(user!.id, '1Y'),
@@ -142,7 +140,7 @@ export function MobileHome() {
   // data, so this stays false on background refetches). While true we render a
   // full skeleton instead of letting each section pop in / flash empty copy as
   // its query resolves.
-  const initialLoading = accountsLoading || transactionsLoading || budgetLoading || goalsLoading
+  const initialLoading = accountsLoading || transactionsLoading || budgetLoading
 
   return (
     <div className="flex flex-col gap-5 pt-3 md:hidden">
@@ -174,7 +172,7 @@ export function MobileHome() {
             total={snapshot?.total_amount ?? 0}
             currency={snapshot?.currency ?? baseCurrency}
           />
-          <GoalsGrid goals={goalsSummary?.goals ?? []} />
+          <HomeGoalsSection />
           <UpcomingStrip items={upcoming} />
           <BiggestExpensesCard rows={biggest} />
         </>

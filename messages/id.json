@@ -1193,7 +1193,12 @@
     },
     "common": {
       "save": "Simpan",
-      "back": "Kembali"
+      "back": "Kembali",
+      "units": {
+        "perYear": "%/tahun",
+        "years": "tahun",
+        "ofMonth": "tiap bulan"
+      }
     },
     "bank": {
       "title": "Bank / Dompet",
@@ -1213,9 +1218,9 @@
       "purchaseDateLabel": "Tanggal Pembelian",
       "mortgage": "Detail KPR",
       "downPayment": "Uang Muka",
-      "interestRate": "Suku Bunga (%/tahun)",
+      "interestRate": "Suku Bunga",
       "monthlyPayment": "Angsuran Bulanan",
-      "loanTermYears": "Tenor (tahun)",
+      "loanTermYears": "Tenor",
       "submit": "Tambah Properti"
     },
     "vehicle": {
@@ -1226,7 +1231,7 @@
       "nameLabel": "Nama Kendaraan",
       "namePlaceholder": "mis. Honda HR-V 2021",
       "priceLabel": "Harga Beli",
-      "depreciationLabel": "Tingkat Depresiasi (%/tahun)",
+      "depreciationLabel": "Tingkat Depresiasi",
       "submit": "Tambah Kendaraan"
     },
     "creditCard": {
@@ -1234,8 +1239,8 @@
       "nameLabel": "Nama Kartu",
       "namePlaceholder": "mis. BCA Platinum",
       "limitLabel": "Limit Kredit",
-      "statementLabel": "Tanggal Cetak Tagihan (hari)",
-      "dueLabel": "Tanggal Jatuh Tempo (hari)",
+      "statementLabel": "Tanggal Cetak Tagihan",
+      "dueLabel": "Tanggal Jatuh Tempo",
       "info": "Pengeluaran dicatat sebagai expense. Saldo menunjukkan sisa limit kredit.",
       "submit": "Tambah Kartu Kredit"
     },
@@ -1992,5 +1997,82 @@
     "browseLink": "Sekadar lihat-lihat? Jelajahi aplikasinya dulu",
     "registerPrompt": "Mau langsung daftar?",
     "registerLink": "Buat akun"
+  },
+  "goals": {
+    "sectionTitle": "Target Tabungan",
+    "seeAll": "Lihat Semua",
+    "add": "Tambah",
+    "empty": {
+      "title": "Mulai Perjalanan Tabungan Anda",
+      "cta": "Tetapkan Target Pertama"
+    },
+    "create": {
+      "title": "Buat Target",
+      "subtitle": "Tetapkan target tabungan untuk akun Anda",
+      "name": "Nama Target",
+      "type": "Jenis Target",
+      "account": "Akun",
+      "accountPlaceholder": "Pilih akun",
+      "amount": "Jumlah Target",
+      "date": "Tanggal Target",
+      "month": "Bulan",
+      "year": "Tahun",
+      "submit": "Buat Target"
+    },
+    "success": {
+      "title": "Target Dibuat!",
+      "subtitle": "Target Anda telah disimpan. Mulai menabung menuju target Anda.",
+      "viewGoal": "Lihat Target",
+      "backToAccount": "Kembali ke Akun"
+    },
+    "card": {
+      "tercapai": "{pct}% tercapai",
+      "onTrack": "On track",
+      "behind": "Tertinggal",
+      "target": "Target {date}",
+      "ofTarget": "dari {target}"
+    },
+    "list": {
+      "totalTitle": "Total Kemajuan Tabungan",
+      "activeCount": "{count} target aktif",
+      "empty": "Belum ada target tabungan",
+      "emptyCta": "Tambah"
+    },
+    "detail": {
+      "title": "Detail Target",
+      "remaining": "Sisa {amount}",
+      "insightsTitle": "Wawasan & Saran",
+      "feasibleOnTrack": "Sesuai rencana untuk mencapai target pada {date}",
+      "feasibleBehind": "Anda perlu kenaikan {rate}% per bulan untuk mencapai target pada {date}"
+    },
+    "edit": {
+      "title": "Ubah Target",
+      "subtitle": "Perbarui target tabungan Anda",
+      "submit": "Simpan Perubahan"
+    },
+    "deleteDialog": {
+      "title": "Hapus Target",
+      "description": "Target ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
+      "cancel": "Batal",
+      "delete": "Hapus"
+    },
+    "insights": {
+      "accelerateTitle": "Percepat Tabungan Anda",
+      "accelerateBody": "Hemat {amount} lebih banyak per bulan selama {months} bulan untuk mencapai target lebih awal",
+      "streakTitle": "Aliran Tabungan",
+      "streakBody": "Anda telah menabung secara konsisten selama {months} bulan"
+    },
+    "types": {
+      "emergency_fund": "Dana Darurat",
+      "vacation": "Liburan",
+      "house_down_payment": "Beli Rumah",
+      "car_purchase": "Beli Mobil",
+      "education": "Pendidikan",
+      "wedding": "Pernikahan",
+      "investment": "Investasi",
+      "other": "Lainnya",
+      "debt_payoff": "Cicil Hutang",
+      "gadget": "Gadget"
+    }
   }
 }

@@ -14,6 +14,7 @@ import { vehicleSchema } from '@/lib/validations-account'
 import { buildAccountPayload } from '@/lib/wallets-utils'
 import { CreateFlowHeader } from '@/components/features/accounts/create/CreateFlowHeader'
 import { FormCard, FormRow } from '@/components/features/accounts/create/FormCard'
+import { MoneyInput } from '@/components/features/accounts/create/MoneyInput'
 import { SegmentedControl } from '@/components/features/accounts/create/SegmentedControl'
 import { SubmitButton } from '@/components/features/accounts/create/SubmitButton'
 import { AccountCreatedView } from '@/components/features/accounts/create/AccountCreatedView'
@@ -29,7 +30,7 @@ export default function VehiclePage() {
   const [created, setCreated] = useState<{ name: string; type: string } | null>(null)
   const [pending, setPending] = useState(false)
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } =
+  const { register, handleSubmit, watch, setValue, control, formState: { errors } } =
     useForm<z.input<typeof vehicleSchema>, unknown, z.output<typeof vehicleSchema>>({
       resolver: zodResolver(vehicleSchema),
       defaultValues: {
@@ -100,21 +101,11 @@ export default function VehiclePage() {
             />
           </FormRow>
           <FormRow icon={Banknote} error={errors.purchasePrice && t(`errors.${errors.purchasePrice.message}`)}>
-            <div className="flex items-center gap-2">
-              <span className="text-sm leading-body-sm text-muted-foreground">{t('vehicle.priceLabel')}</span>
-              <input
-                {...register('purchasePrice')}
-                type="number"
-                inputMode="numeric"
-                min="0"
-                aria-label={t('vehicle.priceLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
-              />
-            </div>
+            <MoneyInput control={control} name="purchasePrice" label={t('vehicle.priceLabel')} />
           </FormRow>
           <FormRow icon={TrendingDown} error={errors.depreciationRate && t(`errors.${errors.depreciationRate.message}`)}>
             <div className="flex items-center gap-2">
-              <span className="text-sm leading-body-sm text-muted-foreground">{t('vehicle.depreciationLabel')}</span>
+              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('vehicle.depreciationLabel')}</span>
               <input
                 {...register('depreciationRate')}
                 type="number"
@@ -122,8 +113,9 @@ export default function VehiclePage() {
                 min="0"
                 step="0.1"
                 aria-label={t('vehicle.depreciationLabel')}
-                className="w-full bg-transparent text-right text-sm leading-body-sm font-semibold text-foreground outline-none"
+                className="min-w-0 flex-1 bg-transparent text-left text-sm leading-body-sm font-semibold text-foreground outline-none"
               />
+              <span className="shrink-0 text-sm leading-body-sm text-muted-foreground">{t('common.units.perYear')}</span>
             </div>
           </FormRow>
         </FormCard>

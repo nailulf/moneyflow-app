@@ -102,6 +102,41 @@ consistently to amounts, deltas, and chart series.
 
 `border-radius`: `rounded-sm` (4px) · `rounded-md` (6px) · `rounded-lg` (8px, `--radius`).
 
+**Mobile control & surface specs** (from the "DESIGN SYSTEM — DEV REFERENCE" frame; these are the
+recurring pixel-gap sources — match them exactly):
+
+- **Text inputs** are **white-filled** (`bg-card`), `h-[52px]`, `rounded-[14px]`, `px-4`, `border-input`
+  → focus navy (`primary`). This lives in the shared `components/ui/atoms/input.tsx` atom — **use the
+  `Input` atom, don't hand-roll `<input>`**, and never set `bg-transparent` on a field (it disappears
+  on the gray `#EEF2F7` screen/sheet background — the #1 repeat defect). Inline "settings-row" inputs
+  (transparent input inside a white `FormCard` row) are the *only* exception.
+- **Money/amount fields must be currency-formatted** — never a raw `type="number"`. Use
+  `<Input type="amount" currency={…}>` (boxed) or `<CurrencyInput>` (inline) so values render with IDR
+  thousand-separators + the `Rp` prefix (e.g. `Rp 25.000.000`). In the create-account FormCard rows,
+  use the shared `components/features/accounts/create/MoneyInput.tsx` (bridges CurrencyInput →
+  react-hook-form via a `Controller`). Only *non-money* numbers stay `type="number"`: day-of-month
+  (1–31), percentages (interest/depreciation rate), and counts (loan-term years).
+- **CTA buttons** are `h-[52px]`, `rounded-[14px]`, `bg-primary` / `text-primary-foreground`, label
+  `text-md leading-body-lg font-semibold`. Secondary = same box, `border` on `background`.
+- **Surfaces are white** (`bg-card`): cards, **and bottom sheets**. A bottom sheet's `SheetContent`
+  should be `bg-card`, not the default gray `bg-background`.
+- **Bottom sheets — CTA goes in a sticky footer, never floating after the content.** Pattern: make
+  the sheet hug its content (`data-[side=bottom]:h-auto data-[side=bottom]:max-h-[90dvh]`, `p-0`,
+  `gap-0`), put the body in a `flex-1 overflow-y-auto` region, and pin the CTA in a
+  `shrink-0 border-t border-border bg-card px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+1rem)]`
+  footer. (The default `SheetContent` bottom variant is `h-[95dvh]`; a button placed after short
+  content floats mid-screen — that's the defect this pattern fixes.) Reference impl:
+  `components/features/accounts/detail/AdjustBalanceSheet.tsx`.
+- **Toasts must be opaque.** The sonner `Toaster` (`components/ui/atoms/sonner.tsx`) sets
+  `--normal-bg: hsl(var(--popover))` — the tokens are raw HSL triplets, so the bare `var(--popover)`
+  is an invalid color and renders transparent. Always wrap token vars in `hsl(...)` for real CSS
+  color values.
+- **A DropdownMenu/Popover item that opens a Dialog/Sheet must set `modal={false}` on the menu.**
+  A modal dropdown locks the body (`pointer-events: none`); when its teardown races the dialog's own
+  scroll-lock, the body's `pointer-events: none` gets *restored* instead of cleared after the dialog
+  closes — freezing the whole screen to taps (scroll still works). Non-modal menu = no body lock = the
+  dialog restores a clean state. Reference: `components/features/accounts/detail/AccountActionsMenu.tsx`.
+
 **Example — a stat card, on-brand and themeable:**
 ```tsx
 import { cn } from '@/lib/utils'
@@ -202,10 +237,15 @@ Mirror an existing form (e.g. `AddTransactionForm`, `EditTransactionForm`) for s
 
 ## Before you call it done
 
-- [ ] **Design match:** if the screen has a Pencil design, compared the rendered result to its
-      `get_screenshot` and reproduced structure, copy, components, spacing, and states — not an
-      approximation. Discrepancies fixed or explicitly flagged.
-- [ ] No hardcoded colors/hex/arbitrary px — only semantic tokens + font/leading tokens.
+- [ ] **Design match (pixel-perfect, verified in the browser):** if the screen has a Pencil design,
+      run it in the preview at 390px and compare **side by side** with its `get_screenshot` — same
+      structure, copy, spacing, **surface colors (white sheets/inputs, not gray)**, control sizes
+      (h52/r14), and states. A "looks reasonable" approximation is a defect. Fix discrepancies before
+      claiming done; don't rely on reading the code alone.
+- [ ] **Controls match the spec:** inputs use the white-filled `Input` atom (no `bg-transparent`
+      fields); bottom-sheet CTAs sit in a sticky `border-t` footer (not floating); toasts are opaque.
+- [ ] No hardcoded colors/hex/arbitrary px — only semantic tokens + font/leading tokens (the
+      `h-[52px]`/`rounded-[14px]` mobile control sizes are the sanctioned exception, per spec).
 - [ ] Works in light **and** dark mode (check token has a `.dark` value; beware `warning`).
 - [ ] All text via `useTranslations`; keys added to `en.json` **and** `id.json`.
 - [ ] `lucide-react` icons, not emojis.

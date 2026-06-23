@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { calculateGoalProgress } from '@/lib/goals/calculations'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
-import { AccountDB } from '@/types/database'
+import { computeGoalWaterfall } from '@/lib/goals/waterfall'
+import { AccountDB, FinancialGoalDB } from '@/types/database'
 
 // GET /api/goals/summary - Get all user goals with progress
 export async function GET(request: NextRequest) {
@@ -56,27 +57,67 @@ export async function GET(request: NextRequest) {
 
     const now = new Date()
 
-    // Process goals and calculate progress
-    const goals = (goalsWithAccounts || []).map((item) => {
-      // TypeScript needs help with the joined data
-      const account = item.accounts as unknown as {
-        id: string
-        user_id: string
-        name: string
-        balance: number
-        type: AccountDB['type']
-        currency: string
-      }
+    type JoinedAccount = {
+      id: string
+      user_id: string
+      name: string
+      balance: number
+      type: AccountDB['type']
+      currency: string
+    }
 
-      // Filter the already-fetched user transactions to legs touching this account
-      const accountTxns = (allUserTxns || []).filter(
-        (t) => t.account_id === account.id || t.to_account_id === account.id
-      )
-      // Compute live balance: opening anchor + Σ(transactions up to now)
-      const currentBalance = calculateAccountBalanceAtDate(
-        accountTxns, now, account.type, account.balance ?? 0, account.id, account.currency || 'IDR'
-      )
-      const progress = calculateGoalProgress(currentBalance, item.target_amount)
+    // Compute each account's live balance once (opening anchor + Σ transactions).
+    const accountBalanceCache = new Map<string, number>()
+    const accountMeta = new Map<string, JoinedAccount>()
+    for (const item of goalsWithAccounts || []) {
+      const account = item.accounts as unknown as JoinedAccount
+      accountMeta.set(account.id, account)
+      if (!accountBalanceCache.has(account.id)) {
+        const accountTxns = (allUserTxns || []).filter(
+          (t) => t.account_id === account.id || t.to_account_id === account.id
+        )
+        const currentBalance = calculateAccountBalanceAtDate(
+          accountTxns, now, account.type, account.balance ?? 0, account.id, account.currency || 'IDR'
+        )
+        accountBalanceCache.set(account.id, currentBalance)
+      }
+    }
+
+    // Group goals by account and apply the balance-waterfall so each ACTIVE goal's
+    // currentAmount is its waterfall `saved` (goal N only fills after 1..N-1 are full).
+    const goalsByAccount = new Map<string, FinancialGoalDB[]>()
+    for (const item of goalsWithAccounts || []) {
+      const accountId = (item.accounts as unknown as JoinedAccount).id
+      const list = goalsByAccount.get(accountId) || []
+      list.push(item as unknown as FinancialGoalDB)
+      goalsByAccount.set(accountId, list)
+    }
+
+    // savedByGoalId holds the waterfall `saved` for each active goal.
+    const savedByGoalId = new Map<string, number>()
+    for (const [accountId, accountGoals] of goalsByAccount) {
+      const balance = accountBalanceCache.get(accountId) ?? 0
+      for (const w of computeGoalWaterfall(balance, accountGoals)) {
+        savedByGoalId.set(w.goal.id, w.saved)
+      }
+    }
+
+    // Process goals and calculate progress using the waterfall saved
+    const goals = (goalsWithAccounts || []).map((item) => {
+      const account = accountMeta.get(
+        (item.accounts as unknown as JoinedAccount).id
+      ) as JoinedAccount
+
+      // Active goals get their waterfall saved. Non-active goals must NOT inject the
+      // full account balance (that double-counts a shared account across its goals):
+      // completed → its target_amount, cancelled → 0.
+      const currentAmount =
+        item.status === 'active'
+          ? (savedByGoalId.get(item.id) ?? 0)
+          : item.status === 'completed'
+            ? item.target_amount
+            : 0
+      const progress = calculateGoalProgress(currentAmount, item.target_amount)
 
       return {
         id: item.id,
@@ -86,7 +127,7 @@ export async function GET(request: NextRequest) {
         accountName: account.name,
         accountType: account.type,
         currency: account.currency,
-        currentAmount: currentBalance,
+        currentAmount,
         targetAmount: item.target_amount,
         progressPercentage: progress.progress_percentage,
         amountRemaining: progress.amount_remaining,
@@ -96,8 +137,12 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Calculate total savings (sum of all account balances that have goals)
-    const totalSavings = goals.reduce((sum, goal) => sum + goal.currentAmount, 0)
+    // Total savings ("Total Terkumpul") = money currently allocated to ACTIVE goals,
+    // i.e. the sum of active goals' waterfall `saved`. Non-active goals are excluded so
+    // a shared account balance is never double-counted across its goals.
+    const totalSavings = goals
+      .filter((goal) => goal.status === 'active')
+      .reduce((sum, goal) => sum + goal.currentAmount, 0)
 
     // Separate active and completed goals
     const activeGoals = goals.filter(g => g.status === 'active')

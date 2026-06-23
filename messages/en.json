@@ -1193,7 +1193,12 @@
     },
     "common": {
       "save": "Save",
-      "back": "Back"
+      "back": "Back",
+      "units": {
+        "perYear": "%/year",
+        "years": "years",
+        "ofMonth": "of month"
+      }
     },
     "bank": {
       "title": "Bank / Wallet",
@@ -1213,9 +1218,9 @@
       "purchaseDateLabel": "Purchase Date",
       "mortgage": "Mortgage Details",
       "downPayment": "Down Payment",
-      "interestRate": "Interest Rate (%/year)",
+      "interestRate": "Interest Rate",
       "monthlyPayment": "Monthly Payment",
-      "loanTermYears": "Loan Term (years)",
+      "loanTermYears": "Loan Term",
       "submit": "Add Property"
     },
     "vehicle": {
@@ -1226,7 +1231,7 @@
       "nameLabel": "Vehicle Name",
       "namePlaceholder": "e.g. Honda HR-V 2021",
       "priceLabel": "Purchase Price",
-      "depreciationLabel": "Depreciation Rate (%/year)",
+      "depreciationLabel": "Depreciation Rate",
       "submit": "Add Vehicle"
     },
     "creditCard": {
@@ -1234,8 +1239,8 @@
       "nameLabel": "Card Name",
       "namePlaceholder": "e.g. BCA Platinum",
       "limitLabel": "Credit Limit",
-      "statementLabel": "Statement Date (day)",
-      "dueLabel": "Due Date (day)",
+      "statementLabel": "Statement Date",
+      "dueLabel": "Due Date",
       "info": "Spending is tracked as expenses. Balance reflects remaining available credit.",
       "submit": "Add Credit Card"
     },
@@ -1992,5 +1997,82 @@
     "browseLink": "Just looking? Browse the app first",
     "registerPrompt": "Rather sign up now?",
     "registerLink": "Create an account"
+  },
+  "goals": {
+    "sectionTitle": "Target Tabungan",
+    "seeAll": "See all",
+    "add": "Add",
+    "empty": {
+      "title": "Start Your Savings Journey",
+      "cta": "Set Your First Goal"
+    },
+    "create": {
+      "title": "Create a Goal",
+      "subtitle": "Set a savings target for your account",
+      "name": "Goal Name",
+      "type": "Goal Type",
+      "account": "Account",
+      "accountPlaceholder": "Select an account",
+      "amount": "Target Amount",
+      "date": "Target Date",
+      "month": "Month",
+      "year": "Year",
+      "submit": "Create Goal"
+    },
+    "success": {
+      "title": "Goal created!",
+      "subtitle": "Your goal has been saved. Start saving towards your target.",
+      "viewGoal": "View Goal",
+      "backToAccount": "Back to Account"
+    },
+    "card": {
+      "tercapai": "{pct}% achieved",
+      "onTrack": "On track",
+      "behind": "Behind",
+      "target": "Target {date}",
+      "ofTarget": "of {target}"
+    },
+    "list": {
+      "totalTitle": "Total Savings Progress",
+      "activeCount": "{count} active goals",
+      "empty": "No savings goals yet",
+      "emptyCta": "Add"
+    },
+    "detail": {
+      "title": "Goal Details",
+      "remaining": "Remaining {amount}",
+      "insightsTitle": "Insights & Tips",
+      "feasibleOnTrack": "On track to reach your goal by {date}",
+      "feasibleBehind": "You need {rate}% increase per month to reach your goal by {date}"
+    },
+    "edit": {
+      "title": "Edit Goal",
+      "subtitle": "Update your savings target",
+      "submit": "Save Changes"
+    },
+    "deleteDialog": {
+      "title": "Delete Goal",
+      "description": "This goal will be permanently removed. This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "insights": {
+      "accelerateTitle": "Accelerate Your Savings",
+      "accelerateBody": "Save {amount} more per month for {months} months to reach your goal early",
+      "streakTitle": "Savings Streak",
+      "streakBody": "You've been saving consistently for {months} months"
+    },
+    "types": {
+      "emergency_fund": "Emergency Fund",
+      "vacation": "Vacation",
+      "house_down_payment": "House Down Payment",
+      "car_purchase": "Car Purchase",
+      "education": "Education",
+      "wedding": "Wedding",
+      "investment": "Investment",
+      "other": "Other",
+      "debt_payoff": "Debt Payoff",
+      "gadget": "Gadget"
+    }
   }
 }

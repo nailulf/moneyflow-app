@@ -48,7 +48,7 @@ export function EditGoalModal({
   })
   const [error, setError] = useState<string | null>(null)
 
-  const updateGoal = useUpdateGoal(account.id)
+  const updateGoal = useUpdateGoal(goal.id)
 
   // Initialize form with goal data
   useEffect(() => {

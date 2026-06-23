@@ -1,4 +1,6 @@
 export { GoalCard } from './GoalCard'
+export { GoalCardCompact } from './GoalCardCompact'
+export { GoalCardMini } from './GoalCardMini'
 export { AddGoalModal } from './AddGoalModal'
 export { EditGoalModal } from './EditGoalModal'
 export { GoalSection } from './GoalSection'

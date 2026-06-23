@@ -218,6 +218,45 @@ scrolls:
   without overflowing the `min-h-svh` parent — see `components/LayoutWrapper.tsx`. Don't reintroduce
   `min-h-[100vh]` there; it over-scrolls by the mobile toolbar height + padding.
 
+**Bottom-sheet chrome (`SheetContent side="bottom"`):** sheets are a **white surface** (`bg-card`, not
+the default gray `bg-background`) and their primary CTA lives in a **sticky footer**, never floating
+after the content. Make the sheet hug its content (`data-[side=bottom]:h-auto
+data-[side=bottom]:max-h-[90dvh]`, `p-0`, `gap-0`), put the body in a `flex-1 overflow-y-auto` region,
+and pin the CTA in a `shrink-0 border-t border-border bg-card px-4 pt-3
+pb-[calc(env(safe-area-inset-bottom)+1rem)]` footer. The default bottom variant is `h-[95dvh]`, so a
+button placed after short content floats mid-screen — that's the bug this fixes. Reference:
+`components/features/accounts/detail/AdjustBalanceSheet.tsx`.
+
+**Form inputs** come from the white-filled `components/ui/atoms/input.tsx` atom (`bg-card`, `h-[52px]`,
+`rounded-[14px]`, `px-4`, focus → `primary`). Never give a field `bg-transparent` (it vanishes on the
+gray `#EEF2F7` screen/sheet background) — use the `Input` atom. The only exception is the inline
+"settings-row" input (transparent input inside a white `FormCard` row, e.g. create-account / edit-record).
+
+**Money/amount fields must be currency-formatted, never a raw `type="number"`.** Use `Input
+type="amount"` (boxed, RHF-compatible) or `CurrencyInput` (inline) so amounts show IDR
+thousand-separators + the `Rp` prefix. Create-account FormCard rows use the shared
+`components/features/accounts/create/MoneyInput.tsx` (CurrencyInput bridged to react-hook-form via a
+`Controller`, keeping the Zod string schemas untouched). Keep `type="number"` only for non-money
+numbers: day-of-month (1–31), percentages (interest/depreciation), and counts (loan-term years).
+
+**Toasts must be opaque.** `components/ui/atoms/sonner.tsx` wraps tokens as `hsl(var(--popover))` — the
+design tokens are raw HSL triplets, so a bare `var(--token)` is an invalid color and renders the toast
+transparent. Always wrap token vars in `hsl(...)` when feeding them to a raw CSS color property.
+
+**A dropdown/popover menu item that opens a Dialog/Sheet must set `modal={false}` on the menu**
+(e.g. `<DropdownMenu modal={false}>`). A modal menu locks the body (`pointer-events: none`); when its
+teardown races the dialog's own scroll-lock, the body's `pointer-events: none` is *restored* instead of
+cleared after the dialog closes — freezing the entire screen to taps while scrolling still works.
+Non-modal menu = no body lock = clean teardown. Reference:
+`components/features/accounts/detail/AccountActionsMenu.tsx`.
+
+**Pixel-fidelity is a hard requirement.** For any screen with a Pencil design, reproduce it exactly
+(structure, copy, spacing, **surface colors**, control sizes) and **verify in the browser preview at
+390px side-by-side with the design screenshot** before claiming done — reading the code is not enough.
+The recurring defects have been: gray (transparent) inputs that should be white, CTAs floating instead
+of in a sticky footer, and transparent toasts. The [moneyflow-frontend skill](.claude/skills/moneyflow-frontend/SKILL.md)
+carries the full control/sheet/toast specs.
+
 **Component Library:**
 - All UI components in `components/ui/` follow Radix UI patterns
 - Use `cn()` utility from `lib/utils.ts` for className merging

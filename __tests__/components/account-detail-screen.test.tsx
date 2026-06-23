@@ -17,6 +17,8 @@ jest.mock('@/contexts/AccountContext', () => ({
 }))
 // Recharts can break under jsdom; stub the trend card — assertions target header + hero.
 jest.mock('@/components/features/accounts/detail/BalanceTrendCard', () => ({ BalanceTrendCard: () => null }))
+// Goals section pulls react-query mutations + AddGoalSheet; stub it — out of scope here.
+jest.mock('@/components/features/goals/AccountGoalsSection', () => ({ AccountGoalsSection: () => null }))
 
 import { AccountDetailScreen } from '@/components/features/accounts/detail/AccountDetailScreen'
 
