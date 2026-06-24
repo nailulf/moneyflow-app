@@ -21,4 +21,10 @@ describe('isFullScreenFlow', () => {
   it.each(['/start', '/start/intent', '/start/goal/emergency-fund', '/start/health-check', '/start/save'])(
     'hides chrome on the guest funnel %s', (path) => expect(isFullScreenFlow(path)).toBe(true)
   )
+  it('hides nav on /forecast (More menu drill-in)', () => {
+    expect(isFullScreenFlow('/forecast')).toBe(true)
+  })
+  it('keeps chrome on other root paths like /budget', () => {
+    expect(isFullScreenFlow('/budget')).toBe(false)
+  })
 })

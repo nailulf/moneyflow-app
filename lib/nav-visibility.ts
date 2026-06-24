@@ -26,9 +26,15 @@ function isGoalDetail(pathname: string): boolean {
   return m !== null
 }
 
+// /forecast is a More-menu drill-in (mobile): hide the bottom tab bar.
+function isForecast(pathname: string): boolean {
+  return pathname === '/forecast'
+}
+
 export const isFullScreenFlow = (pathname: string): boolean =>
   FULL_SCREEN_FLOW_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
   isPortfolioDetail(pathname) ||
   isTransactionEdit(pathname) ||
   isAccountDetail(pathname) ||
-  isGoalDetail(pathname)
+  isGoalDetail(pathname) ||
+  isForecast(pathname)
