@@ -1,6 +1,7 @@
 "use client"
 
 import type { Dispatch, ReactElement, SetStateAction } from "react"
+import { useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import {
   Sheet,
@@ -18,6 +19,7 @@ import { ScenarioSettings } from "./ScenarioSettings"
 interface CustomizeSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  initialTab?: "settings" | "events"
   // Scenario props
   scenarios: ForecastScenario[]
   selectedScenarioId: string | null
@@ -56,6 +58,7 @@ interface CustomizeSheetProps {
 export function CustomizeSheet({
   open,
   onOpenChange,
+  initialTab,
   scenarios,
   selectedScenarioId,
   scenarioDraft,
@@ -76,6 +79,10 @@ export function CustomizeSheet({
   onEventToggle,
 }: CustomizeSheetProps): ReactElement {
   const t = useTranslations("forecast.customize")
+  const [activeTab, setActiveTab] = useState<"settings" | "events">(initialTab ?? "events")
+  useEffect(() => {
+    if (open) setActiveTab(initialTab ?? "events")
+  }, [open, initialTab])
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
@@ -86,7 +93,7 @@ export function CustomizeSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="px-4 pb-6">
-          <Tabs defaultValue="events" className="mt-4">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "settings" | "events")} className="mt-4">
             <TabsList className="w-full">
               <TabsTrigger value="events" className="flex-1">{t("tabEvents")}</TabsTrigger>
               <TabsTrigger value="settings" className="flex-1">{t("tabSettings")}</TabsTrigger>

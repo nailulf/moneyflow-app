@@ -1017,7 +1017,9 @@
       "chipHorizon": "Horizon {n}thn",
       "lifeEvents": "Peristiwa Hidup",
       "manage": "Kelola",
-      "noEvents": "Belum ada peristiwa hidup"
+      "noEvents": "Belum ada peristiwa hidup",
+      "scenarios": "Skenario",
+      "defaultScenario": "Utama"
     },
     "tabs": {
       "netWorth": "Kekayaan Bersih",

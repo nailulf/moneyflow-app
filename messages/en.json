@@ -1017,7 +1017,9 @@
       "chipHorizon": "Horizon {n}y",
       "lifeEvents": "Life Events",
       "manage": "Manage",
-      "noEvents": "No life events yet"
+      "noEvents": "No life events yet",
+      "scenarios": "Scenarios",
+      "defaultScenario": "Default"
     },
     "tabs": {
       "netWorth": "Net Worth",
