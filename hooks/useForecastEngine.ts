@@ -121,6 +121,7 @@ export function useForecastEngine(
         baseDateISO: scenarioDraft.start_date,
         simulations: 500,
         inflationRate,
+        annualIncomeGrowth: scenarioDraft.annual_income_growth ?? 0,
         dobISO: dob ?? null,
       })
     }, DEBOUNCE_MS)
