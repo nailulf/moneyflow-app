@@ -997,6 +997,10 @@
     }
   },
   "forecast": {
+    "root": {
+      "netWorth": "Net Worth",
+      "cashFlow": "Cash Flow"
+    },
     "tabs": {
       "netWorth": "Net Worth",
       "cashFlow": "Cash Flow",
