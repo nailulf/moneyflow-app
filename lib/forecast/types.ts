@@ -141,6 +141,7 @@ export type ScenarioDraft = {
   expected_annual_return: number
   annual_volatility: number
   inflation_rate: number
+  annual_income_growth: number
   monthly_contribution: number
   monthly_withdrawal: number
   include_cashflow: boolean
@@ -169,6 +170,7 @@ export const defaultScenarioPayload = {
   expected_annual_return: 0.07,
   annual_volatility: 0.12,
   inflation_rate: 0.03,
+  annual_income_growth: 0,
   monthly_contribution: 0,
   monthly_withdrawal: 0,
   include_cashflow: true,
@@ -184,6 +186,7 @@ export const buildDraft = (scenario: ForecastScenario): ScenarioDraft => ({
   expected_annual_return: Number(scenario.expected_annual_return),
   annual_volatility: Number(scenario.annual_volatility),
   inflation_rate: Number(scenario.inflation_rate),
+  annual_income_growth: Number(scenario.annual_income_growth),
   monthly_contribution: Number(scenario.monthly_contribution),
   monthly_withdrawal: Number(scenario.monthly_withdrawal),
   include_cashflow: scenario.include_cashflow,
