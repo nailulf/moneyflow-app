@@ -1143,6 +1143,12 @@
       "saving": "Saving..."
     },
     "assumptions": {
+      "title": "Assumptions",
+      "back": "Back",
+      "save": "Save",
+      "saveCta": "Save assumptions",
+      "deleteScenario": "Delete scenario",
+      "duplicateScenario": "Duplicate scenario",
       "growth": "Growth",
       "inflationIncome": "Inflation & income",
       "contributions": "Contributions",

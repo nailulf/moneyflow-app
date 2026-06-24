@@ -1143,6 +1143,12 @@
       "saving": "Menyimpan..."
     },
     "assumptions": {
+      "title": "Asumsi",
+      "back": "Kembali",
+      "save": "Simpan",
+      "saveCta": "Simpan asumsi",
+      "deleteScenario": "Hapus skenario",
+      "duplicateScenario": "Duplikat skenario",
       "growth": "Pertumbuhan",
       "inflationIncome": "Inflasi & pendapatan",
       "contributions": "Kontribusi",
