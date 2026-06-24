@@ -39,11 +39,13 @@ import { ForecastAssumptionsSummary } from "@/components/features/forecast/Forec
 import { ForecastInsightsCard } from "@/components/features/forecast/ForecastInsightsCard"
 import { ForecastEventsPreview } from "@/components/features/forecast/ForecastEventsPreview"
 import { ForecastScenarioSheet } from "@/components/features/forecast/ForecastScenarioSheet"
+import { ScenarioCompareSheet } from "@/components/features/forecast/ScenarioCompareSheet"
 import { CustomizeSheet } from "@/components/features/forecast/CustomizeSheet"
 import { SimulationTable } from "@/components/features/forecast/SimulationTable"
 import { StickyScreenHeader } from "@/components/features/navigation/StickyScreenHeader"
 import { Button } from "@/components/ui/atoms/button"
 import { useYearlySimulation, yearlyRowsToProjection } from "@/hooks/useYearlySimulation"
+import { useScenarioComparisons } from "@/hooks/useScenarioComparisons"
 
 export default function ForecastPage(): ReactElement {
   const { user } = useAuth()
@@ -54,6 +56,8 @@ export default function ForecastPage(): ReactElement {
   const [chartView, setChartView] = useState<RootChartView>("net-worth")
   const [sheetOpen, setSheetOpen] = useState(false)
   const [scenarioSheetOpen, setScenarioSheetOpen] = useState(false)
+  const [compareOpen, setCompareOpen] = useState(false)
+  // Note: the Settings tab is unreachable from the Root post-SP3 (SP4 removes it); customizeTab is now only ever "events".
   const [customizeTab, setCustomizeTab] = useState<"settings" | "events">("settings")
 
   // --- React Query data ---
@@ -69,6 +73,9 @@ export default function ForecastPage(): ReactElement {
   const baseAnnualExpenses = cashflowData?.annualExpenses ?? 0
   const monthlyIncomeBase = baseAnnualIncome / 12
   const monthlyExpenseBase = baseAnnualExpenses / 12
+
+  // --- Per-scenario comparison rows (switcher + Compare sheet) ---
+  const { rows: comparisonRows } = useScenarioComparisons()
 
   // --- Shared yearly simulation (single source of truth for NW chart + table) ---
   const { rows: yearlyRows, params: yearlyParams, events: yearlyEvents } = useYearlySimulation()
@@ -269,10 +276,7 @@ export default function ForecastPage(): ReactElement {
 
           <ForecastAssumptionsSummary
             scenarioDraft={scenarioDraft}
-            onEdit={() => {
-              setCustomizeTab("settings")
-              setSheetOpen(true)
-            }}
+            onEdit={() => router.push(`/forecast/assumptions?scenario=${selectedScenarioId ?? ""}`)}
           />
 
           <ForecastInsightsCard insights={insights} />
@@ -294,12 +298,27 @@ export default function ForecastPage(): ReactElement {
       <ForecastScenarioSheet
         open={scenarioSheetOpen}
         onOpenChange={setScenarioSheetOpen}
-        scenarios={scenarios}
+        rows={comparisonRows}
         selectedScenarioId={selectedScenarioId}
         onSelect={(id) => {
           setSelectedScenarioId(id)
           setScenarioSheetOpen(false)
         }}
+        onNew={async () => {
+          setScenarioSheetOpen(false)
+          const c = await createScenario.mutateAsync({ ...defaultScenarioPayload, name: "New scenario" })
+          router.push(`/forecast/assumptions?scenario=${c.id}`)
+        }}
+        onCompare={() => {
+          setScenarioSheetOpen(false)
+          setCompareOpen(true)
+        }}
+      />
+      <ScenarioCompareSheet
+        open={compareOpen}
+        onOpenChange={setCompareOpen}
+        rows={comparisonRows}
+        selectedScenarioId={selectedScenarioId}
       />
 
       <CustomizeSheet
