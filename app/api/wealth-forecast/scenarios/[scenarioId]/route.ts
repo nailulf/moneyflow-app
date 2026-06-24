@@ -14,6 +14,7 @@ const ScenarioUpdateSchema = z.object({
   expected_annual_return: z.number().min(-1).max(1).optional(),
   annual_volatility: z.number().min(0).max(1).optional(),
   inflation_rate: z.number().min(-1).max(1).optional(),
+  annual_income_growth: z.number().min(0).max(1).optional(),
   monthly_contribution: z.number().optional(),
   monthly_withdrawal: z.number().optional(),
   include_cashflow: z.boolean().optional(),
