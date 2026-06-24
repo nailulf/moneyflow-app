@@ -1129,6 +1129,8 @@
       "annualReturn": "Imbal Hasil Tahunan",
       "volatility": "Volatilitas",
       "inflation": "Inflasi",
+      "incomeGrowth": "Pertumbuhan pendapatan",
+      "incomeGrowthHint": "Terpisah dari inflasi — kenaikan gaji yang Anda harapkan per tahun.",
       "useHistoricalCagr": "Gunakan CAGR historis Anda: {value}%",
       "cashflow": "Arus Kas",
       "cashflowDescription": "Pemasukan dan pengeluaran bulanan yang menjadi dasar prakiraan.",

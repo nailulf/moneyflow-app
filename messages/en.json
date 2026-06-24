@@ -1129,6 +1129,8 @@
       "annualReturn": "Annual Return",
       "volatility": "Volatility",
       "inflation": "Inflation",
+      "incomeGrowth": "Income growth",
+      "incomeGrowthHint": "Separate from inflation — your expected raise per year.",
       "useHistoricalCagr": "Use your historical CAGR: {value}%",
       "cashflow": "Cashflow",
       "cashflowDescription": "Monthly income and expenses that feed the forecast.",

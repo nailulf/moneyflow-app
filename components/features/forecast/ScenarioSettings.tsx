@@ -287,6 +287,16 @@ export function ScenarioSettings({
               onChange={(n) => update("inflation_rate", fromPercent(n))}
             />
           </div>
+          <div className="space-y-1.5">
+            <FieldLabel htmlFor="scenario-income-growth" hint={t("incomeGrowthHint")}>
+              {t("incomeGrowth")}
+            </FieldLabel>
+            <PercentInput
+              id="scenario-income-growth"
+              value={scenarioDraft ? toPercent(scenarioDraft.annual_income_growth) : 0}
+              onChange={(n) => update("annual_income_growth", fromPercent(n))}
+            />
+          </div>
         </div>
       </Section>
 
