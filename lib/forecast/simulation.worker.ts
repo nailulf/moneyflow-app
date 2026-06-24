@@ -86,7 +86,7 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
     baseDateISO,
     simulations,
     inflationRate,
-    annualIncomeGrowth,
+    annualIncomeGrowth = 0,
     dobISO,
   } = e.data
 
