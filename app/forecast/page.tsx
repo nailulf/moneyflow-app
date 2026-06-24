@@ -12,7 +12,6 @@ import {
   buildDraft,
 } from "@/lib/forecast/types"
 import {
-  getMonthKey,
   computeSuccessRate,
   computeCAGR,
 } from "@/lib/forecast/engine"
@@ -30,7 +29,7 @@ import {
   useDeleteEvent,
   useToggleEvent,
 } from "@/hooks/useForecastQuery"
-import { buildEventImpactMap } from "@/lib/forecast/event-impact"
+import { buildProjectionInputs } from "@/lib/forecast/projection-inputs"
 import { useForecastEngine } from "@/hooks/useForecastEngine"
 import { computeInsights } from "@/lib/forecast/insights"
 import { ForecastChart } from "@/components/features/forecast/ForecastChart"
@@ -111,48 +110,11 @@ export default function ForecastPage(): ReactElement {
 
   // --- Derived computation ---
 
-  const eventMap = useMemo(() => {
-    if (!scenarioDraft) return new Map<string, number>()
-    const startYear = new Date(scenarioDraft.start_date).getFullYear()
-    return buildEventImpactMap(events, startYear, scenarioDraft.horizon_years, scenarioDraft.inflation_rate)
-  }, [events, scenarioDraft])
-
-  const eventsByMonth = useMemo(() => {
-    const map = new Map<string, string[]>()
-    for (const event of events) {
-      if (event.is_enabled === false) continue
-      const exactKey = getMonthKey(new Date(event.event_date))
-      const janKey = `${new Date(event.event_date).getFullYear()}-01`
-      // Index by both exact month and January so dots/tooltips show on either
-      for (const key of new Set([exactKey, janKey])) {
-        map.set(key, [...(map.get(key) ?? []), event.event_type])
-      }
-    }
-    return map
-  }, [events])
-
-  const eventDetailsByMonth = useMemo(() => {
-    const map = new Map<string, { name: string; type: string; amount: number }[]>()
-    for (const event of events) {
-      if (event.is_enabled === false) continue
-      const exactKey = getMonthKey(new Date(event.event_date))
-      const janKey = `${new Date(event.event_date).getFullYear()}-01`
-      for (const key of new Set([exactKey, janKey])) {
-        const existing = map.get(key) ?? []
-        // Avoid duplicates if exact month IS January
-        if (key === janKey && exactKey === janKey && existing.some((e) => e.name === event.name)) continue
-        existing.push({ name: event.name, type: event.event_type, amount: Number(event.amount) })
-        map.set(key, existing)
-      }
-    }
-    return map
-  }, [events])
-
-  // Find retirement event date for the engine
-  const retirementDateISO = useMemo(() => {
-    const retEvent = events.find((e) => e.event_type === "RETIREMENT" && e.is_enabled !== false)
-    return retEvent ? retEvent.event_date : null
-  }, [events])
+  const { eventMap, eventsByMonth, eventDetailsByMonth, retirementDateISO } = useMemo(
+    () => scenarioDraft ? buildProjectionInputs(events, scenarioDraft)
+      : { eventMap: new Map<string, number>(), eventsByMonth: new Map<string, string[]>(), eventDetailsByMonth: new Map(), retirementDateISO: null },
+    [events, scenarioDraft],
+  )
 
   const { projection, mcFinalValues, isComputing } = useForecastEngine(
     scenarioDraft, netWorth ?? null, monthlyIncomeBase, monthlyExpenseBase, eventMap, eventsByMonth, userDOB, eventDetailsByMonth, retirementDateISO,
