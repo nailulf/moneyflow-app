@@ -998,6 +998,7 @@
   },
   "forecast": {
     "root": {
+      "title": "Proyeksi",
       "netWorth": "Kekayaan Bersih",
       "cashFlow": "Arus Kas",
       "projectedNetWorth": "Proyeksi Kekayaan Bersih",

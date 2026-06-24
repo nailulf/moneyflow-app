@@ -998,6 +998,7 @@
   },
   "forecast": {
     "root": {
+      "title": "Forecast",
       "netWorth": "Net Worth",
       "cashFlow": "Cash Flow",
       "projectedNetWorth": "Projected Net Worth",

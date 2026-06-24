@@ -3,23 +3,11 @@
 import { useEffect, useMemo, useState, type ReactElement } from "react"
 
 import { useTranslations } from "next-intl"
-import { Info, MoreVertical } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ChevronDown, ChevronLeft } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import { PageLayout, TopContent } from "@/components/PageLayout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/molecules/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/molecules/tabs"
-import { Button } from "@/components/ui/atoms/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/molecules/select"
-import { formatCurrency } from "@/lib/data-utils"
 import {
   type ScenarioDraft,
-  type ComparisonRow,
   defaultScenarioPayload,
   buildDraft,
 } from "@/lib/forecast/types"
@@ -44,19 +32,29 @@ import {
 } from "@/hooks/useForecastQuery"
 import { buildEventImpactMap } from "@/lib/forecast/event-impact"
 import { useForecastEngine } from "@/hooks/useForecastEngine"
-import { ForecastChart, type ForecastChartView } from "@/components/features/forecast/ForecastChart"
-import { ForecastSummary } from "@/components/features/forecast/ForecastSummary"
+import { computeInsights } from "@/lib/forecast/insights"
+import { ForecastChart } from "@/components/features/forecast/ForecastChart"
+import { ForecastHero } from "@/components/features/forecast/ForecastHero"
+import { ForecastViewToggle, type RootChartView } from "@/components/features/forecast/ForecastViewToggle"
+import { ForecastAssumptionsSummary } from "@/components/features/forecast/ForecastAssumptionsSummary"
+import { ForecastInsightsCard } from "@/components/features/forecast/ForecastInsightsCard"
+import { ForecastEventsPreview } from "@/components/features/forecast/ForecastEventsPreview"
+import { ForecastScenarioSheet } from "@/components/features/forecast/ForecastScenarioSheet"
 import { CustomizeSheet } from "@/components/features/forecast/CustomizeSheet"
 import { SimulationTable } from "@/components/features/forecast/SimulationTable"
+import { StickyScreenHeader } from "@/components/features/navigation/StickyScreenHeader"
 import { useYearlySimulation, yearlyRowsToProjection } from "@/hooks/useYearlySimulation"
 
 export default function ForecastPage(): ReactElement {
   const { user } = useAuth()
-  const t = useTranslations("forecast")
+  const tRoot = useTranslations("forecast.root")
+  const router = useRouter()
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null)
   const [scenarioDraft, setScenarioDraft] = useState<ScenarioDraft | null>(null)
-  const [chartView, setChartView] = useState<ForecastChartView>("net-worth")
+  const [chartView, setChartView] = useState<RootChartView>("net-worth")
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [scenarioSheetOpen, setScenarioSheetOpen] = useState(false)
+  const [customizeTab, setCustomizeTab] = useState<"settings" | "events">("settings")
 
   // --- React Query data ---
   const { data: scenarios = [], isLoading: scenariosLoading } = useForecastScenarios()
@@ -164,37 +162,10 @@ export default function ForecastPage(): ReactElement {
     return computeSuccessRate(mcFinalValues, scenarioDraft.target_net_worth)
   }, [mcFinalValues, scenarioDraft])
 
-  const insights = useMemo(() => {
-    if (!projection || !scenarioDraft || netWorth === null) return []
-    const finalPoint = projection[projection.length - 1]
-    const notes: string[] = []
-
-    const targetLabel = scenarioDraft.target_net_worth > 0
-      ? t("insights.targetAbove", { amount: formatCurrency(scenarioDraft.target_net_worth) })
-      : t("insights.targetPositive")
-    if (successRate !== null && successRate < 50) {
-      notes.push(t("insights.lowSuccess", { targetLabel }))
-    } else if (successRate !== null && successRate >= 90) {
-      notes.push(t("insights.highSuccess", { targetLabel }))
-    }
-    if (finalPoint.p50 < netWorth) {
-      notes.push(t("insights.belowToday"))
-    }
-    if (scenarioDraft.include_cashflow && monthlyCashflow < 0) {
-      notes.push(
-        cashflowMonthsUsed >= 2
-          ? t("insights.negativeCashflowMonths", { months: cashflowMonthsUsed })
-          : t("insights.negativeCashflow"),
-      )
-    }
-    if (scenarioDraft.annual_volatility > 0.2) {
-      notes.push(t("insights.highVolatility"))
-    }
-    if (notes.length === 0) {
-      notes.push(t("insights.onTrack"))
-    }
-    return notes
-  }, [projection, scenarioDraft, netWorth, monthlyCashflow, cashflowMonthsUsed, successRate, t])
+  const insights = useMemo(
+    () => computeInsights({ projection, scenarioDraft, netWorth, monthlyCashflow, cashflowMonthsUsed, successRate }),
+    [projection, scenarioDraft, netWorth, monthlyCashflow, cashflowMonthsUsed, successRate],
+  )
 
   // --- Handlers ---
 
@@ -254,84 +225,110 @@ export default function ForecastPage(): ReactElement {
 
   // --- Render ---
 
+  const activeScenarioName = scenarios.find((s) => s.id === selectedScenarioId)?.name ?? ""
+  const startYear = yearlyParams?.startYear ?? new Date().getFullYear()
+  const horizon = scenarioDraft?.horizon_years ?? 0
+
   return (
-    <div className="flex flex-col h-full">
-      <PageLayout>
-        <TopContent>
-          <Card className="rounded-lg shadow-sm">
-            {/* Header: scenario dropdown + actions */}
-            <CardHeader className="flex-row items-center justify-between space-y-0">
-              <div className="flex items-center gap-2">
-                <Select
-                  value={selectedScenarioId ?? undefined}
-                  onValueChange={setSelectedScenarioId}
-                >
-                  <SelectTrigger className="w-auto min-w-[160px] border-none shadow-none font-semibold text-base">
-                    <SelectValue placeholder={t("settings.selectScenario")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {scenarios.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Info className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
+    <div className="mx-auto flex w-full max-w-md flex-col gap-[18px] pt-3 pb-10 md:max-w-2xl">
+      <StickyScreenHeader>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label={tRoot("title")}
+            className="-ml-2 flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted/50 active:bg-muted/50"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-lg font-semibold text-foreground">{tRoot("title")}</h1>
+        </div>
+        {activeScenarioName && (
+          <button
+            type="button"
+            onClick={() => setScenarioSheetOpen(true)}
+            className="flex items-center gap-1 rounded-full bg-card px-3 py-1.5 text-sm font-medium text-foreground shadow-card"
+          >
+            <span className="max-w-[140px] truncate">{activeScenarioName}</span>
+            <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+          </button>
+        )}
+      </StickyScreenHeader>
 
-            <CardContent className="space-y-6">
-              {/* Tab toggle + CTA */}
-              <div className="flex items-center justify-between">
-                <Tabs
-                  value={chartView}
-                  onValueChange={(v) => setChartView(v as ForecastChartView)}
-                >
-                  <TabsList>
-                    <TabsTrigger value="net-worth">{t("tabs.netWorth")}</TabsTrigger>
-                    <TabsTrigger value="cash-flow">{t("tabs.cashFlow")}</TabsTrigger>
-                    <TabsTrigger value="simulation">{t("tabs.simulation")}</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-                <Button onClick={() => setSheetOpen(true)}>
-                  {t("addEventsCustomize")}
-                </Button>
-              </div>
+      {scenarioDraft && (
+        <>
+          <ForecastHero
+            projectedNetWorth={projection ? projection[projection.length - 1].deterministic : null}
+            currentNetWorth={netWorth}
+            targetNetWorth={scenarioDraft.target_net_worth}
+            successRate={successRate}
+            horizonYears={horizon}
+            endYear={startYear + horizon}
+          />
 
-              {/* Chart area */}
-              <ForecastChart
-                view={chartView}
-                projection={projection}
-                yearlyProjection={yearlyProjection}
-                isLoading={scenariosLoading || isComputing}
-                netWorth={netWorth}
-                scenarioDraft={scenarioDraft}
-                monthlyCashflow={monthlyCashflow}
-                baseAnnualIncome={baseAnnualIncome}
-                baseAnnualExpenses={baseAnnualExpenses}
-                events={events}
-                successRate={successRate}
-              />
+          <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-card">
+            <h2 className="text-sm font-semibold text-foreground">
+              {chartView === "cash-flow" ? tRoot("cashFlow") : tRoot("netWorth")}
+            </h2>
+            <ForecastChart
+              view={chartView}
+              projection={projection}
+              yearlyProjection={yearlyProjection}
+              isLoading={scenariosLoading || isComputing}
+              netWorth={netWorth}
+              scenarioDraft={scenarioDraft}
+              monthlyCashflow={monthlyCashflow}
+              baseAnnualIncome={baseAnnualIncome}
+              baseAnnualExpenses={baseAnnualExpenses}
+              events={events}
+              successRate={successRate}
+            />
+          </div>
 
-              {/* Summary strip */}
-              <ForecastSummary insights={insights} />
-            </CardContent>
-          </Card>
+          <ForecastViewToggle
+            value={chartView === "cash-flow" ? "cash-flow" : "net-worth"}
+            onChange={(v) => setChartView(v)}
+          />
 
-          <SimulationTable rows={yearlyRows} params={yearlyParams} events={yearlyEvents} />
-        </TopContent>
-      </PageLayout>
+          <ForecastAssumptionsSummary
+            scenarioDraft={scenarioDraft}
+            onEdit={() => {
+              setCustomizeTab("settings")
+              setSheetOpen(true)
+            }}
+          />
 
-      {/* Customize Sheet */}
+          <ForecastInsightsCard insights={insights} />
+
+          <ForecastEventsPreview
+            events={events}
+            onManage={() => {
+              setCustomizeTab("events")
+              setSheetOpen(true)
+            }}
+          />
+
+          <div className="hidden md:block">
+            <SimulationTable rows={yearlyRows} params={yearlyParams} events={yearlyEvents} />
+          </div>
+        </>
+      )}
+
+      <ForecastScenarioSheet
+        open={scenarioSheetOpen}
+        onOpenChange={setScenarioSheetOpen}
+        scenarios={scenarios}
+        selectedScenarioId={selectedScenarioId}
+        onSelect={(id) => {
+          setSelectedScenarioId(id)
+          setScenarioSheetOpen(false)
+        }}
+      />
+
       <CustomizeSheet
         open={sheetOpen}
         onOpenChange={setSheetOpen}
+        initialTab={customizeTab}
         scenarios={scenarios}
         selectedScenarioId={selectedScenarioId}
         scenarioDraft={scenarioDraft}
