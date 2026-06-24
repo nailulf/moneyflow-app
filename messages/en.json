@@ -1142,6 +1142,28 @@
       "save": "Save",
       "saving": "Saving..."
     },
+    "assumptions": {
+      "growth": "Growth",
+      "inflationIncome": "Inflation & income",
+      "contributions": "Contributions",
+      "horizonGoal": "Horizon & goal",
+      "source": "Source",
+      "name": "Name",
+      "description": "Description",
+      "expectedReturn": "Annual Return",
+      "volatility": "Volatility",
+      "inflation": "Inflation",
+      "incomeGrowth": "Income growth",
+      "incomeNew": "NEW",
+      "monthlyContribution": "Monthly Contribution",
+      "monthlyWithdrawal": "Monthly Withdrawal",
+      "horizon": "Horizon",
+      "targetNetWorth": "Target Net Worth",
+      "useHistory": "Use actual cashflow",
+      "sourceHelper": "Median from {months} months: {amount}/mo",
+      "pctUnit": "%",
+      "yearsUnit": "yrs"
+    },
     "settings": {
       "scenarioSection": "Scenario",
       "scenarioSectionDescription": "Pick the scenario to edit or create a new one.",

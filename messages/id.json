@@ -1142,6 +1142,28 @@
       "save": "Simpan",
       "saving": "Menyimpan..."
     },
+    "assumptions": {
+      "growth": "Pertumbuhan",
+      "inflationIncome": "Inflasi & pendapatan",
+      "contributions": "Kontribusi",
+      "horizonGoal": "Horizon & target",
+      "source": "Sumber",
+      "name": "Nama",
+      "description": "Deskripsi",
+      "expectedReturn": "Imbal Hasil Tahunan",
+      "volatility": "Volatilitas",
+      "inflation": "Inflasi",
+      "incomeGrowth": "Pertumbuhan pendapatan",
+      "incomeNew": "BARU",
+      "monthlyContribution": "Kontribusi Bulanan",
+      "monthlyWithdrawal": "Penarikan Bulanan",
+      "horizon": "Horizon",
+      "targetNetWorth": "Target Kekayaan Bersih",
+      "useHistory": "Gunakan arus kas aktual",
+      "sourceHelper": "Median dari {months} bulan: {amount}/bulan",
+      "pctUnit": "%",
+      "yearsUnit": "thn"
+    },
     "settings": {
       "scenarioSection": "Skenario",
       "scenarioSectionDescription": "Pilih skenario untuk diedit atau buat yang baru.",
