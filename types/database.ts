@@ -839,6 +839,7 @@ export interface Database {
           expected_annual_return: number
           annual_volatility: number
           inflation_rate: number
+          annual_income_growth: number
           monthly_contribution: number
           monthly_withdrawal: number
           include_cashflow: boolean
@@ -857,6 +858,7 @@ export interface Database {
           expected_annual_return?: number
           annual_volatility?: number
           inflation_rate?: number
+          annual_income_growth?: number
           monthly_contribution?: number
           monthly_withdrawal?: number
           include_cashflow?: boolean
@@ -875,6 +877,7 @@ export interface Database {
           expected_annual_return?: number
           annual_volatility?: number
           inflation_rate?: number
+          annual_income_growth?: number
           monthly_contribution?: number
           monthly_withdrawal?: number
           include_cashflow?: boolean
