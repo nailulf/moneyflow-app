@@ -24,6 +24,9 @@ describe('isFullScreenFlow', () => {
   it('hides nav on /forecast (More menu drill-in)', () => {
     expect(isFullScreenFlow('/forecast')).toBe(true)
   })
+  it('hides nav on /forecast/assumptions (assumptions form)', () => {
+    expect(isFullScreenFlow('/forecast/assumptions')).toBe(true)
+  })
   it('keeps chrome on other root paths like /budget', () => {
     expect(isFullScreenFlow('/budget')).toBe(false)
   })
