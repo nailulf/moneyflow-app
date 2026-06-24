@@ -1007,7 +1007,14 @@
       "successRate": "Success rate",
       "today": "Today",
       "horizon": "Horizon",
-      "years": "{n} yrs"
+      "years": "{n} yrs",
+      "assumptions": "Assumptions",
+      "edit": "Edit",
+      "chipReturn": "Return {v}%",
+      "chipInflation": "Inflation {v}%",
+      "chipIncome": "Income +{v}%/yr",
+      "chipContribute": "Contribute {amount}/mo",
+      "chipHorizon": "Horizon {n}y"
     },
     "tabs": {
       "netWorth": "Net Worth",

@@ -1007,7 +1007,14 @@
       "successRate": "Tingkat sukses",
       "today": "Hari ini",
       "horizon": "Horizon",
-      "years": "{n} thn"
+      "years": "{n} thn",
+      "assumptions": "Asumsi",
+      "edit": "Ubah",
+      "chipReturn": "Imbal {v}%",
+      "chipInflation": "Inflasi {v}%",
+      "chipIncome": "Pendapatan +{v}%/thn",
+      "chipContribute": "Setor {amount}/bln",
+      "chipHorizon": "Horizon {n}thn"
     },
     "tabs": {
       "netWorth": "Kekayaan Bersih",
