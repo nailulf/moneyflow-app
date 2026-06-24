@@ -1020,7 +1020,11 @@
       "manage": "Kelola",
       "noEvents": "Belum ada peristiwa hidup",
       "scenarios": "Skenario",
-      "defaultScenario": "Utama"
+      "defaultScenario": "Utama",
+      "back": "Kembali",
+      "emptyTitle": "Belum ada proyeksi",
+      "emptyBody": "Buat skenario untuk memproyeksikan kekayaan bersih Anda.",
+      "createScenario": "Buat skenario"
     },
     "tabs": {
       "netWorth": "Kekayaan Bersih",

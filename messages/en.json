@@ -1020,7 +1020,11 @@
       "manage": "Manage",
       "noEvents": "No life events yet",
       "scenarios": "Scenarios",
-      "defaultScenario": "Default"
+      "defaultScenario": "Default",
+      "back": "Back",
+      "emptyTitle": "No forecast yet",
+      "emptyBody": "Create a scenario to project your future net worth.",
+      "createScenario": "Create scenario"
     },
     "tabs": {
       "netWorth": "Net Worth",

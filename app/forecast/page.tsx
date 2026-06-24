@@ -43,6 +43,7 @@ import { ForecastScenarioSheet } from "@/components/features/forecast/ForecastSc
 import { CustomizeSheet } from "@/components/features/forecast/CustomizeSheet"
 import { SimulationTable } from "@/components/features/forecast/SimulationTable"
 import { StickyScreenHeader } from "@/components/features/navigation/StickyScreenHeader"
+import { Button } from "@/components/ui/atoms/button"
 import { useYearlySimulation, yearlyRowsToProjection } from "@/hooks/useYearlySimulation"
 
 export default function ForecastPage(): ReactElement {
@@ -236,7 +237,7 @@ export default function ForecastPage(): ReactElement {
           <button
             type="button"
             onClick={() => router.back()}
-            aria-label={tRoot("title")}
+            aria-label={tRoot("back")}
             className="-ml-2 flex h-9 w-9 items-center justify-center rounded-full text-foreground transition-colors hover:bg-muted/50 active:bg-muted/50"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -254,6 +255,20 @@ export default function ForecastPage(): ReactElement {
           </button>
         )}
       </StickyScreenHeader>
+
+      {!scenarioDraft && scenariosLoading && (
+        <div className="flex flex-col gap-[18px]">
+          <div className="h-44 animate-pulse rounded-[20px] bg-muted" />
+          <div className="h-64 animate-pulse rounded-2xl bg-muted" />
+        </div>
+      )}
+      {!scenarioDraft && !scenariosLoading && (
+        <div className="flex flex-col items-center gap-4 rounded-2xl bg-card p-8 text-center shadow-card">
+          <p className="text-md font-semibold text-foreground">{tRoot("emptyTitle")}</p>
+          <p className="text-sm text-muted-foreground">{tRoot("emptyBody")}</p>
+          <Button onClick={() => { void handleCreateScenario() }}>{tRoot("createScenario")}</Button>
+        </div>
+      )}
 
       {scenarioDraft && (
         <>
@@ -286,7 +301,7 @@ export default function ForecastPage(): ReactElement {
           </div>
 
           <ForecastViewToggle
-            value={chartView === "cash-flow" ? "cash-flow" : "net-worth"}
+            value={chartView}
             onChange={(v) => setChartView(v)}
           />
 
