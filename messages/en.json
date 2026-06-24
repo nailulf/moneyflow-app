@@ -1014,7 +1014,10 @@
       "chipInflation": "Inflation {v}%",
       "chipIncome": "Income +{v}%/yr",
       "chipContribute": "Contribute {amount}/mo",
-      "chipHorizon": "Horizon {n}y"
+      "chipHorizon": "Horizon {n}y",
+      "lifeEvents": "Life Events",
+      "manage": "Manage",
+      "noEvents": "No life events yet"
     },
     "tabs": {
       "netWorth": "Net Worth",
