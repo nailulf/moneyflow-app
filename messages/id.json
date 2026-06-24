@@ -999,7 +999,15 @@
   "forecast": {
     "root": {
       "netWorth": "Kekayaan Bersih",
-      "cashFlow": "Arus Kas"
+      "cashFlow": "Arus Kas",
+      "projectedNetWorth": "Proyeksi Kekayaan Bersih",
+      "eyebrow": "PROYEKSI KEKAYAAN · {years} THN · {year}",
+      "toGoal": "{pct}% ke target",
+      "target": "target {amount}",
+      "successRate": "Tingkat sukses",
+      "today": "Hari ini",
+      "horizon": "Horizon",
+      "years": "{n} thn"
     },
     "tabs": {
       "netWorth": "Kekayaan Bersih",

@@ -999,7 +999,15 @@
   "forecast": {
     "root": {
       "netWorth": "Net Worth",
-      "cashFlow": "Cash Flow"
+      "cashFlow": "Cash Flow",
+      "projectedNetWorth": "Projected Net Worth",
+      "eyebrow": "PROJECTED NET WORTH · IN {years} YRS · {year}",
+      "toGoal": "{pct}% to goal",
+      "target": "{amount} target",
+      "successRate": "Success rate",
+      "today": "Today",
+      "horizon": "Horizon",
+      "years": "{n} yrs"
     },
     "tabs": {
       "netWorth": "Net Worth",
