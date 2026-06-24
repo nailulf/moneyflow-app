@@ -306,7 +306,7 @@ export default function ForecastPage(): ReactElement {
         }}
         onNew={async () => {
           setScenarioSheetOpen(false)
-          const c = await createScenario.mutateAsync({ ...defaultScenarioPayload, name: "New scenario" })
+          const c = await createScenario.mutateAsync({ ...defaultScenarioPayload, name: "New scenario", is_default: false })
           router.push(`/forecast/assumptions?scenario=${c.id}`)
         }}
         onCompare={() => {
