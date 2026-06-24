@@ -59,6 +59,7 @@ export const runMonteCarlo = (
   baseDate: Date,
   simulations: number,
   inflationRate: number,
+  annualIncomeGrowth: number,
 ): MonteCarloResult => {
   const series: number[][] = Array.from({ length: months + 1 }, () => [])
   const finalValues: number[] = []
@@ -69,9 +70,10 @@ export const runMonteCarlo = (
       const monthDate = addMonths(baseDate, i)
       const eventAdjustment = eventMap.get(getMonthKey(monthDate)) ?? 0
       const inflationFactor = Math.pow(1 + inflationRate, i / 12)
+      const incomeFactor = Math.pow(1 + annualIncomeGrowth, i / 12)
       const income = (retirementMonth !== null && i >= retirementMonth)
         ? 0
-        : monthlyIncome * inflationFactor
+        : monthlyIncome * incomeFactor
       const expense = monthlyExpense * inflationFactor
       const monthlyFlow = income - expense + eventAdjustment
       const shock = randomNormal()
@@ -98,6 +100,7 @@ export function computeProjection(
   const months = Math.max(1, scenarioDraft.horizon_years * 12)
   const baseDate = new Date(scenarioDraft.start_date)
   const inflationRate = scenarioDraft.inflation_rate
+  const annualIncomeGrowth = scenarioDraft.annual_income_growth
   const meanMonthly = calculateNominalMonthlyRate(
     scenarioDraft.expected_annual_return
   )
@@ -126,9 +129,10 @@ export function computeProjection(
     const monthDate = addMonths(baseDate, i)
     const eventAdjustment = eventMap.get(getMonthKey(monthDate)) ?? 0
     const inflationFactor = Math.pow(1 + inflationRate, i / 12)
+    const incomeFactor = Math.pow(1 + annualIncomeGrowth, i / 12)
     const income = (retirementMonth !== null && i >= retirementMonth)
       ? 0
-      : monthlyIncome * inflationFactor
+      : monthlyIncome * incomeFactor
     const expense = monthlyExpense * inflationFactor
     const monthlyFlow = income - expense + eventAdjustment
     deterministicValue = deterministicValue * (1 + meanMonthly) + monthlyFlow
@@ -149,6 +153,7 @@ export function computeProjection(
     baseDate,
     simulations,
     inflationRate,
+    annualIncomeGrowth,
   )
 
   const points: ProjectionPoint[] = []
