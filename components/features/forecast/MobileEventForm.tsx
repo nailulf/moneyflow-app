@@ -139,20 +139,23 @@ export function MobileEventForm({
     }
     const { amount, details: builtDetails, event_date } = buildEventPayload(eventType, fields)
 
-    if (isEdit && existingEvent && onUpdate) {
-      await onUpdate(existingEvent.id, { name, event_date, amount, details: builtDetails })
-    } else {
-      await onSubmit({
-        scenario_id: scenarioId,
-        name,
-        event_type: eventType,
-        note: null,
-        event_date,
-        amount,
-        details: builtDetails,
-      })
+    try {
+      if (isEdit && existingEvent && onUpdate) {
+        await onUpdate(existingEvent.id, { name, event_date, amount, details: builtDetails })
+      } else {
+        await onSubmit({
+          scenario_id: scenarioId,
+          name,
+          event_type: eventType,
+          note: null,
+          event_date,
+          amount,
+          details: builtDetails,
+        })
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-    setIsSubmitting(false)
   }
 
   // Mortgage preview
