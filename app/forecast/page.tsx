@@ -13,7 +13,6 @@ import {
 } from "@/lib/forecast/types"
 import {
   computeSuccessRate,
-  computeCAGR,
 } from "@/lib/forecast/engine"
 import {
   useForecastScenarios,
@@ -21,13 +20,7 @@ import {
   useForecastNetWorth,
   useForecastCashflow,
   useForecastUserDOB,
-  useSaveScenario,
   useCreateScenario,
-  useDeleteScenario,
-  useCreateEvent,
-  useUpdateEvent,
-  useDeleteEvent,
-  useToggleEvent,
 } from "@/hooks/useForecastQuery"
 import { buildProjectionInputs } from "@/lib/forecast/projection-inputs"
 import { useForecastEngine } from "@/hooks/useForecastEngine"
@@ -40,7 +33,6 @@ import { ForecastInsightsCard } from "@/components/features/forecast/ForecastIns
 import { ForecastEventsPreview } from "@/components/features/forecast/ForecastEventsPreview"
 import { ForecastScenarioSheet } from "@/components/features/forecast/ForecastScenarioSheet"
 import { ScenarioCompareSheet } from "@/components/features/forecast/ScenarioCompareSheet"
-import { CustomizeSheet } from "@/components/features/forecast/CustomizeSheet"
 import { SimulationTable } from "@/components/features/forecast/SimulationTable"
 import { StickyScreenHeader } from "@/components/features/navigation/StickyScreenHeader"
 import { Button } from "@/components/ui/atoms/button"
@@ -54,11 +46,8 @@ export default function ForecastPage(): ReactElement {
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null)
   const [scenarioDraft, setScenarioDraft] = useState<ScenarioDraft | null>(null)
   const [chartView, setChartView] = useState<RootChartView>("net-worth")
-  const [sheetOpen, setSheetOpen] = useState(false)
   const [scenarioSheetOpen, setScenarioSheetOpen] = useState(false)
   const [compareOpen, setCompareOpen] = useState(false)
-  // Note: the Settings tab is unreachable from the Root post-SP3 (SP4 removes it); customizeTab is now only ever "events".
-  const [customizeTab, setCustomizeTab] = useState<"settings" | "events">("settings")
 
   // --- React Query data ---
   const { data: scenarios = [], isLoading: scenariosLoading } = useForecastScenarios()
@@ -84,19 +73,8 @@ export default function ForecastPage(): ReactElement {
     [yearlyRows]
   )
 
-  const computedCAGR = useMemo(() => {
-    if (!netWorthData?.historicalData) return null
-    return computeCAGR(netWorthData.historicalData)
-  }, [netWorthData])
-
   // --- Mutations ---
-  const saveScenario = useSaveScenario()
   const createScenario = useCreateScenario()
-  const deleteScenario = useDeleteScenario()
-  const createEvent = useCreateEvent()
-  const updateEvent = useUpdateEvent(selectedScenarioId)
-  const deleteEvent = useDeleteEvent(selectedScenarioId)
-  const toggleEvent = useToggleEvent(selectedScenarioId)
 
   // Auto-select scenario
   const selectedScenario = useMemo(() => {
@@ -139,58 +117,9 @@ export default function ForecastPage(): ReactElement {
 
   // --- Handlers ---
 
-  const handleScenarioSave = async (): Promise<void> => {
-    if (!scenarioDraft || !selectedScenarioId) return
-    await saveScenario.mutateAsync({ scenarioId: selectedScenarioId, draft: scenarioDraft })
-  }
-
-  const handleEventSubmit = async (payload: {
-    scenario_id: string
-    name: string
-    event_date: string
-    event_type: string
-    amount: number
-    note: string | null
-    details?: Record<string, unknown>
-  }): Promise<void> => {
-    await createEvent.mutateAsync(payload)
-  }
-
-  const handleEventUpdate = async (
-    eventId: string,
-    payload: {
-      name: string
-      event_date: string
-      amount: number
-      details: Record<string, unknown>
-    },
-  ): Promise<void> => {
-    await updateEvent.mutateAsync({ eventId, ...payload })
-  }
-
-  const handleToggleEvent = async (eventId: string, is_enabled: boolean): Promise<void> => {
-    await toggleEvent.mutateAsync({ eventId, is_enabled })
-  }
-
   const handleCreateScenario = async (): Promise<void> => {
     const scenario = await createScenario.mutateAsync({ ...defaultScenarioPayload, name: "New Scenario", is_default: false })
     setSelectedScenarioId(scenario.id)
-  }
-
-  const handleDuplicateScenario = async (): Promise<void> => {
-    if (!scenarioDraft) return
-    const scenario = await createScenario.mutateAsync({ ...scenarioDraft, name: `${scenarioDraft.name} (Copy)`, is_default: false })
-    setSelectedScenarioId(scenario.id)
-  }
-
-  const handleDeleteScenario = async (): Promise<void> => {
-    if (!selectedScenarioId || scenarios.length <= 1) return
-    await deleteScenario.mutateAsync(selectedScenarioId)
-    setSelectedScenarioId(null)
-  }
-
-  const handleDeleteEvent = async (eventId: string): Promise<void> => {
-    await deleteEvent.mutateAsync(eventId)
   }
 
   // --- Render ---
@@ -283,10 +212,7 @@ export default function ForecastPage(): ReactElement {
 
           <ForecastEventsPreview
             events={events}
-            onManage={() => {
-              setCustomizeTab("events")
-              setSheetOpen(true)
-            }}
+            onManage={() => router.push(`/forecast/events?scenario=${selectedScenarioId ?? ""}`)}
           />
 
           <div className="hidden md:block">
@@ -319,30 +245,6 @@ export default function ForecastPage(): ReactElement {
         onOpenChange={setCompareOpen}
         rows={comparisonRows}
         selectedScenarioId={selectedScenarioId}
-      />
-
-      <CustomizeSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        initialTab={customizeTab}
-        scenarios={scenarios}
-        selectedScenarioId={selectedScenarioId}
-        scenarioDraft={scenarioDraft}
-        isSaving={saveScenario.isPending}
-        monthlyCashflow={monthlyCashflow}
-        cashflowMonthsUsed={cashflowMonthsUsed}
-        computedCAGR={computedCAGR}
-        onSelectScenario={setSelectedScenarioId}
-        onDraftChange={setScenarioDraft}
-        onSave={handleScenarioSave}
-        onCreate={handleCreateScenario}
-        onDuplicate={handleDuplicateScenario}
-        onDelete={handleDeleteScenario}
-        events={events}
-        onEventSubmit={handleEventSubmit}
-        onEventUpdate={handleEventUpdate}
-        onEventDelete={handleDeleteEvent}
-        onEventToggle={handleToggleEvent}
       />
     </div>
   )
