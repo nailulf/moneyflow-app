@@ -1124,6 +1124,8 @@
       }
     },
     "events": {
+      "addTitle": "Add Life Event",
+      "whatsComingUp": "What's coming up?",
       "yourEvents": "Your events",
       "addEvent": "Add event",
       "eventTitle": "Event title",

@@ -1124,6 +1124,8 @@
       }
     },
     "events": {
+      "addTitle": "Tambah Peristiwa Hidup",
+      "whatsComingUp": "Apa yang akan datang?",
       "yourEvents": "Peristiwa Anda",
       "addEvent": "Tambah peristiwa",
       "eventTitle": "Judul peristiwa",
