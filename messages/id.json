@@ -1154,7 +1154,9 @@
       "deleteEvent": "Hapus peristiwa",
       "back": "Kembali",
       "save": "Simpan",
-      "saving": "Menyimpan..."
+      "saving": "Menyimpan...",
+      "incomeStops": "Pendapatan berhenti",
+      "perYear": "/thn"
     },
     "assumptions": {
       "title": "Asumsi",

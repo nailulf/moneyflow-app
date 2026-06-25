@@ -1154,7 +1154,9 @@
       "deleteEvent": "Delete event",
       "back": "Back",
       "save": "Save",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "incomeStops": "Income stops",
+      "perYear": "/yr"
     },
     "assumptions": {
       "title": "Assumptions",
