@@ -1,4 +1,4 @@
-import { ReactElement } from "react"
+import { ReactElement, ReactNode } from "react"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { NextIntlClientProvider } from "next-intl"
@@ -43,7 +43,7 @@ const messages = {
   }
 }
 
-function Wrapper({ children }: { children: ReactElement }): ReactElement {
+function Wrapper({ children }: { children: ReactNode }): ReactElement {
   return (
     <NextIntlClientProvider locale="en" messages={messages}>
       {children}
