@@ -1156,7 +1156,10 @@
       "save": "Save",
       "saving": "Saving...",
       "incomeStops": "Income stops",
-      "perYear": "/yr"
+      "perYear": "/yr",
+      "listTitle": "Life Events",
+      "add": "Add",
+      "emptyPrompt": "What's coming up? Add your first life event."
     },
     "assumptions": {
       "title": "Assumptions",

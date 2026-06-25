@@ -1156,7 +1156,10 @@
       "save": "Simpan",
       "saving": "Menyimpan...",
       "incomeStops": "Pendapatan berhenti",
-      "perYear": "/thn"
+      "perYear": "/thn",
+      "listTitle": "Peristiwa Hidup",
+      "add": "Tambah",
+      "emptyPrompt": "Apa yang akan datang? Tambahkan peristiwa hidup pertama Anda."
     },
     "assumptions": {
       "title": "Asumsi",
