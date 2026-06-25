@@ -1084,35 +1084,43 @@
     "categories": {
       "PROPERTY": {
         "label": "Property",
-        "template": "Buy a home"
+        "template": "Buy a home",
+        "subLabel": "Property"
       },
       "WEDDING": {
         "label": "Wedding",
-        "template": "Plan a wedding"
+        "template": "Plan a wedding",
+        "subLabel": "One-time cost"
       },
       "KIDS": {
         "label": "Kids",
-        "template": "Have a kid"
+        "template": "Have a kid",
+        "subLabel": "Recurring"
       },
       "EDUCATION": {
         "label": "Education",
-        "template": "College savings"
+        "template": "College savings",
+        "subLabel": "Tuition"
       },
       "HAJJ": {
         "label": "Hajj",
-        "template": "Hajj pilgrimage"
+        "template": "Hajj pilgrimage",
+        "subLabel": "One-time cost"
       },
       "VEHICLE": {
         "label": "Vehicle",
-        "template": "Buy a vehicle"
+        "template": "Buy a vehicle",
+        "subLabel": "Property"
       },
       "RETIREMENT": {
         "label": "Retirement",
-        "template": "Plan retirement"
+        "template": "Plan retirement",
+        "subLabel": "Income stops"
       },
       "OTHER": {
         "label": "Other",
-        "template": "Custom event"
+        "template": "Custom event",
+        "subLabel": "Other"
       }
     },
     "events": {

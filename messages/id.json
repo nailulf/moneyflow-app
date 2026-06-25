@@ -1084,35 +1084,43 @@
     "categories": {
       "PROPERTY": {
         "label": "Properti",
-        "template": "Beli rumah"
+        "template": "Beli rumah",
+        "subLabel": "Properti"
       },
       "WEDDING": {
         "label": "Pernikahan",
-        "template": "Rencanakan pernikahan"
+        "template": "Rencanakan pernikahan",
+        "subLabel": "Biaya sekali"
       },
       "KIDS": {
         "label": "Anak",
-        "template": "Punya anak"
+        "template": "Punya anak",
+        "subLabel": "Berulang"
       },
       "EDUCATION": {
         "label": "Pendidikan",
-        "template": "Tabungan kuliah"
+        "template": "Tabungan kuliah",
+        "subLabel": "Biaya kuliah"
       },
       "HAJJ": {
         "label": "Haji",
-        "template": "Ibadah haji"
+        "template": "Ibadah haji",
+        "subLabel": "Biaya sekali"
       },
       "VEHICLE": {
         "label": "Kendaraan",
-        "template": "Beli kendaraan"
+        "template": "Beli kendaraan",
+        "subLabel": "Properti"
       },
       "RETIREMENT": {
         "label": "Pensiun",
-        "template": "Rencanakan pensiun"
+        "template": "Rencanakan pensiun",
+        "subLabel": "Pendapatan berhenti"
       },
       "OTHER": {
         "label": "Lainnya",
-        "template": "Peristiwa kustom"
+        "template": "Peristiwa kustom",
+        "subLabel": "Lainnya"
       }
     },
     "events": {
