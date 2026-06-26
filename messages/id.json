@@ -1036,6 +1036,10 @@
       "simulation": "Simulasi"
     },
     "addEventsCustomize": "Tambah peristiwa atau sesuaikan",
+    "colYear": "Tahun",
+    "colIncome": "Pendapatan",
+    "colExpense": "Pengeluaran",
+    "colNetWorth": "Kekayaan Bersih",
     "summary": "Ringkasan",
     "chart": {
       "currentNetWorth": "Kekayaan bersih saat ini",

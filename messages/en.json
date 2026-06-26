@@ -1036,6 +1036,10 @@
       "simulation": "Simulation"
     },
     "addEventsCustomize": "Add events or customize",
+    "colYear": "Year",
+    "colIncome": "Income",
+    "colExpense": "Expense",
+    "colNetWorth": "Net Worth",
     "summary": "Summary",
     "chart": {
       "currentNetWorth": "Current net worth",
