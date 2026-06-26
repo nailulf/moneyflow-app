@@ -197,19 +197,21 @@ function EventStrip({ events }: { events: ForecastEvent[] }): ReactElement {
 function EventIcon({ cx, cy, type }: { cx: number; cy: number; type: string }): ReactElement {
   const color = LIFE_EVENT_COLORS[type as LifeEventCategory] ?? "hsl(var(--muted-foreground))"
   const iconPath = EVENT_ICON_MAP[type] ?? EVENT_ICON_MAP.OTHER
-  const r = 12
+  const r = 10
   return (
     <g>
       <circle cx={cx} cy={cy} r={r} fill="hsl(var(--background))" stroke={color} strokeWidth={1.5} />
-      <svg x={cx - 8} y={cy - 8} width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <svg x={cx - 6} y={cy - 6} width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <path d={iconPath} />
       </svg>
     </g>
   )
 }
 
-// Custom dot that renders all event icons stacked vertically below the data point
-// Icons are connected by a vertical line with 8px gaps between each icon
+// Custom dot that renders event icons stacked ABOVE the data point, connected by a short
+// dashed line. Stacking upward (into the open space above the curve) keeps the markers inside
+// the chart card even when the line sits near the bottom (early, low-net-worth years), where
+// stacking downward used to spill the icons past the x-axis.
 function EventDot(props: {
   cx?: number
   cy?: number
@@ -220,28 +222,27 @@ function EventDot(props: {
   if (!payload?.hasEvent || payload.eventTypes.length === 0) return <g key={index} />
 
   const types = payload.eventTypes
-  const r = 12
+  const r = 10
   const diameter = r * 2
-  const gap = 8
+  const gap = 6
 
-  // First icon starts below the data point with a gap
-  const firstIconY = cy + r + gap
-  // Each subsequent icon: diameter + gap below previous center
-  const getIconY = (i: number) => firstIconY + i * (diameter + gap)
-  const lastIconY = getIconY(types.length - 1)
+  // First icon sits just above the data point; each subsequent icon stacks higher.
+  const firstIconY = cy - r - gap
+  const getIconY = (i: number) => firstIconY - i * (diameter + gap)
+  const topIconY = getIconY(types.length - 1)
 
   return (
     <g key={index}>
       {/* Small dot on the actual data point */}
       <circle cx={cx} cy={cy} r={3} fill="hsl(var(--chart-1))" />
 
-      {/* Vertical dashed line from data point to bottom of last icon */}
+      {/* Vertical dashed connector from the data point up to the topmost icon */}
       <line
-        x1={cx} y1={cy + 3} x2={cx} y2={lastIconY + r}
+        x1={cx} y1={cy - 3} x2={cx} y2={topIconY}
         stroke="hsl(var(--border))" strokeWidth={1} strokeDasharray="3 2"
       />
 
-      {/* Stack icons below the line point */}
+      {/* Stack icons above the line point */}
       {types.map((type, i) => (
         <EventIcon key={i} cx={cx} cy={getIconY(i)} type={type} />
       ))}
