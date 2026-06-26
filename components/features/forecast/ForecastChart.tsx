@@ -3,7 +3,7 @@
 import { useMemo, type ReactElement } from "react"
 import { useTranslations } from "next-intl"
 import {
-  AreaChart, Area, ComposedChart, Bar, XAxis, YAxis, ReferenceLine, Line,
+  AreaChart, Area, ComposedChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine, Line,
 } from "recharts"
 import {
   ChartContainer,
@@ -326,25 +326,31 @@ interface NetWorthViewProps {
 
 function NetWorthView({ projection, targetNetWorth }: NetWorthViewProps): ReactElement {
   const chartData = useMemo(() => downsampleProjection(projection), [projection])
+  // Show one marker per event "run": a multi-year impact (e.g. a mortgage) renders a single
+  // pin at its start instead of repeating the icon on every affected point.
+  const eventStartIndices = useMemo(() => {
+    const s = new Set<number>()
+    for (let i = 0; i < chartData.length; i += 1) {
+      if (chartData[i].hasEvent && !(i > 0 && chartData[i - 1].hasEvent)) s.add(i)
+    }
+    return s
+  }, [chartData])
 
   return (
     <ChartContainer config={netWorthConfig} className="h-64 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
-      <AreaChart data={chartData} margin={{ top: 20, right: 16, left: 0, bottom: 8 }}>
+      <AreaChart data={chartData} margin={{ top: 20, right: 8, left: 8, bottom: 8 }}>
         <defs>
           <linearGradient id="nwGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.2} />
             <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
           </linearGradient>
         </defs>
+        <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="hsl(var(--border))" strokeOpacity={0.6} />
         <XAxis
           dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={50}
           tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
         />
-        <YAxis
-          orientation="right" tickLine={false} axisLine={false} width={48}
-          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-          tickFormatter={(v) => formatCurrencyCompact(Number(v))}
-        />
+        <YAxis hide />
         {targetNetWorth > 0 && (
           <ReferenceLine y={targetNetWorth} stroke="hsl(var(--success))" strokeDasharray="6 3" strokeWidth={1.5} />
         )}
@@ -353,7 +359,12 @@ function NetWorthView({ projection, targetNetWorth }: NetWorthViewProps): ReactE
           type="monotone" dataKey="deterministic"
           stroke="hsl(var(--chart-1))" strokeWidth={2}
           fill="url(#nwGradient)"
-          dot={<EventDot />}
+          isAnimationActive={false}
+          dot={(dotProps: { cx?: number; cy?: number; payload?: ProjectionPoint; index?: number }) =>
+            eventStartIndices.has(dotProps.index ?? -1)
+              ? <EventDot key={dotProps.index} cx={dotProps.cx} cy={dotProps.cy} payload={dotProps.payload} index={dotProps.index} />
+              : <g key={dotProps.index} />
+          }
           activeDot={{ r: 4, fill: "hsl(var(--chart-1))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
         />
       </AreaChart>
@@ -458,16 +469,13 @@ function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, mon
 
   return (
     <ChartContainer config={cashFlowConfig} className="h-64 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
-      <ComposedChart data={annualData} margin={{ top: 20, right: 16, left: 0, bottom: 8 }} stackOffset="sign">
+      <ComposedChart data={annualData} margin={{ top: 20, right: 8, left: 8, bottom: 8 }} stackOffset="sign">
+        <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="hsl(var(--border))" strokeOpacity={0.6} />
         <XAxis
           dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={40}
           tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
         />
-        <YAxis
-          orientation="right" tickLine={false} axisLine={false} width={48}
-          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-          tickFormatter={(v) => formatCurrencyCompact(Number(v))}
-        />
+        <YAxis hide />
         <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
         {retirementIndex >= 0 && (
           <ReferenceLine
@@ -476,9 +484,9 @@ function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, mon
           />
         )}
         <ChartTooltip content={<CashFlowTooltip />} allowEscapeViewBox={{ x: true, y: true }} wrapperStyle={{ zIndex: 50, pointerEvents: "none" }} />
-        <Bar dataKey="income" stackId="cashflow" radius={[4, 4, 0, 0]} fill="var(--color-income)" />
-        <Bar dataKey="expense" stackId="cashflow" radius={[0, 0, 4, 4]} fill="var(--color-expense)" />
-        <Line type="monotone" dataKey="net" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
+        <Bar dataKey="income" stackId="cashflow" radius={[8, 8, 0, 0]} fill="var(--color-income)" isAnimationActive={false} />
+        <Bar dataKey="expense" stackId="cashflow" radius={[0, 0, 8, 8]} fill="var(--color-expense)" isAnimationActive={false} />
+        <Line type="monotone" dataKey="net" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} activeDot={{ r: 3 }} isAnimationActive={false} />
       </ComposedChart>
     </ChartContainer>
   )
@@ -544,15 +552,12 @@ function SimulationView({ projection, successRate, targetNetWorth, scenarioDraft
               <stop offset="100%" stopColor="hsl(var(--chart-1))" stopOpacity={0.08} />
             </linearGradient>
           </defs>
+          <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="hsl(var(--border))" strokeOpacity={0.6} />
           <XAxis
             dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={50}
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
           />
-          <YAxis
-            orientation="right" tickLine={false} axisLine={false}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-            tickFormatter={(v) => formatCurrencyCompact(Number(v))}
-          />
+          <YAxis hide />
           {targetNetWorth > 0 && (
             <ReferenceLine y={targetNetWorth} stroke="hsl(var(--destructive))" strokeDasharray="6 3" />
           )}
@@ -564,6 +569,7 @@ function SimulationView({ projection, successRate, targetNetWorth, scenarioDraft
           <Line
             type="monotone" dataKey="p50"
             stroke="hsl(var(--chart-1))" strokeWidth={2} strokeDasharray="2 2"
+            isAnimationActive={false}
             dot={<EventDot />}
             activeDot={{ r: 4, fill: "hsl(var(--chart-1))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
           />
