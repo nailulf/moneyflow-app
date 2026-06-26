@@ -31,6 +31,9 @@ describe('isFullScreenFlow', () => {
     expect(isFullScreenFlow('/forecast/events')).toBe(true)
     expect(isFullScreenFlow('/forecast/events/new')).toBe(true)
   })
+  it('hides nav on /forecast/simulation (simulation flow)', () => {
+    expect(isFullScreenFlow('/forecast/simulation')).toBe(true)
+  })
   it('keeps chrome on other root paths like /budget', () => {
     expect(isFullScreenFlow('/budget')).toBe(false)
   })
