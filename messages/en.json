@@ -1256,7 +1256,10 @@
       "columnReturn": "Return ({rate}%)",
       "columnEndNW": "End NW",
       "retire": "(retire)"
-    }
+    },
+    "yearByYearTitle": "Year by year",
+    "medianPath": "{scenario} · median path",
+    "noSimulation": "No projection yet"
   },
   "pwa": {
     "updateAvailable": "A new version is available",

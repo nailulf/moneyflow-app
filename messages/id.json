@@ -1256,7 +1256,10 @@
       "columnReturn": "Imbal ({rate}%)",
       "columnEndNW": "KB Akhir",
       "retire": "(pensiun)"
-    }
+    },
+    "yearByYearTitle": "Tahun per tahun",
+    "medianPath": "{scenario} · jalur median",
+    "noSimulation": "Belum ada proyeksi"
   },
   "pwa": {
     "updateAvailable": "Versi baru tersedia",
