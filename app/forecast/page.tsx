@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ReactElement } from "react"
 
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
-import { ChevronDown, ChevronLeft } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight, TableProperties } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import {
   type ScenarioDraft,
@@ -33,7 +33,6 @@ import { ForecastInsightsCard } from "@/components/features/forecast/ForecastIns
 import { ForecastEventsPreview } from "@/components/features/forecast/ForecastEventsPreview"
 import { ForecastScenarioSheet } from "@/components/features/forecast/ForecastScenarioSheet"
 import { ScenarioCompareSheet } from "@/components/features/forecast/ScenarioCompareSheet"
-import { SimulationTable } from "@/components/features/forecast/SimulationTable"
 import { StickyScreenHeader } from "@/components/features/navigation/StickyScreenHeader"
 import { Button } from "@/components/ui/atoms/button"
 import { useYearlySimulation, yearlyRowsToProjection } from "@/hooks/useYearlySimulation"
@@ -67,7 +66,7 @@ export default function ForecastPage(): ReactElement {
   const { rows: comparisonRows } = useScenarioComparisons()
 
   // --- Shared yearly simulation (single source of truth for NW chart + table) ---
-  const { rows: yearlyRows, params: yearlyParams, events: yearlyEvents } = useYearlySimulation()
+  const { rows: yearlyRows, params: yearlyParams } = useYearlySimulation()
   const yearlyProjection = useMemo(
     () => yearlyRows.length > 0 ? yearlyRowsToProjection(yearlyRows) : null,
     [yearlyRows]
@@ -215,9 +214,17 @@ export default function ForecastPage(): ReactElement {
             onManage={() => router.push(`/forecast/events?scenario=${selectedScenarioId ?? ""}`)}
           />
 
-          <div className="hidden md:block">
-            <SimulationTable rows={yearlyRows} params={yearlyParams} events={yearlyEvents} />
-          </div>
+          <button
+            type="button"
+            onClick={() => router.push(`/forecast/simulation?scenario=${selectedScenarioId ?? ""}`)}
+            className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-card"
+          >
+            <span className="flex size-9 items-center justify-center rounded-full bg-muted">
+              <TableProperties className="size-4 text-primary" />
+            </span>
+            <span className="flex-1 text-left text-sm font-medium text-foreground">{tRoot("yearByYear")}</span>
+            <ChevronRight className="size-5 text-muted-foreground" />
+          </button>
         </>
       )}
 
