@@ -1029,7 +1029,12 @@
       "back": "Back",
       "emptyTitle": "No forecast yet",
       "emptyBody": "Create a scenario to project your future net worth.",
-      "createScenario": "Create scenario"
+      "createScenario": "Create scenario",
+      "netWorthProjection": "Net Worth Projection",
+      "incomeVsSpending": "Income vs Spending",
+      "cashFlowSubtitle": "Income above zero, spending below — the line is your net.",
+      "legendMedian": "Median",
+      "legendGoal": "Goal"
     },
     "tabs": {
       "netWorth": "Net Worth",

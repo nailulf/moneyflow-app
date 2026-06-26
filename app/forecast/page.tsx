@@ -179,9 +179,28 @@ export default function ForecastPage(): ReactElement {
           />
 
           <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-card">
-            <h2 className="text-sm font-semibold text-foreground">
-              {chartView === "cash-flow" ? tRoot("cashFlow") : tRoot("netWorth")}
-            </h2>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <h2 className="text-sm font-semibold text-foreground">
+                  {chartView === "cash-flow" ? tRoot("incomeVsSpending") : tRoot("netWorthProjection")}
+                </h2>
+                {chartView === "cash-flow" && (
+                  <p className="text-xs leading-caption text-muted-foreground">{tRoot("cashFlowSubtitle")}</p>
+                )}
+              </div>
+              {chartView === "net-worth" && (
+                <div className="flex shrink-0 items-center gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <span className="size-2 rounded-full" style={{ backgroundColor: "hsl(var(--chart-1))" }} />
+                    {tRoot("legendMedian")}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="h-0.5 w-3 bg-success" />
+                    {tRoot("legendGoal")}
+                  </span>
+                </div>
+              )}
+            </div>
             <ForecastChart
               view={chartView}
               projection={projection}

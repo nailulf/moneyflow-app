@@ -3,7 +3,7 @@
 import { useMemo, type ReactElement } from "react"
 import { useTranslations } from "next-intl"
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, ReferenceLine, Line,
+  AreaChart, Area, ComposedChart, Bar, XAxis, YAxis, ReferenceLine, Line,
 } from "recharts"
 import {
   ChartContainer,
@@ -321,64 +321,43 @@ const simulationConfig = {
 
 interface NetWorthViewProps {
   projection: ProjectionPoint[]
-  netWorth: number
-  events: ForecastEvent[]
+  targetNetWorth: number
 }
 
-function NetWorthView({ projection, netWorth, events }: NetWorthViewProps): ReactElement {
-  const t = useTranslations("forecast.chart")
+function NetWorthView({ projection, targetNetWorth }: NetWorthViewProps): ReactElement {
   const chartData = useMemo(() => downsampleProjection(projection), [projection])
-  const finalPoint = projection[projection.length - 1]
-  const delta = finalPoint.deterministic - netWorth
-  const deltaPercent = netWorth !== 0 ? Math.round((delta / netWorth) * 100) : 0
 
   return (
-    <div>
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <p className="text-xs text-muted-foreground">{t("currentNetWorth")}</p>
-          <p className="text-2xl font-bold">{formatCurrency(netWorth)}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">
-            {t("futureNetWorthAt", { age: finalPoint.ageLabel.toLowerCase().replace("age ", "") })}
-          </p>
-          <p className="text-2xl font-bold">{formatCurrency(finalPoint.deterministic)}</p>
-          <p className={`text-sm ${delta >= 0 ? "text-success" : "text-destructive"}`}>
-            {formatCurrency(delta)} ({deltaPercent.toLocaleString()}%)
-          </p>
-        </div>
-      </div>
-
-      <ChartContainer config={netWorthConfig} className="h-80 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
-        <AreaChart data={chartData} margin={{ top: 20, right: 16, left: 0, bottom: 24 }}>
-          <defs>
-            <linearGradient id="nwGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <XAxis
-            dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={50}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-          />
-          <YAxis
-            orientation="right" tickLine={false} axisLine={false}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-            tickFormatter={(v) => formatCurrencyCompact(Number(v))}
-          />
-          <ChartTooltip content={<NetWorthTooltip />} allowEscapeViewBox={{ x: true, y: true }} wrapperStyle={{ zIndex: 50, pointerEvents: "none" }} />
-          <Area
-            type="monotone" dataKey="deterministic"
-            stroke="hsl(var(--chart-1))" strokeWidth={2} strokeDasharray="2 2"
-            fill="url(#nwGradient)"
-            dot={<EventDot />}
-            activeDot={{ r: 4, fill: "hsl(var(--chart-1))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
-          />
-        </AreaChart>
-      </ChartContainer>
-      <EventStrip events={events} />
-    </div>
+    <ChartContainer config={netWorthConfig} className="h-64 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
+      <AreaChart data={chartData} margin={{ top: 20, right: 16, left: 0, bottom: 8 }}>
+        <defs>
+          <linearGradient id="nwGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.2} />
+            <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <XAxis
+          dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={50}
+          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+        />
+        <YAxis
+          orientation="right" tickLine={false} axisLine={false} width={48}
+          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+          tickFormatter={(v) => formatCurrencyCompact(Number(v))}
+        />
+        {targetNetWorth > 0 && (
+          <ReferenceLine y={targetNetWorth} stroke="hsl(var(--success))" strokeDasharray="6 3" strokeWidth={1.5} />
+        )}
+        <ChartTooltip content={<NetWorthTooltip />} allowEscapeViewBox={{ x: true, y: true }} wrapperStyle={{ zIndex: 50, pointerEvents: "none" }} />
+        <Area
+          type="monotone" dataKey="deterministic"
+          stroke="hsl(var(--chart-1))" strokeWidth={2}
+          fill="url(#nwGradient)"
+          dot={<EventDot />}
+          activeDot={{ r: 4, fill: "hsl(var(--chart-1))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
+        />
+      </AreaChart>
+    </ChartContainer>
   )
 }
 
@@ -396,6 +375,7 @@ type AnnualCashFlowPoint = {
   year: number
   income: number
   expense: number
+  net: number
   hasRetirement: boolean
   eventItems: CashFlowEventItem[]
 }
@@ -466,6 +446,7 @@ function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, mon
         year: currentYear,
         income: yearIncome,
         expense: -yearExpense,
+        net: yearIncome - yearExpense,
         hasRetirement,
         eventItems,
       })
@@ -474,56 +455,32 @@ function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, mon
   }, [scenarioDraft, baseAnnualIncome, baseAnnualExpenses, monthlyCashflow, events, inflationRate, t])
 
   const retirementIndex = annualData.findIndex((d) => d.hasRetirement)
-  const preRetire = retirementIndex >= 0 ? annualData.slice(0, retirementIndex) : annualData
-  const postRetire = retirementIndex >= 0 ? annualData.slice(retirementIndex) : []
-  const preRetireNet = preRetire.length > 0
-    ? preRetire.reduce((s, d) => s + d.income + d.expense, 0) / preRetire.length : 0
-  const postRetireNet = postRetire.length > 0
-    ? postRetire.reduce((s, d) => s + d.income + d.expense, 0) / postRetire.length : 0
 
   return (
-    <div>
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <p className="text-xs text-muted-foreground">{retirementIndex >= 0 ? t("preRetire") : t("average")}</p>
-          <p className="text-2xl font-bold">{t("avgPerYear", { amount: formatCurrency(Math.abs(preRetireNet)) })}</p>
-        </div>
+    <ChartContainer config={cashFlowConfig} className="h-64 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
+      <ComposedChart data={annualData} margin={{ top: 20, right: 16, left: 0, bottom: 8 }} stackOffset="sign">
+        <XAxis
+          dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={40}
+          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+        />
+        <YAxis
+          orientation="right" tickLine={false} axisLine={false} width={48}
+          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+          tickFormatter={(v) => formatCurrencyCompact(Number(v))}
+        />
+        <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
         {retirementIndex >= 0 && (
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">{t("postRetire")}</p>
-            <p className="text-2xl font-bold">{t("avgPerYear", { amount: formatCurrency(postRetireNet) })}</p>
-            <p className="text-sm text-destructive">
-              {formatCurrency(postRetireNet - preRetireNet)} ({Math.round(((postRetireNet - preRetireNet) / Math.abs(preRetireNet || 1)) * 100)}%)
-            </p>
-          </div>
+          <ReferenceLine
+            x={annualData[retirementIndex]?.ageLabel}
+            stroke="hsl(var(--muted-foreground))" strokeDasharray="6 3"
+          />
         )}
-      </div>
-
-      <ChartContainer config={cashFlowConfig} className="h-80 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
-        <BarChart data={annualData} margin={{ top: 20, right: 16, left: 0, bottom: 24 }} stackOffset="sign">
-          <XAxis
-            dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={40}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-          />
-          <YAxis
-            orientation="right" tickLine={false} axisLine={false}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-            tickFormatter={(v) => formatCurrencyCompact(Number(v))}
-          />
-          <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
-          {retirementIndex >= 0 && (
-            <ReferenceLine
-              x={annualData[retirementIndex]?.ageLabel}
-              stroke="hsl(var(--muted-foreground))" strokeDasharray="6 3"
-            />
-          )}
-          <ChartTooltip content={<CashFlowTooltip />} allowEscapeViewBox={{ x: true, y: true }} wrapperStyle={{ zIndex: 50, pointerEvents: "none" }} />
-          <Bar dataKey="income" stackId="cashflow" radius={[4, 4, 0, 0]} fill="var(--color-income)" />
-          <Bar dataKey="expense" stackId="cashflow" radius={[0, 0, 4, 4]} fill="var(--color-expense)" />
-        </BarChart>
-      </ChartContainer>
-      <EventStrip events={events} />
-    </div>
+        <ChartTooltip content={<CashFlowTooltip />} allowEscapeViewBox={{ x: true, y: true }} wrapperStyle={{ zIndex: 50, pointerEvents: "none" }} />
+        <Bar dataKey="income" stackId="cashflow" radius={[4, 4, 0, 0]} fill="var(--color-income)" />
+        <Bar dataKey="expense" stackId="cashflow" radius={[0, 0, 4, 4]} fill="var(--color-expense)" />
+        <Line type="monotone" dataKey="net" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
+      </ComposedChart>
+    </ChartContainer>
   )
 }
 
@@ -659,7 +616,7 @@ export function ForecastChart({
 
   if (view === "net-worth") {
     const nwData = yearlyProjection ?? projection
-    return <NetWorthView projection={nwData} netWorth={netWorth} events={events} />
+    return <NetWorthView projection={nwData} targetNetWorth={scenarioDraft.target_net_worth} />
   }
   if (view === "cash-flow") {
     return <CashFlowView scenarioDraft={scenarioDraft} baseAnnualIncome={baseAnnualIncome} baseAnnualExpenses={baseAnnualExpenses} monthlyCashflow={monthlyCashflow} events={events} />

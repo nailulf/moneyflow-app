@@ -1029,7 +1029,12 @@
       "back": "Kembali",
       "emptyTitle": "Belum ada proyeksi",
       "emptyBody": "Buat skenario untuk memproyeksikan kekayaan bersih Anda.",
-      "createScenario": "Buat skenario"
+      "createScenario": "Buat skenario",
+      "netWorthProjection": "Proyeksi Kekayaan Bersih",
+      "incomeVsSpending": "Pendapatan vs Pengeluaran",
+      "cashFlowSubtitle": "Pendapatan di atas nol, pengeluaran di bawah — garisnya adalah net Anda.",
+      "legendMedian": "Median",
+      "legendGoal": "Target"
     },
     "tabs": {
       "netWorth": "Kekayaan Bersih",

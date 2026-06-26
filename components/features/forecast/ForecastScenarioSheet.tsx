@@ -50,6 +50,7 @@ export function ForecastScenarioSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
+        showCloseButton={false}
         className="bg-card data-[side=bottom]:h-auto data-[side=bottom]:max-h-[90dvh] gap-0 p-0"
       >
         <SheetHeader className="shrink-0 flex-row items-center justify-between gap-2 space-y-0">
