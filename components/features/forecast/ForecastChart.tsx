@@ -3,7 +3,7 @@
 import { useMemo, type ReactElement } from "react"
 import { useTranslations } from "next-intl"
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, ReferenceLine, Line,
+  AreaChart, Area, ComposedChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine, Line,
 } from "recharts"
 import {
   ChartContainer,
@@ -197,19 +197,21 @@ function EventStrip({ events }: { events: ForecastEvent[] }): ReactElement {
 function EventIcon({ cx, cy, type }: { cx: number; cy: number; type: string }): ReactElement {
   const color = LIFE_EVENT_COLORS[type as LifeEventCategory] ?? "hsl(var(--muted-foreground))"
   const iconPath = EVENT_ICON_MAP[type] ?? EVENT_ICON_MAP.OTHER
-  const r = 12
+  const r = 10
   return (
     <g>
       <circle cx={cx} cy={cy} r={r} fill="hsl(var(--background))" stroke={color} strokeWidth={1.5} />
-      <svg x={cx - 8} y={cy - 8} width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <svg x={cx - 6} y={cy - 6} width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <path d={iconPath} />
       </svg>
     </g>
   )
 }
 
-// Custom dot that renders all event icons stacked vertically below the data point
-// Icons are connected by a vertical line with 8px gaps between each icon
+// Custom dot that renders event icons stacked ABOVE the data point, connected by a short
+// dashed line. Stacking upward (into the open space above the curve) keeps the markers inside
+// the chart card even when the line sits near the bottom (early, low-net-worth years), where
+// stacking downward used to spill the icons past the x-axis.
 function EventDot(props: {
   cx?: number
   cy?: number
@@ -220,28 +222,27 @@ function EventDot(props: {
   if (!payload?.hasEvent || payload.eventTypes.length === 0) return <g key={index} />
 
   const types = payload.eventTypes
-  const r = 12
+  const r = 10
   const diameter = r * 2
-  const gap = 8
+  const gap = 6
 
-  // First icon starts below the data point with a gap
-  const firstIconY = cy + r + gap
-  // Each subsequent icon: diameter + gap below previous center
-  const getIconY = (i: number) => firstIconY + i * (diameter + gap)
-  const lastIconY = getIconY(types.length - 1)
+  // First icon sits just above the data point; each subsequent icon stacks higher.
+  const firstIconY = cy - r - gap
+  const getIconY = (i: number) => firstIconY - i * (diameter + gap)
+  const topIconY = getIconY(types.length - 1)
 
   return (
     <g key={index}>
       {/* Small dot on the actual data point */}
       <circle cx={cx} cy={cy} r={3} fill="hsl(var(--chart-1))" />
 
-      {/* Vertical dashed line from data point to bottom of last icon */}
+      {/* Vertical dashed connector from the data point up to the topmost icon */}
       <line
-        x1={cx} y1={cy + 3} x2={cx} y2={lastIconY + r}
+        x1={cx} y1={cy - 3} x2={cx} y2={topIconY}
         stroke="hsl(var(--border))" strokeWidth={1} strokeDasharray="3 2"
       />
 
-      {/* Stack icons below the line point */}
+      {/* Stack icons above the line point */}
       {types.map((type, i) => (
         <EventIcon key={i} cx={cx} cy={getIconY(i)} type={type} />
       ))}
@@ -321,64 +322,54 @@ const simulationConfig = {
 
 interface NetWorthViewProps {
   projection: ProjectionPoint[]
-  netWorth: number
-  events: ForecastEvent[]
+  targetNetWorth: number
 }
 
-function NetWorthView({ projection, netWorth, events }: NetWorthViewProps): ReactElement {
-  const t = useTranslations("forecast.chart")
+function NetWorthView({ projection, targetNetWorth }: NetWorthViewProps): ReactElement {
   const chartData = useMemo(() => downsampleProjection(projection), [projection])
-  const finalPoint = projection[projection.length - 1]
-  const delta = finalPoint.deterministic - netWorth
-  const deltaPercent = netWorth !== 0 ? Math.round((delta / netWorth) * 100) : 0
+  // Show one marker per event "run": a multi-year impact (e.g. a mortgage) renders a single
+  // pin at its start instead of repeating the icon on every affected point.
+  const eventStartIndices = useMemo(() => {
+    const s = new Set<number>()
+    for (let i = 0; i < chartData.length; i += 1) {
+      if (chartData[i].hasEvent && !(i > 0 && chartData[i - 1].hasEvent)) s.add(i)
+    }
+    return s
+  }, [chartData])
 
   return (
-    <div>
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <p className="text-xs text-muted-foreground">{t("currentNetWorth")}</p>
-          <p className="text-2xl font-bold">{formatCurrency(netWorth)}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">
-            {t("futureNetWorthAt", { age: finalPoint.ageLabel.toLowerCase().replace("age ", "") })}
-          </p>
-          <p className="text-2xl font-bold">{formatCurrency(finalPoint.deterministic)}</p>
-          <p className={`text-sm ${delta >= 0 ? "text-success" : "text-destructive"}`}>
-            {formatCurrency(delta)} ({deltaPercent.toLocaleString()}%)
-          </p>
-        </div>
-      </div>
-
-      <ChartContainer config={netWorthConfig} className="h-80 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
-        <AreaChart data={chartData} margin={{ top: 20, right: 16, left: 0, bottom: 24 }}>
-          <defs>
-            <linearGradient id="nwGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.2} />
-              <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <XAxis
-            dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={50}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-          />
-          <YAxis
-            orientation="right" tickLine={false} axisLine={false}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-            tickFormatter={(v) => formatCurrencyCompact(Number(v))}
-          />
-          <ChartTooltip content={<NetWorthTooltip />} allowEscapeViewBox={{ x: true, y: true }} wrapperStyle={{ zIndex: 50, pointerEvents: "none" }} />
-          <Area
-            type="monotone" dataKey="deterministic"
-            stroke="hsl(var(--chart-1))" strokeWidth={2} strokeDasharray="2 2"
-            fill="url(#nwGradient)"
-            dot={<EventDot />}
-            activeDot={{ r: 4, fill: "hsl(var(--chart-1))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
-          />
-        </AreaChart>
-      </ChartContainer>
-      <EventStrip events={events} />
-    </div>
+    <ChartContainer config={netWorthConfig} className="h-64 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
+      <AreaChart data={chartData} margin={{ top: 20, right: 8, left: 8, bottom: 8 }}>
+        <defs>
+          <linearGradient id="nwGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.2} />
+            <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="hsl(var(--border))" strokeOpacity={0.6} />
+        <XAxis
+          dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={50}
+          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+        />
+        <YAxis hide />
+        {targetNetWorth > 0 && (
+          <ReferenceLine y={targetNetWorth} stroke="hsl(var(--success))" strokeDasharray="6 3" strokeWidth={1.5} />
+        )}
+        <ChartTooltip content={<NetWorthTooltip />} allowEscapeViewBox={{ x: true, y: true }} wrapperStyle={{ zIndex: 50, pointerEvents: "none" }} />
+        <Area
+          type="monotone" dataKey="deterministic"
+          stroke="hsl(var(--chart-1))" strokeWidth={2}
+          fill="url(#nwGradient)"
+          isAnimationActive={false}
+          dot={(dotProps: { cx?: number; cy?: number; payload?: ProjectionPoint; index?: number }) =>
+            eventStartIndices.has(dotProps.index ?? -1)
+              ? <EventDot key={dotProps.index} cx={dotProps.cx} cy={dotProps.cy} payload={dotProps.payload} index={dotProps.index} />
+              : <g key={dotProps.index} />
+          }
+          activeDot={{ r: 4, fill: "hsl(var(--chart-1))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
+        />
+      </AreaChart>
+    </ChartContainer>
   )
 }
 
@@ -396,6 +387,7 @@ type AnnualCashFlowPoint = {
   year: number
   income: number
   expense: number
+  net: number
   hasRetirement: boolean
   eventItems: CashFlowEventItem[]
 }
@@ -466,6 +458,7 @@ function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, mon
         year: currentYear,
         income: yearIncome,
         expense: -yearExpense,
+        net: yearIncome - yearExpense,
         hasRetirement,
         eventItems,
       })
@@ -474,56 +467,29 @@ function CashFlowView({ scenarioDraft, baseAnnualIncome, baseAnnualExpenses, mon
   }, [scenarioDraft, baseAnnualIncome, baseAnnualExpenses, monthlyCashflow, events, inflationRate, t])
 
   const retirementIndex = annualData.findIndex((d) => d.hasRetirement)
-  const preRetire = retirementIndex >= 0 ? annualData.slice(0, retirementIndex) : annualData
-  const postRetire = retirementIndex >= 0 ? annualData.slice(retirementIndex) : []
-  const preRetireNet = preRetire.length > 0
-    ? preRetire.reduce((s, d) => s + d.income + d.expense, 0) / preRetire.length : 0
-  const postRetireNet = postRetire.length > 0
-    ? postRetire.reduce((s, d) => s + d.income + d.expense, 0) / postRetire.length : 0
 
   return (
-    <div>
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <p className="text-xs text-muted-foreground">{retirementIndex >= 0 ? t("preRetire") : t("average")}</p>
-          <p className="text-2xl font-bold">{t("avgPerYear", { amount: formatCurrency(Math.abs(preRetireNet)) })}</p>
-        </div>
+    <ChartContainer config={cashFlowConfig} className="h-64 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
+      <ComposedChart data={annualData} margin={{ top: 20, right: 8, left: 8, bottom: 8 }} stackOffset="sign">
+        <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="hsl(var(--border))" strokeOpacity={0.6} />
+        <XAxis
+          dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={40}
+          tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+        />
+        <YAxis hide />
+        <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
         {retirementIndex >= 0 && (
-          <div className="text-right">
-            <p className="text-xs text-muted-foreground">{t("postRetire")}</p>
-            <p className="text-2xl font-bold">{t("avgPerYear", { amount: formatCurrency(postRetireNet) })}</p>
-            <p className="text-sm text-destructive">
-              {formatCurrency(postRetireNet - preRetireNet)} ({Math.round(((postRetireNet - preRetireNet) / Math.abs(preRetireNet || 1)) * 100)}%)
-            </p>
-          </div>
+          <ReferenceLine
+            x={annualData[retirementIndex]?.ageLabel}
+            stroke="hsl(var(--muted-foreground))" strokeDasharray="6 3"
+          />
         )}
-      </div>
-
-      <ChartContainer config={cashFlowConfig} className="h-80 w-full overflow-visible [&_.recharts-wrapper]:overflow-visible [&_.recharts-surface]:overflow-visible">
-        <BarChart data={annualData} margin={{ top: 20, right: 16, left: 0, bottom: 24 }} stackOffset="sign">
-          <XAxis
-            dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={40}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-          />
-          <YAxis
-            orientation="right" tickLine={false} axisLine={false}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-            tickFormatter={(v) => formatCurrencyCompact(Number(v))}
-          />
-          <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={1} />
-          {retirementIndex >= 0 && (
-            <ReferenceLine
-              x={annualData[retirementIndex]?.ageLabel}
-              stroke="hsl(var(--muted-foreground))" strokeDasharray="6 3"
-            />
-          )}
-          <ChartTooltip content={<CashFlowTooltip />} allowEscapeViewBox={{ x: true, y: true }} wrapperStyle={{ zIndex: 50, pointerEvents: "none" }} />
-          <Bar dataKey="income" stackId="cashflow" radius={[4, 4, 0, 0]} fill="var(--color-income)" />
-          <Bar dataKey="expense" stackId="cashflow" radius={[0, 0, 4, 4]} fill="var(--color-expense)" />
-        </BarChart>
-      </ChartContainer>
-      <EventStrip events={events} />
-    </div>
+        <ChartTooltip content={<CashFlowTooltip />} allowEscapeViewBox={{ x: true, y: true }} wrapperStyle={{ zIndex: 50, pointerEvents: "none" }} />
+        <Bar dataKey="income" stackId="cashflow" radius={[8, 8, 0, 0]} fill="var(--color-income)" isAnimationActive={false} />
+        <Bar dataKey="expense" stackId="cashflow" radius={[0, 0, 8, 8]} fill="var(--color-expense)" isAnimationActive={false} />
+        <Line type="monotone" dataKey="net" stroke="hsl(var(--foreground))" strokeWidth={2} dot={false} activeDot={{ r: 3 }} isAnimationActive={false} />
+      </ComposedChart>
+    </ChartContainer>
   )
 }
 
@@ -587,15 +553,12 @@ function SimulationView({ projection, successRate, targetNetWorth, scenarioDraft
               <stop offset="100%" stopColor="hsl(var(--chart-1))" stopOpacity={0.08} />
             </linearGradient>
           </defs>
+          <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="hsl(var(--border))" strokeOpacity={0.6} />
           <XAxis
             dataKey="ageLabel" tickLine={false} axisLine={false} minTickGap={50}
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
           />
-          <YAxis
-            orientation="right" tickLine={false} axisLine={false}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-            tickFormatter={(v) => formatCurrencyCompact(Number(v))}
-          />
+          <YAxis hide />
           {targetNetWorth > 0 && (
             <ReferenceLine y={targetNetWorth} stroke="hsl(var(--destructive))" strokeDasharray="6 3" />
           )}
@@ -607,6 +570,7 @@ function SimulationView({ projection, successRate, targetNetWorth, scenarioDraft
           <Line
             type="monotone" dataKey="p50"
             stroke="hsl(var(--chart-1))" strokeWidth={2} strokeDasharray="2 2"
+            isAnimationActive={false}
             dot={<EventDot />}
             activeDot={{ r: 4, fill: "hsl(var(--chart-1))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
           />
@@ -659,7 +623,7 @@ export function ForecastChart({
 
   if (view === "net-worth") {
     const nwData = yearlyProjection ?? projection
-    return <NetWorthView projection={nwData} netWorth={netWorth} events={events} />
+    return <NetWorthView projection={nwData} targetNetWorth={scenarioDraft.target_net_worth} />
   }
   if (view === "cash-flow") {
     return <CashFlowView scenarioDraft={scenarioDraft} baseAnnualIncome={baseAnnualIncome} baseAnnualExpenses={baseAnnualExpenses} monthlyCashflow={monthlyCashflow} events={events} />

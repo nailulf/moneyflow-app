@@ -997,12 +997,56 @@
     }
   },
   "forecast": {
+    "root": {
+      "title": "Forecast",
+      "yearByYear": "Year-by-year",
+      "netWorth": "Net Worth",
+      "cashFlow": "Cash Flow",
+      "projectedNetWorth": "Projected Net Worth",
+      "eyebrow": "PROJECTED NET WORTH · IN {years} YRS · {year}",
+      "toGoal": "{pct}% to goal",
+      "target": "{amount} target",
+      "successRate": "Success rate",
+      "today": "Today",
+      "horizon": "Horizon",
+      "years": "{n} yrs",
+      "assumptions": "Assumptions",
+      "edit": "Edit",
+      "chipReturn": "Return {v}%",
+      "chipInflation": "Inflation {v}%",
+      "chipIncome": "Income +{v}%/yr",
+      "chipContribute": "Contribute {amount}/mo",
+      "chipHorizon": "Horizon {n}y",
+      "lifeEvents": "Life Events",
+      "manage": "Manage",
+      "noEvents": "No life events yet",
+      "scenarios": "Scenarios",
+      "defaultScenario": "Default",
+      "new": "New",
+      "projected": "{amount} projected",
+      "compare": "Compare scenarios",
+      "compareTitle": "Compare",
+      "back": "Back",
+      "emptyTitle": "No forecast yet",
+      "emptyBody": "Create a scenario to project your future net worth.",
+      "createScenario": "Create scenario",
+      "netWorthProjection": "Net Worth Projection",
+      "incomeVsSpending": "Income vs Spending",
+      "cashFlowSubtitle": "Income above zero, spending below — the line is your net.",
+      "legendMedian": "Median",
+      "legendGoal": "Goal"
+    },
     "tabs": {
       "netWorth": "Net Worth",
       "cashFlow": "Cash Flow",
       "simulation": "Simulation"
     },
     "addEventsCustomize": "Add events or customize",
+    "back": "Back",
+    "colYear": "Year",
+    "colIncome": "Income",
+    "colExpense": "Expense",
+    "colNetWorth": "Net Worth",
     "summary": "Summary",
     "chart": {
       "currentNetWorth": "Current net worth",
@@ -1051,38 +1095,48 @@
     "categories": {
       "PROPERTY": {
         "label": "Property",
-        "template": "Buy a home"
+        "template": "Buy a home",
+        "subLabel": "Property"
       },
       "WEDDING": {
         "label": "Wedding",
-        "template": "Plan a wedding"
+        "template": "Plan a wedding",
+        "subLabel": "One-time cost"
       },
       "KIDS": {
         "label": "Kids",
-        "template": "Have a kid"
+        "template": "Have a kid",
+        "subLabel": "Recurring"
       },
       "EDUCATION": {
         "label": "Education",
-        "template": "College savings"
+        "template": "College savings",
+        "subLabel": "Tuition"
       },
       "HAJJ": {
         "label": "Hajj",
-        "template": "Hajj pilgrimage"
+        "template": "Hajj pilgrimage",
+        "subLabel": "One-time cost"
       },
       "VEHICLE": {
         "label": "Vehicle",
-        "template": "Buy a vehicle"
+        "template": "Buy a vehicle",
+        "subLabel": "Property"
       },
       "RETIREMENT": {
         "label": "Retirement",
-        "template": "Plan retirement"
+        "template": "Plan retirement",
+        "subLabel": "Income stops"
       },
       "OTHER": {
         "label": "Other",
-        "template": "Custom event"
+        "template": "Custom event",
+        "subLabel": "Other"
       }
     },
     "events": {
+      "addTitle": "Add Life Event",
+      "whatsComingUp": "What's coming up?",
       "yourEvents": "Your events",
       "addEvent": "Add event",
       "eventTitle": "Event title",
@@ -1106,8 +1160,47 @@
       "duration": "Duration (years)",
       "recurring": "Recurring",
       "numberOfYears": "Number of years",
+      "whenSection": "When",
+      "detailsSection": "Details",
+      "ageThen": "Your age then",
+      "saveEvent": "Save event",
+      "deleteEvent": "Delete event",
+      "back": "Back",
       "save": "Save",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "incomeStops": "Income stops",
+      "perYear": "/yr",
+      "listTitle": "Life Events",
+      "add": "Add",
+      "emptyPrompt": "What's coming up? Add your first life event."
+    },
+    "assumptions": {
+      "title": "Assumptions",
+      "back": "Back",
+      "save": "Save",
+      "saveCta": "Save assumptions",
+      "deleteScenario": "Delete scenario",
+      "duplicateScenario": "Duplicate scenario",
+      "growth": "Growth",
+      "inflationIncome": "Inflation & income",
+      "contributions": "Contributions",
+      "horizonGoal": "Horizon & goal",
+      "source": "Source",
+      "name": "Name",
+      "description": "Description",
+      "expectedReturn": "Annual Return",
+      "volatility": "Volatility",
+      "inflation": "Inflation",
+      "incomeGrowth": "Income growth",
+      "incomeNew": "NEW",
+      "monthlyContribution": "Monthly Contribution",
+      "monthlyWithdrawal": "Monthly Withdrawal",
+      "horizon": "Horizon",
+      "targetNetWorth": "Target Net Worth",
+      "useHistory": "Use actual cashflow",
+      "sourceHelper": "Median from {months} months: {amount}/mo",
+      "pctUnit": "%",
+      "yearsUnit": "yrs"
     },
     "settings": {
       "scenarioSection": "Scenario",
@@ -1129,6 +1222,8 @@
       "annualReturn": "Annual Return",
       "volatility": "Volatility",
       "inflation": "Inflation",
+      "incomeGrowth": "Income growth",
+      "incomeGrowthHint": "Separate from inflation — your expected raise per year.",
       "useHistoricalCagr": "Use your historical CAGR: {value}%",
       "cashflow": "Cashflow",
       "cashflowDescription": "Monthly income and expenses that feed the forecast.",
@@ -1168,7 +1263,10 @@
       "columnReturn": "Return ({rate}%)",
       "columnEndNW": "End NW",
       "retire": "(retire)"
-    }
+    },
+    "yearByYearTitle": "Year by year",
+    "medianPath": "{scenario} · median path",
+    "noSimulation": "No projection yet"
   },
   "pwa": {
     "updateAvailable": "A new version is available",

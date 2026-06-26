@@ -71,6 +71,87 @@ export function yearlyRowsToProjection(rows: YearlySimulationRow[]): ProjectionP
   }))
 }
 
+// --- Pure row builder (extracted for unit testing) ---
+
+export type BuildYearlyRowsInput = {
+  netWorth: number
+  yearOneIncome: number
+  yearOneExpense: number
+  inflationRate: number
+  incomeGrowth: number
+  annualReturn: number
+  horizonYears: number
+  startYear: number
+  retirementYear: number | null
+  eventImpacts: Map<number, { income: number; expense: number; labels: string[]; types: string[] }>
+  baseDate: Date
+  dob: Date | null
+}
+
+export function buildYearlyRows(input: BuildYearlyRowsInput): YearlySimulationRow[] {
+  const {
+    netWorth,
+    yearOneIncome,
+    yearOneExpense,
+    inflationRate,
+    incomeGrowth,
+    annualReturn,
+    horizonYears,
+    startYear,
+    retirementYear,
+    eventImpacts,
+    baseDate,
+    dob,
+  } = input
+
+  const result: YearlySimulationRow[] = []
+  let nw = netWorth
+  for (let y = 0; y < Math.min(horizonYears, 50); y++) {
+    const currentYear = startYear + y
+    const inflationFactor = Math.pow(1 + inflationRate, y)
+    const incomeFactor = Math.pow(1 + incomeGrowth, y)
+    const isRetired = retirementYear !== null && currentYear >= retirementYear
+
+    const baseIncome = isRetired ? 0 : yearOneIncome * incomeFactor
+    const baseExpense = yearOneExpense * inflationFactor
+
+    const ei = eventImpacts.get(currentYear)
+    const eventIncome = ei?.income ?? 0
+    const eventExpense = ei?.expense ?? 0
+    const eventLabels = ei?.labels ?? []
+    const eventTypes = ei?.types ?? []
+
+    const totalIncome = baseIncome + eventIncome
+    const totalExpense = baseExpense + eventExpense
+    const netCashflow = totalIncome - totalExpense
+
+    const startNW = nw
+    const investmentReturn = startNW * annualReturn
+    const endNW = startNW + investmentReturn + netCashflow
+
+    result.push({
+      year: currentYear,
+      yearIndex: y,
+      ageLabel: getAgeLabel(baseDate, y * 12, dob),
+      inflationFactor,
+      income: totalIncome,
+      expense: totalExpense,
+      eventIncome,
+      eventExpense,
+      eventLabels,
+      eventTypes,
+      netCashflow,
+      startNW,
+      investmentReturn,
+      endNW,
+      isRetired,
+    })
+
+    nw = endNW
+  }
+  return result
+}
+
 // --- Shared hook ---
 
 export function useYearlySimulation(): {
@@ -93,6 +174,7 @@ export function useYearlySimulation(): {
 
   const draft = defaultScenario ? buildDraft(defaultScenario) : null
   const inflationRate = draft?.inflation_rate ?? 0.03
+  const incomeGrowth = draft?.annual_income_growth ?? 0
   const annualReturn = draft?.expected_annual_return ?? 0.07
   const horizonYears = draft?.horizon_years ?? 50
   const monthlyContribution = draft?.monthly_contribution ?? 0
@@ -126,53 +208,24 @@ export function useYearlySimulation(): {
     return allImpacts
   }, [events, startYear, horizonYears, inflationRate])
 
-  const rows = useMemo(() => {
-    const result: YearlySimulationRow[] = []
-    let nw = netWorth
-    for (let y = 0; y < Math.min(horizonYears, 50); y++) {
-      const currentYear = startYear + y
-      const inflationFactor = Math.pow(1 + inflationRate, y)
-      const isRetired = retirementYear !== null && currentYear >= retirementYear
-
-      const baseIncome = isRetired ? 0 : yearOneIncome * inflationFactor
-      const baseExpense = yearOneExpense * inflationFactor
-
-      const ei = eventImpacts.get(currentYear)
-      const eventIncome = ei?.income ?? 0
-      const eventExpense = ei?.expense ?? 0
-      const eventLabels = ei?.labels ?? []
-      const eventTypes = ei?.types ?? []
-
-      const totalIncome = baseIncome + eventIncome
-      const totalExpense = baseExpense + eventExpense
-      const netCashflow = totalIncome - totalExpense
-
-      const startNW = nw
-      const investmentReturn = startNW * annualReturn
-      const endNW = startNW + investmentReturn + netCashflow
-
-      result.push({
-        year: currentYear,
-        yearIndex: y,
-        ageLabel: getAgeLabel(baseDate, y * 12, dob),
-        inflationFactor,
-        income: totalIncome,
-        expense: totalExpense,
-        eventIncome,
-        eventExpense,
-        eventLabels,
-        eventTypes,
-        netCashflow,
-        startNW,
-        investmentReturn,
-        endNW,
-        isRetired,
-      })
-
-      nw = endNW
-    }
-    return result
-  }, [netWorth, yearOneIncome, yearOneExpense, inflationRate, annualReturn, horizonYears, startYear, retirementYear, eventImpacts, baseDate, dob])
+  const rows = useMemo(
+    () =>
+      buildYearlyRows({
+        netWorth,
+        yearOneIncome,
+        yearOneExpense,
+        inflationRate,
+        incomeGrowth,
+        annualReturn,
+        horizonYears,
+        startYear,
+        retirementYear,
+        eventImpacts,
+        baseDate,
+        dob,
+      }),
+    [netWorth, yearOneIncome, yearOneExpense, inflationRate, incomeGrowth, annualReturn, horizonYears, startYear, retirementYear, eventImpacts, baseDate, dob]
+  )
 
   const params: YearlySimulationParams = {
     netWorth,

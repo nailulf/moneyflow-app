@@ -13,6 +13,7 @@ type MonteCarloInput = {
   baseDateISO: string
   simulations: number
   inflationRate: number
+  annualIncomeGrowth: number
   dobISO: string | null
 }
 
@@ -85,6 +86,7 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
     baseDateISO,
     simulations,
     inflationRate,
+    annualIncomeGrowth = 0,
     dobISO,
   } = e.data
 
@@ -108,7 +110,8 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
     const monthDate = addMonthsSimple(baseDate, i)
     const eventAdj = eventMap.get(getMonthKey(monthDate)) ?? 0
     const inflationFactor = Math.pow(1 + inflationRate, i / 12)
-    const income = (retirementMonth !== null && i >= retirementMonth) ? 0 : monthlyIncome * inflationFactor
+    const incomeFactor = Math.pow(1 + annualIncomeGrowth, i / 12)
+    const income = (retirementMonth !== null && i >= retirementMonth) ? 0 : monthlyIncome * incomeFactor
     const expense = monthlyExpense * inflationFactor
     deterministicValue = deterministicValue * (1 + meanMonthly) + income - expense + eventAdj
     deterministicSeries.push(deterministicValue)
@@ -125,7 +128,8 @@ self.onmessage = (e: MessageEvent<MonteCarloInput>) => {
       const monthDate = addMonthsSimple(baseDate, i)
       const eventAdj = eventMap.get(getMonthKey(monthDate)) ?? 0
       const inflationFactor = Math.pow(1 + inflationRate, i / 12)
-      const income = (retirementMonth !== null && i >= retirementMonth) ? 0 : monthlyIncome * inflationFactor
+      const incomeFactor = Math.pow(1 + annualIncomeGrowth, i / 12)
+      const income = (retirementMonth !== null && i >= retirementMonth) ? 0 : monthlyIncome * incomeFactor
       const expense = monthlyExpense * inflationFactor
       const monthlyFlow = income - expense + eventAdj
       const shock = randomNormal()

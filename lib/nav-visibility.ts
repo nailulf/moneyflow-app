@@ -1,5 +1,5 @@
 /** Routes that render as full-screen flows: no bottom tab bar, no nav clearance padding. */
-const FULL_SCREEN_FLOW_PREFIXES = ['/accounts/new', '/budget/create', '/budget/edit', '/transactions/new', '/start']
+const FULL_SCREEN_FLOW_PREFIXES = ['/accounts/new', '/budget/create', '/budget/edit', '/transactions/new', '/start', '/forecast/assumptions', '/forecast/events', '/forecast/simulation']
 
 // Portfolio drill-ins (/portfolio/<accountId>[/add]) are full-screen, but the bare
 // /portfolio root and the desktop sub-pages (/portfolio/holdings, /portfolio/analytics) are not.
@@ -26,9 +26,15 @@ function isGoalDetail(pathname: string): boolean {
   return m !== null
 }
 
+// /forecast is a More-menu drill-in (mobile): hide the bottom tab bar.
+function isForecast(pathname: string): boolean {
+  return pathname === '/forecast'
+}
+
 export const isFullScreenFlow = (pathname: string): boolean =>
   FULL_SCREEN_FLOW_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
   isPortfolioDetail(pathname) ||
   isTransactionEdit(pathname) ||
   isAccountDetail(pathname) ||
-  isGoalDetail(pathname)
+  isGoalDetail(pathname) ||
+  isForecast(pathname)
