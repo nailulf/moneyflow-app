@@ -11,16 +11,26 @@ const CategorizationSchema = z.object({
   }))
 });
 
-import { createServerComponentClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
+import { enforceRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
 export async function POST(request: Request) {
   try {
-    const supabase = createServerComponentClient();
+    // Cookie/anon client (RLS-enforced). The service-role client carries no session,
+    // so auth.getUser() never resolved a user here — this also fixes that.
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Cost guard: cap AI categorization calls per user (falls back to IP).
+    const limited = await enforceRateLimit(
+      `ai:categorize:${user.id ?? getClientIp(request)}`,
+      RATE_LIMITS.ai
+    );
+    if (limited) return limited;
 
     const { transactions, categories } = await request.json();
 

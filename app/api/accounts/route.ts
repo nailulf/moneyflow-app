@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 import { getExchangeRate, SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
 import { sanitizeAccountPayload, sanitizeAccountUpdate } from '@/lib/account-payload'
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 /**
  * Build a Map of "FROM-TO" → rate for converting any supported currency
@@ -193,6 +194,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const limited = await enforceRateLimit(`mutation:${user.id}`, RATE_LIMITS.mutation)
+    if (limited) return limited
+
     const result = sanitizeAccountPayload(body)
     if (!result.ok) {
       return NextResponse.json({ error: result.error }, { status: 400 })
@@ -253,6 +257,9 @@ export async function PUT(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await enforceRateLimit(`mutation:${user.id}`, RATE_LIMITS.mutation)
+    if (limited) return limited
 
     // Get the account to check user_id
     const { data: existingAccount, error: fetchError } = await supabase
@@ -318,6 +325,9 @@ export async function DELETE(request: NextRequest) {
         if (authError || !user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const limited = await enforceRateLimit(`mutation:${user.id}`, RATE_LIMITS.mutation)
+        if (limited) return limited
 
         const { error } = await supabase
             .from('accounts')

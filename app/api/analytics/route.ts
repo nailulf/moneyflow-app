@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { enforceRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
 // Proxy endpoint for Amplitude to bypass ad blockers/tracking protection
 // This forwards requests to Amplitude's API through your own domain
@@ -17,6 +18,10 @@ const AMPLITUDE_ENDPOINTS = {
 
 export async function POST(request: NextRequest) {
   try {
+    // Anti-flood guard: this proxy is public (no auth). Cap per IP.
+    const limited = await enforceRateLimit(`analytics:${getClientIp(request)}`, RATE_LIMITS.analytics);
+    if (limited) return limited;
+
     const body = await request.text();
     const url = new URL(request.url);
 

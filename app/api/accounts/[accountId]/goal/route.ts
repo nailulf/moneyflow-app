@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { calculateGoalProgress } from '@/lib/goals/calculations'
 import { calculateAccountBalanceAtDate } from '@/lib/net-worth-utils'
 import { canHaveGoal } from '@/lib/goals/eligibility'
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 import { AccountDB, FinancialGoalInsert, FinancialGoalUpdate, GoalType } from '@/types/database'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
@@ -94,6 +95,10 @@ export async function POST(request: NextRequest, context: RouteParams) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Abuse guard: cap goal-creation rate per user.
+    const limited = await enforceRateLimit(`mutation:${user.id}`, RATE_LIMITS.mutation)
+    if (limited) return limited
 
     // Verify account belongs to user and get balance
     const { data: account, error: accountError } = await supabase

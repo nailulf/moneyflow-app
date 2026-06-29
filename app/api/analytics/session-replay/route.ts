@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { enforceRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit';
 
 // Dedicated proxy endpoint for Amplitude Session Replay
 // Session replay data goes to a different server than regular events
@@ -7,6 +8,10 @@ const SESSION_REPLAY_URL = 'https://api-sr.amplitude.com/sessions/track';
 
 export async function POST(request: NextRequest) {
   try {
+    // Anti-flood guard: this proxy is public (no auth). Cap per IP.
+    const limited = await enforceRateLimit(`analytics:${getClientIp(request)}`, RATE_LIMITS.analytics);
+    if (limited) return limited;
+
     const body = await request.text();
 
     const response = await fetch(SESSION_REPLAY_URL, {

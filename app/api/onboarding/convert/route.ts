@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServerComponentClient } from '@/lib/supabase'
+import { enforceRateLimit, getClientIp, RATE_LIMITS } from '@/lib/rate-limit'
 
 /**
  * Anonymous-guest → permanent account conversion via the service-role admin API.
@@ -22,6 +23,11 @@ import { createServerComponentClient } from '@/lib/supabase'
  * while the session is live. The funnel is verification-optional by design.
  */
 export async function POST(request: NextRequest) {
+  // Abuse guard: this route sets credentials / promotes accounts. Limit per IP
+  // (the caller may not yet have a stable user id worth keying on).
+  const limited = await enforceRateLimit(`auth:convert:${getClientIp(request)}`, RATE_LIMITS.authSensitive)
+  if (limited) return limited
+
   const { email, password } = await request
     .json()
     .catch(() => ({}) as { email?: string; password?: string })

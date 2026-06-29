@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase-server'
 import { z } from 'zod'
 import { apiTransactionSchema } from '@/lib/validations'
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 // Validation schema matching TransactionReviewModal data and DB requirements
 const TransactionSchema = apiTransactionSchema
@@ -118,6 +119,10 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Abuse guard: cap transaction writes per user (bulk import counts as one call).
+    const limited = await enforceRateLimit(`mutation:${user.id}`, RATE_LIMITS.mutation)
+    if (limited) return limited
 
     // Handle bulk insertion if body is an array
     if (Array.isArray(body)) {
@@ -314,6 +319,10 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
     const { id, ...updates } = body
+    // Never let the client reassign ownership or protected columns via mass assignment.
+    delete updates.user_id
+    delete updates.id
+    delete updates.created_at
 
     if (!id) {
       return NextResponse.json({ error: 'Transaction ID is required' }, { status: 400 })
@@ -330,6 +339,9 @@ export async function PUT(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await enforceRateLimit(`mutation:${user.id}`, RATE_LIMITS.mutation)
+    if (limited) return limited
 
     // Check ownership
     const { data: existingTransaction } = await supabase
@@ -390,6 +402,9 @@ export async function DELETE(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const limited = await enforceRateLimit(`mutation:${user.id}`, RATE_LIMITS.mutation)
+    if (limited) return limited
 
     // Check ownership before deleting
     const { data: existingTransaction } = await supabase
