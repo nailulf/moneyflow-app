@@ -8,8 +8,9 @@ const withSerwist = require('@serwist/next').default({
 })
 
 // Content-Security-Policy directives. Kept as an ordered list for readability.
-// Phase 1 ships this as `Content-Security-Policy-Report-Only` (reports violations,
-// enforces nothing) so we can observe real traffic before flipping to enforcing mode.
+// Phase 2: now ENFORCING (`Content-Security-Policy`). Every origin the app talks to
+// is allowlisted below (Supabase http+wss, Amplitude, self for Vercel telemetry &
+// service worker, blob for the pdf.js/serwist workers).
 // Phase 3 will replace `script-src 'unsafe-inline'` with a per-request nonce.
 const cspDirectives = [
   "default-src 'self'",
@@ -32,9 +33,9 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()' },
-  // Report-Only for now — see cspDirectives note above. Flip the key to
-  // 'Content-Security-Policy' (drop '-Report-Only') to enforce.
-  { key: 'Content-Security-Policy-Report-Only', value: cspDirectives.join('; ') },
+  // Enforcing (Phase 2). If a legit origin is ever blocked, add it to
+  // cspDirectives above rather than reverting to Report-Only.
+  { key: 'Content-Security-Policy', value: cspDirectives.join('; ') },
 ]
 
 /** @type {import('next').NextConfig} */
