@@ -165,6 +165,9 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
     const { id, ...updates } = body
+    // Never let the client reassign ownership or primary key via mass assignment.
+    delete updates.user_id
+    delete updates.id
 
     if (!id) {
       return NextResponse.json({ error: 'Category group ID is required' }, { status: 400 })

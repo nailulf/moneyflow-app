@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { parseStatementWithAI } from '@/lib/statement-parser';
 import { createClient } from '@/lib/supabase/server';
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit';
 // @ts-ignore
 import pdf from 'pdf-parse/lib/pdf-parse.js';
 
@@ -16,6 +17,10 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Cost guard: cap AI statement-parsing calls per user.
+    const limited = await enforceRateLimit(`ai:statements:${user.id}`, RATE_LIMITS.ai);
+    if (limited) return limited;
 
     const formData = await request.formData();
     const file = formData.get('file') as File;

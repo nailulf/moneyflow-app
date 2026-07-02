@@ -1,23 +1,58 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/session';
 
-export async function proxy(request: NextRequest) {
-  // First, run the Supabase auth middleware
-  const response = await updateSession(request);
+/**
+ * Build the Content-Security-Policy for a request, given a fresh per-request nonce.
+ *
+ * script-src uses `'nonce-<n>' 'strict-dynamic'`: modern browsers trust only the
+ * nonced Next.js bootstrap script + whatever it loads (chunks, Vercel Analytics,
+ * the service-worker registration — all injected by already-trusted bundle code).
+ * `'unsafe-inline' https:` are legacy fallbacks that CSP3 browsers IGNORE once a
+ * nonce is present; they only apply to old browsers that don't support nonces.
+ *
+ * style-src keeps `'unsafe-inline'` on purpose — Tailwind/Radix inject inline
+ * styles at runtime that can't be nonced, and style injection is far lower risk
+ * than script injection.
+ */
+function buildCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' https:`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api2.amplitude.com https://api-sr.amplitude.com",
+    "worker-src 'self' blob:",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+    'upgrade-insecure-requests',
+  ].join('; ');
+}
 
-  // If the response is a redirect, we return it immediately
+export async function proxy(request: NextRequest) {
+  // Nonce-based CSP runs in production only. In `next dev`, HMR relies on eval and
+  // inline scripts, so we skip the CSP header entirely and let dev work unhindered.
+  // The static headers (HSTS, X-Frame-Options, …) still come from next.config.js.
+  const isProd = process.env.NODE_ENV === 'production';
+  const nonce = isProd ? btoa(crypto.randomUUID()) : undefined;
+  const csp = nonce ? buildCsp(nonce) : undefined;
+
+  // Run the Supabase auth middleware. When a nonce is set it's threaded into the
+  // forwarded request headers so Next.js stamps it onto its own <script> tags.
+  const response = await updateSession(request, nonce, csp);
+
+  if (csp) {
+    response.headers.set('Content-Security-Policy', csp);
+  }
+
+  // Redirects carry no rendered scripts — set CSP (above) and return without the
+  // client-side tracking headers.
   if (response.status === 307 || response.status === 308 || response.status === 302) {
     return response;
   }
 
-  // Add custom headers for client-side tracking
-  // We clone the response to modify headers if needed, 
-  // but updateSession already returns a response with headers we can modify
-  
-  // Note: response is immutable in some contexts, so we might need to create a new one
-  // but updateSession returns a NextResponse that we should be able to modify or copy
-  
-  // Set headers for tracking
   response.headers.set('x-page-path', request.nextUrl.pathname);
   response.headers.set('x-referrer', request.headers.get('referer') || '');
 

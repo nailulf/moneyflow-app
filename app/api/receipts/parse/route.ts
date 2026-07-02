@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { parseReceiptWithAI } from '@/lib/receipt-parser'
 import { createClient } from '@/lib/supabase/server'
+import { enforceRateLimit, RATE_LIMITS } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
@@ -15,6 +16,10 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Cost guard: cap AI receipt-parsing (vision) calls per user.
+    const limited = await enforceRateLimit(`ai:receipts:${user.id}`, RATE_LIMITS.ai)
+    if (limited) return limited
 
     const formData = await request.formData()
     const file = formData.get('file') as File

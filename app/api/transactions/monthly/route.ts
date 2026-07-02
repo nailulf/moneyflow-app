@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerComponentClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 
 // Interface for monthly aggregated data
 interface MonthlyData {
@@ -57,14 +57,15 @@ export async function GET(request: NextRequest) {
     const monthsParam = searchParams.get('months')
     
     // Environment check
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       return NextResponse.json(
-        { error: 'Service temporarily unavailable', code: 'SERVICE_UNAVAILABLE' }, 
+        { error: 'Service temporarily unavailable', code: 'SERVICE_UNAVAILABLE' },
         { status: 503 }
       )
     }
 
-    const supabase = createServerComponentClient()
+    // Cookie/anon client so RLS applies (defense-in-depth on top of the user_id filter).
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
