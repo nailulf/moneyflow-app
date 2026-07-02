@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
@@ -55,6 +56,35 @@ it('submits a create payload with target date', async () => {
   expect(onCreated).not.toHaveBeenCalled()
   fireEvent.click(screen.getByRole('button', { name: 'success.viewGoal' }))
   await waitFor(() => expect(onCreated).toHaveBeenCalledWith('newgoal'))
+})
+
+it('shows a fresh form when reopened after dismissing the success view', async () => {
+  // Stateful host mirroring real usage: Radix dismissals (overlay tap, swipe,
+  // close button) call onOpenChange(false) directly — no CTA reset() runs.
+  function Host() {
+    const [open, setOpen] = useState(true)
+    return (
+      <>
+        <button onClick={() => setOpen(true)}>host.reopen</button>
+        <AddGoalSheet open={open} onOpenChange={setOpen} accountId="a1" onCreated={() => {}} />
+      </>
+    )
+  }
+  render(<Host />)
+
+  fireEvent.change(screen.getByLabelText('create.name'), { target: { value: 'Dana Darurat' } })
+  fireEvent.change(screen.getByLabelText('create.amount'), { target: { value: '30000000' } })
+  fireEvent.click(screen.getByRole('button', { name: 'create.submit' }))
+  await waitFor(() => expect(screen.getByRole('button', { name: 'success.viewGoal' })).toBeInTheDocument())
+
+  // Dismiss via the sheet's own close affordance (not the success CTAs).
+  fireEvent.click(screen.getByRole('button', { name: 'Close' }))
+  await waitFor(() => expect(screen.queryByRole('button', { name: 'success.viewGoal' })).not.toBeInTheDocument())
+
+  // Reopen: the form must show, not the previous goal's success recap.
+  fireEvent.click(screen.getByRole('button', { name: 'host.reopen' }))
+  await waitFor(() => expect(screen.getByRole('button', { name: 'create.submit' })).toBeInTheDocument())
+  expect(screen.queryByRole('button', { name: 'success.viewGoal' })).not.toBeInTheDocument()
 })
 
 it('renders goal-type chips with the i18n label (not the hardcoded English label)', () => {

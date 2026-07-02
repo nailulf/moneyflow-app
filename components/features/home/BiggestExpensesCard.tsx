@@ -20,7 +20,11 @@ interface BiggestExpensesCardProps {
   rows: ExpenseRow[]
 }
 
-/** Biggest expenses this month (design `IlvC4`), top-3 ranked rows. */
+// The card always reserves 5 ranked slots (design `IlvC4`); months with fewer
+// expenses fill the tail with ghost rows so the card height stays stable.
+const EXPENSE_SLOTS = 5
+
+/** Biggest expenses this month (design `IlvC4`), top-5 ranked rows. */
 export function BiggestExpensesCard({ rows }: BiggestExpensesCardProps) {
   const t = useTranslations('home')
 
@@ -47,13 +51,13 @@ export function BiggestExpensesCard({ rows }: BiggestExpensesCardProps) {
       </div>
       <div className="rounded-2xl bg-card shadow-card">
         {
-          rows.map((row, i) => {
+          rows.slice(0, EXPENSE_SLOTS).map((row, i) => {
             const Icon = getCategoryIcon(row.categoryName)
             const tint = getCategoryTint(row.categoryName)
             return (
               <div
                 key={row.id}
-                className={cn('flex items-center gap-3 px-4 py-3', i < rows.length - 1 && 'border-b border-muted')}
+                className={cn('flex items-center gap-3 px-4 py-3', i < EXPENSE_SLOTS - 1 && 'border-b border-muted')}
               >
                 <span className={cn(
                   'flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-nano font-bold',
@@ -77,6 +81,22 @@ export function BiggestExpensesCard({ rows }: BiggestExpensesCardProps) {
             )
           })
         }
+        {Array.from({ length: Math.max(0, EXPENSE_SLOTS - rows.length) }, (_, i) => (
+          <div
+            key={`placeholder-${i}`}
+            data-testid="expense-placeholder"
+            aria-hidden="true"
+            className={cn(
+              'flex items-center gap-3 px-4 py-3',
+              rows.length + i < EXPENSE_SLOTS - 1 && 'border-b border-muted'
+            )}
+          >
+            <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border border-dashed border-border text-nano font-bold text-muted-foreground/50">
+              {rows.length + i + 1}
+            </span>
+            <span className="h-10 w-10 shrink-0 rounded-xl border border-dashed border-border" />
+          </div>
+        ))}
       </div>
     </section>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 import { createElement } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { formatCurrencyCompact } from '@/lib/data-utils'
 import { calculateGoalProgress, isGoalOnTrack } from '@/lib/goals/calculations'
@@ -14,8 +14,10 @@ interface GoalCardProps {
   onClick?: () => void
 }
 
+/** Horizontal-scroll mini goal card (design `O3m7TF`: w160 · r16 · p14 · gap8). */
 export function GoalCardMini({ item, currency, onClick }: GoalCardProps) {
   const t = useTranslations('goals')
+  const locale = useLocale()
   const { goal, saved } = item
 
   const target = Number(goal.target_amount)
@@ -26,45 +28,54 @@ export function GoalCardMini({ item, currency, onClick }: GoalCardProps) {
   const onTrack = tracking.status !== 'behind' && tracking.status !== 'overdue'
 
   const tint = goalTint(goal.goal_type)
+  const targetLabel = new Date(goal.target_date).toLocaleDateString(locale, {
+    month: 'short',
+    year: 'numeric',
+  })
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-[150px] shrink-0 flex-col rounded-2xl bg-card p-3.5 text-left shadow-card transition-colors hover:bg-muted/30"
+      className="flex w-[160px] shrink-0 flex-col gap-2 rounded-2xl bg-card p-3.5 text-left shadow-card transition-colors hover:bg-muted/30"
     >
       {/* Top row: icon + percent */}
       <div className="flex items-center justify-between">
         <div
           className={cn(
-            'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
+            'flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px]',
             tint.bg,
           )}
         >
-          {createElement(goalIcon(goal.goal_type), { className: cn('h-[18px] w-[18px]', tint.fg), 'aria-hidden': true })}
+          {createElement(goalIcon(goal.goal_type), { className: cn('h-4 w-4', tint.fg), 'aria-hidden': true })}
         </div>
-        <span className="text-sm font-semibold leading-body-sm text-primary">
+        <span className="text-xs font-bold leading-caption text-primary">
           {pct}%
         </span>
       </div>
 
-      {/* Name */}
-      <p className="mt-3 truncate text-md font-semibold leading-body-sm text-foreground">
-        {goal.name}
-      </p>
+      {/* Name + target date */}
+      <div className="flex min-w-0 flex-col">
+        <p className="truncate text-sm font-semibold leading-body-sm text-foreground">
+          {goal.name}
+        </p>
+        <p className="text-nano leading-caption text-muted-foreground">
+          {targetLabel}
+        </p>
+      </div>
 
       {/* Amount */}
-      <div className="mt-1 flex items-baseline gap-1">
-        <span className="truncate text-xl font-bold leading-title-5 text-foreground">
+      <div className="flex min-w-0 items-baseline gap-1">
+        <span className="truncate text-md font-bold leading-body-sm text-foreground">
           {formatCurrencyCompact(saved, currency)}
         </span>
-        <span className="shrink-0 text-xs leading-caption text-muted-foreground">
+        <span className="shrink-0 text-tiny leading-caption text-muted-foreground">
           / {formatCurrencyCompact(target, currency)}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
         <div
           className="h-full rounded-full bg-primary transition-all"
           style={{ width: `${barWidth}%` }}
@@ -72,7 +83,12 @@ export function GoalCardMini({ item, currency, onClick }: GoalCardProps) {
       </div>
 
       {/* Status */}
-      <span className="mt-2.5 flex items-center gap-1.5 text-xs font-medium leading-caption text-foreground">
+      <span
+        className={cn(
+          'flex items-center gap-1.5 text-nano font-semibold leading-caption',
+          onTrack ? 'text-success' : 'text-destructive',
+        )}
+      >
         <span
           className={cn(
             'h-1.5 w-1.5 rounded-full',

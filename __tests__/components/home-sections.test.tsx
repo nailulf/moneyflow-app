@@ -31,6 +31,19 @@ describe('UpcomingStrip', () => {
     render(<UpcomingStrip items={[]} />)
     expect(screen.getByText('upcoming.emptyTitle')).toBeInTheDocument()
   })
+  it('pads missing slots with placeholder tiles so tile width stays fixed (design lowJu: 4 slots)', () => {
+    render(<UpcomingStrip items={items} />)
+    expect(screen.getAllByTestId('upcoming-placeholder')).toHaveLength(2)
+  })
+  it('renders no placeholders when all 4 slots are filled', () => {
+    const four = [
+      ...items,
+      { id: 't3', name: 'Grab Subs', categoryName: 'Transportation', amount: 49000, currency: 'IDR', dayLabel: 'Fri', dayNumber: 20 },
+      { id: 't4', name: 'Health Ins', categoryName: 'Health', amount: 150000, currency: 'IDR', dayLabel: 'Wed', dayNumber: 25 },
+    ]
+    render(<UpcomingStrip items={four} />)
+    expect(screen.queryAllByTestId('upcoming-placeholder')).toHaveLength(0)
+  })
 })
 
 describe('BiggestExpensesCard', () => {
@@ -50,5 +63,9 @@ describe('BiggestExpensesCard', () => {
   it('renders the empty message when no rows', () => {
     render(<BiggestExpensesCard rows={[]} />)
     expect(screen.getByText('biggest.emptyTitle')).toBeInTheDocument()
+  })
+  it('pads to 5 slots with placeholder rows so the card height stays stable', () => {
+    render(<BiggestExpensesCard rows={rows} />)
+    expect(screen.getAllByTestId('expense-placeholder')).toHaveLength(3)
   })
 })
