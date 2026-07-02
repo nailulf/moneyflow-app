@@ -246,11 +246,8 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         console.error('[Bulk Import] Database insertion error:', error)
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: 'Failed to create bulk transactions',
-          details: error.details,
-          message: error.message,
-          code: error.code
         }, { status: 500 })
       }
 
@@ -304,11 +301,8 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating transaction:', error)
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: 'Failed to create transaction',
-        details: error.details,
-        message: error.message,
-        code: error.code
       }, { status: 500 })
     }
 
@@ -373,9 +367,6 @@ export async function PUT(request: NextRequest) {
       console.error('Error updating transaction:', error)
       return NextResponse.json({
         error: 'Failed to update transaction',
-        details: error.details,
-        message: error.message,
-        code: error.code
       }, { status: 500 })
     }
 
@@ -431,9 +422,6 @@ export async function DELETE(request: NextRequest) {
       console.error('Error deleting transaction:', error)
       return NextResponse.json({
         error: 'Failed to delete transaction',
-        details: error.details,
-        message: error.message,
-        code: error.code
       }, { status: 500 })
     }
 

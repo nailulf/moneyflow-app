@@ -14,7 +14,10 @@ export async function POST(request: Request) {
   let deleted = 0
   while (true) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 })
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('[Cleanup Anonymous] listUsers failed:', error)
+      return NextResponse.json({ error: 'Failed to list users' }, { status: 500 })
+    }
     const users = data.users
     for (const u of users) {
       if ((u as { is_anonymous?: boolean }).is_anonymous && new Date(u.created_at).getTime() < cutoff) {

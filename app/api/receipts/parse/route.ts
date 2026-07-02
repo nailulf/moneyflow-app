@@ -133,7 +133,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'AI parsing failed',
-          details: aiError instanceof Error ? aiError.message : 'Unknown AI error',
         },
         { status: 500 }
       )
@@ -143,7 +142,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Failed to process image',
-        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     )

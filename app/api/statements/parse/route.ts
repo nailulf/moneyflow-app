@@ -170,17 +170,15 @@ export async function POST(request: NextRequest) {
         });
     } catch (aiError) {
         console.error("AI Parse Error", aiError);
-        return NextResponse.json({ 
-            error: 'AI Parsing failed', 
-            details: aiError instanceof Error ? aiError.message : 'Unknown AI error' 
+        return NextResponse.json({
+            error: 'AI Parsing failed',
         }, { status: 500 });
     }
 
   } catch (error) {
     console.error('Parse API Error:', error);
-    return NextResponse.json({ 
-      error: 'Failed to process file', 
-      details: error instanceof Error ? error.message : 'Unknown error' 
+    return NextResponse.json({
+      error: 'Failed to process file',
     }, { status: 500 });
   }
 }
