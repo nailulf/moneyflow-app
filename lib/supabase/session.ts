@@ -22,10 +22,27 @@ const legacyOnboardingRoutes = [
   '/complete'
 ]
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(
+  request: NextRequest,
+  nonce?: string,
+  csp?: string,
+) {
+  // Clone the current request headers and, when a CSP nonce is provided, attach it
+  // so Next.js stamps `nonce="…"` onto its own <script> tags (required for the
+  // 'strict-dynamic' policy set in proxy.ts). Cloning `request.headers` *after*
+  // any cookie mutation also carries refreshed Supabase cookies to the render.
+  const withSecurityHeaders = () => {
+    const headers = new Headers(request.headers)
+    if (nonce && csp) {
+      headers.set('x-nonce', nonce)
+      headers.set('content-security-policy', csp)
+    }
+    return headers
+  }
+
   let response = NextResponse.next({
     request: {
-      headers: request.headers,
+      headers: withSecurityHeaders(),
     },
   })
 
@@ -42,7 +59,9 @@ export async function updateSession(request: NextRequest) {
             request.cookies.set(name, value)
           )
           response = NextResponse.next({
-            request,
+            request: {
+              headers: withSecurityHeaders(),
+            },
           })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
