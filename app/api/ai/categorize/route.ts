@@ -101,7 +101,7 @@ ${transactionsList}`
   } catch (error: any) {
     console.error('AI Categorization Error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to categorize transactions' },
+      { error: 'Failed to categorize transactions' },
       { status: 500 }
     );
   }

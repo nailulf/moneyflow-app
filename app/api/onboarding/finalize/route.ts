@@ -47,7 +47,8 @@ export async function POST(request: Request) {
     p_draft: parsed.data,
   })
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('[Onboarding Finalize] finalize_onboarding failed:', error)
+    return NextResponse.json({ error: 'Failed to finalize onboarding' }, { status: 500 })
   }
   return NextResponse.json(data)
 }

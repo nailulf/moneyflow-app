@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient } from '@/lib/supabase'
 import { generateBudgetSnapshots } from '@/lib/budget-snapshot-processor'
+import { checkCronAuth } from '@/lib/cron-auth'
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify cron secret
-    const authHeader = request.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET
-
-    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Verify cron secret — constant-time
+    const authError = checkCronAuth(request)
+    if (authError) return authError
 
     const supabase = createServerComponentClient()
     const result = await generateBudgetSnapshots(supabase)

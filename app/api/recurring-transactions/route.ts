@@ -1,30 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { processRecurringTransactions } from '@/lib/recurring-processor'
+import { checkCronAuth } from '@/lib/cron-auth'
 
 // This endpoint processes recurring transactions and generates new ones
 // It should be called by a cron job (GitHub Actions) on a daily basis
 export async function POST(request: NextRequest) {
   try {
-    // Verify the request is from an authorized source (cron job)
-    const authHeader = request.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET
-
-    if (!cronSecret) {
-      console.error('CRON_SECRET environment variable is not configured')
-      return NextResponse.json({
-        error: 'Server configuration error',
-        details: 'CRON_SECRET is not set. Please configure it in your environment variables.'
-      }, { status: 500 })
-    }
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      console.error('Unauthorized request - invalid or missing authorization header')
-      return NextResponse.json({
-        error: 'Unauthorized',
-        details: 'Invalid or missing authorization token'
-      }, { status: 401 })
-    }
+    // Verify the request is from an authorized source (cron job) — constant-time
+    const authError = checkCronAuth(request)
+    if (authError) return authError
 
     // Check if we're in build time
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {

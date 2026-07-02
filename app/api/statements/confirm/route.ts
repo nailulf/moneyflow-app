@@ -148,9 +148,8 @@ export async function POST(request: NextRequest) {
           }, { status: 409 });
         }
         console.error('Error creating statement:', statementError);
-        return NextResponse.json({ 
-          error: 'Failed to create statement record', 
-          details: statementError.message 
+        return NextResponse.json({
+          error: 'Failed to create statement record',
         }, { status: 500 });
       }
 
@@ -282,9 +281,8 @@ export async function POST(request: NextRequest) {
           // Rollback by deleting the statement
           await supabase.from('statements').delete().eq('id', statement.id);
           
-          return NextResponse.json({ 
-            error: 'Failed to insert transactions', 
-            details: batchError.message 
+          return NextResponse.json({
+            error: 'Failed to insert transactions',
           }, { status: 500 });
         }
 
@@ -334,7 +332,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: 'Database operation failed',
-        details: dbError instanceof Error ? dbError.message : 'Unknown database error'
       }, { status: 500 });
     }
 
@@ -343,7 +340,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
