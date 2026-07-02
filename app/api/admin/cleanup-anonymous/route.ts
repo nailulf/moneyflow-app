@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createServerComponentClient } from '@/lib/supabase'
+import { checkCronAuth } from '@/lib/cron-auth'
 
 const MAX_AGE_DAYS = 30
 
 export async function POST(request: Request) {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
-  if (request.headers.get('authorization') !== `Bearer ${cronSecret}`)
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authError = checkCronAuth(request)
+  if (authError) return authError
 
   const admin = createServerComponentClient()
   const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000
