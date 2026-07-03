@@ -21,3 +21,8 @@ it('renders the mini variant with name and percent', () => {
   expect(screen.getByText('Dana Darurat')).toBeInTheDocument()
   expect(screen.getByText(/51/)).toBeInTheDocument()
 })
+
+it('renders the mini variant target-date meta line (design O3m7TF)', () => {
+  render(<GoalCardMini item={item} currency="IDR" />)
+  expect(screen.getByText('Dec 2026')).toBeInTheDocument()
+})

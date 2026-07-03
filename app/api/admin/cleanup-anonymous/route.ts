@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createServerComponentClient } from '@/lib/supabase'
+import { checkCronAuth } from '@/lib/cron-auth'
 
 const MAX_AGE_DAYS = 30
 
 export async function POST(request: Request) {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
-  if (request.headers.get('authorization') !== `Bearer ${cronSecret}`)
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authError = checkCronAuth(request)
+  if (authError) return authError
 
   const admin = createServerComponentClient()
   const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000
@@ -15,7 +14,10 @@ export async function POST(request: Request) {
   let deleted = 0
   while (true) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 })
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('[Cleanup Anonymous] listUsers failed:', error)
+      return NextResponse.json({ error: 'Failed to list users' }, { status: 500 })
+    }
     const users = data.users
     for (const u of users) {
       if ((u as { is_anonymous?: boolean }).is_anonymous && new Date(u.created_at).getTime() < cutoff) {

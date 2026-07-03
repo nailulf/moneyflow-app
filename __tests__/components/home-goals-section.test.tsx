@@ -7,6 +7,7 @@ jest.mock('next-intl', () => ({
       values ? `${key}:${JSON.stringify(values)}` : key
     return t
   },
+  useLocale: () => 'en',
 }))
 
 const push = jest.fn()

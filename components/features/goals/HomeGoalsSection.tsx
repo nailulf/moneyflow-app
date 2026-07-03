@@ -49,7 +49,7 @@ export function HomeGoalsSection() {
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="flex w-[150px] shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card p-3.5 text-center text-primary transition-colors hover:bg-muted/30"
+          className="flex w-[160px] shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card p-3.5 text-center text-primary transition-colors hover:bg-muted/30"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-selected">
             <Plus className="h-[18px] w-[18px] text-selected-foreground" aria-hidden="true" />

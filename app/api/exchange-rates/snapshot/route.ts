@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient } from '@/lib/supabase'
 import { SUPPORTED_CURRENCIES } from '@/lib/exchange-rate'
+import { checkCronAuth } from '@/lib/cron-auth'
 
 const BASE_CURRENCY = 'IDR'
 
@@ -13,17 +14,9 @@ const BASE_CURRENCY = 'IDR'
  */
 export async function POST(request: NextRequest) {
   try {
-    // Auth — same pattern as recurring-transactions
-    const authHeader = request.headers.get('authorization')
-    const cronSecret = process.env.CRON_SECRET
-
-    if (!cronSecret) {
-      return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
-    }
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Auth — same pattern as recurring-transactions (constant-time)
+    const authError = checkCronAuth(request)
+    if (authError) return authError
 
     const supabase = createServerComponentClient()
 

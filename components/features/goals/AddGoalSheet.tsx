@@ -143,8 +143,16 @@ export function AddGoalSheet({ open, onOpenChange, accountId, onCreated }: Props
 
   const submitting = isPending || isSubmitting
 
+  // Radix dismissals (overlay tap, swipe, close button) bypass the success-view
+  // CTAs, so clear the finished flow here or the next open replays the recap.
+  // Mid-entry form values are kept on purpose — only a completed create resets.
+  const handleOpenChange = (next: boolean) => {
+    if (!next && createdGoalId) reset()
+    onOpenChange(next)
+  }
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="bottom"
         className="gap-0 rounded-t-2xl bg-card p-0 data-[side=bottom]:h-auto data-[side=bottom]:max-h-[90dvh]"

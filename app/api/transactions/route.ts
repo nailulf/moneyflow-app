@@ -22,10 +22,14 @@ export async function GET(request: NextRequest) {
     const accountId = searchParams.get('accountId')
     const merchant = searchParams.get('merchant')
     const search = searchParams.get('search')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const sortBy = searchParams.get('sortBy') || 'date'
-    const sortOrder = searchParams.get('sortOrder') || 'desc'
+    // Clamp/validate pagination + sort so a caller can't force a huge scan
+    // (?limit=100000000) or inject an arbitrary ORDER BY column.
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1)
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10) || 50))
+    const ALLOWED_SORT_COLUMNS = ['date', 'amount', 'created_at']
+    const requestedSort = searchParams.get('sortBy') || 'date'
+    const sortBy = ALLOWED_SORT_COLUMNS.includes(requestedSort) ? requestedSort : 'date'
+    const sortOrder = searchParams.get('sortOrder') === 'asc' ? 'asc' : 'desc'
 
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -242,11 +246,8 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         console.error('[Bulk Import] Database insertion error:', error)
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: 'Failed to create bulk transactions',
-          details: error.details,
-          message: error.message,
-          code: error.code
         }, { status: 500 })
       }
 
@@ -300,11 +301,8 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error creating transaction:', error)
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: 'Failed to create transaction',
-        details: error.details,
-        message: error.message,
-        code: error.code
       }, { status: 500 })
     }
 
@@ -369,9 +367,6 @@ export async function PUT(request: NextRequest) {
       console.error('Error updating transaction:', error)
       return NextResponse.json({
         error: 'Failed to update transaction',
-        details: error.details,
-        message: error.message,
-        code: error.code
       }, { status: 500 })
     }
 
@@ -427,9 +422,6 @@ export async function DELETE(request: NextRequest) {
       console.error('Error deleting transaction:', error)
       return NextResponse.json({
         error: 'Failed to delete transaction',
-        details: error.details,
-        message: error.message,
-        code: error.code
       }, { status: 500 })
     }
 

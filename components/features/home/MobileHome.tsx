@@ -27,7 +27,7 @@ import { MobileHomeSkeleton } from './MobileHomeSkeleton'
 const HERO_MONTHS = 6
 const UPCOMING_HORIZON_DAYS = 30
 const UPCOMING_MAX = 4
-const TOP_EXPENSES = 3
+const TOP_EXPENSES = 5
 
 export function MobileHome() {
   const locale = useLocale()
