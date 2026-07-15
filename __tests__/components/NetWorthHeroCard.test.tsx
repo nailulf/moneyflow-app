@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 jest.mock('next-intl', () => ({
@@ -40,7 +40,34 @@ describe('NetWorthHeroCard', () => {
   it('renders one chart bar per month', () => {
     const { container } = render(<NetWorthHeroCard {...props} />)
     expect(container.querySelectorAll('rect[data-bar]')).toHaveLength(2)
-    expect(container.querySelector('polyline')).toBeInTheDocument()
+  })
+
+  it('renders a smooth (curved) net-worth line with a gradient area fade', () => {
+    const { container } = render(<NetWorthHeroCard {...props} />)
+    const line = container.querySelector('path[data-line]')
+    expect(line).toBeInTheDocument()
+    // Monotone cubic path: starts at a moveto and uses bezier segments, not line segments.
+    expect(line!.getAttribute('d')).toMatch(/^M.*C/)
+    const area = container.querySelector('path[data-area]')
+    expect(area).toBeInTheDocument()
+    expect(area!.getAttribute('fill')).toMatch(/^url\(#/)
+  })
+
+  it('shows a tap guideline with the month values, and toggles it off on repeat tap', () => {
+    const { container } = render(<NetWorthHeroCard {...props} />)
+    const hits = container.querySelectorAll('rect[data-hit]')
+    expect(hits).toHaveLength(2)
+
+    fireEvent.click(hits[0])
+    expect(container.querySelector('line[data-guideline]')).toBeInTheDocument()
+    const tooltip = screen.getByTestId('hero-tooltip')
+    expect(tooltip).toHaveTextContent('May')
+    expect(tooltip).toHaveTextContent(/20/) // net worth value
+    expect(tooltip).toHaveTextContent(/200/) // spending value
+
+    fireEvent.click(hits[0])
+    expect(container.querySelector('line[data-guideline]')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('hero-tooltip')).not.toBeInTheDocument()
   })
 
   it('handles empty months without crashing', () => {
