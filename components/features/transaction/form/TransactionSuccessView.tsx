@@ -1,5 +1,6 @@
 'use client'
 
+import { createElement } from 'react'
 import { Check, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
@@ -47,12 +48,10 @@ export function TransactionSuccessView({
     : 'text-foreground'
 
   // Category icon/tint (used for non-transfer)
-  const CategoryIcon = getCategoryIcon(categoryName)
   const tint = getCategoryTint(categoryName)
 
   // Transfer tint uses a neutral "transfer" keyword
   const transferTint = getCategoryTint('transfer')
-  const TransferIcon = getCategoryIcon('transfer')
 
   // Formatted date
   const displayDate = new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
@@ -97,7 +96,7 @@ export function TransactionSuccessView({
                   transferTint.bg,
                 )}
               >
-                <TransferIcon className={cn('size-5', transferTint.fg)} />
+                {createElement(getCategoryIcon('transfer'), { className: cn('size-5', transferTint.fg) })}
               </div>
             ) : (
               <div
@@ -106,7 +105,7 @@ export function TransactionSuccessView({
                   tint.bg,
                 )}
               >
-                <CategoryIcon className={cn('size-5', tint.fg)} />
+                {createElement(getCategoryIcon(categoryName), { className: cn('size-5', tint.fg) })}
               </div>
             )}
 

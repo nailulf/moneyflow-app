@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslations } from 'next-intl'
@@ -94,7 +94,7 @@ export function AddGoalSheet({ open, onOpenChange, accountId, onCreated }: Props
   const [createdGoalId, setCreatedGoalId] = useState<string | null>(null)
 
   const {
-    register, handleSubmit, control, watch, setValue, reset: resetForm,
+    register, handleSubmit, control, setValue, reset: resetForm,
     formState: { isSubmitting },
   } = useForm({
     resolver: zodResolver(formSchema),
@@ -107,7 +107,7 @@ export function AddGoalSheet({ open, onOpenChange, accountId, onCreated }: Props
     },
   })
 
-  const selectedType = watch('goalType') as GoalType
+  const selectedType = useWatch({ control, name: 'goalType' }) as GoalType
 
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: 11 }, (_, i) => currentYear + i) // current..+10

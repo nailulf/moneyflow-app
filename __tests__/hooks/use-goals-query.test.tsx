@@ -17,7 +17,10 @@ jest.mock('@/contexts/AccountContext', () => ({
 
 function wrap() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return ({ children }: any) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+  function Wrapper({ children }: any) {
+    return <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+  }
+  return Wrapper
 }
 
 beforeEach(() => {
