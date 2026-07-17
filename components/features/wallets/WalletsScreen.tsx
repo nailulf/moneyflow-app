@@ -6,9 +6,9 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useAccounts } from '@/contexts/AccountContext'
+import { useAccounts, type AccountWithHistory } from '@/contexts/AccountContext'
 import { useGuestGuard } from '@/hooks/useGuestGuard'
-import { fetchNetWorthData } from '@/lib/net-worth-utils'
+import { fetchNetWorthData, type AccountWithBalance } from '@/lib/net-worth-utils'
 import { splitAccounts } from '@/lib/home-utils'
 import { groupAccounts } from '@/lib/wallets-utils'
 import { NavUser } from '@/components/features/navigation/nav-user'
@@ -34,8 +34,13 @@ export function WalletsScreen({ onOpenAccount }: WalletsScreenProps) {
     enabled: !!user?.id,
   })
 
-  const split = useMemo(() => splitAccounts(accounts), [accounts])
-  const groups = useMemo(() => groupAccounts(accounts), [accounts])
+  // FX-converted accounts (currentBalanceInBase) keep multi-currency totals and
+  // asset/loan classification consistent with the net-worth figure; rows still
+  // render their native currency (AccountGroupCard uses currentBalance).
+  const fxAccounts: Array<AccountWithBalance | AccountWithHistory> =
+    netWorth?.accounts ?? accounts
+  const split = useMemo(() => splitAccounts(fxAccounts), [fxAccounts])
+  const groups = useMemo(() => groupAccounts(fxAccounts), [fxAccounts])
 
   const userData = {
     name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',

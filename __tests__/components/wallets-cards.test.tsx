@@ -38,4 +38,16 @@ describe('AccountGroupCard', () => {
     screen.getByRole('button', { name: /BCA Savings/ }).click()
     expect(onOpen).toHaveBeenCalledWith('a1')
   })
+
+  it('shows the native-currency balance on rows even when a base-converted value exists', () => {
+    // FX-aware accounts (from /api/net-worth) carry currentBalanceInBase (IDR).
+    // The row must keep showing the native AED figure, not the IDR conversion.
+    const fx = [{
+      id: 'a3', name: 'Wio', type: 'BANK', currency: 'AED',
+      balance: 75101, currentBalance: 75101, currentBalanceInBase: 335200000,
+    }]
+    render(<AccountGroupCard groupKey="bank" accounts={fx as never} onOpen={() => {}} />)
+    expect(screen.getByText(/75\.101|75,101/)).toBeInTheDocument()
+    expect(screen.queryByText(/335\.200\.000|335,200,000/)).not.toBeInTheDocument()
+  })
 })

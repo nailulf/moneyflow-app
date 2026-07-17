@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { getCategoryTint } from '@/lib/category-style'
 import { formatCurrency } from '@/lib/data-utils'
-import { effectiveBalance, type WalletAccountLike, type WalletGroupKey } from '@/lib/wallets-utils'
+import { type WalletAccountLike, type WalletGroupKey } from '@/lib/wallets-utils'
 import { cn } from '@/lib/utils'
 
 const GROUP_META: Record<WalletGroupKey, { icon: LucideIcon; iconClasses: string }> = {
@@ -56,7 +56,9 @@ export function AccountGroupCard({ groupKey, accounts, onOpen }: AccountGroupCar
         {accounts.map((account) => {
           const Icon = TYPE_ICONS[account.type] ?? Wallet
           const tint = getCategoryTint(account.name)
-          const balance = effectiveBalance(account)
+          // Row shows the account's own currency; the base-converted figure
+          // (currentBalanceInBase) is only for totals/classification math.
+          const balance = account.currentBalance ?? account.balance
           return (
             <button
               key={account.id}

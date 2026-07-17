@@ -5,10 +5,10 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTransactions } from '@/contexts/TransactionContext'
-import { useAccounts } from '@/contexts/AccountContext'
+import { useAccounts, type AccountWithHistory } from '@/contexts/AccountContext'
 import { useCategories } from '@/contexts/CategoryContext'
 import { useBudgetSnapshot } from '@/hooks/useBudgetSnapshot'
-import { fetchNetWorthData } from '@/lib/net-worth-utils'
+import { fetchNetWorthData, type AccountWithBalance } from '@/lib/net-worth-utils'
 import {
   getGreetingKey, summarizeToday, topExpenses, monthlySpending,
   monthlyNetWorthPoints, splitAccounts, upcomingRecurring,
@@ -103,7 +103,15 @@ export function MobileHome() {
     [transactions, now]
   )
 
-  const split = useMemo(() => splitAccounts(accounts), [accounts])
+  // Prefer the FX-converted accounts from /api/net-worth (currentBalanceInBase,
+  // IDR) so multi-currency totals match the hero number; fall back to raw
+  // context accounts while that query loads. Raw balances treat AED/USD figures
+  // as rupiah — that was the home-screen discrepancy.
+  const split = useMemo(() => {
+    const fxAccounts: Array<AccountWithBalance | AccountWithHistory> =
+      netWorth?.accounts ?? accounts
+    return splitAccounts(fxAccounts)
+  }, [netWorth, accounts])
 
   const upcoming = useMemo(
     () => upcomingRecurring(transactions, now, UPCOMING_HORIZON_DAYS, UPCOMING_MAX).map(({ transaction, date }) => ({

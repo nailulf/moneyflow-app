@@ -315,6 +315,10 @@ The app uses `pdfjs-dist` for PDF parsing with special webpack configuration:
 - Uses `@testing-library/react` for component testing
 - Mock data available in `lib/mock-data.ts` and `lib/mock-chart-data.ts`
 - Test pattern: `**/__tests__/**/*.test.{ts,tsx}`
+- **Full-scale E2E test-scenario catalog (every user journey, Given/When/Then, stable `TS-*` IDs):**
+  [`docs/testing/full-scale-test-scenarios.md`](docs/testing/full-scale-test-scenarios.md) — the source
+  spec for manual QA, the P0 smoke suite, and new Playwright/Jest e2e tests. Prefix test titles with
+  the scenario ID (e.g. `TS-TXN-03`). Update it in the same PR when a flow changes.
 
 ## Database Migrations
 
